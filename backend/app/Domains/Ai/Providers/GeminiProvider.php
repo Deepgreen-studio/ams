@@ -22,7 +22,7 @@ class GeminiProvider extends AbstractHttpAiProvider
         $started = microtime(true);
 
         try {
-            $model = $this->resolveModel(null, 'gemini-2.0-flash');
+            $model = $this->resolveModel(null, 'gemini-flash-latest');
             $response = $this->client()->get($this->endpoint('/models'));
             $latency = (int) ((microtime(true) - $started) * 1000);
 
@@ -45,7 +45,7 @@ class GeminiProvider extends AbstractHttpAiProvider
     public function chat(AiChatRequest $request): AiChatResult
     {
         $this->requireConfigured();
-        $model = $this->resolveModel($request->model, 'gemini-2.0-flash');
+        $model = $this->resolveModel($request->model, 'gemini-flash-latest');
         $started = microtime(true);
 
         $contents = [];

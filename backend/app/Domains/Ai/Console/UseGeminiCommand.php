@@ -13,7 +13,7 @@ class UseGeminiCommand extends Command
 {
     protected $signature = 'ai:use-gemini
                             {--key= : Google AI Studio / Gemini API key}
-                            {--model=gemini-2.0-flash : Default chat model}
+                            {--model=gemini-flash-latest : Default chat model}
                             {--make-default=1 : Mark Gemini as the default provider}';
 
     protected $description = 'Quick-add Google Gemini as an AI provider and optionally set it as default';

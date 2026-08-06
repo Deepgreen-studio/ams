@@ -162,7 +162,7 @@ class WebhookEngineTest extends TestCase
 
         $this->call(
             'POST',
-            '/api/v1/webhooks/incoming/'.$webhook->uuid,
+            '/api/v1/webhooks/incoming/'.$webhook->slug,
             [],
             [],
             [],

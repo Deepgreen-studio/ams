@@ -30,7 +30,7 @@ return [
     'providers' => [
         'gemini' => [
             'api_key' => env('GEMINI_API_KEY'),
-            'default_model' => env('GEMINI_MODEL', 'gemini-2.0-flash'),
+            'default_model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
             'base_url' => env('GEMINI_BASE_URL', 'https://generativelanguage.googleapis.com/v1beta'),
         ],
         'openai' => [

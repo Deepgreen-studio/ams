@@ -182,7 +182,7 @@ abstract class AbstractHttpAiProvider implements AiProviderInterface
         if ($status === 429 || $remoteStatus === 'RESOURCE_EXHAUSTED' || $code === 429) {
             $hint = 'Quota or rate limit exceeded. Wait and retry, switch model, or check billing/plan in the provider console.';
             if (stripos($remoteMessage, 'free_tier') !== false || stripos($remoteMessage, 'free tier') !== false) {
-                $hint = 'Free-tier quota exceeded for this model. Wait and retry, try another model (e.g. gemini-1.5-flash), or enable billing in Google AI Studio.';
+                $hint = 'Free-tier quota exceeded for this model. Wait and retry, try another model (e.g. gemini-flash-latest), or enable billing in Google AI Studio.';
             }
 
             return new ApiException("{$vendor} {$operation} failed: {$hint}", 429);

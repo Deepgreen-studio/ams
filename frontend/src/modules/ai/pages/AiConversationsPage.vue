@@ -40,7 +40,7 @@
       <p class="mt-1 whitespace-pre-wrap break-words">{{ store.error }}</p>
       <p v-if="isQuotaError" class="mt-2 text-xs text-rose-700">
         Tip: wait ~1 minute, change the provider model in AI Settings (try
-        <code class="rounded bg-rose-100 px-1">gemini-1.5-flash</code>),
+        <code class="rounded bg-rose-100 px-1">gemini-flash-latest</code>),
         or enable billing in Google AI Studio.
       </p>
     </div>

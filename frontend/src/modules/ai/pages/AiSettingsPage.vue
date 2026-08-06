@@ -201,7 +201,7 @@ const driverPresets = {
   },
   gemini: {
     name: 'Google Gemini',
-    default_model: 'gemini-2.0-flash',
+    default_model: 'gemini-flash-latest',
     embedding_model: 'text-embedding-004',
     base_url: 'https://generativelanguage.googleapis.com/v1beta',
     hint: 'Paste your Google AI Studio API key, then Create → set Default → Test.',

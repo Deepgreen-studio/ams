@@ -24,7 +24,8 @@ class WebhookRepository extends BaseRepository
 
         /** @var Webhook|null $webhook */
         $webhook = $query->where(function (Builder $builder) use ($identifier): void {
-            $builder->where('uuid', $identifier);
+            $builder->where('uuid', $identifier)
+                ->orWhere('slug', $identifier);
             if (ctype_digit($identifier)) {
                 $builder->orWhere('id', (int) $identifier);
             }

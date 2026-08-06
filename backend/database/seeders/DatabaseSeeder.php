@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             PortalCustomerUserSeeder::class,
             ConsentTypeSeeder::class,
             EasyCarbsCompanySeeder::class,
+            EasyCareCompanySeeder::class,
         ]);
     }
 }

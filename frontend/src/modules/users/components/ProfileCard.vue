@@ -1,0 +1,70 @@
+<template>
+  <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+      <div
+        class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-brand-50 text-lg font-semibold text-brand-700"
+      >
+        <img
+          v-if="user?.avatar_url"
+          :src="user.avatar_url"
+          alt=""
+          class="h-full w-full object-cover"
+        />
+        <span v-else>{{ initials }}</span>
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-2">
+          <h2 class="truncate text-xl font-semibold text-slate-900">{{ user?.full_name }}</h2>
+          <StatusBadge :status="user?.status" />
+        </div>
+        <p class="mt-1 text-sm text-slate-500">{{ user?.email }}</p>
+      </div>
+    </div>
+
+    <dl class="mt-6 grid gap-4 sm:grid-cols-2">
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Phone</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ user?.phone || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Timezone</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ user?.timezone || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Language</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ user?.language || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Last login</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ formatDate(user?.last_login_at) || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Created</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ formatDate(user?.created_at) || '—' }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Created by</dt>
+        <dd class="mt-1 text-sm text-slate-900">{{ user?.created_by?.full_name || '—' }}</dd>
+      </div>
+    </dl>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import { formatDate } from '@/utils/formatters';
+import StatusBadge from '@/modules/users/components/StatusBadge.vue';
+
+const props = defineProps({
+  user: {
+    type: Object,
+    default: null,
+  },
+});
+
+const initials = computed(() => {
+  const first = props.user?.first_name?.[0] || '';
+  const last = props.user?.last_name?.[0] || '';
+  return `${first}${last}`.toUpperCase() || 'U';
+});
+</script>

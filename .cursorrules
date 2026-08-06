@@ -1,0 +1,887 @@
+# ==========================================================
+# CURSOR RULES
+# Application Management System (AMS)
+# Version: 3.0
+# ==========================================================
+
+## Project Vision
+
+This project is an Enterprise  Application Management System (AMS).
+
+The platform manages multiple Android, iOS and Web applications from a single dashboard.
+
+This is NOT a demo project.
+
+This is NOT an MVP.
+
+This is an Enterprise Production Ready Application.
+
+Every feature must be production quality.
+
+Never generate temporary solutions.
+
+Always follow enterprise software engineering best practices.
+
+----------------------------------------------------------
+
+## Technology Stack
+
+Backend
+
+- Laravel 12
+- PHP 8.3+
+- MySQL 8+
+- Redis
+- Laravel Sanctum
+
+Frontend
+
+- Vue 3
+- Vite
+- Tailwind CSS
+- Pinia
+- Vue Router
+- Axios
+
+Development
+
+- REST API
+- JSON
+- Git
+- Docker Ready
+
+----------------------------------------------------------
+
+## Architecture
+
+Always follow:
+
+- Domain Driven Design (DDD)
+- Modular Monolith
+- REST API First
+- Repository Pattern
+- Service Layer
+- Event Driven Architecture
+- SOLID Principles
+- PSR-12 Coding Standard
+
+Never place business logic inside Controllers.
+
+Controllers only:
+
+- Validate Request
+- Authorize Request
+- Call Service
+- Return API Response
+
+Business Logic
+
+↓
+
+Service
+
+Database Logic
+
+↓
+
+Repository
+
+Repository
+
+↓
+
+Model
+
+Model
+
+↓
+
+Database
+
+----------------------------------------------------------
+
+## Folder Structure
+
+Root monorepo
+
+AMS/
+
+backend/
+
+frontend/
+
+docs/
+
+docker/
+
+scripts/
+
+.github/
+
+Backend
+
+backend/app/
+
+Domains/
+
+Shared/
+
+Actions/
+
+Contracts/
+
+DTOs/
+
+Enums/
+
+Exceptions/
+
+Helpers/
+
+Middleware/
+
+Services/
+
+Traits/
+
+Validators/
+
+Responses/
+
+Utilities/
+
+Repositories/
+
+Policies/
+
+Resources/
+
+Events/
+
+Jobs/
+
+Listeners/
+
+Notifications/
+
+Frontend
+
+frontend/src/
+
+assets/
+
+components/
+
+composables/
+
+layouts/
+
+modules/
+
+pages/
+
+router/
+
+services/
+
+stores/
+
+types/
+
+utils/
+
+----------------------------------------------------------
+
+## Domain Structure
+
+Every business module must be isolated.
+
+Each Domain must contain:
+
+Controllers
+
+Requests
+
+Services
+
+Repositories
+
+Models
+
+Policies
+
+Resources
+
+Events
+
+Listeners
+
+Notifications
+
+Jobs
+
+Routes
+
+Tests
+
+Never mix modules together.
+
+----------------------------------------------------------
+
+## Core Modules
+
+Authentication
+
+Dashboard
+
+Users
+
+Roles
+
+Companies
+
+Applications
+
+Customers
+
+Integrations
+
+Releases
+
+Content
+
+Support
+
+Notifications
+
+Analytics
+
+Compliance
+
+Reports
+
+Settings
+
+----------------------------------------------------------
+
+## API Rules
+
+Everything is API First.
+
+Never use Blade.
+
+Never return HTML.
+
+Always return JSON.
+
+Response Format
+
+Success
+
+{
+    "success": true,
+    "message": "",
+    "data": {}
+}
+
+Validation Error
+
+{
+    "success": false,
+    "message": "Validation Failed",
+    "errors": {}
+}
+
+Server Error
+
+{
+    "success": false,
+    "message": "Unexpected Error"
+}
+
+Use:
+
+GET
+
+POST
+
+PUT
+
+PATCH
+
+DELETE
+
+Use correct HTTP Status Codes.
+
+----------------------------------------------------------
+
+## Coding Standards
+
+Always
+
+Use Dependency Injection
+
+Use Interfaces
+
+Use Constructor Injection
+
+Use Typed Properties
+
+Use Return Types
+
+Use Enums
+
+Use Form Requests
+
+Use API Resources
+
+Use Repository Pattern
+
+Use Service Layer
+
+Never
+
+Duplicate Code
+
+Hardcode Values
+
+Use Static Helpers unnecessarily
+
+Write Fat Controllers
+
+Write Large Methods
+
+----------------------------------------------------------
+
+## Database Standards
+
+Use MySQL.
+
+Always create:
+
+Migration
+
+Model
+
+Factory
+
+Seeder
+
+Policy
+
+Resource
+
+Request
+
+Repository
+
+Service
+
+Controller
+
+Use
+
+Foreign Keys
+
+Indexes
+
+Soft Deletes where appropriate
+
+UUID where necessary
+
+Never modify database manually.
+
+----------------------------------------------------------
+
+## Authentication
+
+Use Laravel Sanctum.
+
+Prepare architecture for:
+
+Email Verification
+
+Forgot Password
+
+Reset Password
+
+Remember Login
+
+2FA (Future)
+
+Session Management
+
+Device Management (Future)
+
+----------------------------------------------------------
+
+## Roles & Permissions
+
+Use Spatie Laravel Permission.
+
+Everything must be permission based.
+
+Permission naming
+
+users.view
+
+users.create
+
+users.update
+
+users.delete
+
+applications.view
+
+applications.create
+
+applications.update
+
+support.manage
+
+reports.export
+
+Never hardcode permissions.
+
+----------------------------------------------------------
+
+## Activity Log
+
+Use Spatie Activitylog.
+
+Log
+
+Login
+
+Logout
+
+Create
+
+Update
+
+Delete
+
+Publish
+
+Restore
+
+Permission Change
+
+Status Change
+
+Include
+
+User
+
+IP Address
+
+Browser
+
+Timestamp
+
+Old Values
+
+New Values
+
+----------------------------------------------------------
+
+## Frontend Standards
+
+Vue 3 Composition API
+
+Pinia
+
+Vue Router
+
+Axios
+
+Tailwind CSS
+
+Never use jQuery.
+
+Create reusable components.
+
+Separate
+
+Pages
+
+Components
+
+Stores
+
+Services
+
+Composables
+
+----------------------------------------------------------
+
+## UI Standards
+
+Responsive First
+
+Mobile First
+
+Reusable Components
+
+Consistent Colors
+
+Consistent Typography
+
+Consistent Spacing
+
+Use
+
+Cards
+
+Tables
+
+Forms
+
+Badges
+
+Modals
+
+Drawers
+
+Dropdowns
+
+Breadcrumbs
+
+Tabs
+
+Loading States
+
+Empty States
+
+Error States
+
+Skeleton Loading
+
+Confirmation Dialogs
+
+----------------------------------------------------------
+
+## Table Standards
+
+Every table should support
+
+Search
+
+Pagination
+
+Sorting
+
+Filters
+
+Bulk Actions
+
+Column Visibility (Future)
+
+Export (Future)
+
+----------------------------------------------------------
+
+## Form Standards
+
+Frontend Validation
+
+Backend Validation
+
+Disable Submit During Processing
+
+Show Success Messages
+
+Show Error Messages
+
+Prevent Duplicate Submission
+
+----------------------------------------------------------
+
+## External API Integration
+
+Platform must support unlimited external APIs.
+
+Supported Authentication
+
+API Key
+
+Bearer Token
+
+Basic Auth
+
+JWT
+
+OAuth2
+
+Every integration must include
+
+Connection Test
+
+Health Check
+
+Logging
+
+Retry
+
+Timeout
+
+Error Handling
+
+----------------------------------------------------------
+
+## Webhooks
+
+Support
+
+Incoming Webhooks
+
+Outgoing Webhooks
+
+Retry Queue
+
+Webhook Logs
+
+Webhook History
+
+Event Mapping
+
+----------------------------------------------------------
+
+## Notifications
+
+Support
+
+Email
+
+Firebase Push Notification
+
+In-App Notification
+
+Queued Notification
+
+Notification Templates
+
+----------------------------------------------------------
+
+## Content Management
+
+Support
+
+Blogs
+
+Pages
+
+Privacy Policy
+
+Terms
+
+FAQs
+
+Knowledge Base
+
+Version History
+
+Draft
+
+Publish
+
+Rollback
+
+Compare Versions
+
+----------------------------------------------------------
+
+## Release Management
+
+Support
+
+Android Releases
+
+iOS Releases
+
+Build Numbers
+
+Release Notes
+
+Deployment History
+
+Rollback
+
+----------------------------------------------------------
+
+## Compliance
+
+Support
+
+GDPR
+
+Privacy Requests
+
+DPIA
+
+Data Breach
+
+Audit Trail
+
+Compliance Reports
+
+----------------------------------------------------------
+
+## Reports
+
+Support
+
+Dashboard Reports
+
+Application Reports
+
+Customer Reports
+
+Support Reports
+
+Analytics Reports
+
+Compliance Reports
+
+----------------------------------------------------------
+
+## Performance
+
+Avoid N+1 Queries
+
+Use Eager Loading
+
+Use Queue
+
+Use Cache
+
+Optimize Queries
+
+Optimize Indexes
+
+----------------------------------------------------------
+
+## Testing
+
+Generate
+
+Unit Tests
+
+Feature Tests
+
+API Tests
+
+Never leave features untested.
+
+----------------------------------------------------------
+
+## Documentation
+
+Each module must include
+
+Overview
+
+Responsibilities
+
+Folder Structure
+
+Database Tables
+
+Relationships
+
+API Endpoints
+
+Permissions
+
+Events
+
+Testing Notes
+
+----------------------------------------------------------
+
+## Development Workflow
+
+Always develop ONE milestone only.
+
+Never generate multiple milestones together.
+
+Workflow
+
+1. Analyse requirement
+
+2. Design database
+
+3. Create backend
+
+4. Create API
+
+5. Create frontend
+
+6. Connect frontend
+
+7. Test
+
+8. Explain changes
+
+After every milestone provide
+
+- Files Created
+- Files Updated
+- Database Changes
+- API Endpoints
+- Vue Components
+- Commands Executed
+- Testing Steps
+- Remaining Tasks
+
+Stop after completing the milestone.
+
+Wait for user approval before continuing.
+
+----------------------------------------------------------
+
+## Code Quality
+
+Write clean code.
+
+Write readable code.
+
+Write reusable code.
+
+Write scalable code.
+
+Write maintainable code.
+
+Security and performance always have higher priority than speed of development.
+
+----------------------------------------------------------
+
+## Future Ready
+
+Architecture must support
+
+Multi Tenant SaaS
+
+Plugin Marketplace
+
+Remote Configuration
+
+AI Assistant
+
+Developer Portal
+
+Microservices Migration
+
+without major refactoring.
+
+----------------------------------------------------------
+
+## Final Rule
+
+Never sacrifice architecture for speed.
+
+Think like a Senior Software Architect.
+
+Generate code that can be maintained for the next 10+ years.
+
+Every implementation must be production-ready, secure, scalable, and follow enterprise best practices.

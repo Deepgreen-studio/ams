@@ -1,0 +1,98 @@
+<template>
+  <div>
+    <PageHeader title="Media library" description="Upload, preview, and organize platform media assets." />
+    <SettingsTabs>
+      <div v-if="mediaStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ mediaStore.successMessage }}</div>
+      <div v-if="mediaStore.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ mediaStore.error }}</div>
+
+      <div class="grid gap-6 lg:grid-cols-4">
+        <FolderTree
+          :folders="mediaStore.folders"
+          :selected="selectedFolder"
+          @select="onSelectFolder"
+          @create="createFolder"
+        />
+        <div class="space-y-4 lg:col-span-3">
+          <SearchBar v-model="search" @search="reload" />
+          <MediaUpload :progress="progress" @files="onUpload" />
+          <MediaGrid :items="mediaStore.items" :loading="mediaStore.loading" @preview="preview = $event" @delete="openDelete" />
+          <Pagination :meta="mediaStore.meta" :loading="mediaStore.loading" @change="(page) => reload(page)" />
+        </div>
+      </div>
+    </SettingsTabs>
+
+    <PreviewModal :open="Boolean(preview)" :item="preview" @close="preview = null" />
+    <DeleteConfirmation
+      :open="Boolean(pendingDelete)"
+      title="Delete media"
+      :message="`Delete ${pendingDelete?.original_name || 'this file'}?`"
+      :loading="mediaStore.saving"
+      @cancel="pendingDelete = null"
+      @confirm="confirmDelete"
+    />
+  </div>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import Pagination from '@/modules/users/components/Pagination.vue';
+import FolderTree from '@/modules/settings/components/FolderTree.vue';
+import MediaGrid from '@/modules/settings/components/MediaGrid.vue';
+import MediaUpload from '@/modules/settings/components/MediaUpload.vue';
+import PreviewModal from '@/modules/settings/components/PreviewModal.vue';
+import SearchBar from '@/modules/settings/components/SearchBar.vue';
+import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
+import { useMediaStore } from '@/modules/settings/stores/settings';
+
+const mediaStore = useMediaStore();
+const search = ref('');
+const selectedFolder = ref(null);
+const preview = ref(null);
+const pendingDelete = ref(null);
+const progress = ref(0);
+
+onMounted(async () => {
+  await mediaStore.fetchFolders();
+  await reload();
+});
+
+async function reload(page = 1) {
+  const params = { page, per_page: 12, search: search.value };
+  if (selectedFolder.value) params.folder = selectedFolder.value;
+  await mediaStore.fetchMedia(params);
+}
+
+function onSelectFolder(folder) {
+  selectedFolder.value = folder?.uuid || null;
+  reload();
+}
+
+async function createFolder() {
+  const name = window.prompt('Folder name');
+  if (!name) return;
+  await mediaStore.createFolder({ name });
+  await mediaStore.fetchFolders();
+}
+
+async function onUpload(fileList) {
+  if (!fileList?.length) return;
+  progress.value = 40;
+  await mediaStore.upload(fileList, selectedFolder.value);
+  progress.value = 100;
+  setTimeout(() => { progress.value = 0; }, 400);
+  await reload();
+  await mediaStore.fetchFolders();
+}
+
+function openDelete(item) {
+  pendingDelete.value = item;
+}
+
+async function confirmDelete() {
+  await mediaStore.remove(pendingDelete.value.uuid);
+  pendingDelete.value = null;
+  await reload();
+}
+</script>

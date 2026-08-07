@@ -5,6 +5,7 @@ namespace App\Domains\Support\Listeners;
 use App\Domains\Notifications\Enums\NotificationEventKey;
 use App\Domains\Notifications\Services\NotificationDispatchService;
 use App\Domains\Support\Enums\SupportTicketMessageVisibility;
+use App\Domains\Support\Enums\SupportTicketSource;
 use App\Domains\Support\Events\SupportTicketAssigned;
 use App\Domains\Support\Events\SupportTicketAttachmentUploaded;
 use App\Domains\Support\Events\SupportTicketClosed;
@@ -36,7 +37,8 @@ class PrepareSupportNotifications
             NotificationEventKey::TicketCreated,
             $event->ticket,
             $event->actor,
-            $this->ticketPayload($event->ticket, $event->actor)
+            $this->ticketPayload($event->ticket, $event->actor),
+            excludeActor: ! $this->isInboundComplaint($event->ticket),
         );
     }
 
@@ -52,7 +54,8 @@ class PrepareSupportNotifications
             NotificationEventKey::TicketAssigned,
             $event->ticket,
             $event->actor,
-            $this->ticketPayload($event->ticket, $event->actor)
+            $this->ticketPayload($event->ticket, $event->actor),
+            excludeActor: ! $this->isInboundComplaint($event->ticket),
         );
     }
 
@@ -174,13 +177,35 @@ class PrepareSupportNotifications
         SupportTicket $ticket,
         ?User $actor,
         array $payload,
+        bool $excludeActor = true,
     ): void {
-        $recipients = $this->recipientResolver->forTicket($ticket, $actor);
+        $recipients = $this->recipientResolver->forTicket($ticket, $actor, $excludeActor);
         if ($recipients->isEmpty()) {
             return;
         }
 
         $this->dispatchService->dispatch($eventKey, $recipients, $payload);
+    }
+
+    /**
+     * Inbound tickets/complaints (webhook, SMS, email, etc.) use a system actor that often
+     * also has support.manage — still notify that staff so the bell/center updates.
+     */
+    private function isInboundComplaint(SupportTicket $ticket): bool
+    {
+        $source = $ticket->source instanceof SupportTicketSource
+            ? $ticket->source
+            : SupportTicketSource::tryFrom((string) $ticket->source);
+
+        return match ($source) {
+            SupportTicketSource::Api,
+            SupportTicketSource::Sms,
+            SupportTicketSource::Email,
+            SupportTicketSource::Web,
+            SupportTicketSource::Chat,
+            SupportTicketSource::Phone => true,
+            default => false,
+        };
     }
 
     /**

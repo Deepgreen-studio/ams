@@ -39,8 +39,14 @@ POST /api/v1/webhooks/incoming/{uuid}
 WebhookReceiver + SignatureValidator
         │
         ▼
-Persist log / dispatch internal handling
+Persist log → IncomingWebhookIngestService
+        │
+        ├─ EasyCare handler (slug-specific domain events)
+        └─ Generic Support handler (support.sms.received / message / ticket)
 ```
+
+For connecting any external website/app so Support SMS lands in AMS, see
+[Connect Any App → Support](./Connect-Any-App-Support.md).
 
 ## Tables
 

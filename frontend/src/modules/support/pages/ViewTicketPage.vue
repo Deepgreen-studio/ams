@@ -69,9 +69,22 @@
             <TicketStatusBadge :status="ticket.status" :label="ticket.status_label" />
             <PriorityIndicator :priority="ticket.priority" :label="ticket.priority_label" />
             <TicketCategoryBadge :category="ticket.category" :label="ticket.category_label" />
+            <span
+              v-if="ticket.source"
+              class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+            >
+              {{ ticket.source_label || ticket.source }}
+            </span>
           </div>
           <h2 class="text-lg font-semibold text-slate-900">{{ ticket.subject }}</h2>
-          <p class="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{{ ticket.description }}</p>
+
+          <div class="mt-4">
+            <TicketDescriptionPanel
+              :description="ticket.description || ''"
+              :source="ticket.source || ''"
+              :has-linked-customer="Boolean(ticket.customer?.display_name)"
+            />
+          </div>
 
           <div class="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
             <h3 class="mb-3 text-sm font-semibold text-slate-900">Change status</h3>
@@ -141,7 +154,23 @@
               </div>
               <div>
                 <dt class="text-xs uppercase tracking-wide text-slate-500">Customer</dt>
-                <dd class="mt-1 text-slate-900">{{ ticket.customer?.display_name || '—' }}</dd>
+                <dd class="mt-1 text-slate-900">
+                  <template v-if="ticket.customer?.display_name">
+                    {{ ticket.customer.display_name }}
+                  </template>
+                  <template v-else-if="ingestContact.name || ingestContact.email || ingestContact.from">
+                    <span class="font-medium">{{ ingestContact.name || ingestContact.from || '—' }}</span>
+                    <span
+                      v-if="ingestContact.email"
+                      class="mt-0.5 block text-xs text-slate-500"
+                    >{{ ingestContact.email }}</span>
+                    <span
+                      v-if="ingestContact.from && ingestContact.name"
+                      class="mt-0.5 block text-xs text-slate-500"
+                    >{{ ingestContact.from }}</span>
+                  </template>
+                  <template v-else>—</template>
+                </dd>
               </div>
               <div>
                 <dt class="text-xs uppercase tracking-wide text-slate-500">Application</dt>
@@ -230,9 +259,11 @@ import SlaStatusBadge from '@/modules/support/components/SlaStatusBadge.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketCategoryBadge from '@/modules/support/components/TicketCategoryBadge.vue';
 import TicketConversationPanel from '@/modules/support/components/TicketConversationPanel.vue';
+import TicketDescriptionPanel from '@/modules/support/components/TicketDescriptionPanel.vue';
 import TicketForm from '@/modules/support/components/TicketForm.vue';
 import TicketStatusBadge from '@/modules/support/components/TicketStatusBadge.vue';
 import TicketStatusTimeline from '@/modules/support/components/TicketStatusTimeline.vue';
+import { parseTicketDescription } from '@/modules/support/utils/parseTicketDescription';
 import { useSupportTicketsStore } from '@/modules/support/stores/supportTickets';
 
 const route = useRoute();
@@ -244,6 +275,9 @@ const transitionStatus = ref('');
 const transitionComments = ref('');
 
 const ticket = computed(() => store.currentTicket);
+const ingestContact = computed(
+  () => parseTicketDescription(ticket.value?.description).contact,
+);
 
 onMounted(async () => {
   await Promise.all([store.fetchTicket(route.params.id), store.fetchAgents()]);

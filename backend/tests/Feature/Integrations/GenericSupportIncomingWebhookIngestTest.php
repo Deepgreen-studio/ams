@@ -1,0 +1,175 @@
+<?php
+
+namespace Tests\Feature\Integrations;
+
+use App\Domains\Applications\Enums\ApplicationCategory;
+use App\Domains\Applications\Enums\ApplicationPlatform;
+use App\Domains\Applications\Enums\ApplicationStatus;
+use App\Domains\Applications\Enums\ApplicationVisibility;
+use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Models\Company;
+use App\Domains\Integrations\Enums\WebhookDirection;
+use App\Domains\Integrations\Enums\WebhookStatus;
+use App\Domains\Integrations\Models\Webhook;
+use App\Domains\Support\Models\SupportTicket;
+use App\Models\User;
+use App\Shared\Services\Webhook\SignatureValidator;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class GenericSupportIncomingWebhookIngestTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $admin;
+
+    private Company $company;
+
+    private Webhook $webhook;
+
+    private string $secret = 'any-app-secret';
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RolesAndPermissionsSeeder::class);
+
+        $this->admin = User::factory()->create(['email' => 'admin@ams.test']);
+        $this->admin->assignRole('super-admin');
+
+        $this->company = Company::query()->create([
+            'company_name' => 'Shop Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        Application::query()->create([
+            'company_id' => $this->company->id,
+            'slug' => 'shop-web',
+            'name' => 'Shop Web',
+            'platform' => ApplicationPlatform::Web,
+            'category' => ApplicationCategory::Other,
+            'status' => ApplicationStatus::Active,
+            'visibility' => ApplicationVisibility::Internal,
+            'current_version' => '1.0.0',
+            'minimum_supported_version' => '1.0.0',
+        ]);
+
+        $this->webhook = Webhook::query()->create([
+            'company_id' => $this->company->id,
+            'name' => 'Shop Incoming',
+            'slug' => 'shop-web',
+            'direction' => WebhookDirection::Incoming,
+            'status' => WebhookStatus::Active,
+            'secret' => $this->secret,
+            'signature_algorithm' => 'hmac_sha256',
+            'signature_header' => 'X-AMS-Signature',
+            'subscribed_events' => [
+                'support.sms.received',
+                'support.message.received',
+                'support.ticket.created',
+            ],
+            'created_by' => $this->admin->id,
+        ]);
+    }
+
+    public function test_any_app_support_sms_creates_ticket_with_sms_source(): void
+    {
+        $payload = [
+            'event' => 'support.sms.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'sms-1001',
+                'from' => '+8801700000000',
+                'to' => '+8801800000000',
+                'body' => 'I need help with my delivery.',
+                'application_slug' => 'shop-web',
+                'customer_name' => 'Rahim',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.received', true)
+            ->assertJsonPath('data.ingest.handled', true)
+            ->assertJsonPath('data.ingest.skipped', false);
+
+        $ticket = SupportTicket::query()
+            ->where('company_id', $this->company->id)
+            ->where('description', 'like', '%[ams-support-ingest:shop-web:support.sms.received:sms-1001]%')
+            ->first();
+
+        $this->assertNotNull($ticket);
+        $this->assertSame('sms', $ticket->source->value);
+        $this->assertSame('I need help with my delivery.', strtok($ticket->description, "\n"));
+        $this->assertNotNull($ticket->application_id);
+    }
+
+    public function test_support_message_received_uses_api_source_by_default(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'msg-55',
+                'body' => 'Website contact form: please call me back.',
+                'channel' => 'web',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.handled', true);
+
+        $ticket = SupportTicket::query()->where('company_id', $this->company->id)->first();
+        $this->assertNotNull($ticket);
+        $this->assertSame('web', $ticket->source->value);
+    }
+
+    public function test_duplicate_sms_is_idempotent(): void
+    {
+        $payload = [
+            'event' => 'support.sms.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'sms-dup-1',
+                'from' => '+8801700000001',
+                'body' => 'Duplicate check',
+            ],
+        ];
+
+        $this->postSigned($payload)->assertOk()->assertJsonPath('data.ingest.skipped', false);
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.skipped', true)
+            ->assertJsonPath('data.ingest.actions.0', 'idempotent_skip');
+
+        $this->assertSame(1, SupportTicket::query()->where('company_id', $this->company->id)->count());
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function postSigned(array $payload)
+    {
+        $body = json_encode($payload, JSON_THROW_ON_ERROR);
+        $signature = app(SignatureValidator::class)->generate($body, $this->secret);
+
+        return $this->call(
+            'POST',
+            '/api/v1/webhooks/incoming/shop-web',
+            [],
+            [],
+            [],
+            [
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_ACCEPT' => 'application/json',
+                'HTTP_X_AMS_SIGNATURE' => $signature,
+            ],
+            $body
+        );
+    }
+}

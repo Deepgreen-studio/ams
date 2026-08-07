@@ -56,3 +56,28 @@ EasyCare sends `X-EasyCare-Signature` (raw HMAC-SHA256 of body). AMS webhook is 
 
 In AMS UI: Integrations → EasyCare API → Test connection  
 (or `POST /api/v1/integrations/{uuid}/test-connection`)
+
+## Auto-ingest (Support + Compliance)
+
+When EasyCare posts a signed webhook to AMS, AMS:
+
+1. Verifies `X-EasyCare-Signature`
+2. Writes a `webhook_logs` row
+3. Queues / runs `IncomingWebhookIngestService` (inline; retries via `ProcessIncomingWebhookJob` on failure)
+4. `EasyCareIncomingWebhookHandler` creates a **Support** ticket (`source=api`)
+5. Health / personal-data events also set `involves_personal_data=true`, which triggers
+   `SupportComplianceRoutingService` → **Compliance** privacy request (linked to the ticket)
+
+| EasyCare event | Support ticket | Compliance privacy request |
+|----------------|----------------|----------------------------|
+| `user.created` / `user.updated` | Yes | No |
+| `appointment.created` | Yes | No |
+| `easycare.test` | Yes | No |
+| `patient.created` / `patient.updated` | Yes | Yes (auto-routed) |
+| `blood_sugar.created` | Yes (priority escalates on extreme values) | Yes (auto-routed) |
+| `medicine.updated` | Yes | Yes (auto-routed) |
+
+Idempotency: duplicate deliveries with the same `data.uuid` reuse the existing ticket
+(`[easycare-ingest:{event}:{uuid}]` tag in the description).
+
+System actor: `admin@ams.test` (fallback: webhook creator / company user).

@@ -171,11 +171,21 @@ class WebhookController
     public function incoming(Request $request, string $webhook): JsonResponse
     {
         $result = $this->webhookService->receiveIncoming($webhook, $request);
+        $log = $result['log'];
+        $ingest = null;
+        if (is_string($log->response_body) && $log->response_body !== '') {
+            $decoded = json_decode($log->response_body, true);
+            if (is_array($decoded) && isset($decoded['ingest']) && is_array($decoded['ingest'])) {
+                $ingest = $decoded['ingest'];
+            }
+        }
 
         return ApiResponse::success([
             'received' => true,
-            'event_name' => $result['log']->event_name,
-            'log_uuid' => $result['log']->uuid,
+            'event_name' => $log->event_name,
+            'log_uuid' => $log->uuid,
+            'ingest' => $ingest,
+            'ingest_queued' => false,
         ], 'Webhook received successfully.');
     }
 }

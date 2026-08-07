@@ -76,11 +76,22 @@ class NotificationTemplateService
         $template = $this->resolve($eventKey, $channel, $locale);
         $defaults = $this->defaultContent($eventKey, $channel);
         $subject = $template?->subject ?: $defaults['subject'];
-        $body = $template?->body ?: $defaults['body'];
+        $body = $this->interpolate($template?->body ?: $defaults['body'], $variables);
+
+        // In-app / SMS / push are plain text in the UI — never store raw HTML tags.
+        if (in_array($channel, [
+            NotificationChannelEnum::InApp,
+            NotificationChannelEnum::Sms,
+            NotificationChannelEnum::Push,
+        ], true)) {
+            $body = Str::of(strip_tags(str_replace(['</p>', '<br>', '<br/>', '<br />'], ' ', $body)))
+                ->squish()
+                ->toString();
+        }
 
         return [
             'subject' => $this->interpolate($subject, $variables),
-            'body' => $this->interpolate($body, $variables),
+            'body' => $body,
             'title' => $this->interpolate($defaults['title'], $variables),
             'locale' => $template?->locale ?? $locale,
             'channel' => $channel->value,

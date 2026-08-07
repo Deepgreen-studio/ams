@@ -11,6 +11,7 @@ enum SupportTicketSource: string
     case Api = 'api';
     case Internal = 'internal';
     case Web = 'web';
+    case Sms = 'sms';
 
     /**
      * @return list<string>
@@ -30,6 +31,7 @@ enum SupportTicketSource: string
             self::Api => 'API',
             self::Internal => 'Internal',
             self::Web => 'Web',
+            self::Sms => 'SMS',
         };
     }
 }

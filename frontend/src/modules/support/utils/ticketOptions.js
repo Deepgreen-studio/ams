@@ -35,6 +35,7 @@ export const sourceOptions = [
   { value: 'api', label: 'API' },
   { value: 'internal', label: 'Internal' },
   { value: 'web', label: 'Web' },
+  { value: 'sms', label: 'SMS' },
 ];
 
 export const assignmentTypeOptions = [

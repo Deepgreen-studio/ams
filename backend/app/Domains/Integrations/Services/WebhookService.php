@@ -9,6 +9,7 @@ use App\Domains\Integrations\Events\WebhookCreated;
 use App\Domains\Integrations\Events\WebhookDeleted;
 use App\Domains\Integrations\Events\WebhookUpdated;
 use App\Domains\Integrations\Jobs\DeliverOutgoingWebhookJob;
+use App\Domains\Integrations\Jobs\ProcessIncomingWebhookJob;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookEvent;
 use App\Domains\Integrations\Models\WebhookLog;
@@ -22,7 +23,9 @@ use App\Shared\Services\Webhook\WebhookEngine;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 class WebhookService
 {
@@ -34,6 +37,7 @@ class WebhookService
         private readonly IntegrationRepository $integrationRepository,
         private readonly WebhookDeliveryService $deliveryService,
         private readonly WebhookEngine $webhookEngine,
+        private readonly IncomingWebhookIngestService $incomingWebhookIngestService,
     ) {}
 
     /**
@@ -306,6 +310,22 @@ class WebhookService
             'last_triggered_at' => now(),
             'last_success_at' => now(),
         ]);
+
+        // Auto-ingest into Support / Compliance. Failures are logged but do not
+        // fail the webhook ACK (EasyCare already delivered successfully).
+        try {
+            $this->incomingWebhookIngestService->processLog($log->id);
+            $log = $this->webhookLogRepository->findByUuidOrFail($log->uuid);
+        } catch (Throwable $e) {
+            Log::error('Incoming webhook received but auto-ingest failed.', [
+                'webhook_log_uuid' => $log->uuid,
+                'webhook_slug' => $webhook->slug,
+                'error' => $e->getMessage(),
+            ]);
+
+            // Optional async retry without blocking the ACK path.
+            ProcessIncomingWebhookJob::dispatch($log->id, $webhook->company_id);
+        }
 
         return [
             'webhook' => $webhook->refresh(),

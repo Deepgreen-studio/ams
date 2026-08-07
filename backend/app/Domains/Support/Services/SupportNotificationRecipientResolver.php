@@ -10,11 +10,12 @@ use Illuminate\Support\Collection;
 class SupportNotificationRecipientResolver
 {
     /**
-     * Agents (assignee) + users with support.manage, excluding the actor.
+     * Agents (assignee) + users with support.manage (+ portal customer users).
+     * Optionally excludes the acting user (skipped for inbound webhook/API complaints).
      *
      * @return Collection<int, User>
      */
-    public function forTicket(SupportTicket $ticket, ?User $actor = null): Collection
+    public function forTicket(SupportTicket $ticket, ?User $actor = null, bool $excludeActor = true): Collection
     {
         $ticket->loadMissing('assignee');
 
@@ -41,7 +42,7 @@ class SupportNotificationRecipientResolver
 
         $recipients = $recipients->unique('id');
 
-        if ($actor) {
+        if ($excludeActor && $actor) {
             $recipients = $recipients->reject(fn (User $user) => (int) $user->id === (int) $actor->id);
         }
 

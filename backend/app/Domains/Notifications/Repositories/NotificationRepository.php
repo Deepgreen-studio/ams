@@ -90,6 +90,7 @@ class NotificationRepository extends BaseRepository
     {
         return $this->model->newQuery()
             ->where('user_id', $user->id)
+            ->where('channel', 'in_app')
             ->with($this->defaultRelations())
             ->latest('id')
             ->limit($limit)

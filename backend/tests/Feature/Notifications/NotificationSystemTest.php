@@ -98,6 +98,30 @@ class NotificationSystemTest extends TestCase
         NotificationFacade::assertSentTo($this->agent, TemplatedNotification::class);
     }
 
+    public function test_inbound_api_ticket_notifies_system_actor_with_manage_permission(): void
+    {
+        // Mimic webhook ingest: system actor creates an inbound complaint and must still be notified.
+        $ticketService = app(\App\Domains\Support\Services\SupportTicketService::class);
+
+        $ticketService->create([
+            'company_id' => $this->company->uuid,
+            'subject' => 'Complaint from external app',
+            'description' => 'Customer complaint via webhook',
+            'category' => 'customer_support',
+            'priority' => 'high',
+            'source' => 'api',
+        ], $this->manager);
+
+        $this->assertTrue(
+            Notification::query()
+                ->where('user_id', $this->manager->id)
+                ->where('event_key', NotificationEventKey::TicketCreated->value)
+                ->where('channel', 'in_app')
+                ->exists(),
+            'Inbound tickets must notify support managers including the system ingest actor.'
+        );
+    }
+
     public function test_preferences_can_be_updated(): void
     {
         Sanctum::actingAs($this->agent);

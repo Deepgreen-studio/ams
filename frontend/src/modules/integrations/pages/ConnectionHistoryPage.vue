@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Connection History"
       description="Outbound requests executed by the API Connection Engine for this integration."
-    />
+    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -124,7 +124,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import ResponseViewer from '@/modules/integrations/components/ResponseViewer.vue';

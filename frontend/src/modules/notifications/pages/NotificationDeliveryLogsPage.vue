@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Delivery Logs" description="Outbound notification delivery history" />
+    <!-- <PageHeader title="Delivery Logs" description="Outbound notification delivery history" /> -->
     <NotificationsSubnav />
 
     <div class="mb-4 grid gap-3 sm:grid-cols-4">
@@ -60,7 +60,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

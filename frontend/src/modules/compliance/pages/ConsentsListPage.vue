@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Consent records"
       description="Search and manage subject consent across all supported channels."
     >
@@ -18,7 +18,21 @@
           Record consent
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.consents.dashboard' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Dashboard
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'compliance.consents.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Record consent
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -55,7 +69,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import ConsentSearchFilters from '@/modules/compliance/components/ConsentSearchFilters.vue';
 import ConsentTable from '@/modules/compliance/components/ConsentTable.vue';

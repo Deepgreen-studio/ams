@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Compare versions" description="Difference viewer for two content snapshots.">
+    <!-- <PageHeader title="Compare versions" description="Difference viewer for two content snapshots.">
       <template #actions>
         <RouterLink
           :to="{ name: 'content.versions', params: { id: route.params.id } }"
@@ -9,7 +9,15 @@
           Version timeline
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'content.versions', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Version timeline
+        </RouterLink>
+    </Teleport>
 
     <ContentItemSubnav :content-id="route.params.id" />
 
@@ -106,7 +114,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';
 import { useContentStore } from '@/modules/content/stores/content';
 

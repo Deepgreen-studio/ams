@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create role"
       description="Define a new role and optionally seed permissions."
-    />
+    /> -->
     <div class="grid gap-6 lg:grid-cols-2">
       <div class="rounded-xl border border-slate-200 bg-white p-6">
         <RoleForm
@@ -33,7 +33,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import PermissionTree from '@/modules/roles/components/PermissionTree.vue';
 import RoleForm from '@/modules/roles/components/RoleForm.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';

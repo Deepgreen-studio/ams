@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.current?.title || 'DPIA details'"
       :description="store.current?.assessment_number || 'Assessment workflow and linked risks'"
     >
@@ -13,7 +13,16 @@
           Continue wizard
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="store.current"
+          :to="{ name: 'compliance.dpia.wizard.edit', params: { id: store.current.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Continue wizard
+        </RouterLink>
+    </Teleport>
     <ComplianceSubnav />
 
     <div
@@ -136,7 +145,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import BreachSeverityBadge from '@/modules/compliance/components/BreachSeverityBadge.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import DpiaStatusBadge from '@/modules/compliance/components/DpiaStatusBadge.vue';

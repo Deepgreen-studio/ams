@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Monitoring alerts"
       description="Threshold rules for crash rate, health score, response time, and more."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div
@@ -164,7 +164,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useMonitoringStore } from '@/modules/applications/stores/monitoring';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="subscription?.plan_name || 'Subscription details'"
       description="Plan, licensing, and payment status."
     >
@@ -49,7 +49,51 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="subscription">
+          <RouterLink
+            :to="{ name: 'customers.subscriptions', params: { id: route.params.id } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Back
+          </RouterLink>
+          <RouterLink
+            :to="{
+              name: 'customers.subscriptions.edit',
+              params: { id: route.params.id, subscriptionId: subscription.uuid },
+            }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+          <button
+            v-if="subscription.status !== 'cancelled' && !subscription.deleted_at"
+            type="button"
+            class="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+            :disabled="store.saving"
+            @click="cancelSubscription"
+          >
+            Cancel plan
+          </button>
+          <button
+            v-if="subscription.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="store.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showArchive = true"
+          >
+            Archive
+          </button>
+    </Teleport>
 
     <div
       v-if="store.error"
@@ -192,7 +236,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import LicenseStatusBadge from '@/modules/customers/components/LicenseStatusBadge.vue';
 import PaymentStatusBadge from '@/modules/customers/components/PaymentStatusBadge.vue';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Executive Forecast" description="Forward-looking revenue and customer growth projections." />
+    <!-- <PageHeader title="Executive Forecast" description="Forward-looking revenue and customer growth projections." /> -->
     <AnalyticsSubnav />
     <ExecutiveAnalyticsSubnav />
 
@@ -64,7 +64,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import ExecutiveAnalyticsSubnav from '@/modules/analytics/components/ExecutiveAnalyticsSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

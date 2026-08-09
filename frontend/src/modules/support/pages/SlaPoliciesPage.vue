@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="SLA Policies" description="Global defaults and company overrides" />
+    <!-- <PageHeader title="SLA Policies" description="Global defaults and company overrides" /> -->
     <SupportSubnav />
 
     <div
@@ -47,7 +47,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';
 

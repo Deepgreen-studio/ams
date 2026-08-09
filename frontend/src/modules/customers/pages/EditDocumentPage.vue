@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit document"
       description="Update document metadata (name, folder, status, expiry)."
-    />
+    /> -->
     <div v-if="store.loading && !document" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <form
       v-else-if="document"
@@ -78,7 +78,7 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';
 
 const route = useRoute();

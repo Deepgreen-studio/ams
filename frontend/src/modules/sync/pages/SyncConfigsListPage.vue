@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Sync Configs"
       description="Configure import/export synchronization for connected APIs."
     >
@@ -12,7 +12,15 @@
           Create config
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'sync.configs.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create config
+        </RouterLink>
+    </Teleport>
     <SyncSubnav />
 
     <div
@@ -141,7 +149,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';

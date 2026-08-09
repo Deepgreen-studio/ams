@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader :title="integration?.name || 'Integration details'" description="Connection overview and configuration.">
+    <!-- <PageHeader :title="integration?.name || 'Integration details'" description="Connection overview and configuration.">
       <template #actions>
         <template v-if="integration">
           <RouterLink :to="{ name: 'integrations.configuration', params: { id: integration.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
@@ -31,7 +31,36 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="integration">
+          <RouterLink :to="{ name: 'integrations.configuration', params: { id: integration.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Configure API
+          </RouterLink>
+          <RouterLink :to="{ name: 'integrations.connection', params: { id: integration.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Test connection
+          </RouterLink>
+          <RouterLink :to="{ name: 'integrations.edit', params: { id: integration.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Edit
+          </RouterLink>
+          <button
+            v-if="integration.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="integrationsStore.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showDelete = true"
+          >
+            Delete
+          </button>
+    </Teleport>
 
     <IntegrationSubnav v-if="integration" :integration-id="integration.uuid" />
 
@@ -57,7 +86,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import IntegrationCard from '@/modules/integrations/components/IntegrationCard.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';

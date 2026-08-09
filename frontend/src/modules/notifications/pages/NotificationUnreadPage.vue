@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Unread Notifications" description="Notifications waiting for your attention.">
+    <!-- <PageHeader title="Unread Notifications" description="Notifications waiting for your attention.">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           Mark all read
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          :disabled="!store.unreadCount"
+          @click="markAll"
+        >
+          Mark all read
+        </button>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -50,7 +60,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';

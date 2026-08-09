@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Company profile" description="Branding, logo, and organizational identity.">
+    <!-- <PageHeader title="Company profile" description="Branding, logo, and organizational identity.">
       <template #actions>
         <RouterLink
           v-if="company"
@@ -10,7 +10,16 @@
           Back to company
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="company"
+          :to="{ name: 'companies.show', params: { id: company.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to company
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="companiesStore.successMessage"
@@ -127,7 +136,7 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import CompanyCard from '@/modules/companies/components/CompanyCard.vue';
 import CompanyLogoUpload from '@/modules/companies/components/CompanyLogoUpload.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';

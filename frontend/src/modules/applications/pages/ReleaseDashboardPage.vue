@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="title"
       description="Plan, schedule, approve, deploy, and roll back application releases."
     >
@@ -24,7 +24,27 @@
           Plan release
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'applications.releases.calendar', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Calendar
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'applications.releases.timeline', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Timeline
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'applications.releases.create', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Plan release
+        </RouterLink>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -153,7 +173,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useReleasesStore } from '@/modules/applications/stores/releases';

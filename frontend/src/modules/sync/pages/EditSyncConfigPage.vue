@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit sync config" description="Update synchronization settings." />
+    <!-- <PageHeader title="Edit sync config" description="Update synchronization settings." /> -->
     <SyncSubnav />
     <div
       v-if="store.loading && !store.currentConfig"
@@ -24,7 +24,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SyncConfigForm from '@/modules/sync/components/SyncConfigForm.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';

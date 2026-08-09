@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Assignment screen"
       description="Assign tickets manually, automatically, or by department, team, and agent."
-    />
+    /> -->
 
     <SupportSubnav />
 
@@ -87,7 +87,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import AssignmentPanel from '@/modules/support/components/AssignmentPanel.vue';
 import PriorityIndicator from '@/modules/support/components/PriorityIndicator.vue';

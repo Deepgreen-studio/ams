@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="title"
       description="Manage Development, Testing, Staging, Production, and Sandbox environments."
     >
@@ -30,7 +30,33 @@
           </RouterLink>
         </div>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <div class="flex flex-wrap items-center gap-2">
+          <select
+            v-if="environmentsStore.environments.length"
+            class="h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+            :value="environmentsStore.currentEnvironment?.uuid || ''"
+            :disabled="environmentsStore.saving"
+            @change="onSwitchSelect"
+          >
+            <option value="" disabled>Switch environment</option>
+            <option
+              v-for="item in environmentsStore.environments"
+              :key="item.uuid"
+              :value="item.uuid"
+            >
+              {{ item.name }}{{ item.is_current ? ' (current)' : '' }}
+            </option>
+          </select>
+          <RouterLink
+            :to="{ name: 'applications.environments.create', params: { id: route.params.id } }"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          >
+            Add environment
+          </RouterLink>
+        </div>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -105,7 +131,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import EnvironmentCard from '@/modules/applications/components/EnvironmentCard.vue';

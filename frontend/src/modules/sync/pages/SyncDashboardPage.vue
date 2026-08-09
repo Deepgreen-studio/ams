@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Sync Dashboard"
       description="Monitor API synchronization runs, progress, and outcomes."
     >
@@ -12,7 +12,15 @@
           New sync config
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'sync.configs.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New sync config
+        </RouterLink>
+    </Teleport>
     <SyncSubnav />
 
     <div
@@ -116,7 +124,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SyncProgressBar from '@/modules/sync/components/SyncProgressBar.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';

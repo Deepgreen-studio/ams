@@ -1,9 +1,9 @@
 <template>
     <div>
-        <PageHeader
+        <!-- <PageHeader
             title="Dashboard"
             description="Enterprise Application Management System foundation is ready."
-        />
+        /> -->
 
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <div

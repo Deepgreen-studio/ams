@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="license?.license_key || 'License details'"
       description="License key, activations, and status."
     >
@@ -50,7 +50,52 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="license">
+          <RouterLink
+            :to="{ name: 'customers.licenses', params: { id: route.params.id } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Back
+          </RouterLink>
+          <RouterLink
+            v-if="!license.deleted_at"
+            :to="{
+              name: 'customers.licenses.edit',
+              params: { id: route.params.id, licenseId: license.uuid },
+            }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+          <button
+            v-if="license.status !== 'revoked' && !license.deleted_at"
+            type="button"
+            class="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+            :disabled="store.saving"
+            @click="revoke"
+          >
+            Revoke
+          </button>
+          <button
+            v-if="license.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="store.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showArchive = true"
+          >
+            Archive
+          </button>
+    </Teleport>
 
     <div
       v-if="store.error"
@@ -139,7 +184,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import LicenseStatusBadge from '@/modules/customers/components/LicenseStatusBadge.vue';
 import PaymentStatusBadge from '@/modules/customers/components/PaymentStatusBadge.vue';

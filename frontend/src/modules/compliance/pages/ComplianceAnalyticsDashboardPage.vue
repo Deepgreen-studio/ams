@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Compliance Analytics"
       description="Cross-module KPIs for privacy, cases, risk, policies, consent, breaches, and audit activity."
     >
@@ -18,7 +18,21 @@
           GDPR report
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.analytics.risks' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Risk charts
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'compliance.analytics.gdpr' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          GDPR report
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -95,7 +109,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

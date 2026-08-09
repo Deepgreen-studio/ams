@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Add environment"
       description="Register a Development, Testing, Staging, Production, or Sandbox environment."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <EnvironmentForm
@@ -22,7 +22,7 @@
 
 <script setup>
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import EnvironmentForm from '@/modules/applications/components/EnvironmentForm.vue';
 import { useEnvironmentsStore } from '@/modules/applications/stores/environments';

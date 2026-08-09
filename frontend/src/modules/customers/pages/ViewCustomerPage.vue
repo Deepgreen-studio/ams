@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="customer?.display_name || 'Customer details'"
       description="Customer profile and relationship overview."
     >
@@ -31,7 +31,33 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="customer">
+          <RouterLink
+            :to="{ name: 'customers.edit', params: { id: customer.uuid } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+          <button
+            v-if="customer.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="customersStore.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showArchive = true"
+          >
+            Archive
+          </button>
+    </Teleport>
 
     <div
       v-if="customersStore.error"
@@ -169,7 +195,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CustomerCard from '@/modules/customers/components/CustomerCard.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';

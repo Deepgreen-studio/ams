@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Report data breach"
       description="Capture incident details for risk assessment and notification workflows."
-    />
+    /> -->
     <ComplianceSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <BreachForm
@@ -18,7 +18,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import BreachForm from '@/modules/compliance/components/BreachForm.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';

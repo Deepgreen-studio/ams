@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Prompt Manager"
       description="Versioned prompt templates for each AI feature."
     >
@@ -12,7 +12,15 @@
           New prompt
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="startCreate"
+        >
+          New prompt
+        </button>
+    </Teleport>
     <AiSubnav />
 
     <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -120,7 +128,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AiSubnav from '@/modules/ai/components/AiSubnav.vue';
 import { useAiStore } from '@/modules/ai/stores/ai';
 

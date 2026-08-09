@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Compare versions"
       description="Diff two semantic versions for this application."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div class="mb-4 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-3">
@@ -128,7 +128,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useVersionsStore } from '@/modules/applications/stores/versions';
 

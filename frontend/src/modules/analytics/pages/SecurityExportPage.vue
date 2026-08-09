@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Export Security Report" description="Download JSON or CSV security analytics reports.">
+    <!-- <PageHeader title="Export Security Report" description="Download JSON or CSV security analytics reports.">
       <template #actions>
         <button
           type="button"
@@ -19,7 +19,25 @@
           Download CSV
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          :disabled="store.loading"
+          @click="loadJson"
+        >
+          Generate JSON
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          :disabled="downloading"
+          @click="downloadCsv"
+        >
+          Download CSV
+        </button>
+    </Teleport>
     <AnalyticsSubnav />
     <SecurityAnalyticsSubnav />
 
@@ -63,7 +81,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import SecurityAnalyticsSubnav from '@/modules/analytics/components/SecurityAnalyticsSubnav.vue';
 import { useSecurityAnalyticsStore } from '@/modules/analytics/stores/securityAnalytics';

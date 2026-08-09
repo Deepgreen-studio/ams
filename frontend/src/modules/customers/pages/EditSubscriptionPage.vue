@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit subscription" description="Update plan, dates, and payment status." />
+    <!-- <PageHeader title="Edit subscription" description="Update plan, dates, and payment status." /> -->
     <div v-if="store.loading && !subscription" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <div v-else-if="subscription" class="rounded-xl border border-slate-200 bg-white p-6">
       <SubscriptionForm
@@ -24,7 +24,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SubscriptionForm from '@/modules/customers/components/SubscriptionForm.vue';
 import { useSubscriptionsStore } from '@/modules/customers/stores/subscriptions';
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Scheduler Statistics" description="Aggregated job definition and run metrics." />
+    <!-- <PageHeader title="Scheduler Statistics" description="Aggregated job definition and run metrics." /> -->
     <SchedulerSubnav />
 
     <div class="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -21,7 +21,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SchedulerSubnav from '@/modules/scheduler/components/SchedulerSubnav.vue';
 import { useSchedulerStore } from '@/modules/scheduler/stores/scheduler';
 

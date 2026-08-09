@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="CMS API Explorer"
       description="Try public and private headless CMS endpoints, manage delivery API keys, and inspect live JSON responses."
-    />
+    /> -->
     <ContentSubnav />
 
     <div class="mb-5 inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
@@ -231,7 +231,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import { contentService } from '@/modules/content/services/contentService';
 

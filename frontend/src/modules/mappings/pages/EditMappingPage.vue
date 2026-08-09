@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit mapping"
       description="Update field mappings, transforms, and validation rules."
-    />
+    /> -->
     <MappingSubnav />
     <div
       v-if="store.loading && !store.currentMapping"
@@ -27,7 +27,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MappingForm from '@/modules/mappings/components/MappingForm.vue';
 import MappingSubnav from '@/modules/mappings/components/MappingSubnav.vue';
 import { useMappingsStore } from '@/modules/mappings/stores/mappings';

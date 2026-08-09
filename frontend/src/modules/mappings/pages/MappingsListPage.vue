@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Data Mappings"
       description="Enterprise field mapping profiles for external integrations."
     >
@@ -12,7 +12,15 @@
           Create mapping
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'mappings.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create mapping
+        </RouterLink>
+    </Teleport>
     <MappingSubnav />
 
     <div
@@ -141,7 +149,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import MappingSubnav from '@/modules/mappings/components/MappingSubnav.vue';
 import { useMappingsStore } from '@/modules/mappings/stores/mappings';

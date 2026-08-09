@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Compare policy versions"
       description="Field-level difference viewer for two immutable policy snapshots."
     >
@@ -12,7 +12,15 @@
           Version timeline
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.policies.versions', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Version timeline
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -109,7 +117,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { usePolicyStore } from '@/modules/compliance/stores/policies';
 

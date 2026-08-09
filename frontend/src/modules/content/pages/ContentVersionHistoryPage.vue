@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="
         contentStore.versionMeta?.title
           ? `History · ${contentStore.versionMeta.title}`
@@ -22,7 +22,21 @@
           Back to editor
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'content.compare', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Compare versions
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'content.edit', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to editor
+        </RouterLink>
+    </Teleport>
 
     <ContentItemSubnav :content-id="route.params.id" />
 
@@ -162,7 +176,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';
 import { contentService } from '@/modules/content/services/contentService';

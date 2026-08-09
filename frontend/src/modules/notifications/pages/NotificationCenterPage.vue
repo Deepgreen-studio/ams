@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Notification Center" description="Your latest in-app alerts across the AMS platform.">
+    <!-- <PageHeader title="Notification Center" description="Your latest in-app alerts across the AMS platform.">
       <template #actions>
         <button
           type="button"
@@ -17,7 +17,23 @@
           Preferences
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          :disabled="!store.unreadCount"
+          @click="markAll"
+        >
+          Mark all read
+        </button>
+        <RouterLink
+          :to="{ name: 'notifications.preferences' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Preferences
+        </RouterLink>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -68,7 +84,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

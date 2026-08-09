@@ -9,10 +9,20 @@
                 <TopNavigation />
 
                 <main class="flex-1 px-4 pb-8 pt-2 sm:px-6 lg:px-8">
-                    <Breadcrumb
-                        v-if="showBreadcrumb"
-                        class="mb-4"
-                    />
+                    <div
+                        v-if="showToolbar"
+                        class="mb-[30px] mt-[16px] flex flex-wrap items-center justify-between gap-3"
+                    >
+                        <Breadcrumb
+                            v-if="showBreadcrumb"
+                            class="min-w-0"
+                        />
+                        <div
+                            id="page-header-actions"
+                            class="flex flex-wrap items-center justify-end gap-2"
+                            :class="showBreadcrumb ? 'ml-auto' : 'w-full'"
+                        />
+                    </div>
                     <RouterView />
                 </main>
             </div>
@@ -33,4 +43,5 @@ const appStore = useAppStore();
 const route = useRoute();
 
 const showBreadcrumb = computed(() => route.name !== 'dashboard');
+const showToolbar = computed(() => showBreadcrumb.value);
 </script>

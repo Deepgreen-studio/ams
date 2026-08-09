@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Notification Preferences" description="Choose which channels deliver each event notification.">
+    <!-- <PageHeader title="Notification Preferences" description="Choose which channels deliver each event notification.">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           {{ store.saving ? 'Saving…' : 'Save preferences' }}
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="save"
+        >
+          {{ store.saving ? 'Saving…' : 'Save preferences' }}
+        </button>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -58,7 +68,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

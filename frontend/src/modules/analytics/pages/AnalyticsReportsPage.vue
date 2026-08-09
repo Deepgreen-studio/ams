@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Report Builder" description="Design tabular, chart, grouped, and scheduled enterprise reports.">
+    <!-- <PageHeader title="Report Builder" description="Design tabular, chart, grouped, and scheduled enterprise reports.">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           New report
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="showCreate = true"
+        >
+          New report
+        </button>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -131,7 +141,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
 

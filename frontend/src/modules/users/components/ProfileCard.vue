@@ -1,17 +1,13 @@
 <template>
   <div class="rounded-xl border border-slate-200 bg-white p-6">
     <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
-      <div
-        class="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full bg-brand-50 text-lg font-semibold text-brand-700"
-      >
-        <img
-          v-if="user?.avatar_url"
-          :src="user.avatar_url"
-          alt=""
-          class="h-full w-full object-cover"
-        />
-        <span v-else>{{ initials }}</span>
-      </div>
+      <UserAvatar
+        :src="user?.avatar_url || ''"
+        :name="user?.full_name || user?.name || 'User'"
+        :first-name="user?.first_name || ''"
+        :last-name="user?.last_name || ''"
+        size="lg"
+      />
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
           <h2 class="truncate text-xl font-semibold text-slate-900">{{ user?.full_name }}</h2>
@@ -65,6 +61,7 @@ import { computed } from 'vue';
 import { formatDate } from '@/utils/formatters';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
+import UserAvatar from '@/components/ui/UserAvatar.vue';
 
 const props = defineProps({
   user: {
@@ -74,10 +71,4 @@ const props = defineProps({
 });
 
 const roles = computed(() => props.user?.roles || []);
-
-const initials = computed(() => {
-  const first = props.user?.first_name?.[0] || '';
-  const last = props.user?.last_name?.[0] || '';
-  return `${first}${last}`.toUpperCase() || 'U';
-});
 </script>

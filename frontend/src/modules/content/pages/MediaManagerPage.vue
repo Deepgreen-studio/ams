@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Media library"
       description="Enterprise CMS media manager with folders, previews, replace, and version history."
-    />
+    /> -->
     <ContentSubnav />
 
     <div
@@ -120,7 +120,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';

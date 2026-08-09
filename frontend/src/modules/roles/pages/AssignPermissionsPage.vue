@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="`Permissions · ${rolesStore.currentRole?.display_name || 'Role'}`"
       description="Assign module permissions using the grouped checkbox tree."
-    />
+    /> -->
 
     <div
       v-if="rolesStore.successMessage"
@@ -49,7 +49,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import PermissionTree from '@/modules/roles/components/PermissionTree.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';
 

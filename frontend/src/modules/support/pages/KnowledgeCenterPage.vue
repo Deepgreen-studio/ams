@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Knowledge Center" description="Articles, guides, FAQs, tutorials, videos, and release notes">
+    <!-- <PageHeader title="Knowledge Center" description="Articles, guides, FAQs, tutorials, videos, and release notes">
       <template #actions>
         <RouterLink
           :to="{ name: 'support.knowledge.create' }"
@@ -9,7 +9,15 @@
           New article
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'support.knowledge.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New article
+        </RouterLink>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -149,7 +157,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useKnowledgeBaseStore } from '@/modules/support/stores/knowledgeBase';
 

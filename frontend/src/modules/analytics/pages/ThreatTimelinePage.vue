@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Threat Timeline" description="Chronological security events: failed logins, role changes, GDPR, API errors." />
+    <!-- <PageHeader title="Threat Timeline" description="Chronological security events: failed logins, role changes, GDPR, API errors." /> -->
     <AnalyticsSubnav />
     <SecurityAnalyticsSubnav />
 
@@ -47,7 +47,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import SecurityAnalyticsSubnav from '@/modules/analytics/components/SecurityAnalyticsSubnav.vue';
 import { useSecurityAnalyticsStore } from '@/modules/analytics/stores/securityAnalytics';

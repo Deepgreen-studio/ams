@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit version"
       description="Update version metadata, status, and release notes."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
     <div
       v-if="versionsStore.loading && !versionsStore.currentVersion"
@@ -26,7 +26,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import VersionForm from '@/modules/applications/components/VersionForm.vue';
 import { useVersionsStore } from '@/modules/applications/stores/versions';

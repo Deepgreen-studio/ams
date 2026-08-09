@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="File manager" description="Nested folders and media organization." />
+    <!-- <PageHeader title="File manager" description="Nested folders and media organization." /> -->
     <SettingsTabs>
       <div
         v-if="mediaStore.error"
@@ -80,7 +80,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
 import SearchBar from '@/modules/settings/components/SearchBar.vue';

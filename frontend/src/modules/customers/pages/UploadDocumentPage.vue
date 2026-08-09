@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Upload document" :description="`Add a file to ${customerName}'s library.`" />
+    <!-- <PageHeader title="Upload document" :description="`Add a file to ${customerName}'s library.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <DocumentUploadForm
         :default-category="route.query.category || 'contracts'"
@@ -18,7 +18,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DocumentUploadForm from '@/modules/customers/components/DocumentUploadForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';

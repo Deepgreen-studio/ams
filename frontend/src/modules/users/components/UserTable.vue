@@ -84,17 +84,13 @@
             </td>
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <div
-                  class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-brand-50 text-xs font-semibold text-brand-700"
-                >
-                  <img
-                    v-if="user.avatar_url"
-                    :src="user.avatar_url"
-                    alt=""
-                    class="h-full w-full object-cover"
-                  />
-                  <span v-else>{{ initials(user) }}</span>
-                </div>
+                <UserAvatar
+                  :src="user.avatar_url || ''"
+                  :name="user.full_name || user.name || 'User'"
+                  :first-name="user.first_name || ''"
+                  :last-name="user.last_name || ''"
+                  size="sm"
+                />
                 <div>
                   <p class="font-medium text-slate-900">{{ user.full_name }}</p>
                   <p class="text-xs text-slate-500">{{ user.uuid }}</p>
@@ -143,6 +139,7 @@
 import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { formatDate } from '@/utils/formatters';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
@@ -178,10 +175,4 @@ const allSelected = computed(() => {
 
   return props.users.every((user) => props.selectedIds.includes(user.uuid));
 });
-
-function initials(user) {
-  const first = user.first_name?.[0] || '';
-  const last = user.last_name?.[0] || '';
-  return `${first}${last}`.toUpperCase() || 'U';
-}
 </script>

@@ -32,7 +32,7 @@
       </svg>
       <div class="pointer-events-none absolute inset-x-0 bottom-2 text-center">
         <p class="text-3xl font-bold text-zinc-900">{{ percent }}%</p>
-        <p class="text-xs font-medium text-zinc-500">Completed</p>
+        <p class="text-xs font-medium text-zinc-500">Active / archived</p>
       </div>
     </div>
 
@@ -48,11 +48,18 @@
 <script setup>
 import { computed } from 'vue';
 
-const percent = 72;
+const props = defineProps({
+  progress: {
+    type: Object,
+    default: null,
+  },
+});
+
+const percent = computed(() => Number(props.progress?.percent_completed ?? 0));
 const circumference = Math.PI * 80;
 
 const needle = computed(() => {
-  const angle = Math.PI * (1 - percent / 100);
+  const angle = Math.PI * (1 - percent.value / 100);
   const cx = 100;
   const cy = 110;
   const r = 80;
@@ -62,10 +69,13 @@ const needle = computed(() => {
   };
 });
 
-const stats = [
-  { label: 'Total apps', value: 95, color: 'text-zinc-900' },
-  { label: 'Completed', value: 26, color: 'text-emerald-600' },
-  { label: 'Delayed', value: 35, color: 'text-amber-600' },
-  { label: 'On going', value: 35, color: 'text-brand-500' },
-];
+const stats = computed(() => {
+  const by = props.progress?.by_status || {};
+  return [
+    { label: 'Total apps', value: props.progress?.total ?? 0, color: 'text-zinc-900' },
+    { label: 'Active', value: by.active ?? 0, color: 'text-emerald-600' },
+    { label: 'Draft', value: by.draft ?? 0, color: 'text-zinc-600' },
+    { label: 'Inactive', value: by.inactive ?? 0, color: 'text-amber-600' },
+  ];
+});
 </script>

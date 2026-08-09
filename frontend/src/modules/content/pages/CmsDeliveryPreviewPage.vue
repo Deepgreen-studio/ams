@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="CMS Delivery Preview"
       description="Preview published content delivery, SEO packages, and public search results exactly as headless consumers receive them."
-    />
+    /> -->
     <ContentSubnav />
 
     <div class="mb-4 flex flex-wrap gap-2">
@@ -190,7 +190,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentPreview from '@/modules/content/components/ContentPreview.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import SeoPreviewPanel from '@/modules/content/components/SeoPreviewPanel.vue';

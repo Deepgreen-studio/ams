@@ -1,6 +1,7 @@
 <template>
-  <header class="sticky top-0 z-20 bg-canvas/90 backdrop-blur">
-    <div class="flex h-[4.5rem] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+  <header class="sticky top-0 z-20 border-b border-zinc-200/80 bg-canvas/95 backdrop-blur">
+    <div class="flex h-[90px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <!-- Left: page title -->
       <div class="flex min-w-0 items-center gap-3">
         <button
           type="button"
@@ -9,29 +10,27 @@
         >
           <Bars3Icon class="h-5 w-5" />
         </button>
-        <h1 class="truncate text-2xl font-bold tracking-tight text-zinc-900 sm:text-[1.75rem]">
+        <h1 class="truncate text-[1.75rem] font-bold tracking-tight text-zinc-900">
           {{ pageTitle }}
         </h1>
       </div>
 
-      <div class="hidden max-w-md flex-1 md:block lg:max-w-lg">
-        <label class="relative block">
+      <!-- Right: search + notifications + profile pill -->
+      <div class="flex min-w-0 items-center gap-3 sm:gap-4">
+        <label class="relative hidden w-[min(100%,22rem)] shrink md:block lg:w-[26rem]">
           <span class="sr-only">Search</span>
-          <MagnifyingGlassIcon class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-zinc-400" />
           <input
             v-model="searchQuery"
             type="search"
             placeholder="Search for anything..."
-            class="w-full rounded-full border-0 bg-white py-2.5 pl-11 pr-4 text-sm text-zinc-800 shadow-sm ring-1 ring-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+            class="w-full rounded-full border-0 bg-white py-3 pl-5 pr-4 text-sm text-zinc-800 ring-1 ring-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
           />
         </label>
-      </div>
 
-      <div class="flex items-center gap-3 sm:gap-4">
-        <div class="relative">
+        <div class="relative shrink-0">
           <button
             type="button"
-            class="relative inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-zinc-600 shadow-sm ring-1 ring-zinc-100 hover:bg-zinc-50"
+            class="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-zinc-600 ring-1 ring-zinc-100 hover:bg-zinc-50"
             @click="toggleBell"
           >
             <BellIcon class="h-5 w-5" />
@@ -45,7 +44,7 @@
 
           <div
             v-if="bellOpen"
-            class="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-xl"
+            class="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-2xl border border-zinc-100 bg-white"
           >
             <div class="flex items-center justify-between border-b border-zinc-100 px-3 py-2.5">
               <p class="text-sm font-semibold text-zinc-900">Notifications</p>
@@ -79,35 +78,67 @@
           </div>
         </div>
 
-        <RouterLink
-          :to="{ name: 'profile' }"
-          class="flex items-center gap-3 rounded-full py-1 pl-1 pr-2 transition hover:bg-white/70"
-        >
-          <span
-            class="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-200 text-sm font-semibold text-zinc-700 ring-2 ring-white"
+        <div class="relative shrink-0">
+          <button
+            type="button"
+            class="flex items-center gap-3 rounded-full bg-white py-1.5 pl-1.5 pr-3 ring-1 ring-zinc-100 transition hover:bg-zinc-50"
+            :aria-expanded="profileOpen"
+            aria-haspopup="menu"
+            @click="toggleProfile"
           >
-            <img
-              v-if="avatarUrl"
+            <UserAvatar
               :src="avatarUrl"
-              :alt="displayName"
-              class="h-full w-full object-cover"
+              :name="displayName"
+              :first-name="authStore.user?.first_name || ''"
+              :last-name="authStore.user?.last_name || ''"
+              size="md"
             />
-            <span v-else>{{ initials }}</span>
-          </span>
-          <span class="hidden min-w-0 sm:block">
-            <span class="block truncate text-sm font-semibold text-zinc-900">{{ displayName }}</span>
-            <span class="block truncate text-xs text-zinc-500">{{ roleLabel }}</span>
-          </span>
-        </RouterLink>
+            <span class="hidden min-w-0 text-left sm:block">
+              <span class="block max-w-[9rem] truncate text-sm font-semibold text-zinc-900 lg:max-w-[12rem]">
+                {{ displayName }}
+              </span>
+              <span class="block max-w-[9rem] truncate text-xs text-zinc-500 lg:max-w-[12rem]">
+                {{ roleLabel }}
+              </span>
+            </span>
+            <ChevronDownIcon
+              class="hidden h-4 w-4 shrink-0 text-zinc-400 transition sm:block"
+              :class="profileOpen ? 'rotate-180' : ''"
+            />
+          </button>
 
-        <button
-          type="button"
-          class="hidden rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 sm:inline-flex"
-          :disabled="authStore.loading"
-          @click="onLogout"
-        >
-          Logout
-        </button>
+          <div
+            v-if="profileOpen"
+            class="absolute right-0 z-30 mt-2 w-48 overflow-hidden rounded-2xl border border-zinc-100 bg-white py-1"
+            role="menu"
+          >
+            <RouterLink
+              :to="{ name: 'profile' }"
+              class="block px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
+              role="menuitem"
+              @click="profileOpen = false"
+            >
+              My profile
+            </RouterLink>
+            <RouterLink
+              :to="{ name: 'change-password' }"
+              class="block px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
+              role="menuitem"
+              @click="profileOpen = false"
+            >
+              Change password
+            </RouterLink>
+            <button
+              type="button"
+              class="block w-full px-4 py-2.5 text-left text-sm text-rose-600 hover:bg-rose-50"
+              role="menuitem"
+              :disabled="authStore.loading"
+              @click="onLogout"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -115,11 +146,13 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue';
-import { Bars3Icon, BellIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { Bars3Icon, BellIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useAppStore } from '@/stores/app';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
+import UserAvatar from '@/components/ui/UserAvatar.vue';
+import { getUserAvatarUrl } from '@/utils/avatar';
 
 const appStore = useAppStore();
 const authStore = useAuthStore();
@@ -127,6 +160,7 @@ const notificationsStore = useNotificationsStore();
 const router = useRouter();
 const route = useRoute();
 const bellOpen = ref(false);
+const profileOpen = ref(false);
 const searchQuery = ref('');
 let pollTimer = null;
 
@@ -160,32 +194,41 @@ const roleLabel = computed(() => {
   return 'Administrator';
 });
 
-const avatarUrl = computed(() => authStore.user?.avatar_url || authStore.user?.avatar || null);
-
-const initials = computed(() => {
-  const name = displayName.value.trim();
-  const parts = name.split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return 'U';
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-});
+const avatarUrl = computed(() => getUserAvatarUrl(authStore.user));
 
 onMounted(() => {
   notificationsStore.fetchCenter().catch(() => {});
   pollTimer = window.setInterval(() => {
     notificationsStore.fetchUnreadCount();
   }, 60000);
+  document.addEventListener('click', onDocumentClick);
 });
 
 onUnmounted(() => {
   if (pollTimer) window.clearInterval(pollTimer);
+  document.removeEventListener('click', onDocumentClick);
 });
 
+function onDocumentClick(event) {
+  const target = event.target;
+  if (!(target instanceof Element)) return;
+  if (!target.closest('header')) {
+    bellOpen.value = false;
+    profileOpen.value = false;
+  }
+}
+
 async function toggleBell() {
+  profileOpen.value = false;
   bellOpen.value = !bellOpen.value;
   if (bellOpen.value) {
     await notificationsStore.fetchCenter().catch(() => {});
   }
+}
+
+function toggleProfile() {
+  bellOpen.value = false;
+  profileOpen.value = !profileOpen.value;
 }
 
 async function markAll() {
@@ -206,6 +249,7 @@ async function openNotification(item) {
 }
 
 async function onLogout() {
+  profileOpen.value = false;
   await authStore.logout();
   await router.push({ name: 'login' });
 }

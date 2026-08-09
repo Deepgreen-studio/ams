@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Affected users"
       description="Maintain the list of individuals impacted by this breach."
     >
@@ -12,7 +12,15 @@
           Back to incident
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.breaches.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to incident
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -93,7 +101,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Template Approvals" description="Review submitted notification templates before publish.">
+    <!-- <PageHeader title="Template Approvals" description="Review submitted notification templates before publish.">
       <template #actions>
         <RouterLink
           :to="{ name: 'notifications.templates' }"
@@ -9,7 +9,15 @@
           Template manager
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'notifications.templates' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Template manager
+        </RouterLink>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -55,7 +63,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

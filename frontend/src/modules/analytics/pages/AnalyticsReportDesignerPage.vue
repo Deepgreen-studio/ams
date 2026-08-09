@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.currentReport?.name || 'Report Designer'"
       description="Configure columns, filters, sorting, grouping, preview, export, and scheduling."
     >
@@ -20,7 +20,23 @@
           Save designer
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'analytics.reports' }"
+          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onSave"
+        >
+          Save designer
+        </button>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -265,7 +281,7 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
 

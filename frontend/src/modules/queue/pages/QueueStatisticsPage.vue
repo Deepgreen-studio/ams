@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Queue Statistics"
       description="Aggregated queue health across priority and functional queues."
-    />
+    /> -->
     <QueueSubnav />
 
     <div
@@ -96,7 +96,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import QueueSubnav from '@/modules/queue/components/QueueSubnav.vue';
 import { useQueueStore } from '@/modules/queue/stores/queue';
 

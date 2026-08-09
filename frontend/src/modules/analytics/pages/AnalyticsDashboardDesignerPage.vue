@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.currentDashboard?.name || 'Dashboard Designer'"
       description="Drag widgets from the library, resize on the grid, then save layout, settings, and sharing."
     >
@@ -34,7 +34,37 @@
           Save layout
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'analytics.dashboards' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          @click="activePanel = activePanel === 'settings' ? 'canvas' : 'settings'"
+        >
+          Settings
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          @click="activePanel = activePanel === 'sharing' ? 'canvas' : 'sharing'"
+        >
+          Sharing
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving || !layoutDirty"
+          @click="persistLayout"
+        >
+          Save layout
+        </button>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -131,7 +161,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import AnalyticsWidgetCard from '@/modules/analytics/components/AnalyticsWidgetCard.vue';
 import WidgetLibraryPanel from '@/modules/analytics/components/WidgetLibraryPanel.vue';

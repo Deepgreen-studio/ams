@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Login history" description="Successful logins, sessions, browsers, and devices." />
+    <!-- <PageHeader title="Login history" description="Successful logins, sessions, browsers, and devices." /> -->
     <AuditTabs />
     <div class="mt-4 space-y-4">
       <SearchFilters :model-value="store.filters" :show-module="false" :show-action="false" @submit="store.fetchList" @reset="onReset" />
@@ -12,7 +12,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';
 import LoginHistoryTable from '@/modules/audit/components/LoginHistoryTable.vue';

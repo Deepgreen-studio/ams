@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Automation History"
       description="Execution logs for automation rules across the platform."
-    />
+    /> -->
 
     <AutomationSubnav />
 
@@ -82,7 +82,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.vue';
 import { useAutomationStore } from '@/modules/automation/stores/automation';
 

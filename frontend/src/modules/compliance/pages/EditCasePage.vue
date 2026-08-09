@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit compliance case"
       description="Update case status, priority, assignment, and due date."
-    />
+    /> -->
     <ComplianceSubnav />
     <div v-if="store.loading && !current" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
@@ -24,7 +24,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import CaseForm from '@/modules/compliance/components/CaseForm.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useComplianceStore } from '@/modules/compliance/stores/compliance';

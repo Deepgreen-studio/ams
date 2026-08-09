@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Version history"
       description="Complete version history including soft-deleted entries."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div
@@ -67,7 +67,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import VersionStatusBadge from '@/modules/applications/components/VersionStatusBadge.vue';

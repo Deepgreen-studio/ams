@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Audit Dashboard" description="Logins, permission/role changes, data exports, and deletions." />
+    <!-- <PageHeader title="Audit Dashboard" description="Logins, permission/role changes, data exports, and deletions." /> -->
     <AnalyticsSubnav />
     <SecurityAnalyticsSubnav />
 
@@ -68,7 +68,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import SecurityAnalyticsSubnav from '@/modules/analytics/components/SecurityAnalyticsSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Alert Configuration"
       description="Configure thresholds for Integration Hub health metrics."
-    />
+    /> -->
     <MonitoringSubnav />
 
     <div
@@ -150,7 +150,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

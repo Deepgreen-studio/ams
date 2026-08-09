@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit environment"
       description="Update URLs, status, and encrypted environment variables."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
     <div
       v-if="environmentsStore.loading && !environmentsStore.selectedEnvironment"
@@ -31,7 +31,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import EnvironmentForm from '@/modules/applications/components/EnvironmentForm.vue';
 import { useEnvironmentsStore } from '@/modules/applications/stores/environments';

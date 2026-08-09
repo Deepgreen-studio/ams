@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Policy documents"
       description="Search privacy, terms, cookie, security, and internal governance documents."
     >
@@ -18,7 +18,21 @@
           New policy
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.policies.dashboard' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Dashboard
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'compliance.policies.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New policy
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -137,7 +151,7 @@
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PolicyStatusBadge from '@/modules/compliance/components/PolicyStatusBadge.vue';
 import { usePolicyStore } from '@/modules/compliance/stores/policies';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Preference Center"
       description="Load and update a subject’s consent preferences across all channels."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -92,7 +92,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { useConsentStore } from '@/modules/compliance/stores/consents';

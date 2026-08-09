@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Customer contacts" :description="`Manage contacts for ${customerName}.`">
+    <!-- <PageHeader title="Customer contacts" :description="`Manage contacts for ${customerName}.`">
       <template #actions>
         <RouterLink
           :to="{ name: 'customers.show', params: { id: route.params.id } }"
@@ -15,7 +15,21 @@
           Add contact
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'customers.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.contacts.create', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Add contact
+        </RouterLink>
+    </Teleport>
 
     <div v-if="contactsStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
       {{ contactsStore.successMessage }}
@@ -69,7 +83,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ContactSearchFilter from '@/modules/customers/components/ContactSearchFilter.vue';

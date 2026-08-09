@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Communication center"
       :description="`Notes, tasks, emails, and reminders for ${customerName}.`"
     >
@@ -12,7 +12,15 @@
           Back
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'customers.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="store.successMessage"
@@ -386,7 +394,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCommunicationStore } from '@/modules/customers/stores/communication';
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Template Preview & Test Send" description="Render placeholders and send a test notification.">
+    <!-- <PageHeader title="Template Preview & Test Send" description="Render placeholders and send a test notification.">
       <template #actions>
         <RouterLink
           :to="{ name: 'notifications.templates.edit', params: { id: route.params.id } }"
@@ -9,7 +9,15 @@
           Edit
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'notifications.templates.edit', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Edit
+        </RouterLink>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -63,7 +71,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

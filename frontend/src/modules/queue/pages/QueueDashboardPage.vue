@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Queue Dashboard"
       description="Monitor Laravel queue workers, running jobs, failures, and priorities."
     >
@@ -22,7 +22,25 @@
           Dispatch sample
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onRestart"
+        >
+          Restart workers
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onSample"
+        >
+          Dispatch sample
+        </button>
+    </Teleport>
     <QueueSubnav />
 
     <div
@@ -145,7 +163,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import QueueSubnav from '@/modules/queue/components/QueueSubnav.vue';
 import { useQueueStore } from '@/modules/queue/stores/queue';
 

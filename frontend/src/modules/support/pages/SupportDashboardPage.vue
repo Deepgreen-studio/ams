@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Support Center"
       description="Enterprise helpdesk overview across all connected applications."
     >
@@ -24,7 +24,27 @@
           Create ticket
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'support.tickets.board' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Kanban
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'support.tickets.index' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          All tickets
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'support.tickets.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create ticket
+        </RouterLink>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -122,7 +142,7 @@
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import PriorityIndicator from '@/modules/support/components/PriorityIndicator.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketStatusBadge from '@/modules/support/components/TicketStatusBadge.vue';

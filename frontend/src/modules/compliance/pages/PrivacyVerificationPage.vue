@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Identity verification"
       description="Verify the requester before progressing the approval workflow."
     >
@@ -13,7 +13,16 @@
           Back to request
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="current"
+          :to="{ name: 'compliance.privacy.show', params: { id: current.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to request
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -75,7 +84,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
 import PrivacyVerificationPanel from '@/modules/compliance/components/PrivacyVerificationPanel.vue';

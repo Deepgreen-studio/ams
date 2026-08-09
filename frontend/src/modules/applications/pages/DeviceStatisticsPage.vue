@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Device statistics"
       description="Crash and error distribution across device models and OS versions."
     >
@@ -11,7 +11,14 @@
           >Crash dashboard</RouterLink
         >
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'applications.monitoring.crashes', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Crash dashboard</RouterLink
+        >
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -63,7 +70,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useMonitoringStore } from '@/modules/applications/stores/monitoring';

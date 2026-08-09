@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Escalation Queue" description="Level 1–3, manager, and administrator escalations" />
+    <!-- <PageHeader title="Escalation Queue" description="Level 1–3, manager, and administrator escalations" /> -->
     <SupportSubnav />
 
     <div
@@ -99,7 +99,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';
 

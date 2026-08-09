@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Health Dashboard"
       description="Integration Hub health, performance, uptime, and operational monitors."
     >
@@ -14,7 +14,17 @@
           Capture snapshot
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onCapture"
+        >
+          Capture snapshot
+        </button>
+    </Teleport>
     <MonitoringSubnav />
 
     <div
@@ -138,7 +148,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import SimpleLineChart from '@/modules/monitoring/components/SimpleLineChart.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';

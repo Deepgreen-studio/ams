@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Feature Flag Manager" :description="configuration?.name || 'Toggle and edit feature flags for this configuration.'">
+    <!-- <PageHeader title="Feature Flag Manager" :description="configuration?.name || 'Toggle and edit feature flags for this configuration.'">
       <template #actions>
         <RouterLink
           v-if="configuration"
@@ -10,7 +10,16 @@
           JSON editor
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="configuration"
+          :to="{ name: 'applications.configurations.edit', params: { id: route.params.id, configurationId: configuration.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          JSON editor
+        </RouterLink>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -38,7 +47,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import FeatureFlagManager from '@/modules/applications/components/FeatureFlagManager.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';

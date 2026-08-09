@@ -1,13 +1,16 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Activity logs"
       description="Cross-module activity trail powered by Spatie Activity Log."
     >
       <template #actions>
         <ExportButton :loading="exporting" @click="onExport" />
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <ExportButton :loading="exporting" @click="onExport" />
+    </Teleport>
     <AuditTabs />
     <div class="mt-4 space-y-4">
       <SearchFilters :model-value="store.filters" @submit="store.fetchList" @reset="onReset" />
@@ -46,7 +49,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ActivityTable from '@/modules/audit/components/ActivityTable.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';

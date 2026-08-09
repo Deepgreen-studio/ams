@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="SEO Tools"
       description="Inspect sitemap and robots configuration, and validate social metadata for delivered CMS content."
-    />
+    /> -->
     <ContentSubnav />
 
     <div class="mb-4 grid gap-3 sm:grid-cols-3">
@@ -117,7 +117,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import SeoPreviewPanel from '@/modules/content/components/SeoPreviewPanel.vue';
 import { contentService } from '@/modules/content/services/contentService';

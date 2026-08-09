@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Automation Engine"
       description="Event, time, scheduled, and conditional automation across AMS."
     >
@@ -18,7 +18,21 @@
           New rule
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'automation.rules' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          View rules
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'automation.rules.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New rule
+        </RouterLink>
+    </Teleport>
 
     <AutomationSubnav />
 
@@ -65,7 +79,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.vue';
 import { useAutomationStore } from '@/modules/automation/stores/automation';
 

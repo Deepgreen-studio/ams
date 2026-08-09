@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Response History"
       description="Hourly API response volume and latency for the Integration Hub."
-    />
+    /> -->
     <MonitoringSubnav />
     <div
       v-if="store.error"
@@ -72,7 +72,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import SimpleLineChart from '@/modules/monitoring/components/SimpleLineChart.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Roles" description="Manage enterprise roles and access control.">
+    <!-- <PageHeader title="Roles" description="Manage enterprise roles and access control.">
       <template #actions>
         <RouterLink :to="{ name: 'roles.matrix' }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
           Permission matrix
@@ -12,7 +12,18 @@
           Create role
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink :to="{ name: 'roles.matrix' }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Permission matrix
+        </RouterLink>
+        <RouterLink :to="{ name: 'roles.assign' }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+          Assign roles
+        </RouterLink>
+        <RouterLink :to="{ name: 'roles.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+          Create role
+        </RouterLink>
+    </Teleport>
 
     <div v-if="rolesStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
       {{ rolesStore.successMessage }}
@@ -48,7 +59,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';
 import RoleSearchFilter from '@/modules/roles/components/RoleSearchFilter.vue';

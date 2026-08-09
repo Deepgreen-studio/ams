@@ -1,12 +1,17 @@
 <template>
   <div>
-    <PageHeader title="Integrations" description="Manage external system connections for the Integration Hub.">
+    <!-- <PageHeader title="Integrations" description="Manage external system connections for the Integration Hub.">
       <template #actions>
         <RouterLink :to="{ name: 'integrations.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
           Create integration
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink :to="{ name: 'integrations.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+          Create integration
+        </RouterLink>
+    </Teleport>
 
     <div v-if="integrationsStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
       {{ integrationsStore.successMessage }}
@@ -44,7 +49,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import IntegrationTable from '@/modules/integrations/components/IntegrationTable.vue';

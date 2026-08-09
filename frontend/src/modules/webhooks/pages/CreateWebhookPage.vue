@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create webhook"
       description="Register an incoming or outgoing webhook endpoint."
-    />
+    /> -->
     <WebhookSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <WebhookForm
@@ -20,7 +20,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WebhookForm from '@/modules/webhooks/components/WebhookForm.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';

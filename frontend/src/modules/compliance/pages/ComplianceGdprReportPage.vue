@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="GDPR reports"
       description="Privacy request volume, resolution time, breaches, DPIA status, and related cases."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <AnalyticsFilterBar
@@ -62,7 +62,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

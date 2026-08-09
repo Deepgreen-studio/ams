@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="DPIA risk matrix" description="Likelihood × impact matrix for active risk register entries." />
+    <!-- <PageHeader title="DPIA risk matrix" description="Likelihood × impact matrix for active risk register entries." /> -->
     <ComplianceSubnav />
 
     <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white p-5">
@@ -32,7 +32,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDpiaStore } from '@/modules/compliance/stores/dpia';
 

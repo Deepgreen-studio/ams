@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Subscription dashboard"
       :description="`Plans, billing status, and renewals for ${customerName}.`"
     >
@@ -24,7 +24,27 @@
           New subscription
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'customers.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.licenses', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Licenses
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.subscriptions.create', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New subscription
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="store.successMessage"
@@ -89,7 +109,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import RenewalReminderList from '@/modules/customers/components/RenewalReminderList.vue';

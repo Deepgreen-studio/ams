@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create support ticket"
       description="Log customer, technical, billing, or emergency support requests."
-    />
+    /> -->
     <SupportSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <TicketForm
@@ -20,7 +20,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketForm from '@/modules/support/components/TicketForm.vue';
 import { useSupportTicketsStore } from '@/modules/support/stores/supportTickets';

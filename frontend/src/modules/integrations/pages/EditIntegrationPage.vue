@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit integration"
       description="Update connection settings for this integration."
-    />
+    /> -->
     <div
       v-if="integrationsStore.loading && !integrationsStore.currentIntegration"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
@@ -26,7 +26,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationForm from '@/modules/integrations/components/IntegrationForm.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';
 

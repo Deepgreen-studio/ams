@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Real-Time Status" description="Live health board across services, APIs, queues, and checks.">
+    <!-- <PageHeader title="Real-Time Status" description="Live health board across services, APIs, queues, and checks.">
       <template #actions>
         <button
           type="button"
@@ -14,7 +14,20 @@
           Refresh
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onCapture"
+        >
+          Capture now
+        </button>
+        <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">
+          Refresh
+        </button>
+    </Teleport>
     <MonitoringSubnav />
 
     <div
@@ -174,7 +187,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit role" description="Update role details and metadata." />
+    <!-- <PageHeader title="Edit role" description="Update role details and metadata." /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <RoleForm
         v-if="rolesStore.currentRole"
@@ -21,7 +21,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import RoleForm from '@/modules/roles/components/RoleForm.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 

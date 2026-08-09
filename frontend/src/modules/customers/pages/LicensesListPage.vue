@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="License management" :description="`License keys for ${customerName}.`">
+    <!-- <PageHeader title="License management" :description="`License keys for ${customerName}.`">
       <template #actions>
         <RouterLink
           :to="{ name: 'customers.subscriptions', params: { id: route.params.id } }"
@@ -21,7 +21,27 @@
           Issue license
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'customers.subscriptions', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Subscriptions
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.licenses.history', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          History
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.licenses.create', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Issue license
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="store.successMessage"
@@ -84,7 +104,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import LicenseSearchFilter from '@/modules/customers/components/LicenseSearchFilter.vue';

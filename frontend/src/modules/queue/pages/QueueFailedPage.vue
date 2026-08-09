@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Failed Jobs" description="Inspect, retry, or remove failed background jobs.">
+    <!-- <PageHeader title="Failed Jobs" description="Inspect, retry, or remove failed background jobs.">
       <template #actions>
         <button
           type="button"
@@ -19,7 +19,25 @@
           Flush all
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="store.saving || !store.failed.length"
+          @click="onRetryAll"
+        >
+          Retry all
+        </button>
+        <button
+          type="button"
+          class="rounded-lg border border-rose-300 px-4 py-2 text-sm font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+          :disabled="store.saving || !store.failed.length"
+          @click="onFlush"
+        >
+          Flush all
+        </button>
+    </Teleport>
     <QueueSubnav />
 
     <div
@@ -120,7 +138,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import QueueSubnav from '@/modules/queue/components/QueueSubnav.vue';
 import { useQueueStore } from '@/modules/queue/stores/queue';

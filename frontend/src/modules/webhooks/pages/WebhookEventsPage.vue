@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Webhook Events"
       description="Catalog of system and module events available for webhook subscriptions."
-    />
+    /> -->
     <WebhookSubnav />
 
     <div
@@ -47,7 +47,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 

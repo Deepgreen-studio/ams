@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="API Configuration"
       description="Headers, credentials, timeout, retries, and rate limits for this integration."
-    />
+    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -32,7 +32,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApiConfigurationForm from '@/modules/integrations/components/ApiConfigurationForm.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';

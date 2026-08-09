@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Privacy Request Center"
       description="GDPR and privacy request intake, verification, and fulfilment overview."
     >
@@ -18,7 +18,21 @@
           New request
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.privacy.index' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          All requests
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'compliance.privacy.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New request
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -126,7 +140,7 @@
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
 import { usePrivacyRequestsStore } from '@/modules/compliance/stores/privacyRequests';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Webhook Monitor" description="Webhook delivery success rate and volume." />
+    <!-- <PageHeader title="Webhook Monitor" description="Webhook delivery success rate and volume." /> -->
     <MonitoringSubnav />
     <div
       v-if="store.error"
@@ -32,7 +32,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

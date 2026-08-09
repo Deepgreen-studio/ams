@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="content?.title || 'Content review'"
       description="Review screen for the linear approval workflow."
     >
@@ -12,7 +12,15 @@
           Back to queue
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'content.workflow' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to queue
+        </RouterLink>
+    </Teleport>
 
     <ContentItemSubnav v-if="content" :content-id="content.uuid" />
 
@@ -165,7 +173,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import WorkflowTimeline from '@/modules/content/components/WorkflowTimeline.vue';

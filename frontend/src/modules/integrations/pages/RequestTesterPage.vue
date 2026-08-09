@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Request Tester"
       description="Send GET/POST/PUT/PATCH/DELETE requests through the shared API Connection Engine."
-    />
+    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -41,7 +41,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import RequestTesterForm from '@/modules/integrations/components/RequestTesterForm.vue';
 import ResponseViewer from '@/modules/integrations/components/ResponseViewer.vue';

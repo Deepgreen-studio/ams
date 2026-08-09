@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Categories"
       description="Manage unlimited nested CMS categories with SEO slugs, status, and sort order."
     >
@@ -13,7 +13,16 @@
           Create category
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="openCreate"
+        >
+          Create category
+        </button>
+    </Teleport>
 
     <ContentSubnav />
 
@@ -251,7 +260,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CategoryForm from '@/modules/content/components/CategoryForm.vue';

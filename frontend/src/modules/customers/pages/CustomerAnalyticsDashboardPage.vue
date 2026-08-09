@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="title"
       description="Health score, usage, risk indicators, growth trends, and activity timeline."
     >
@@ -20,7 +20,23 @@
           {{ store.refreshing ? 'Refreshing…' : 'Refresh snapshot' }}
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'customers.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to customer
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.refreshing || store.loading"
+          @click="refresh"
+        >
+          {{ store.refreshing ? 'Refreshing…' : 'Refresh snapshot' }}
+        </button>
+    </Teleport>
 
     <div
       v-if="store.error"
@@ -197,7 +213,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import { useCustomerAnalyticsStore } from '@/modules/customers/stores/customerAnalytics';

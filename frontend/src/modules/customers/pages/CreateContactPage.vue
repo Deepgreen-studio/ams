@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Add contact" :description="`Create a contact for ${customerName}.`" />
+    <!-- <PageHeader title="Add contact" :description="`Create a contact for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <ContactForm
         :loading="contactsStore.saving"
@@ -17,7 +17,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContactForm from '@/modules/customers/components/ContactForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerContactsStore } from '@/modules/customers/stores/contacts';

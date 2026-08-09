@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create privacy request"
       description="Log an access, export, deletion, restriction, objection, consent, or portability request."
-    />
+    /> -->
     <ComplianceSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <PrivacyRequestForm
@@ -20,7 +20,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PrivacyRequestForm from '@/modules/compliance/components/PrivacyRequestForm.vue';
 import { usePrivacyRequestsStore } from '@/modules/compliance/stores/privacyRequests';

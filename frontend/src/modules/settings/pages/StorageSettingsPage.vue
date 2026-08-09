@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Storage settings" description="Disks, upload limits, and cloud readiness." />
+    <!-- <PageHeader title="Storage settings" description="Disks, upload limits, and cloud readiness." /> -->
     <SettingsTabs>
       <div class="rounded-xl border border-slate-200 bg-white p-6">
         <SettingsForm
@@ -19,7 +19,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';

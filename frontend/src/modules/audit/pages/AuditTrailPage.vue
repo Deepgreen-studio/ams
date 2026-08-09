@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Audit trail" description="Structured before/after change history across modules." />
+    <!-- <PageHeader title="Audit trail" description="Structured before/after change history across modules." /> -->
     <AuditTabs />
     <div class="mt-4 space-y-4">
       <SearchFilters :model-value="store.filters" @submit="store.fetchList" @reset="onReset" />
@@ -13,7 +13,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import AuditTable from '@/modules/audit/components/AuditTable.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';

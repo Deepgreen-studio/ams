@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Webhook Testing Tool"
       description="Send a signed test delivery through the Webhook Engine queue/delivery pipeline."
-    />
+    /> -->
     <WebhookSubnav />
 
     <div
@@ -94,7 +94,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 

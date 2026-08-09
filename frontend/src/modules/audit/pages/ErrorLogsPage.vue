@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Error logs"
       description="Captured exceptions, stack traces, and failing requests."
-    />
+    /> -->
     <AuditTabs />
     <div class="mt-4 space-y-4">
       <SearchFilters
@@ -65,7 +65,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';
 import LogDetailsModal from '@/modules/audit/components/LogDetailsModal.vue';

@@ -1,10 +1,13 @@
 <template>
   <div>
-    <PageHeader title="Queue Monitor" description="Queue depth, worker health, and job status.">
+    <!-- <PageHeader title="Queue Monitor" description="Queue depth, worker health, and job status.">
       <template #actions>
         <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">Refresh</button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">Refresh</button>
+    </Teleport>
     <MonitoringSubnav />
 
     <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -73,7 +76,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

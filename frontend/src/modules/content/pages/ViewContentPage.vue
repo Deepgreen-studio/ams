@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="content?.title || 'Content details'"
       description="Headless CMS content entry details."
     >
@@ -54,7 +54,56 @@
           </div>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="content">
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <RouterLink
+              :to="{ name: 'content.review', params: { id: content.uuid } }"
+              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            >
+              Review / Approve
+            </RouterLink>
+            <button
+              v-if="content.status?.slug === 'published'"
+              type="button"
+              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              :disabled="contentStore.saving"
+              @click="unpublish"
+            >
+              Unpublish
+            </button>
+            <RouterLink
+              :to="{ name: 'content.edit', params: { id: content.uuid } }"
+              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Edit
+            </RouterLink>
+            <RouterLink
+              :to="{ name: 'content.versions', params: { id: content.uuid } }"
+              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Version history
+            </RouterLink>
+            <button
+              v-if="content.deleted_at"
+              type="button"
+              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              :disabled="contentStore.saving"
+              @click="restore"
+            >
+              Restore
+            </button>
+            <button
+              v-else
+              type="button"
+              class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+              @click="showDelete = true"
+            >
+              Delete
+            </button>
+          </div>
+    </Teleport>
 
     <ContentItemSubnav v-if="content" :content-id="content.uuid" />
 
@@ -337,7 +386,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';

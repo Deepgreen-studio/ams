@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create configuration"
       description="Initialize a typed JSON configuration for this application scope."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <form
@@ -89,7 +89,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import JsonEditor from '@/modules/applications/components/JsonEditor.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Consent audit view"
       description="Audit trail of consent changes with IP, device, source, and actor metadata."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -95,7 +95,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useConsentStore } from '@/modules/compliance/stores/consents';
 import Pagination from '@/modules/users/components/Pagination.vue';

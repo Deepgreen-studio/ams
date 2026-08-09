@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Approval Queue"
       description="Workflow instances waiting for your approval decision."
-    />
+    /> -->
     <WorkflowsSubnav />
 
     <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -73,7 +73,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 

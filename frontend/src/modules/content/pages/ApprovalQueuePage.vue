@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Approval queue"
       description="Content awaiting your review, approval, or publish action."
-    />
+    /> -->
     <ContentSubnav />
 
     <div
@@ -95,7 +95,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';

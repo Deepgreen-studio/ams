@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="title"
       description="Active users, retention, installs, and engagement trends."
     >
@@ -26,7 +26,29 @@
           >Devices</RouterLink
         >
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'applications.analytics.trends', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Trends</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.analytics.heatmap', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Heatmap</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.analytics.countries', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Countries</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.analytics.devices', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          >Devices</RouterLink
+        >
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -123,7 +145,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

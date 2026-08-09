@@ -18,7 +18,11 @@
       </div>
     </div>
 
-    <div class="overflow-x-auto">
+    <div v-if="!rows.length" class="py-10 text-center text-sm text-zinc-500">
+      No applications found.
+    </div>
+
+    <div v-else class="overflow-x-auto">
       <table class="min-w-full text-left text-sm">
         <thead>
           <tr class="border-b border-zinc-100 text-xs font-medium uppercase tracking-wide text-zinc-400">
@@ -32,28 +36,35 @@
         <tbody>
           <tr
             v-for="row in filteredRows"
-            :key="row.id"
+            :key="row.uuid"
             class="border-b border-zinc-50 last:border-0"
           >
-            <td class="py-3.5 pr-4 font-medium text-zinc-900">{{ row.name }}</td>
+            <td class="py-3.5 pr-4 font-medium text-zinc-900">
+              <RouterLink
+                :to="{ name: 'applications.show', params: { id: row.uuid } }"
+                class="hover:text-brand-600"
+              >
+                {{ row.name }}
+              </RouterLink>
+            </td>
             <td class="py-3.5 pr-4">
               <div class="flex items-center gap-2">
                 <span
                   class="inline-flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-semibold text-white"
-                  :style="{ backgroundColor: row.ownerColor }"
+                  :style="{ backgroundColor: ownerColor(row.owner?.full_name) }"
                 >
-                  {{ row.ownerInitials }}
+                  {{ row.owner?.initials || '—' }}
                 </span>
-                <span class="text-zinc-600">{{ row.owner }}</span>
+                <span class="text-zinc-600">{{ row.owner?.full_name || 'Unassigned' }}</span>
               </div>
             </td>
-            <td class="py-3.5 pr-4 text-zinc-600">{{ row.dueDate }}</td>
+            <td class="py-3.5 pr-4 text-zinc-600">{{ formatDate(row.due_date) }}</td>
             <td class="py-3.5 pr-4">
               <span
                 class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
                 :class="statusClass(row.status)"
               >
-                {{ row.status }}
+                {{ row.status_label || row.status }}
               </span>
             </td>
             <td class="py-3.5">
@@ -75,10 +86,10 @@
                     :stroke="progressColor(row.progress)"
                     stroke-width="3"
                     stroke-linecap="round"
-                    :stroke-dasharray="`${row.progress * 0.88} 88`"
+                    :stroke-dasharray="`${(row.progress || 0) * 0.88} 88`"
                   />
                 </svg>
-                <span class="absolute text-[10px] font-semibold text-zinc-700">{{ row.progress }}%</span>
+                <span class="absolute text-[10px] font-semibold text-zinc-700">{{ row.progress || 0 }}%</span>
               </div>
             </td>
           </tr>
@@ -90,6 +101,14 @@
 
 <script setup>
 import { computed, reactive } from 'vue';
+import { RouterLink } from 'vue-router';
+
+const props = defineProps({
+  rows: {
+    type: Array,
+    default: () => [],
+  },
+});
 
 const filters = reactive({
   app: '',
@@ -97,80 +116,56 @@ const filters = reactive({
   status: '',
 });
 
-const rows = [
-  {
-    id: 1,
-    name: 'AMS Mobile Release',
-    owner: 'Sarah Chen',
-    ownerInitials: 'SC',
-    ownerColor: '#7c3aed',
-    dueDate: '15 May 2026',
-    status: 'Completed',
-    progress: 100,
-  },
-  {
-    id: 2,
-    name: 'Customer Portal Revamp',
-    owner: 'James Park',
-    ownerInitials: 'JP',
-    ownerColor: '#ea580c',
-    dueDate: '20 May 2026',
-    status: 'Delayed',
-    progress: 45,
-  },
-  {
-    id: 3,
-    name: 'Integration Hub API',
-    owner: 'Mia Lopez',
-    ownerInitials: 'ML',
-    ownerColor: '#2563eb',
-    dueDate: '25 May 2026',
-    status: 'At risk',
-    progress: 32,
-  },
-  {
-    id: 4,
-    name: 'Compliance Audit Pack',
-    owner: 'Alex Melan',
-    ownerInitials: 'AM',
-    ownerColor: '#db2777',
-    dueDate: '30 May 2026',
-    status: 'On going',
-    progress: 68,
-  },
-  {
-    id: 5,
-    name: 'Support Knowledge Base',
-    owner: 'Ken Ortiz',
-    ownerInitials: 'KO',
-    ownerColor: '#0d9488',
-    dueDate: '02 Jun 2026',
-    status: 'On going',
-    progress: 54,
-  },
-];
-
-const appOptions = computed(() => [...new Set(rows.map((r) => r.name))]);
-const ownerOptions = computed(() => [...new Set(rows.map((r) => r.owner))]);
-const statusOptions = ['Completed', 'Delayed', 'At risk', 'On going'];
+const appOptions = computed(() => [...new Set(props.rows.map((r) => r.name).filter(Boolean))]);
+const ownerOptions = computed(() => [
+  ...new Set(props.rows.map((r) => r.owner?.full_name).filter(Boolean)),
+]);
+const statusOptions = computed(() => [
+  ...new Set(props.rows.map((r) => r.status_label || r.status).filter(Boolean)),
+]);
 
 const filteredRows = computed(() =>
-  rows.filter((row) => {
+  props.rows.filter((row) => {
     if (filters.app && row.name !== filters.app) return false;
-    if (filters.owner && row.owner !== filters.owner) return false;
-    if (filters.status && row.status !== filters.status) return false;
+    if (filters.owner && row.owner?.full_name !== filters.owner) return false;
+    const label = row.status_label || row.status;
+    if (filters.status && label !== filters.status) return false;
     return true;
   }),
 );
 
+const palette = ['#7c3aed', '#ea580c', '#2563eb', '#db2777', '#0d9488', '#ca8a04', '#4f46e5'];
+
+function ownerColor(name) {
+  const raw = String(name || 'U');
+  let hash = 0;
+  for (let i = 0; i < raw.length; i += 1) {
+    hash = (hash + raw.charCodeAt(i) * (i + 1)) % 997;
+  }
+  return palette[hash % palette.length];
+}
+
+function formatDate(value) {
+  if (!value) return '—';
+  try {
+    return new Date(value).toLocaleDateString(undefined, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  } catch {
+    return value;
+  }
+}
+
 function statusClass(status) {
   const map = {
-    Completed: 'bg-emerald-50 text-emerald-700',
-    Delayed: 'bg-amber-50 text-amber-700',
-    'At risk': 'bg-rose-50 text-rose-700',
-    'On going': 'bg-orange-50 text-orange-700',
+    active: 'bg-emerald-50 text-emerald-700',
+    draft: 'bg-zinc-100 text-zinc-600',
+    inactive: 'bg-amber-50 text-amber-700',
+    archived: 'bg-sky-50 text-sky-700',
   };
-  return map[status] || 'bg-zinc-100 text-zinc-600';
+  return map[String(status || '').toLowerCase()] || 'bg-zinc-100 text-zinc-600';
 }
 
 function progressColor(progress) {

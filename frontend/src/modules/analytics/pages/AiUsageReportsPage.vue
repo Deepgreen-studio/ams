@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="AI Usage Analytics"
       description="Cross-domain AI request volume, tokens, latency, and driver breakdown."
-    />
+    /> -->
     <AnalyticsSubnav />
     <AnalyticsFilterBar
       v-model="store.filters"
@@ -73,7 +73,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/analytics/components/AnalyticsFilterBar.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';

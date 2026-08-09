@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit assignment"
       description="Update ownership, environment, status, and dates."
-    />
+    /> -->
     <div
       v-if="store.loading && !store.currentAssignment"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
@@ -33,7 +33,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AssignmentForm from '@/modules/customers/components/AssignmentForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerApplicationsStore } from '@/modules/customers/stores/applications';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Audit reports"
       description="Compliance module activity log results — events, volume trends, and recent audit trail."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <AnalyticsFilterBar
@@ -82,7 +82,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

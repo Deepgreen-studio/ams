@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create policy"
       description="Draft a new governed policy document. Updates always create a new immutable version."
-    />
+    /> -->
     <ComplianceSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <PolicyForm
@@ -18,7 +18,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PolicyForm from '@/modules/compliance/components/PolicyForm.vue';
 import { usePolicyStore } from '@/modules/compliance/stores/policies';

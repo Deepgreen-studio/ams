@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit license" description="Update license status, activations, and dates." />
+    <!-- <PageHeader title="Edit license" description="Update license status, activations, and dates." /> -->
     <div v-if="store.loading && !license" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <div v-else-if="license" class="rounded-xl border border-slate-200 bg-white p-6">
       <LicenseForm
@@ -24,7 +24,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import LicenseForm from '@/modules/customers/components/LicenseForm.vue';
 import { useLicensesStore } from '@/modules/customers/stores/licenses';
 

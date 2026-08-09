@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Business Scorecards" description="Composite performance scorecards across revenue, growth, support, compliance, and operations." />
+    <!-- <PageHeader title="Business Scorecards" description="Composite performance scorecards across revenue, growth, support, compliance, and operations." /> -->
     <AnalyticsSubnav />
     <ExecutiveAnalyticsSubnav />
 
@@ -54,7 +54,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import ExecutiveAnalyticsSubnav from '@/modules/analytics/components/ExecutiveAnalyticsSubnav.vue';
 import { useExecutiveAnalyticsStore } from '@/modules/analytics/stores/executiveAnalytics';

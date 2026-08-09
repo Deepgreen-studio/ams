@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="My profile" description="Update your personal information and avatar." />
+    <!-- <PageHeader title="My profile"/> -->
 
     <div
       v-if="usersStore.successMessage"

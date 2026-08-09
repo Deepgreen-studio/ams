@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Connection Test"
       description="Validate reachability and authentication through the API Connection Engine."
-    />
+    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -75,7 +75,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import ResponseViewer from '@/modules/integrations/components/ResponseViewer.vue';
 import StatusBadge from '@/modules/integrations/components/StatusBadge.vue';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Consent history"
       description="Chronological consent grant and withdrawal events."
     >
@@ -12,7 +12,15 @@
           Audit view
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.consents.audit' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Audit view
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -38,7 +46,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import ConsentTimeline from '@/modules/compliance/components/ConsentTimeline.vue';
 import { useConsentStore } from '@/modules/compliance/stores/consents';

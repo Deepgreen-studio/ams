@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Category Tree" description="Nested category hierarchy for the headless CMS.">
+    <!-- <PageHeader title="Category Tree" description="Nested category hierarchy for the headless CMS.">
       <template #actions>
         <RouterLink
           :to="{ name: 'content.categories' }"
@@ -9,7 +9,15 @@
           Category list
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'content.categories' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Category list
+        </RouterLink>
+    </Teleport>
 
     <ContentSubnav />
 
@@ -44,7 +52,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CategoryTree from '@/modules/content/components/CategoryTree.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';

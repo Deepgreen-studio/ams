@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Webhook Logs"
       description="Delivery history, statuses, and failed webhook retries."
-    />
+    /> -->
     <WebhookSubnav />
 
     <div
@@ -156,7 +156,7 @@
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';

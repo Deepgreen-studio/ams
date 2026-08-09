@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="SLA Violation Report" description="Response and resolution breaches" />
+    <!-- <PageHeader title="SLA Violation Report" description="Response and resolution breaches" /> -->
     <SupportSubnav />
 
     <div
@@ -76,7 +76,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SlaStatusBadge from '@/modules/support/components/SlaStatusBadge.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';

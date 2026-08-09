@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit contact" description="Update contact details and classification." />
+    <!-- <PageHeader title="Edit contact" description="Update contact details and classification." /> -->
     <div
       v-if="contactsStore.loading && !contactsStore.currentContact"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
@@ -27,7 +27,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContactForm from '@/modules/customers/components/ContactForm.vue';
 import { useCustomerContactsStore } from '@/modules/customers/stores/contacts';
 

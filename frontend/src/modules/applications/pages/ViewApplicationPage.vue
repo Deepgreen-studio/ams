@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader :title="application?.name || 'Application details'" description="Application profile and configuration overview.">
+    <!-- <PageHeader :title="application?.name || 'Application details'" description="Application profile and configuration overview.">
       <template #actions>
         <template v-if="application">
           <RouterLink :to="{ name: 'applications.versions', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
@@ -43,7 +43,48 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="application">
+          <RouterLink :to="{ name: 'applications.versions', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Versions
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.environments', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Environments
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.configurations', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Configurations
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.releases', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Releases
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.monitoring.crashes', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Monitoring
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.analytics', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Analytics
+          </RouterLink>
+          <RouterLink :to="{ name: 'applications.edit', params: { id: application.uuid } }" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            Edit
+          </RouterLink>
+          <button
+            v-if="application.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="applicationsStore.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showDelete = true"
+          >
+            Delete
+          </button>
+    </Teleport>
 
     <ApplicationSubnav v-if="application" :application-id="application.uuid" />
 
@@ -69,7 +110,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import ApplicationCard from '@/modules/applications/components/ApplicationCard.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';

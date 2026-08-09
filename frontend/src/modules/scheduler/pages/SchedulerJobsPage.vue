@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Scheduled Jobs" description="Manage cron, recurring, one-time, delayed, and queue jobs.">
+    <!-- <PageHeader title="Scheduled Jobs" description="Manage cron, recurring, one-time, delayed, and queue jobs.">
       <template #actions>
         <RouterLink
           :to="{ name: 'scheduler.jobs.create' }"
@@ -9,7 +9,15 @@
           Create job
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'scheduler.jobs.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create job
+        </RouterLink>
+    </Teleport>
 
     <SchedulerSubnav />
 
@@ -103,7 +111,7 @@
 <script setup>
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SchedulerSubnav from '@/modules/scheduler/components/SchedulerSubnav.vue';
 import { useSchedulerStore } from '@/modules/scheduler/stores/scheduler';
 

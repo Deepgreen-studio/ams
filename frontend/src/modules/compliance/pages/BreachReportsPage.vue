@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Breach reports"
       description="Summary statistics and risk matrix snapshot for compliance reporting."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -45,7 +45,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 

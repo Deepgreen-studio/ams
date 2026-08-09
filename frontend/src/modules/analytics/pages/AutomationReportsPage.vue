@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Automation Reports"
       description="Automation executions, success rate, and average processing time."
-    />
+    /> -->
     <AnalyticsSubnav />
     <AnalyticsFilterBar
       v-model="store.filters"
@@ -64,7 +64,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import SimpleBarChart from '@/modules/compliance/components/SimpleBarChart.vue';
 import AnalyticsFilterBar from '@/modules/analytics/components/AnalyticsFilterBar.vue';

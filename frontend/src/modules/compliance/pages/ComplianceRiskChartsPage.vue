@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Risk charts"
       description="Open vs closed risks, score distribution, and highest-scoring active risks."
     >
@@ -12,7 +12,15 @@
           Analytics dashboard
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.analytics.dashboard' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Analytics dashboard
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -91,7 +99,7 @@
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

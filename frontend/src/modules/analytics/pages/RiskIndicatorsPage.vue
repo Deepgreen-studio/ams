@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Risk Indicators" description="Composite risk score and severity indicators across security signals." />
+    <!-- <PageHeader title="Risk Indicators" description="Composite risk score and severity indicators across security signals." /> -->
     <AnalyticsSubnav />
     <SecurityAnalyticsSubnav />
 
@@ -51,7 +51,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import SecurityAnalyticsSubnav from '@/modules/analytics/components/SecurityAnalyticsSubnav.vue';
 import { useSecurityAnalyticsStore } from '@/modules/analytics/stores/securityAnalytics';

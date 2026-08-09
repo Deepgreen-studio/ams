@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Canned Responses"
       description="Personal and shared reply templates for support conversations"
     >
@@ -13,7 +13,16 @@
           New response
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="openCreate"
+        >
+          New response
+        </button>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -168,7 +177,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketReplyEditor from '@/modules/support/components/TicketReplyEditor.vue';
 import { useCannedResponsesStore } from '@/modules/support/stores/cannedResponses';

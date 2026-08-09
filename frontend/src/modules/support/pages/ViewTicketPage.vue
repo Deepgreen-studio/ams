@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="ticket?.ticket_number || 'Ticket details'"
       :description="ticket?.subject || 'Support ticket overview'"
     >
@@ -43,7 +43,45 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="ticket">
+          <button
+            v-if="ticket.status === 'closed' || ticket.status === 'cancelled'"
+            type="button"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            :disabled="store.saving"
+            @click="reopenTicket"
+          >
+            Reopen
+          </button>
+          <button
+            v-else-if="ticket.status !== 'closed'"
+            type="button"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            :disabled="store.saving"
+            @click="closeTicket"
+          >
+            Close ticket
+          </button>
+          <button
+            v-if="ticket.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="store.saving"
+            @click="restoreTicket"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showArchive = true"
+          >
+            Archive
+          </button>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -250,7 +288,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import AssignmentPanel from '@/modules/support/components/AssignmentPanel.vue';
 import PriorityIndicator from '@/modules/support/components/PriorityIndicator.vue';

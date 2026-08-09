@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="title"
       description="Crash reports, ANR events, and API errors with trend charts."
     >
@@ -26,7 +26,29 @@
           >Charts</RouterLink
         >
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'applications.monitoring.health', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Health</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.monitoring.devices', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Devices</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.monitoring.alerts', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >Alerts</RouterLink
+        >
+        <RouterLink
+          :to="{ name: 'applications.monitoring.charts', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          >Charts</RouterLink
+        >
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -115,7 +137,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

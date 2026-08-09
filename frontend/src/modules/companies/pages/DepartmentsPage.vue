@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Departments" :description="`Manage departments for ${companyName}.`">
+    <!-- <PageHeader title="Departments" :description="`Manage departments for ${companyName}.`">
       <template #actions>
         <RouterLink
           :to="{ name: 'companies.show', params: { id: route.params.id } }"
@@ -9,7 +9,15 @@
           Back
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'companies.show', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="departmentsStore.error"
@@ -77,7 +85,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import DepartmentTable from '@/modules/companies/components/DepartmentTable.vue';

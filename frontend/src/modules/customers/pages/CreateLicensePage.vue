@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Issue license" :description="`Create a license key for ${customerName}.`" />
+    <!-- <PageHeader title="Issue license" :description="`Create a license key for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <LicenseForm
         :default-subscription-id="route.query.subscription || ''"
@@ -18,7 +18,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import LicenseForm from '@/modules/customers/components/LicenseForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useLicensesStore } from '@/modules/customers/stores/licenses';

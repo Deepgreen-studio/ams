@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Create subscription" :description="`Add a plan for ${customerName}.`" />
+    <!-- <PageHeader title="Create subscription" :description="`Add a plan for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <SubscriptionForm
         :loading="store.saving"
@@ -17,7 +17,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SubscriptionForm from '@/modules/customers/components/SubscriptionForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useSubscriptionsStore } from '@/modules/customers/stores/subscriptions';

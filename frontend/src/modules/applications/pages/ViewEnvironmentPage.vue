@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="environment?.name || 'Environment details'"
       description="Environment configuration, health status, and switch controls."
     >
@@ -41,7 +41,43 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="environment">
+          <button
+            v-if="!environment.is_current"
+            type="button"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            :disabled="environmentsStore.saving"
+            @click="switchTo"
+          >
+            Switch to this
+          </button>
+          <button
+            type="button"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            :disabled="environmentsStore.saving"
+            @click="healthCheck"
+          >
+            Run health check
+          </button>
+          <RouterLink
+            :to="{
+              name: 'applications.environments.edit',
+              params: { id: route.params.id, environmentId: environment.uuid },
+            }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+          <button
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showDelete = true"
+          >
+            Delete
+          </button>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -188,7 +224,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import EnvironmentHealthBadge from '@/modules/applications/components/EnvironmentHealthBadge.vue';

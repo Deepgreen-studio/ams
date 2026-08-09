@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="configuration?.name || 'Edit configuration'"
       description="Update validated JSON configuration and publish status."
     >
@@ -26,7 +26,29 @@
           Feature flags
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="configuration"
+          :to="{
+            name: 'applications.configurations.history',
+            params: { id: route.params.id, configurationId: configuration.uuid },
+          }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          History
+        </RouterLink>
+        <RouterLink
+          v-if="configuration?.type === 'feature_flags'"
+          :to="{
+            name: 'applications.configurations.flags',
+            params: { id: route.params.id, configurationId: configuration.uuid },
+          }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Feature flags
+        </RouterLink>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -119,7 +141,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import JsonEditor from '@/modules/applications/components/JsonEditor.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';

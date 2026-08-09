@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create sync config"
       description="Define how AMS imports or exports data for an integration."
-    />
+    /> -->
     <SyncSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <SyncConfigForm
@@ -21,7 +21,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SyncConfigForm from '@/modules/sync/components/SyncConfigForm.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';

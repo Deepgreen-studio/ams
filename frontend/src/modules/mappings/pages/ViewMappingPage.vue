@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader :title="mapping?.name || 'Mapping details'" :description="subtitle">
+    <!-- <PageHeader :title="mapping?.name || 'Mapping details'" :description="subtitle">
       <template #actions>
         <RouterLink
           v-if="mapping"
@@ -10,7 +10,16 @@
           Edit builder
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="mapping"
+          :to="{ name: 'mappings.edit', params: { id: mapping.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Edit builder
+        </RouterLink>
+    </Teleport>
     <MappingSubnav />
 
     <div
@@ -174,7 +183,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MappingSubnav from '@/modules/mappings/components/MappingSubnav.vue';
 import { useMappingsStore } from '@/modules/mappings/stores/mappings';
 

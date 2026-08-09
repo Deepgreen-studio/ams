@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Create user" description="Provision a new platform user account." />
+    <!-- <PageHeader title="Create user" description="Provision a new platform user account." /> -->
 
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <UserForm
@@ -20,7 +20,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import UserForm from '@/modules/users/components/UserForm.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 import { useUsersStore } from '@/modules/users/stores/users';

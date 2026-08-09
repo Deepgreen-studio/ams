@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Content Dashboard"
       description="Headless CMS overview for pages, blogs, FAQs, and custom content types."
     >
@@ -30,7 +30,33 @@
           Create content
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'content.categories' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Categories
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'content.tags' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Tags
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'content.index' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Browse content
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'content.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create content
+        </RouterLink>
+    </Teleport>
 
     <ContentSubnav />
 
@@ -106,7 +132,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import { useContentStore } from '@/modules/content/stores/content';

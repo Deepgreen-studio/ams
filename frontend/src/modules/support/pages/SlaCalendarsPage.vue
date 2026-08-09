@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Business Hours & Holidays" description="SLA calendars and holiday exceptions" />
+    <!-- <PageHeader title="Business Hours & Holidays" description="SLA calendars and holiday exceptions" /> -->
     <SupportSubnav />
 
     <div
@@ -57,7 +57,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';
 

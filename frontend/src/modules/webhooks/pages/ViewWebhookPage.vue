@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="webhook?.name || 'Webhook details'"
       description="Webhook status, endpoint, and recent activity."
     >
@@ -25,7 +25,27 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="webhook">
+          <RouterLink
+            :to="{ name: 'webhooks.tester', params: { id: webhook.uuid } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >Test</RouterLink
+          >
+          <RouterLink
+            :to="{ name: 'webhooks.edit', params: { id: webhook.uuid } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >Edit</RouterLink
+          >
+          <button
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="remove"
+          >
+            Delete
+          </button>
+    </Teleport>
     <WebhookSubnav />
 
     <div
@@ -85,7 +105,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 

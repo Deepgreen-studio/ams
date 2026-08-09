@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Trend analysis" description="Compare a metric against the previous period.">
+    <!-- <PageHeader title="Trend analysis" description="Compare a metric against the previous period.">
       <template #actions>
         <select
           v-model="metric"
@@ -18,7 +18,24 @@
           <option value="retention_d30">Retention D30</option>
         </select>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <select
+          v-model="metric"
+          class="h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+          @change="reload"
+        >
+          <option value="daily_users">Daily users</option>
+          <option value="monthly_users">Monthly users</option>
+          <option value="active_users">Active users</option>
+          <option value="avg_session_seconds">Session time</option>
+          <option value="installs">Installs</option>
+          <option value="uninstalls">Uninstalls</option>
+          <option value="retention_d1">Retention D1</option>
+          <option value="retention_d7">Retention D7</option>
+          <option value="retention_d30">Retention D30</option>
+        </select>
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -61,7 +78,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import { useAnalyticsStore } from '@/modules/applications/stores/analytics';

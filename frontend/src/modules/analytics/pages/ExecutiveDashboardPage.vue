@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader :title="pageTitle" :description="pageDescription">
+    <!-- <PageHeader :title="pageTitle" :description="pageDescription">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           Capture snapshot
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onCapture"
+        >
+          Capture snapshot
+        </button>
+    </Teleport>
     <AnalyticsSubnav />
     <ExecutiveAnalyticsSubnav />
 
@@ -142,7 +152,7 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import ExecutiveAnalyticsSubnav from '@/modules/analytics/components/ExecutiveAnalyticsSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

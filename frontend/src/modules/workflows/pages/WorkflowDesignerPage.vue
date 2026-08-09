@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="isEdit ? 'Edit Workflow' : 'Create Workflow'"
       description="Drag stages on the canvas. Configure approvers, timeouts, and transitions."
     >
@@ -12,7 +12,15 @@
           Back
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'workflows.designer' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+    </Teleport>
 
     <WorkflowsSubnav />
 
@@ -170,7 +178,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';

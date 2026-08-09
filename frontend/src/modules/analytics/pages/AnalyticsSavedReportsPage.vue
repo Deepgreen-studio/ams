@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Saved Reports" description="Reusable report definitions marked as saved." />
+    <!-- <PageHeader title="Saved Reports" description="Reusable report definitions marked as saved." /> -->
     <AnalyticsSubnav />
 
     <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -33,7 +33,7 @@
 
 <script setup>
 import { onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
 

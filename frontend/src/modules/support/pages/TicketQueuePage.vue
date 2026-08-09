@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Ticket queue"
       description="Operational queues for open, unassigned, critical, and reopened tickets."
-    />
+    /> -->
 
     <SupportSubnav />
 
@@ -49,7 +49,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketTable from '@/modules/support/components/TicketTable.vue';

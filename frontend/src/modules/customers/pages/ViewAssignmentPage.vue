@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="assignment?.application?.name || 'Assignment details'"
       description="Assignment profile and activity timeline."
     >
@@ -40,7 +40,42 @@
           </button>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="assignment">
+          <RouterLink
+            :to="{ name: 'customers.applications', params: { id: route.params.id } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Back
+          </RouterLink>
+          <RouterLink
+            :to="{
+              name: 'customers.applications.edit',
+              params: { id: route.params.id, assignmentId: assignment.uuid },
+            }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+          <button
+            v-if="assignment.deleted_at"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="store.saving"
+            @click="restore"
+          >
+            Restore
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            @click="showArchive = true"
+          >
+            Archive
+          </button>
+    </Teleport>
 
     <div
       v-if="store.error"
@@ -117,7 +152,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import AssignmentStatusBadge from '@/modules/customers/components/AssignmentStatusBadge.vue';
 import AssignmentTimeline from '@/modules/customers/components/AssignmentTimeline.vue';

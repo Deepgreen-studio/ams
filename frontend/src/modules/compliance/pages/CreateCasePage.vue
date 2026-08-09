@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create compliance case"
       description="Open a new GDPR, privacy, audit, or governance case."
-    />
+    /> -->
     <ComplianceSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <CaseForm
@@ -20,7 +20,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import CaseForm from '@/modules/compliance/components/CaseForm.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useComplianceStore } from '@/modules/compliance/stores/compliance';

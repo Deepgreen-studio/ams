@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="SLA Dashboard" description="Response and resolution timers, risk, and breaches">
+    <!-- <PageHeader title="SLA Dashboard" description="Response and resolution timers, risk, and breaches">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           Evaluate now
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="store.evaluateNow()"
+        >
+          Evaluate now
+        </button>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -155,7 +165,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SlaCountdown from '@/modules/support/components/SlaCountdown.vue';
 import SlaStatusBadge from '@/modules/support/components/SlaStatusBadge.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';

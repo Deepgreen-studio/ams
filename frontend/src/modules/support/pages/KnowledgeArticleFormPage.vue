@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="isEdit ? 'Edit article' : 'Create article'"
       description="Author knowledge content or sync from CMS"
-    />
+    /> -->
     <SupportSubnav />
 
     <div
@@ -90,7 +90,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useKnowledgeBaseStore } from '@/modules/support/stores/knowledgeBase';
 

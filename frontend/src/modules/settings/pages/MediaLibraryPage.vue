@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Media library" description="Upload, preview, and organize platform media assets." />
+    <!-- <PageHeader title="Media library" description="Upload, preview, and organize platform media assets." /> -->
     <SettingsTabs>
       <div v-if="mediaStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ mediaStore.successMessage }}</div>
       <div v-if="mediaStore.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ mediaStore.error }}</div>
@@ -42,7 +42,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';

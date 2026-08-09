@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Edit customer" description="Update customer profile and contact details." />
+    <!-- <PageHeader title="Edit customer" description="Update customer profile and contact details." /> -->
     <div
       v-if="customersStore.loading && !customersStore.currentCustomer"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
@@ -22,7 +22,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import CustomerForm from '@/modules/customers/components/CustomerForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 

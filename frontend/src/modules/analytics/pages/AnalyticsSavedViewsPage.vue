@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Saved Views" description="Reusable filter presets for enterprise analytics dashboards.">
+    <!-- <PageHeader title="Saved Views" description="Reusable filter presets for enterprise analytics dashboards.">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           Save current filters
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="showCreate = true"
+        >
+          Save current filters
+        </button>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -125,7 +135,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';

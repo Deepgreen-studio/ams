@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Assign roles to user"
       description="Sync one or more roles onto a platform user."
-    />
+    /> -->
 
     <div
       v-if="rolesStore.successMessage"
@@ -118,7 +118,7 @@
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 import { userService } from '@/modules/users/services/userService';
 

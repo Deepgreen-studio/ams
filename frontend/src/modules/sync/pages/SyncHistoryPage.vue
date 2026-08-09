@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Sync History"
       description="Review every synchronization run with progress and record outcomes."
-    />
+    /> -->
     <SyncSubnav />
 
     <div
@@ -165,7 +165,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import SyncProgressBar from '@/modules/sync/components/SyncProgressBar.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';

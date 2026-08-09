@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Compare Template Versions" description="Diff field changes between two immutable snapshots.">
+    <!-- <PageHeader title="Compare Template Versions" description="Diff field changes between two immutable snapshots.">
       <template #actions>
         <RouterLink
           :to="{ name: 'notifications.templates.versions', params: { id: route.params.id } }"
@@ -9,7 +9,15 @@
           Back to versions
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'notifications.templates.versions', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back to versions
+        </RouterLink>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -62,7 +70,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

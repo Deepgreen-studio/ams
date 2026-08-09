@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader :title="article?.title || 'Article'" :description="article?.type_label || 'Knowledge article'">
+    <!-- <PageHeader :title="article?.title || 'Article'" :description="article?.type_label || 'Knowledge article'">
       <template #actions>
         <template v-if="article">
           <button
@@ -20,7 +20,25 @@
           </RouterLink>
         </template>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <template v-if="article">
+          <button
+            v-if="article.status !== 'published'"
+            type="button"
+            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            :disabled="store.saving"
+            @click="store.publishArticle(article.uuid)"
+          >
+            Publish
+          </button>
+          <RouterLink
+            :to="{ name: 'support.knowledge.edit', params: { id: article.uuid } }"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Edit
+          </RouterLink>
+    </Teleport>
 
     <SupportSubnav />
 
@@ -175,7 +193,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import DOMPurify from 'dompurify';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useKnowledgeBaseStore } from '@/modules/support/stores/knowledgeBase';
 

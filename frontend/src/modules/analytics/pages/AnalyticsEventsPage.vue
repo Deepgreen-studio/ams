@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Analytics Events"
       description="Central event stream powering enterprise analytics across AMS domains."
-    />
+    /> -->
 
     <AnalyticsSubnav />
 
@@ -70,7 +70,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';

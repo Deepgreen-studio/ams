@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Data breaches" description="Search and manage reported breach incidents.">
+    <!-- <PageHeader title="Data breaches" description="Search and manage reported breach incidents.">
       <template #actions>
         <RouterLink
           :to="{ name: 'compliance.breaches.create' }"
@@ -9,7 +9,15 @@
           Report incident
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.breaches.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Report incident
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -50,7 +58,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import BreachSearchFilters from '@/modules/compliance/components/BreachSearchFilters.vue';
 import BreachTable from '@/modules/compliance/components/BreachTable.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

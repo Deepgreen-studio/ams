@@ -1,12 +1,17 @@
 <template>
   <div>
-    <PageHeader title="Companies" description="Manage organizations, branding, and structure.">
+    <!-- <PageHeader title="Companies" description="Manage organizations, branding, and structure.">
       <template #actions>
         <RouterLink :to="{ name: 'companies.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
           Create company
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink :to="{ name: 'companies.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+          Create company
+        </RouterLink>
+    </Teleport>
 
     <div v-if="companiesStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
       {{ companiesStore.successMessage }}
@@ -44,7 +49,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CompanyTable from '@/modules/companies/components/CompanyTable.vue';

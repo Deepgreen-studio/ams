@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Customer Dashboard" description="Growth, active customers, health scores, and at-risk accounts." />
+    <!-- <PageHeader title="Customer Dashboard" description="Growth, active customers, health scores, and at-risk accounts." /> -->
     <AnalyticsSubnav />
     <BusinessAnalyticsSubnav />
 
@@ -66,7 +66,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import BusinessAnalyticsSubnav from '@/modules/analytics/components/BusinessAnalyticsSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

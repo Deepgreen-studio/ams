@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Mitigation tracker"
       description="Track open risks, mitigation plans, and action completion."
     >
@@ -13,7 +13,16 @@
           {{ showForm ? 'Hide form' : 'Register risk' }}
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="showForm = !showForm"
+        >
+          {{ showForm ? 'Hide form' : 'Register risk' }}
+        </button>
+    </Teleport>
     <ComplianceSubnav />
 
     <div
@@ -141,7 +150,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import DpiaStatusBadge from '@/modules/compliance/components/DpiaStatusBadge.vue';
 import { companyService } from '@/modules/companies/services/companyService';

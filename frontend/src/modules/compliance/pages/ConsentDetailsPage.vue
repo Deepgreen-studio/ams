@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="current?.subject_name || current?.subject_email || 'Consent details'"
       description="Consent audit details, metadata, and timeline."
     >
@@ -15,7 +15,18 @@
           Withdraw consent
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          v-if="current?.granted"
+          type="button"
+          class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          :disabled="store.saving"
+          @click="onWithdraw"
+        >
+          Withdraw consent
+        </button>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -96,7 +107,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import ConsentStatusBadge from '@/modules/compliance/components/ConsentStatusBadge.vue';
 import ConsentTimeline from '@/modules/compliance/components/ConsentTimeline.vue';

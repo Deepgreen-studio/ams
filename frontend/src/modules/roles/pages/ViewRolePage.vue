@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="rolesStore.currentRole?.display_name || 'Role details'"
       description="Role overview and activity history."
     >
@@ -20,7 +20,23 @@
           Edit
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="rolesStore.currentRole"
+          :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Assign permissions
+        </RouterLink>
+        <RouterLink
+          v-if="rolesStore.currentRole"
+          :to="{ name: 'roles.edit', params: { id: rolesStore.currentRole.uuid } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Edit
+        </RouterLink>
+    </Teleport>
 
     <div v-if="rolesStore.currentRole" class="grid gap-6 lg:grid-cols-3">
       <div class="space-y-6 lg:col-span-2">
@@ -117,7 +133,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 

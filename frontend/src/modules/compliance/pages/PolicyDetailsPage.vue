@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.current?.title || 'Policy details'"
       :description="store.current?.policy_number || 'Policy governance and approval workflow'"
     >
@@ -20,7 +20,23 @@
           Compare versions
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="store.current"
+          :to="{ name: 'compliance.policies.versions', params: { id: store.current.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Version timeline
+        </RouterLink>
+        <RouterLink
+          v-if="store.current"
+          :to="{ name: 'compliance.policies.compare', params: { id: store.current.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Compare versions
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -202,7 +218,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PolicyForm from '@/modules/compliance/components/PolicyForm.vue';
 import PolicyStatusBadge from '@/modules/compliance/components/PolicyStatusBadge.vue';

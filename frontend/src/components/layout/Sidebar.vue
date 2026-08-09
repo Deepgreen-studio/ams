@@ -51,24 +51,6 @@
             </button>
         </div>
 
-        <!-- Primary CTA -->
-        <div class="shrink-0 px-4 pb-4" :class="collapsed ? 'px-2' : 'px-4'">
-            <RouterLink
-                :to="{ name: 'applications.create' }"
-                class="flex items-center rounded-full bg-white text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50"
-                :class="collapsed ? 'justify-center p-2' : 'gap-3 py-2.5 pl-2.5 pr-4'"
-                :title="collapsed ? 'Create application' : undefined"
-                @click="closeMobile"
-            >
-                <span
-                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-500 text-white"
-                >
-                    <PlusIcon class="h-4 w-4" />
-                </span>
-                <span v-if="!collapsed">Create application</span>
-            </RouterLink>
-        </div>
-
         <!-- Navigation -->
         <nav
             class="scrollbar-dark min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-2"
@@ -146,7 +128,6 @@ import {
     DocumentTextIcon,
     HomeIcon,
     LifebuoyIcon,
-    PlusIcon,
     PuzzlePieceIcon,
     PresentationChartLineIcon,
     QuestionMarkCircleIcon,

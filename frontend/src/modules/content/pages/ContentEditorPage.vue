@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="isCreate ? 'Create content' : 'Edit content'"
       :description="
         isCreate
@@ -56,7 +56,55 @@
           {{ contentStore.saving ? 'Saving…' : 'Save draft' }}
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <span
+          v-if="autosaveLabel"
+          class="hidden self-center text-xs text-slate-500 sm:inline"
+        >
+          {{ autosaveLabel }}
+        </span>
+        <RouterLink
+          v-if="!isCreate && contentId"
+          :to="{ name: 'content.versions', params: { id: contentId } }"
+          class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Versions
+        </RouterLink>
+        <RouterLink
+          v-if="!isCreate && contentId"
+          :to="{ name: 'content.review', params: { id: contentId } }"
+          class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Workflow
+        </RouterLink>
+        <button
+          v-if="!isCreate && ['draft', 'rejected'].includes(form.statusSlug)"
+          type="button"
+          class="rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-60"
+          :disabled="contentStore.saving"
+          @click="submitForReview"
+        >
+          Submit for review
+        </button>
+        <button
+          v-else-if="!isCreate && form.statusSlug === 'published'"
+          type="button"
+          class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="contentStore.saving"
+          @click="unpublish"
+        >
+          Unpublish
+        </button>
+        <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="contentStore.saving"
+          @click="saveDraft"
+        >
+          {{ contentStore.saving ? 'Saving…' : 'Save draft' }}
+        </button>
+    </Teleport>
 
     <ContentSubnav v-if="isCreate" />
     <ContentItemSubnav v-else-if="contentId" :content-id="contentId" />
@@ -451,7 +499,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentBodyEditor from '@/modules/content/components/ContentBodyEditor.vue';
 import ContentPreview from '@/modules/content/components/ContentPreview.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="DPIA wizard"
       description="Guided data protection impact assessment using enterprise templates."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -154,7 +154,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { useDpiaStore } from '@/modules/compliance/stores/dpia';

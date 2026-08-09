@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Running Jobs"
       description="Jobs currently tracked as running by the Queue Monitor."
-    />
+    /> -->
     <QueueSubnav />
 
     <div
@@ -87,7 +87,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import QueueSubnav from '@/modules/queue/components/QueueSubnav.vue';
 import { useQueueStore } from '@/modules/queue/stores/queue';

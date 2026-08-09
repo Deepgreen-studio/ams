@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Edit application"
       description="Update application profile, platform, and visibility settings."
-    />
+    /> -->
     <div
       v-if="applicationsStore.loading && !applicationsStore.currentApplication"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
@@ -26,7 +26,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationForm from '@/modules/applications/components/ApplicationForm.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 

@@ -28,84 +28,104 @@
       </button>
     </div>
 
-    <ul class="space-y-1">
+    <ul v-if="visibleTasks.length" class="space-y-1">
       <li
         v-for="task in visibleTasks"
-        :key="task.id"
+        :key="`${task.type}-${task.id}`"
         class="flex items-center gap-3 rounded-xl px-1 py-2.5 hover:bg-zinc-50"
       >
-        <button
-          type="button"
-          class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition"
+        <span
+          class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
           :class="
             task.done
               ? 'border-brand-500 bg-brand-500 text-white'
-              : 'border-zinc-300 text-transparent hover:border-brand-400'
+              : 'border-zinc-300 text-transparent'
           "
-          :aria-pressed="task.done"
-          @click="task.done = !task.done"
+          aria-hidden="true"
         >
-          <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <svg class="h-3 w-3" viewBox="0 0 12 12" fill="none">
             <path d="M2.5 6.5L5 9L9.5 3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-        </button>
-        <span
-          class="min-w-0 flex-1 truncate text-sm"
+        </span>
+        <RouterLink
+          :to="taskLink(task)"
+          class="min-w-0 flex-1 truncate text-sm hover:text-brand-600"
           :class="task.done ? 'text-zinc-400 line-through' : 'text-zinc-800'"
         >
           {{ task.title }}
-        </span>
+        </RouterLink>
         <span
           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-medium"
           :class="taskStatusClass(task.status)"
         >
-          {{ task.status }}
+          {{ task.status_label || task.status }}
         </span>
       </li>
     </ul>
+    <p v-else class="py-8 text-center text-sm text-zinc-500">No tasks for today.</p>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { RouterLink } from 'vue-router';
+
+const props = defineProps({
+  payload: {
+    type: Object,
+    default: null,
+  },
+});
 
 const activeTab = ref('all');
 
-const tabs = [
-  { id: 'all', label: 'All', count: 10 },
-  { id: 'important', label: 'Important', count: null },
-  { id: 'notes', label: 'Notes', count: 5 },
-  { id: 'links', label: 'Links', count: 10 },
-];
+const tabs = computed(() => {
+  const counts = props.payload?.tabs || {};
+  return [
+    { id: 'all', label: 'All', count: counts.all ?? 0 },
+    { id: 'important', label: 'Important', count: counts.important ?? 0 },
+    { id: 'tickets', label: 'Tickets', count: counts.tickets ?? 0 },
+    { id: 'customer_tasks', label: 'Tasks', count: counts.customer_tasks ?? 0 },
+  ];
+});
 
-const tasks = reactive([
-  { id: 1, title: 'Review Android release notes', status: 'Approved', done: true, important: true, tab: 'all' },
-  { id: 2, title: 'Approve privacy policy draft', status: 'In review', done: false, important: true, tab: 'all' },
-  { id: 3, title: 'Sync integration health checks', status: 'On going', done: false, important: false, tab: 'all' },
-  { id: 4, title: 'Close overdue support tickets', status: 'On going', done: false, important: true, tab: 'all' },
-  { id: 5, title: 'Update customer license pack', status: 'Approved', done: false, important: false, tab: 'all' },
-  { id: 6, title: 'Draft compliance breach report', status: 'In review', done: false, important: true, tab: 'notes' },
-]);
+const items = computed(() => props.payload?.items ?? []);
 
 const visibleTasks = computed(() => {
   if (activeTab.value === 'important') {
-    return tasks.filter((t) => t.important);
+    return items.value.filter((t) => t.important);
   }
-  if (activeTab.value === 'notes') {
-    return tasks.filter((t) => t.tab === 'notes' || t.status === 'In review');
+  if (activeTab.value === 'tickets') {
+    return items.value.filter((t) => t.type === 'support_ticket');
   }
-  if (activeTab.value === 'links') {
-    return tasks.slice(0, 3);
+  if (activeTab.value === 'customer_tasks') {
+    return items.value.filter((t) => t.type === 'customer_task');
   }
-  return tasks;
+  return items.value;
 });
+
+function taskLink(task) {
+  if (task.type === 'support_ticket') {
+    return { name: 'support.tickets.show', params: { id: task.id } };
+  }
+  if (task.customer_uuid) {
+    return { name: 'customers.show', params: { id: task.customer_uuid } };
+  }
+  return { name: 'customers.index' };
+}
 
 function taskStatusClass(status) {
   const map = {
-    Approved: 'bg-emerald-50 text-emerald-700',
-    'In review': 'bg-rose-50 text-rose-700',
-    'On going': 'bg-orange-50 text-orange-700',
+    completed: 'bg-emerald-50 text-emerald-700',
+    open: 'bg-sky-50 text-sky-700',
+    in_progress: 'bg-orange-50 text-orange-700',
+    pending: 'bg-amber-50 text-amber-700',
+    waiting_for_customer: 'bg-violet-50 text-violet-700',
+    reopened: 'bg-rose-50 text-rose-700',
+    resolved: 'bg-emerald-50 text-emerald-700',
+    closed: 'bg-zinc-100 text-zinc-600',
+    cancelled: 'bg-zinc-100 text-zinc-500',
   };
-  return map[status] || 'bg-zinc-100 text-zinc-600';
+  return map[String(status || '').toLowerCase()] || 'bg-zinc-100 text-zinc-600';
 }
 </script>

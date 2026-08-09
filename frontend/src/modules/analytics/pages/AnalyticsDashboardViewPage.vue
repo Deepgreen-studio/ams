@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.currentDashboard?.name || 'Dashboard'"
       :description="store.currentDashboard?.description || 'Widget charts and KPI tiles for this analytics view.'"
     >
@@ -26,7 +26,29 @@
           Add widget
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'analytics.dashboards' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Back
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'analytics.dashboards.designer', params: { uuid: dashboardUuid } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Open designer
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="store.saving || !dashboardUuid"
+          @click="showWidgetForm = true"
+        >
+          Add widget
+        </button>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -116,7 +138,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
 import AnalyticsWidgetCard from '@/modules/analytics/components/AnalyticsWidgetCard.vue';

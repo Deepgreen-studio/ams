@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Data Breach Incident Dashboard"
       description="Incident reporting, risk, containment, notifications, and recovery overview."
     >
@@ -18,7 +18,21 @@
           Report incident
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.breaches.index' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          All incidents
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'compliance.breaches.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Report incident
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -120,7 +134,7 @@
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import BreachSeverityBadge from '@/modules/compliance/components/BreachSeverityBadge.vue';
 import BreachStatusBadge from '@/modules/compliance/components/BreachStatusBadge.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Assign application"
       :description="`Link an application to ${customerName}.`"
-    />
+    /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <AssignmentForm
         :customer-id="route.params.id"
@@ -22,7 +22,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AssignmentForm from '@/modules/customers/components/AssignmentForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerApplicationsStore } from '@/modules/customers/stores/applications';

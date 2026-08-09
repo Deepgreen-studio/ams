@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="AI Logs"
       description="Request-level usage logs across providers, features, and operations."
-    />
+    /> -->
     <AiSubnav />
 
     <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
@@ -72,7 +72,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AiSubnav from '@/modules/ai/components/AiSubnav.vue';
 import { useAiStore } from '@/modules/ai/stores/ai';
 

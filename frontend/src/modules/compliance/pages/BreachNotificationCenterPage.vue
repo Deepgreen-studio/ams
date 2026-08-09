@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Notification center"
       description="Regulator, customer, internal, and affected-user breach notices."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -73,7 +73,7 @@
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 import Pagination from '@/modules/users/components/Pagination.vue';

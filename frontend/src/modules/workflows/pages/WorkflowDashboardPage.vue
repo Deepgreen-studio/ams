@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Workflow Engine"
       description="Design, monitor, and approve enterprise workflows."
     >
@@ -18,7 +18,21 @@
           New workflow
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'workflows.queue' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Approval queue
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'workflows.designer.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New workflow
+        </RouterLink>
+    </Teleport>
 
     <WorkflowsSubnav />
 
@@ -66,7 +80,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 

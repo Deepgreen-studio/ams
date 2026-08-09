@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create mapping"
       description="Build a reusable field mapping profile for an integration."
-    />
+    /> -->
     <MappingSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <MappingForm
@@ -21,7 +21,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MappingForm from '@/modules/mappings/components/MappingForm.vue';
 import MappingSubnav from '@/modules/mappings/components/MappingSubnav.vue';
 import { useMappingsStore } from '@/modules/mappings/stores/mappings';

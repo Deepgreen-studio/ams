@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="DPIA & Risk Dashboard"
       description="Data protection impact assessments, risk register, and mitigation overview."
     >
@@ -12,7 +12,15 @@
           Start DPIA wizard
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.dpia.wizard' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Start DPIA wizard
+        </RouterLink>
+    </Teleport>
 
     <ComplianceSubnav />
 
@@ -108,7 +116,7 @@
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import BreachSeverityBadge from '@/modules/compliance/components/BreachSeverityBadge.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import DpiaStatusBadge from '@/modules/compliance/components/DpiaStatusBadge.vue';

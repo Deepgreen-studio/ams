@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Create application"
       description="Register a new customer application in the Application Management catalog."
-    />
+    /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <ApplicationForm
         :loading="applicationsStore.saving"
@@ -19,7 +19,7 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationForm from '@/modules/applications/components/ApplicationForm.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Business Dashboard" description="Portfolio growth, revenue, usage, support, and customer health.">
+    <!-- <PageHeader title="Business Dashboard" description="Portfolio growth, revenue, usage, support, and customer health.">
       <template #actions>
         <button
           type="button"
@@ -11,7 +11,17 @@
           Capture snapshot
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+          :disabled="store.saving"
+          @click="onCapture"
+        >
+          Capture snapshot
+        </button>
+    </Teleport>
     <AnalyticsSubnav />
     <BusinessAnalyticsSubnav />
 
@@ -76,7 +86,7 @@
 
 <script setup>
 import { computed, onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import BusinessAnalyticsSubnav from '@/modules/analytics/components/BusinessAnalyticsSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';

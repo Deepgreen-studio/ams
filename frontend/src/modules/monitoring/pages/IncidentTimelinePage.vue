@@ -1,10 +1,13 @@
 <template>
   <div>
-    <PageHeader title="Incident Timeline" description="Monitoring logs and alert events in chronological order.">
+    <!-- <PageHeader title="Incident Timeline" description="Monitoring logs and alert events in chronological order.">
       <template #actions>
         <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">Refresh</button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">Refresh</button>
+    </Teleport>
     <MonitoringSubnav />
 
     <div class="mb-4 flex flex-wrap gap-3">
@@ -59,7 +62,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

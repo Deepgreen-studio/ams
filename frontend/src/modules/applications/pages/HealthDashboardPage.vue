@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Health Dashboard"
       description="Health score, rates, memory, battery, and response time trends."
     >
@@ -19,7 +19,22 @@
           >Crash dashboard</RouterLink
         >
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          :disabled="monitoringStore.saving"
+          @click="monitoringStore.refreshHealth(route.params.id)"
+        >
+          Refresh score
+        </button>
+        <RouterLink
+          :to="{ name: 'applications.monitoring.crashes', params: { id: route.params.id } }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          >Crash dashboard</RouterLink
+        >
+    </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
@@ -99,7 +114,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import { useMonitoringStore } from '@/modules/applications/stores/monitoring';

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Users" description="Manage platform users, status, and profiles.">
+    <!-- <PageHeader title="Users" description="Manage platform users, status, and profiles.">
       <template #actions>
         <RouterLink
           :to="{ name: 'users.create' }"
@@ -9,7 +9,15 @@
           Create user
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'users.create' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create user
+        </RouterLink>
+    </Teleport>
 
     <div
       v-if="usersStore.successMessage"
@@ -85,7 +93,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import UserSearchFilter from '@/modules/users/components/UserSearchFilter.vue';

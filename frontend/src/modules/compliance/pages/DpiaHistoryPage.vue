@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Assessment history" description="All DPIA assessments across templates and statuses.">
+    <!-- <PageHeader title="Assessment history" description="All DPIA assessments across templates and statuses.">
       <template #actions>
         <RouterLink
           :to="{ name: 'compliance.dpia.wizard' }"
@@ -9,7 +9,15 @@
           New DPIA
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'compliance.dpia.wizard' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          New DPIA
+        </RouterLink>
+    </Teleport>
     <ComplianceSubnav />
 
     <div class="mb-4 rounded-xl border border-slate-200 bg-white p-4">
@@ -96,7 +104,7 @@
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import DpiaStatusBadge from '@/modules/compliance/components/DpiaStatusBadge.vue';
 import { useDpiaStore } from '@/modules/compliance/stores/dpia';

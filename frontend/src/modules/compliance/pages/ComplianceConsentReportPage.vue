@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Consent reports"
       description="Granted, withdrawn, pending, and expired consent activity with source breakdown."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <AnalyticsFilterBar
@@ -58,7 +58,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';

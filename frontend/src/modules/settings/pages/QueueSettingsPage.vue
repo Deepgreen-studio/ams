@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Queue settings" description="Background job defaults and runtime status." />
+    <!-- <PageHeader title="Queue settings" description="Background job defaults and runtime status." /> -->
     <SettingsTabs>
       <div class="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4" v-if="settingsStore.queueStatus">
         <div
@@ -29,7 +29,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';

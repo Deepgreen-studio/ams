@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader title="Notification History" description="Searchable history across your notification inbox.">
+    <!-- <PageHeader title="Notification History" description="Searchable history across your notification inbox.">
       <template #actions>
         <button
           type="button"
@@ -10,7 +10,16 @@
           Mark all read
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          @click="store.markAllRead().then(reload)"
+        >
+          Mark all read
+        </button>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -97,7 +106,7 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';

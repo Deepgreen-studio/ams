@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="store.templateVersionMeta?.name ? `Versions · ${store.templateVersionMeta.name}` : 'Template Version History'"
       description="Every save creates an immutable snapshot. Restore always appends a new draft version."
     >
@@ -18,7 +18,21 @@
           Edit
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'notifications.templates.compare', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Compare
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'notifications.templates.edit', params: { id: route.params.id } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Edit
+        </RouterLink>
+    </Teleport>
 
     <NotificationsSubnav />
 
@@ -84,7 +98,7 @@
 <script setup>
 import { onMounted } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 

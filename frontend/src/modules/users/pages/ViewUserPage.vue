@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       :title="usersStore.currentUser?.full_name || 'User details'"
       description="Account overview and activity summary."
     >
@@ -21,7 +21,24 @@
           Delete
         </button>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          v-if="usersStore.currentUser"
+          :to="{ name: 'users.edit', params: { id: usersStore.currentUser.uuid } }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Edit
+        </RouterLink>
+        <button
+          v-if="usersStore.currentUser"
+          type="button"
+          class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          @click="showDelete = true"
+        >
+          Delete
+        </button>
+    </Teleport>
 
     <div
       v-if="usersStore.loading && !usersStore.currentUser"
@@ -167,7 +184,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';

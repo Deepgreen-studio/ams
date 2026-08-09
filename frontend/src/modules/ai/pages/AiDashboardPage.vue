@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="AI Assistant"
       description="Provider-agnostic AI architecture for suggestions, routing, translation, search, and chat."
     >
@@ -18,7 +18,21 @@
           AI settings
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'ai.conversations' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Open chat
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'ai.settings' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          AI settings
+        </RouterLink>
+    </Teleport>
 
     <AiSubnav />
 
@@ -94,7 +108,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AiSubnav from '@/modules/ai/components/AiSubnav.vue';
 import { useAiStore } from '@/modules/ai/stores/ai';
 

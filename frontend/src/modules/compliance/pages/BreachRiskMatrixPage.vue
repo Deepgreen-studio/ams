@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Risk matrix"
       description="Likelihood × impact view of active breach assessments."
-    />
+    /> -->
     <ComplianceSubnav />
 
     <div
@@ -47,7 +47,7 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 

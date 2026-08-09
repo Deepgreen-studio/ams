@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Operational Analytics"
       description="Notification delivery, automation executions, workflow outcomes, and AI usage in one place."
     >
@@ -18,7 +18,21 @@
           Automation reports
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+          :to="{ name: 'analytics.delivery' }"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        >
+          Delivery reports
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'analytics.automation' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Automation reports
+        </RouterLink>
+    </Teleport>
 
     <AnalyticsSubnav />
 
@@ -89,7 +103,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import SimpleBarChart from '@/modules/compliance/components/SimpleBarChart.vue';
 import AnalyticsFilterBar from '@/modules/analytics/components/AnalyticsFilterBar.vue';

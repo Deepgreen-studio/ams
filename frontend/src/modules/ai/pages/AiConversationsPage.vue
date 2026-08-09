@@ -1,6 +1,6 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Conversation History"
       description="Chat assistant history and interactive knowledge conversations."
     >
@@ -19,7 +19,22 @@
           AI settings
         </RouterLink>
       </template>
-    </PageHeader>
+    </PageHeader> -->
+    <Teleport defer to="#page-header-actions">
+      <button
+          type="button"
+          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          @click="startNewChat"
+        >
+          New chat
+        </button>
+        <RouterLink
+          :to="{ name: 'ai.settings' }"
+          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          AI settings
+        </RouterLink>
+    </Teleport>
     <AiSubnav />
 
     <div
@@ -145,7 +160,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import AiSubnav from '@/modules/ai/components/AiSubnav.vue';
 import { useAiStore } from '@/modules/ai/stores/ai';
 

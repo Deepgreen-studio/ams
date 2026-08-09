@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Plan release"
       description="Create a release plan linked to an existing application version."
-    />
+    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <form
@@ -149,7 +149,7 @@
 <script setup>
 import { onMounted, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useReleasesStore } from '@/modules/applications/stores/releases';
 import { versionService } from '@/modules/applications/services/versionService';

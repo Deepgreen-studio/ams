@@ -1,9 +1,9 @@
 <template>
   <div>
-    <PageHeader
+    <!-- <PageHeader
       title="Permission matrix"
       description="Review permission assignment across modules for a selected role."
-    />
+    /> -->
 
     <div class="mb-4 rounded-xl border border-slate-200 bg-white p-4">
       <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
@@ -27,7 +27,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import PageHeader from '@/components/ui/PageHeader.vue';
+// import PageHeader from '@/components/ui/PageHeader.vue';
 import PermissionMatrix from '@/modules/roles/components/PermissionMatrix.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';
 

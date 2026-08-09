@@ -199,13 +199,18 @@ class WebhookService
     /**
      * @param  array<string, mixed>  $payload
      */
-    public function dispatchEvent(string $eventName, array $payload, ?int $companyId = null, ?User $actor = null): int
-    {
+    public function dispatchEvent(
+        string $eventName,
+        array $payload,
+        ?int $companyId = null,
+        ?User $actor = null,
+        bool $sync = false,
+    ): int {
         $webhooks = $this->webhookRepository->findActiveOutgoingForEvent($eventName, $companyId);
         $count = 0;
 
         foreach ($webhooks as $webhook) {
-            $this->queueOutgoing($webhook, $eventName, $payload, $actor, isTest: false);
+            $this->queueOutgoing($webhook, $eventName, $payload, $actor, isTest: false, sync: $sync);
             $count++;
         }
 

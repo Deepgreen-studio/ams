@@ -14,7 +14,7 @@ The Integration Hub is the enterprise foundation for connecting AMS to unlimited
 |----------|-------------|
 | [API Documentation](./API.md) | REST endpoints for integrations, sync, mappings, queue, monitoring |
 | [Webhook Documentation](./Webhooks.md) | Incoming/outgoing webhooks, signatures, retries, events |
-| [Connect Any App → Support](./Connect-Any-App-Support.md) | Any website/app sends Support SMS/messages into AMS tickets |
+| [Connect Any App → Support](./Connect-Any-App-Support.md) | App → AMS Support SMS ingest + AMS → app Public reply / SMS out contract |
 | [Developer Guide](./Developer-Guide.md) | How to extend the hub from other domains safely |
 | [Architecture Report](./reports/Architecture-Report.md) | Layering, DDD boundaries, engine ownership |
 | [Security Report](./reports/Security-Report.md) | AuthZ, crypto, SSRF, findings |

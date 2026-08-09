@@ -1,9 +1,5 @@
 <template>
   <form class="space-y-6" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ error }}
-    </div>
-
     <div class="grid gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">First name</label>
@@ -98,31 +94,50 @@
           <option value="pending">Pending</option>
         </select>
       </div>
+
+      <div v-if="showRole">
+        <label class="mb-1 block text-sm font-medium text-slate-700">Role</label>
+        <select
+          v-model="form.role"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          :class="fieldClass('roles')"
+        >
+          <option value="">Select a role</option>
+          <option
+            v-for="role in roleOptions"
+            :key="role.uuid || role.name"
+            :value="role.name"
+          >
+            {{ role.display_name || role.name }}
+          </option>
+        </select>
+        <p v-if="errors.roles" class="mt-1 text-xs text-rose-600">{{ errors.roles[0] }}</p>
+      </div>
     </div>
 
     <div v-if="showPassword" class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">
+        <label for="user-form-password" class="mb-1 block text-sm font-medium text-slate-700">
           Password
           <span v-if="!requirePassword" class="font-normal text-slate-400">(optional)</span>
         </label>
-        <input
+        <PasswordInput
+          id="user-form-password"
           v-model="form.password"
-          type="password"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          :class="fieldClass('password')"
           autocomplete="new-password"
+          :input-class="fieldClass('password')"
         />
         <p v-if="errors.password" class="mt-1 text-xs text-rose-600">{{ errors.password[0] }}</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Confirm password</label>
-        <input
+        <label for="user-form-password-confirmation" class="mb-1 block text-sm font-medium text-slate-700">
+          Confirm password
+        </label>
+        <PasswordInput
+          id="user-form-password-confirmation"
           v-model="form.password_confirmation"
-          type="password"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          :class="fieldClass('password')"
           autocomplete="new-password"
+          :input-class="fieldClass('password')"
         />
       </div>
     </div>
@@ -149,6 +164,8 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
+import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
   initial: {
@@ -183,9 +200,18 @@ const props = defineProps({
     type: Boolean,
     default: true,
   },
+  showRole: {
+    type: Boolean,
+    default: true,
+  },
+  roleOptions: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const emit = defineEmits(['submit', 'cancel']);
+const toast = useToast();
 
 const form = reactive(createForm(props.initial));
 
@@ -196,6 +222,29 @@ watch(
   },
   { deep: true }
 );
+
+watch(
+  () => props.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+function resolveInitialRole(value = {}) {
+  if (value.role) {
+    return value.role;
+  }
+
+  const roles = value.roles || [];
+  if (!roles.length) {
+    return '';
+  }
+
+  const first = roles[0];
+  return typeof first === 'string' ? first : first?.name || '';
+}
 
 function createForm(value = {}) {
   return {
@@ -208,6 +257,7 @@ function createForm(value = {}) {
     timezone: value.timezone || 'UTC',
     language: value.language || 'en',
     status: value.status || 'active',
+    role: resolveInitialRole(value),
     password: '',
     password_confirmation: '',
   };
@@ -228,6 +278,11 @@ function onSubmit() {
   if (!props.showStatus) {
     delete payload.status;
   }
+
+  if (props.showRole) {
+    payload.roles = payload.role ? [payload.role] : [];
+  }
+  delete payload.role;
 
   if (!payload.gender) {
     payload.gender = null;

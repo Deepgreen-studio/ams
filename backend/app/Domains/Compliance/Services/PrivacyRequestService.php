@@ -22,10 +22,15 @@ use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Compliance\Repositories\PrivacyRequestLogRepository;
 use App\Domains\Compliance\Repositories\PrivacyRequestRepository;
 use App\Domains\Customers\Repositories\CustomerRepository;
+use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
+use App\Domains\Support\Enums\SupportTicketMessageVisibility;
+use App\Domains\Support\Models\SupportTicketMessage;
+use App\Domains\Support\Services\SupportTicketConversationService;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,7 +41,8 @@ class PrivacyRequestService
         private readonly PrivacyRequestRepository $privacyRequestRepository,
         private readonly PrivacyRequestLogRepository $privacyRequestLogRepository,
         private readonly CompanyRepository $companyRepository,
-        private readonly CustomerRepository $customerRepository
+        private readonly CustomerRepository $customerRepository,
+        private readonly SupportTicketConversationService $conversationService,
     ) {}
 
     /**
@@ -93,8 +99,94 @@ class PrivacyRequestService
             'decisionMaker:id,uuid,full_name,email',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
-            'supportTicket:id,uuid,ticket_number,subject,status',
+            'supportTicket:id,uuid,ticket_number,subject,status,source',
         ]);
+    }
+
+    /**
+     * Linked Support ticket conversation (SMS / chat) for Compliance agents.
+     *
+     * @return array{
+     *   ticket: array<string, mixed>|null,
+     *   messages: SupportCollection<int, SupportTicketMessage>,
+     *   unread_count: int,
+     *   attachment_count: int
+     * }
+     */
+    public function conversation(string $identifier, User $viewer): array
+    {
+        $privacyRequest = $this->find($identifier)->loadMissing('supportTicket');
+        $ticket = $privacyRequest->supportTicket;
+
+        if ($ticket === null) {
+            return [
+                'ticket' => null,
+                'messages' => collect(),
+                'unread_count' => 0,
+                'attachment_count' => 0,
+            ];
+        }
+
+        $result = $this->conversationService->conversation($ticket->uuid, $viewer);
+
+        return [
+            'ticket' => [
+                'uuid' => $ticket->uuid,
+                'ticket_number' => $ticket->ticket_number,
+                'subject' => $ticket->subject,
+                'status' => $ticket->status?->value ?? $ticket->status,
+                'source' => $ticket->source?->value ?? $ticket->source,
+            ],
+            'messages' => $result['messages'],
+            'unread_count' => $result['unread_count'],
+            'attachment_count' => $result['attachment_count'],
+        ];
+    }
+
+    /**
+     * Public/private reply on the linked Support ticket.
+     * Public replies on SMS-sourced tickets fire support.sms.sent to the app.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public function replyToLinkedTicket(string $identifier, array $data, User $actor): SupportTicketMessage
+    {
+        $privacyRequest = $this->find($identifier)->loadMissing('supportTicket');
+        $ticket = $privacyRequest->supportTicket;
+
+        if ($ticket === null) {
+            throw new ApiException('This privacy request is not linked to a Support ticket.', 422);
+        }
+
+        $visibility = SupportTicketMessageVisibility::tryFrom((string) ($data['visibility'] ?? 'public'))
+            ?? SupportTicketMessageVisibility::Public;
+
+        $message = $this->conversationService->createMessage(
+            $ticket->uuid,
+            [
+                'body' => (string) $data['body'],
+                'body_format' => (string) ($data['body_format'] ?? 'html'),
+                'visibility' => $visibility->value,
+                'author_type' => SupportTicketMessageAuthorType::Agent->value,
+            ],
+            $actor
+        );
+
+        $this->privacyRequestLogRepository->recordForRequest(
+            $privacyRequest,
+            PrivacyRequestLogAction::Updated->value,
+            $privacyRequest->status?->value ?? (string) $privacyRequest->status,
+            $privacyRequest->status?->value ?? (string) $privacyRequest->status,
+            $actor->id,
+            'Agent reply posted on linked Support ticket '.$ticket->ticket_number.' ('.$visibility->value.').',
+            [
+                'support_ticket_uuid' => $ticket->uuid,
+                'message_uuid' => $message->uuid,
+                'visibility' => $visibility->value,
+            ]
+        );
+
+        return $message;
     }
 
     /**

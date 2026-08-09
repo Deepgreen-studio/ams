@@ -10,6 +10,7 @@
       <SyncConfigForm
         :initial="store.currentConfig || {}"
         :loading="store.saving"
+        :errors="store.fieldErrors"
         :error="store.error || formError"
         submit-label="Save changes"
         hide-company

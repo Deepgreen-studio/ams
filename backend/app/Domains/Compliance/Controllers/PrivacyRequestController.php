@@ -7,6 +7,7 @@ use App\Domains\Compliance\Requests\CompletePrivacyRequestRequest;
 use App\Domains\Compliance\Requests\ConfirmPrivacyDeletionRequest;
 use App\Domains\Compliance\Requests\DecidePrivacyRequestRequest;
 use App\Domains\Compliance\Requests\RejectPrivacyRequestRequest;
+use App\Domains\Compliance\Requests\ReplyPrivacyRequestConversationRequest;
 use App\Domains\Compliance\Requests\StorePrivacyRequestRequest;
 use App\Domains\Compliance\Requests\UpdatePrivacyRequestRequest;
 use App\Domains\Compliance\Requests\VerifyPrivacyRequestIdentityRequest;
@@ -14,6 +15,7 @@ use App\Domains\Compliance\Resources\PrivacyRequestCollection;
 use App\Domains\Compliance\Resources\PrivacyRequestLogResource;
 use App\Domains\Compliance\Resources\PrivacyRequestResource;
 use App\Domains\Compliance\Services\PrivacyRequestService;
+use App\Domains\Support\Resources\SupportTicketMessageResource;
 use App\Models\User;
 use App\Shared\Responses\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -242,5 +244,47 @@ class PrivacyRequestController
         return ApiResponse::success([
             'privacy_request' => new PrivacyRequestResource($updated),
         ], 'Privacy request completed successfully.');
+    }
+
+    public function conversation(Request $request, string $privacyRequest): JsonResponse
+    {
+        $existing = $this->privacyRequestService->find($privacyRequest);
+        $this->authorize('view', $existing);
+
+        /** @var User $viewer */
+        $viewer = $request->user();
+        $result = $this->privacyRequestService->conversation($privacyRequest, $viewer);
+
+        return ApiResponse::success([
+            'ticket' => $result['ticket'],
+            'messages' => SupportTicketMessageResource::collection($result['messages'])->resolve(),
+            'unread_count' => $result['unread_count'],
+            'attachment_count' => $result['attachment_count'],
+        ]);
+    }
+
+    public function reply(ReplyPrivacyRequestConversationRequest $request, string $privacyRequest): JsonResponse
+    {
+        $existing = $this->privacyRequestService->find($privacyRequest)->loadMissing('supportTicket');
+        $this->authorize('update', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $message = $this->privacyRequestService->replyToLinkedTicket(
+            $privacyRequest,
+            $request->validated(),
+            $actor
+        );
+
+        $ticket = $existing->supportTicket;
+
+        return ApiResponse::success([
+            'message' => new SupportTicketMessageResource($message),
+            'ticket' => $ticket ? [
+                'uuid' => $ticket->uuid,
+                'ticket_number' => $ticket->ticket_number,
+                'source' => $ticket->source?->value ?? $ticket->source,
+            ] : null,
+        ], 'Reply posted to linked Support ticket.', 201);
     }
 }

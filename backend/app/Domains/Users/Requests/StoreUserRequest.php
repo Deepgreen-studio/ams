@@ -31,6 +31,8 @@ class StoreUserRequest extends FormRequest
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'status' => ['nullable', Rule::in(UserStatus::values())],
+            'roles' => ['sometimes', 'array'],
+            'roles.*' => ['required', 'string', 'max:255'],
             'send_welcome_notification' => ['sometimes', 'boolean'],
         ];
     }

@@ -26,6 +26,11 @@ export default defineConfig(({ mode }) => {
           target: proxyTarget,
           changeOrigin: true,
         },
+        // Media library / public disk assets (thumbnails, open links)
+        '/storage': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
       },
     },
   };

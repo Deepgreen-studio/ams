@@ -47,6 +47,8 @@ class UpdateUserRequest extends FormRequest
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'status' => ['sometimes', 'required', Rule::in(UserStatus::values())],
+            'roles' => ['sometimes', 'array'],
+            'roles.*' => ['required', 'string', 'max:255'],
         ];
     }
 }

@@ -8,6 +8,7 @@
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <WebhookForm
         :loading="store.saving"
+        :errors="store.fieldErrors"
         :error="store.error || ''"
         submit-label="Create webhook"
         @submit="onSubmit"

@@ -16,40 +16,75 @@
 
     <SchedulerSubnav />
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
-    </div>
-
-    <form class="max-w-3xl space-y-6" @submit.prevent="submit">
+    <form class="max-w-3xl space-y-6" novalidate @submit.prevent="submit">
       <section class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm md:col-span-2">
             <span class="mb-1 block font-medium text-slate-700">Name</span>
-            <input v-model="form.name" required class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model="form.name"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('name')"
+            />
+            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Job type</span>
-            <select v-model="form.job_type" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <select
+              v-model="form.job_type"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('job_type')"
+            >
               <option v-for="item in store.catalog.job_types" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
+            <p v-if="fieldErrors.job_type" class="mt-1 text-xs text-rose-600">{{ fieldErrors.job_type[0] }}</p>
           </label>
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Handler</span>
-            <select v-model="form.handler_key" required class="w-full rounded-lg border border-slate-300 px-3 py-2" @change="onHandlerChange">
+            <select
+              v-model="form.handler_key"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('handler_key')"
+              @change="onHandlerChange"
+            >
               <option v-for="item in store.catalog.handlers" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
+            <p v-if="fieldErrors.handler_key" class="mt-1 text-xs text-rose-600">{{ fieldErrors.handler_key[0] }}</p>
           </label>
           <label v-if="needsCron" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Cron expression</span>
-            <input v-model="form.schedule_cron" class="w-full rounded-lg border border-slate-300 px-3 py-2" placeholder="0 6 * * *" />
+            <input
+              v-model="form.schedule_cron"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('schedule_cron')"
+              placeholder="0 6 * * *"
+            />
+            <p v-if="fieldErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.schedule_cron[0] }}
+            </p>
           </label>
           <label v-if="form.job_type === 'one_time'" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Run at</span>
-            <input v-model="form.run_at" type="datetime-local" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model="form.run_at"
+              type="datetime-local"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('run_at')"
+            />
+            <p v-if="fieldErrors.run_at" class="mt-1 text-xs text-rose-600">{{ fieldErrors.run_at[0] }}</p>
           </label>
           <label v-if="form.job_type === 'delayed'" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Delay (minutes)</span>
-            <input v-model.number="form.delay_minutes" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model.number="form.delay_minutes"
+              type="number"
+              min="1"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('delay_minutes')"
+            />
+            <p v-if="fieldErrors.delay_minutes" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.delay_minutes[0] }}
+            </p>
           </label>
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Queue</span>
@@ -82,15 +117,18 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { useToast } from '@/composables/useToast';
 import SchedulerSubnav from '@/modules/scheduler/components/SchedulerSubnav.vue';
 import { useSchedulerStore } from '@/modules/scheduler/stores/scheduler';
 
 const store = useSchedulerStore();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
+const fieldErrors = ref({});
 const isEdit = computed(() => Boolean(route.params.id));
 const needsCron = computed(() => ['cron', 'recurring', 'queue'].includes(form.job_type));
 
@@ -108,6 +146,19 @@ const form = reactive({
   without_overlapping: true,
   payload: {},
 });
+
+watch(
+  () => store.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+function fieldClass(field) {
+  return fieldErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
 
 function onHandlerChange() {
   const handler = store.catalog.handlers.find((item) => item.value === form.handler_key);
@@ -129,9 +180,51 @@ function hydrate(job) {
   form.is_enabled = Boolean(job.is_enabled);
   form.without_overlapping = job.without_overlapping !== false;
   form.payload = job.payload || {};
+  fieldErrors.value = {};
+}
+
+function validate() {
+  const next = {};
+
+  if (!String(form.name || '').trim()) {
+    next.name = ['The name field is required.'];
+  }
+
+  if (!String(form.job_type || '').trim()) {
+    next.job_type = ['The job type field is required.'];
+  }
+
+  if (!String(form.handler_key || '').trim()) {
+    next.handler_key = ['The handler field is required.'];
+  }
+
+  if (needsCron.value && !String(form.schedule_cron || '').trim()) {
+    next.schedule_cron = ['The cron expression field is required.'];
+  }
+
+  if (form.job_type === 'one_time' && !String(form.run_at || '').trim()) {
+    next.run_at = ['Please choose a run time.'];
+  }
+
+  if (form.job_type === 'delayed') {
+    const delay = Number(form.delay_minutes);
+    if (!Number.isInteger(delay) || delay < 1) {
+      next.delay_minutes = ['Delay must be at least 1 minute.'];
+    }
+  }
+
+  fieldErrors.value = next;
+  return Object.keys(next).length === 0;
 }
 
 async function submit() {
+  if (!validate()) {
+    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+    return;
+  }
+
+  fieldErrors.value = {};
+
   const payload = {
     name: form.name,
     description: form.description,
@@ -147,9 +240,13 @@ async function submit() {
     payload: form.payload,
   };
 
-  const saved = await store.saveJob(payload, isEdit.value ? route.params.id : null);
-  if (!isEdit.value && saved?.uuid) {
-    await router.push({ name: 'scheduler.jobs.edit', params: { id: saved.uuid } });
+  try {
+    const saved = await store.saveJob(payload, isEdit.value ? route.params.id : null);
+    if (!isEdit.value && saved?.uuid) {
+      await router.push({ name: 'scheduler.jobs.edit', params: { id: saved.uuid } });
+    }
+  } catch {
+    // Store sets error; toast watch handles display.
   }
 }
 

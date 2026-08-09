@@ -48,4 +48,10 @@ export const privacyRequestService = {
   complete(id, payload = {}) {
     return api.post(`/compliance/privacy-requests/${id}/complete`, payload);
   },
+  conversation(id) {
+    return api.get(`/compliance/privacy-requests/${id}/conversation`);
+  },
+  reply(id, payload) {
+    return api.post(`/compliance/privacy-requests/${id}/reply`, payload);
+  },
 };

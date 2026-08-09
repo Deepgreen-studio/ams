@@ -1,24 +1,51 @@
 <template>
-  <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</div>
+  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div v-if="!hideCompany">
         <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select v-model="form.company_id" class="input" required @change="loadIntegrations">
+        <select
+          v-model="form.company_id"
+          class="input"
+          :class="fieldClass('company_id')"
+          @change="onCompanyChange"
+        >
           <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">{{ company.company_name }}</option>
+          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
+            {{ company.company_name }}
+          </option>
         </select>
+        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.company_id[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Integration</label>
-        <select v-model="form.integration_id" class="input" required :disabled="!form.company_id">
+        <select
+          v-model="form.integration_id"
+          class="input"
+          :class="fieldClass('integration_id')"
+          :disabled="!form.company_id && !hideCompany"
+        >
           <option value="" disabled>Select integration</option>
-          <option v-for="item in integrations" :key="item.uuid" :value="item.uuid">{{ item.name }}</option>
+          <option v-for="item in integrations" :key="item.uuid" :value="item.uuid">
+            {{ item.name }}
+          </option>
         </select>
+        <p v-if="displayErrors.integration_id" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.integration_id[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
-        <input v-model="form.name" type="text" class="input" required />
+        <input
+          v-model="form.name"
+          type="text"
+          class="input"
+          :class="fieldClass('name')"
+        />
+        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.name[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Direction</label>
@@ -45,7 +72,16 @@
       </div>
       <div v-if="form.trigger_type === 'scheduled'">
         <label class="mb-1 block text-sm font-medium text-slate-700">Cron expression</label>
-        <input v-model="form.schedule_cron" type="text" class="input" placeholder="*/15 * * * *" />
+        <input
+          v-model="form.schedule_cron"
+          type="text"
+          class="input"
+          :class="fieldClass('schedule_cron')"
+          placeholder="*/15 * * * *"
+        />
+        <p v-if="displayErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.schedule_cron[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Conflict strategy</label>
@@ -70,7 +106,17 @@
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Batch size</label>
-        <input v-model.number="form.batch_size" type="number" min="1" max="500" class="input" />
+        <input
+          v-model.number="form.batch_size"
+          type="number"
+          min="1"
+          max="500"
+          class="input"
+          :class="fieldClass('batch_size')"
+        />
+        <p v-if="displayErrors.batch_size" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.batch_size[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Cursor field</label>
@@ -82,7 +128,16 @@
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-sm font-medium text-slate-700">Sample records JSON (local testing)</label>
-        <textarea v-model="sampleRecordsText" rows="4" class="input font-mono text-xs" placeholder='[{"id":"1","name":"Ada"}]' />
+        <textarea
+          v-model="sampleRecordsText"
+          rows="4"
+          class="input font-mono text-xs"
+          :class="fieldClass('options')"
+          placeholder='[{"id":"1","name":"Ada"}]'
+        />
+        <p v-if="displayErrors.options" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.options[0] }}
+        </p>
       </div>
       <div class="md:col-span-2">
         <label class="flex items-center gap-2 text-sm text-slate-700">
@@ -92,8 +147,19 @@
       </div>
     </div>
     <div class="flex justify-end gap-2">
-      <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="$emit('cancel')">Cancel</button>
-      <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="loading">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        :disabled="loading"
+        @click="$emit('cancel')"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading"
+      >
         {{ loading ? 'Saving...' : submitLabel }}
       </button>
     </div>
@@ -101,30 +167,57 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
+  errors: { type: Object, default: () => ({}) },
   error: { type: String, default: '' },
   loading: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Save' },
   hideCompany: { type: Boolean, default: false },
 });
 const emit = defineEmits(['submit', 'cancel']);
+const toast = useToast();
 
 const companies = ref([]);
 const integrations = ref([]);
 const sampleRecordsText = ref('');
+const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+
+const displayErrors = computed(() => ({
+  ...localErrors.value,
+  ...props.errors,
+}));
 
 watch(() => props.initial, (value) => {
   Object.assign(form, createForm(value));
   const sample = value?.options?.sample_records;
   sampleRecordsText.value = sample ? JSON.stringify(sample, null, 2) : '';
+  localErrors.value = {};
   if (form.company_id) loadIntegrations();
 }, { deep: true, immediate: true });
+
+watch(
+  () => props.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+watch(
+  () => props.errors,
+  () => {
+    localErrors.value = {};
+  },
+  { deep: true }
+);
 
 onMounted(async () => {
   if (!props.hideCompany && !props.initial?.uuid) {
@@ -158,6 +251,10 @@ function createForm(value = {}) {
   };
 }
 
+function fieldClass(field) {
+  return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
+
 async function loadIntegrations() {
   if (!form.company_id) {
     integrations.value = [];
@@ -171,16 +268,62 @@ async function loadIntegrations() {
   }
 }
 
-function onSubmit() {
-  let options = props.initial?.options ? { ...props.initial.options } : {};
+function onCompanyChange() {
+  form.integration_id = '';
+  loadIntegrations();
+}
+
+function validate() {
+  const next = {};
+
+  if (!props.hideCompany && !String(form.company_id || '').trim()) {
+    next.company_id = ['Please select a company.'];
+  }
+
+  if (!String(form.integration_id || '').trim()) {
+    next.integration_id = ['Please select an integration.'];
+  }
+
+  if (!String(form.name || '').trim()) {
+    next.name = ['The name field is required.'];
+  }
+
+  if (form.trigger_type === 'scheduled' && !String(form.schedule_cron || '').trim()) {
+    next.schedule_cron = ['The cron expression field is required for scheduled syncs.'];
+  }
+
+  if (form.batch_size !== null && form.batch_size !== undefined && form.batch_size !== '') {
+    const batch = Number(form.batch_size);
+    if (!Number.isInteger(batch) || batch < 1 || batch > 500) {
+      next.batch_size = ['Batch size must be between 1 and 500.'];
+    }
+  }
+
   const trimmed = sampleRecordsText.value.trim();
   if (trimmed) {
     try {
-      options = { ...options, sample_records: JSON.parse(trimmed) };
+      JSON.parse(trimmed);
     } catch {
-      emit('submit', null);
-      return;
+      next.options = ['Sample records must be valid JSON.'];
     }
+  }
+
+  localErrors.value = next;
+  return Object.keys(next).length === 0;
+}
+
+function onSubmit() {
+  if (!validate()) {
+    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+    return;
+  }
+
+  localErrors.value = {};
+
+  let options = props.initial?.options ? { ...props.initial.options } : {};
+  const trimmed = sampleRecordsText.value.trim();
+  if (trimmed) {
+    options = { ...options, sample_records: JSON.parse(trimmed) };
   } else if (options.sample_records) {
     delete options.sample_records;
   }

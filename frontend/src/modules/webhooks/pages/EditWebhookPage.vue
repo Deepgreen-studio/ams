@@ -14,6 +14,7 @@
         :initial="store.currentWebhook || {}"
         hide-company
         :loading="store.saving"
+        :errors="store.fieldErrors"
         :error="store.error || ''"
         submit-label="Save changes"
         @submit="onSubmit"

@@ -23,6 +23,8 @@ class WebhookEventSeeder extends Seeder
             ['name' => 'support.sms.received', 'label' => 'Support SMS Received', 'source_module' => 'support', 'description' => 'External app forwarded an inbound support SMS to AMS.'],
             ['name' => 'support.message.received', 'label' => 'Support Message Received', 'source_module' => 'support', 'description' => 'External app forwarded a support message (web/chat/email/etc.) to AMS.'],
             ['name' => 'support.ticket.created', 'label' => 'External Support Ticket Created', 'source_module' => 'support', 'description' => 'External app created a support ticket payload for AMS ingest.'],
+            ['name' => 'support.reply.sent', 'label' => 'Support Reply Sent', 'source_module' => 'support', 'description' => 'Agent public reply ready to push to connected app / website.'],
+            ['name' => 'support.sms.sent', 'label' => 'Support SMS Sent', 'source_module' => 'support', 'description' => 'Agent public SMS reply ready to send via connected app gateway.'],
         ];
 
         foreach ($events as $event) {

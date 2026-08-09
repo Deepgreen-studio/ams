@@ -16,25 +16,28 @@
 
     <WorkflowsSubnav />
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
-    </div>
-    <div v-if="store.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-      {{ store.successMessage }}
-    </div>
-
-    <form class="space-y-6" @submit.prevent="submit">
+    <form class="space-y-6" novalidate @submit.prevent="submit">
       <section class="rounded-xl border border-slate-200 bg-white p-5">
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Name</span>
-            <input v-model="form.name" required class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model="form.name"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('name')"
+            />
+            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Type</span>
-            <select v-model="form.type" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <select
+              v-model="form.type"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('type')"
+            >
               <option v-for="item in store.catalog.types" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
+            <p v-if="fieldErrors.type" class="mt-1 text-xs text-rose-600">{{ fieldErrors.type[0] }}</p>
           </label>
           <label class="block text-sm md:col-span-2">
             <span class="mb-1 block font-medium text-slate-700">Description</span>
@@ -69,6 +72,7 @@
         <div
           ref="canvasRef"
           class="relative h-[420px] overflow-auto rounded-xl border border-dashed border-slate-300 bg-slate-50"
+          :class="fieldErrors.steps ? 'border-rose-300' : ''"
           @dragover.prevent
           @drop.prevent="onCanvasDrop"
         >
@@ -87,6 +91,7 @@
             <p class="mt-1 truncate text-[11px] text-slate-400">{{ step.step_key }}</p>
           </div>
         </div>
+        <p v-if="fieldErrors.steps" class="mt-2 text-xs text-rose-600">{{ fieldErrors.steps[0] }}</p>
       </section>
 
       <section v-if="selectedStep" class="rounded-xl border border-slate-200 bg-white p-5">
@@ -163,18 +168,21 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const canvasRef = ref(null);
 const selectedIndex = ref(0);
 const dragIndex = ref(null);
+const fieldErrors = ref({});
 let uid = 0;
 
 const isEdit = computed(() => Boolean(route.params.id));
@@ -198,6 +206,28 @@ const approverRolesInput = computed({
   get: () => (selectedStep.value?.config?.approver_roles || []).join(', '),
   set: () => {},
 });
+
+watch(
+  () => store.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (message) {
+      toast.success(message);
+    }
+  }
+);
+
+function fieldClass(field) {
+  return fieldErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
 
 function makeStep(stepType, overrides = {}) {
   uid += 1;
@@ -293,9 +323,42 @@ function hydrate(workflow) {
     is_required: step.is_required !== false,
   }));
   selectedIndex.value = 0;
+  fieldErrors.value = {};
+}
+
+function validate() {
+  const next = {};
+
+  if (!String(form.name || '').trim()) {
+    next.name = ['The name field is required.'];
+  }
+
+  if (!String(form.type || '').trim()) {
+    next.type = ['The type field is required.'];
+  }
+
+  if (!form.steps.length) {
+    next.steps = ['Add at least one stage to the workflow canvas.'];
+  } else {
+    const hasStart = form.steps.some((step) => step.step_type === 'start');
+    const hasEnd = form.steps.some((step) => step.step_type === 'end');
+    if (!hasStart || !hasEnd) {
+      next.steps = ['Workflow must include both a Start and an End stage.'];
+    }
+  }
+
+  fieldErrors.value = next;
+  return Object.keys(next).length === 0;
 }
 
 async function submit() {
+  if (!validate()) {
+    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+    return;
+  }
+
+  fieldErrors.value = {};
+
   const payload = {
     name: form.name,
     description: form.description,
@@ -316,14 +379,22 @@ async function submit() {
     })),
   };
 
-  const saved = await store.saveWorkflow(payload, isEdit.value ? route.params.id : null);
-  if (!isEdit.value && saved?.uuid) {
-    await router.push({ name: 'workflows.designer.edit', params: { id: saved.uuid } });
+  try {
+    const saved = await store.saveWorkflow(payload, isEdit.value ? route.params.id : null);
+    if (!isEdit.value && saved?.uuid) {
+      await router.push({ name: 'workflows.designer.edit', params: { id: saved.uuid } });
+    }
+  } catch {
+    // Store sets error; toast watch handles display.
   }
 }
 
 async function publish() {
-  await store.publishWorkflow(route.params.id);
+  try {
+    await store.publishWorkflow(route.params.id);
+  } catch {
+    // Store sets error; toast watch handles display.
+  }
 }
 
 onMounted(async () => {

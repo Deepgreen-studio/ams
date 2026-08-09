@@ -122,6 +122,32 @@ class UserManagementTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_create_user_with_role_assignment(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $payload = [
+            'first_name' => 'Alan',
+            'last_name' => 'Turing',
+            'email' => 'alan@example.com',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+            'status' => 'active',
+            'roles' => ['support-agent'],
+        ];
+
+        $response = $this->postJson('/api/v1/users', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.user.email', 'alan@example.com')
+            ->assertJsonPath('data.user.roles.0.name', 'support-agent');
+
+        $created = User::query()->where('email', 'alan@example.com')->first();
+        $this->assertNotNull($created);
+        $this->assertTrue($created->hasRole('support-agent'));
+    }
+
     public function test_create_user_validates_unique_email_and_password_rules(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);

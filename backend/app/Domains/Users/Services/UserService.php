@@ -2,6 +2,8 @@
 
 namespace App\Domains\Users\Services;
 
+use App\Domains\Roles\Enums\RolePermission;
+use App\Domains\Roles\Services\RoleService;
 use App\Domains\Users\Events\AvatarUpdated;
 use App\Domains\Users\Events\UserCreated;
 use App\Domains\Users\Events\UserDeleted;
@@ -20,7 +22,8 @@ use Illuminate\Support\Str;
 class UserService
 {
     public function __construct(
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly RoleService $roleService
     ) {}
 
     /**
@@ -41,7 +44,7 @@ class UserService
     public function show(string $identifier): array
     {
         $user = $this->userRepository->findByIdentifierOrFail($identifier);
-        $user->load(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
+        $user->load(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email', 'roles']);
 
         return [
             'user' => $user,
@@ -61,13 +64,17 @@ class UserService
 
             $user = $this->userRepository->createUser($payload);
 
+            if (! empty($data['roles']) && is_array($data['roles'])) {
+                $this->syncUserRoles($user, $data['roles'], $actor);
+            }
+
             event(new UserCreated($user, $actor));
 
             if (! empty($data['send_welcome_notification'])) {
                 $user->notify(new UserWelcomeNotification);
             }
 
-            return $user->load(['creator', 'updater']);
+            return $user->load(['creator', 'updater', 'roles']);
         });
     }
 
@@ -83,9 +90,13 @@ class UserService
 
             $updated = $this->userRepository->updateUser($user, $payload);
 
+            if (array_key_exists('roles', $data)) {
+                $this->syncUserRoles($updated, $data['roles'] ?? [], $actor);
+            }
+
             event(new UserUpdated($updated, $actor, 'user_updated'));
 
-            return $updated;
+            return $updated->load(['roles']);
         });
     }
 
@@ -234,6 +245,18 @@ class UserService
         }
 
         return $payload;
+    }
+
+    /**
+     * @param  list<string>  $roleIdentifiers
+     */
+    protected function syncUserRoles(User $user, array $roleIdentifiers, User $actor): void
+    {
+        if (! $actor->can(RolePermission::ASSIGN_USERS)) {
+            throw new ApiException('You are not allowed to assign roles to users.', 403);
+        }
+
+        $this->roleService->assignRolesToUser($user->uuid, $roleIdentifiers, $actor);
     }
 
     protected function deleteAvatarFile(?string $path): void

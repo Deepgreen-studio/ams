@@ -818,6 +818,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(SupportTicketReopened::class, [$notifications, 'handleSupportTicketReopened']);
         Event::listen(SupportTicketStatusChanged::class, [$notifications, 'handleSupportTicketStatusChanged']);
         Event::listen(SupportTicketMessageCreated::class, [$notifications, 'handleSupportTicketMessageCreated']);
+        Event::listen(SupportTicketMessageCreated::class, \App\Domains\Support\Listeners\DispatchSupportReplyOutgoingWebhook::class);
         Event::listen(SupportTicketAttachmentUploaded::class, [$notifications, 'handleSupportTicketAttachmentUploaded']);
         Event::listen(SupportTicketSlaBreached::class, [$notifications, 'handleSupportTicketSlaBreached']);
         Event::listen(SupportTicketSlaWarning::class, [$notifications, 'handleSupportTicketSlaWarning']);

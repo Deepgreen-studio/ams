@@ -36,6 +36,7 @@ class PrivacyRequestResource extends JsonResource
                     'ticket_number' => $this->supportTicket->ticket_number,
                     'subject' => $this->supportTicket->subject,
                     'status' => $this->supportTicket->status?->value ?? $this->supportTicket->status,
+                    'source' => $this->supportTicket->source?->value ?? $this->supportTicket->source,
                 ] : null;
             }),
             'customer' => $this->whenLoaded('customer', function () {

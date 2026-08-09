@@ -113,6 +113,11 @@
         @complete="onComplete"
       />
 
+      <PrivacySupportConversationPanel
+        :privacy-request-id="current.uuid"
+        :ticket="current.support_ticket"
+      />
+
       <PrivacyTimeline :history="store.timeline" :loading="timelineLoading" />
     </div>
 
@@ -135,6 +140,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PrivacyApprovalPanel from '@/modules/compliance/components/PrivacyApprovalPanel.vue';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
+import PrivacySupportConversationPanel from '@/modules/compliance/components/PrivacySupportConversationPanel.vue';
 import PrivacyTimeline from '@/modules/compliance/components/PrivacyTimeline.vue';
 import { usePrivacyRequestsStore } from '@/modules/compliance/stores/privacyRequests';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';

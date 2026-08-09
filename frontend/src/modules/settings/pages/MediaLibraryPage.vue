@@ -10,7 +10,7 @@
           :folders="mediaStore.folders"
           :selected="selectedFolder"
           @select="onSelectFolder"
-          @create="createFolder"
+          @create="openFolderModal"
         />
         <div class="space-y-4 lg:col-span-3">
           <SearchBar v-model="search" @search="reload" />
@@ -21,6 +21,13 @@
       </div>
     </SettingsTabs>
 
+    <CreateFolderModal
+      :open="folderModalOpen"
+      :loading="mediaStore.saving"
+      :error="folderModalError"
+      @cancel="closeFolderModal"
+      @submit="submitCreateFolder"
+    />
     <PreviewModal :open="Boolean(preview)" :item="preview" @close="preview = null" />
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -38,6 +45,7 @@ import { onMounted, ref } from 'vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
 import FolderTree from '@/modules/settings/components/FolderTree.vue';
 import MediaGrid from '@/modules/settings/components/MediaGrid.vue';
 import MediaUpload from '@/modules/settings/components/MediaUpload.vue';
@@ -52,6 +60,8 @@ const selectedFolder = ref(null);
 const preview = ref(null);
 const pendingDelete = ref(null);
 const progress = ref(0);
+const folderModalOpen = ref(false);
+const folderModalError = ref(null);
 
 onMounted(async () => {
   await mediaStore.fetchFolders();
@@ -69,11 +79,27 @@ function onSelectFolder(folder) {
   reload();
 }
 
-async function createFolder() {
-  const name = window.prompt('Folder name');
-  if (!name) return;
-  await mediaStore.createFolder({ name });
-  await mediaStore.fetchFolders();
+function openFolderModal() {
+  folderModalError.value = null;
+  folderModalOpen.value = true;
+}
+
+function closeFolderModal() {
+  if (mediaStore.saving) return;
+  folderModalOpen.value = false;
+  folderModalError.value = null;
+}
+
+async function submitCreateFolder({ name }) {
+  folderModalError.value = null;
+  try {
+    await mediaStore.createFolder({ name });
+    folderModalOpen.value = false;
+    await mediaStore.fetchFolders();
+  } catch (err) {
+    folderModalError.value =
+      err?.errors?.name?.[0] || err?.message || 'Unable to create folder';
+  }
 }
 
 async function onUpload(fileList) {

@@ -8,6 +8,7 @@
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <SyncConfigForm
         :loading="store.saving"
+        :errors="store.fieldErrors"
         :error="store.error || formError"
         submit-label="Create config"
         @submit="onSubmit"

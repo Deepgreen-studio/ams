@@ -1,17 +1,33 @@
 <template>
-  <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</div>
+  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div v-if="!hideCompany">
         <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select v-model="form.company_id" class="input" required>
+        <select
+          v-model="form.company_id"
+          class="input"
+          :class="fieldClass('company_id')"
+        >
           <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">{{ company.company_name }}</option>
+          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
+            {{ company.company_name }}
+          </option>
         </select>
+        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.company_id[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
-        <input v-model="form.name" type="text" class="input" required />
+        <input
+          v-model="form.name"
+          type="text"
+          class="input"
+          :class="fieldClass('name')"
+        />
+        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.name[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Direction</label>
@@ -31,7 +47,16 @@
       </div>
       <div v-if="form.direction === 'outgoing'" class="md:col-span-2">
         <label class="mb-1 block text-sm font-medium text-slate-700">Destination URL</label>
-        <input v-model="form.url" type="url" class="input" placeholder="https://" required />
+        <input
+          v-model="form.url"
+          type="url"
+          class="input"
+          placeholder="https://"
+          :class="fieldClass('url')"
+        />
+        <p v-if="displayErrors.url" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.url[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Signature algorithm</label>
@@ -47,15 +72,42 @@
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
-        <input v-model.number="form.timeout" type="number" min="1" max="300" class="input" />
+        <input
+          v-model.number="form.timeout"
+          type="number"
+          min="1"
+          max="300"
+          class="input"
+          :class="fieldClass('timeout')"
+        />
+        <p v-if="displayErrors.timeout" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.timeout[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Retry attempts</label>
-        <input v-model.number="form.retry_attempts" type="number" min="1" max="10" class="input" />
+        <input
+          v-model.number="form.retry_attempts"
+          type="number"
+          min="1"
+          max="10"
+          class="input"
+          :class="fieldClass('retry_attempts')"
+        />
+        <p v-if="displayErrors.retry_attempts" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.retry_attempts[0] }}
+        </p>
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Subscribed events (comma-separated)</label>
-        <input v-model="eventsText" type="text" class="input" placeholder="webhook.test, integration.created" />
+        <label class="mb-1 block text-sm font-medium text-slate-700">
+          Subscribed events (comma-separated)
+        </label>
+        <input
+          v-model="eventsText"
+          type="text"
+          class="input"
+          placeholder="webhook.test, integration.created"
+        />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
@@ -69,8 +121,19 @@
       </div>
     </div>
     <div class="flex justify-end gap-2">
-      <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="$emit('cancel')">Cancel</button>
-      <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="loading">
+      <button
+        type="button"
+        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        :disabled="loading"
+        @click="$emit('cancel')"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading"
+      >
         {{ loading ? 'Saving...' : submitLabel }}
       </button>
     </div>
@@ -78,26 +141,53 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
+  errors: { type: Object, default: () => ({}) },
   error: { type: String, default: '' },
   loading: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Save' },
   hideCompany: { type: Boolean, default: false },
 });
 const emit = defineEmits(['submit', 'cancel']);
+const toast = useToast();
 
 const companies = ref([]);
 const eventsText = ref('');
+const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+
+const displayErrors = computed(() => ({
+  ...localErrors.value,
+  ...props.errors,
+}));
 
 watch(() => props.initial, (value) => {
   Object.assign(form, createForm(value));
   eventsText.value = (value.subscribed_events || []).join(', ');
+  localErrors.value = {};
 }, { deep: true, immediate: true });
+
+watch(
+  () => props.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+watch(
+  () => props.errors,
+  () => {
+    localErrors.value = {};
+  },
+  { deep: true }
+);
 
 onMounted(async () => {
   if (props.hideCompany || props.initial?.uuid) return;
@@ -125,7 +215,64 @@ function createForm(value = {}) {
   };
 }
 
+function fieldClass(field) {
+  return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
+
+function isValidUrl(value) {
+  try {
+    void new URL(value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function validate() {
+  const next = {};
+
+  if (!props.hideCompany && !String(form.company_id || '').trim()) {
+    next.company_id = ['Please select a company.'];
+  }
+
+  if (!String(form.name || '').trim()) {
+    next.name = ['The name field is required.'];
+  }
+
+  if (form.direction === 'outgoing') {
+    if (!String(form.url || '').trim()) {
+      next.url = ['The destination URL field is required.'];
+    } else if (!isValidUrl(form.url)) {
+      next.url = ['The destination URL must be a valid URL.'];
+    }
+  }
+
+  if (form.timeout !== null && form.timeout !== undefined && form.timeout !== '') {
+    const timeout = Number(form.timeout);
+    if (!Number.isInteger(timeout) || timeout < 1 || timeout > 300) {
+      next.timeout = ['Timeout must be between 1 and 300 seconds.'];
+    }
+  }
+
+  if (form.retry_attempts !== null && form.retry_attempts !== undefined && form.retry_attempts !== '') {
+    const retries = Number(form.retry_attempts);
+    if (!Number.isInteger(retries) || retries < 1 || retries > 10) {
+      next.retry_attempts = ['Retry attempts must be between 1 and 10.'];
+    }
+  }
+
+  localErrors.value = next;
+  return Object.keys(next).length === 0;
+}
+
 function onSubmit() {
+  if (!validate()) {
+    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+    return;
+  }
+
+  localErrors.value = {};
+
   const subscribed_events = eventsText.value
     .split(',')
     .map((item) => item.trim())

@@ -73,7 +73,9 @@ AMS does **not** need direct Twilio credentials if the app already owns the SMS 
 
 | Item | Purpose |
 |------|---------|
-| Outgoing AMS → app webhook | If you later want AMS ticket updates pushed back |
+| Outgoing AMS → app webhook | Required if agent replies in AMS must appear on the website / go out as SMS |
+| Receive endpoint for AMS replies | Website URL that accepts signed POSTs from AMS |
+| SMS send (if channel is SMS) | Website/gateway sends the agent reply text to the customer phone |
 | REST integration + bearer token | For broader API sync (not required for Support SMS ingest) |
 | Map `application_slug` | Links the ticket to the correct AMS Application |
 
@@ -145,11 +147,11 @@ await fetch(process.env.AMS_WEBHOOK_URL, {
 
 ## Standard events
 
-| Event | Ticket `source` | Use when |
-|-------|-----------------|----------|
-| `support.sms.received` | `sms` | Inbound SMS to the app’s support number |
-| `support.message.received` | `api` (or `channel`) | Web form, chat, in-app help |
-| `support.ticket.created` | `api` (or `channel`) | App already modeled a ticket |
+| Event | Ticket `source` | Use when | Reply mode back to app |
+|-------|-----------------|----------|------------------------|
+| `support.sms.received` | `sms` | Inbound SMS to the app’s support number | **SMS reply** (`support.sms.sent`) |
+| `support.message.received` | `chat` / `web` / `api` / … | Live chat, Support, Complaint form | **Live chat** (`support.reply.sent`) |
+| `support.ticket.created` | `api` (or `channel`) | App already modeled a ticket | Live chat or SMS from `channel` |
 
 ### `data` fields
 
@@ -165,14 +167,216 @@ await fetch(process.env.AMS_WEBHOOK_URL, {
 | `priority` | Optional | `low` … `emergency` |
 | `channel` | Optional | Overrides source for non-SMS events (`email`, `chat`, `web`, …) |
 | `involves_personal_data` | Optional | `true` → auto Compliance privacy request |
+| `ticket_uuid` / `ticket_number` | Optional | **Follow-up** — append to existing AMS ticket Conversation instead of creating a new ticket |
 
 ---
 
 ## Where it appears in AMS
 
 - **Support → Tickets** — new ticket, `source = SMS` (or API/Web/…)  
+- **Support → Ticket → Conversation** — inbound SMS/message body as the first customer message  
+- **Support → Ticket → Reply** — agent answers with Public / Private / Internal  
+- **Compliance → Privacy Request → Linked Support conversation** — same reply path when the ticket was escalated for personal data (Public SMS replies still leave via outgoing webhook)  
 - **Webhooks → Logs** — receive + ingest result  
 - **Compliance → Privacy Requests** — only if `involves_personal_data=true`
+
+---
+
+## How agent replies show on the connected website
+
+### Reply modes (important)
+
+AMS uses **one Conversation UI** for everything. How the Public reply leaves AMS depends on the ticket channel:
+
+| Inbound type | Ticket `source` / `channel` | Public reply behaves like | Connected website must |
+|--------------|-----------------------------|---------------------------|------------------------|
+| **Support** (help / live chat) | `chat`, `web`, `portal`, `api` | **Live chat** | Append message to the same chat thread (no SMS) |
+| **Complaint** (same chat UX) | `chat`, `web`, `portal`, `api` | **Live chat** | Append message to the same chat / complaint thread |
+| **SMS** | `sms` | **SMS reply** | Send plain-text SMS to customer phone via your gateway |
+
+Same agent action in AMS: **Public reply → Send**.  
+Different delivery on the website:
+
+```
+Support / Complaint  →  live chat bubble on website
+SMS                  →  SMS text back to customer phone
+```
+
+Private reply and Internal note never leave AMS.
+
+### What you see in AMS (already live)
+
+On **Support → Tickets → open ticket**:
+
+| UI block | Role |
+|----------|------|
+| **Conversation** | Full message history (customer + agent) — live-chat style thread |
+| **Reply** | Composer: **Public reply** / Private reply / Internal note |
+
+| Reply type | Visible in AMS Conversation | Leaves AMS to connected app |
+|------------|-----------------------------|-----------------------------|
+| **Public reply** | Yes | Yes — as **live chat** or **SMS**, based on ticket source |
+| **Private reply** | Yes (staff) | No |
+| **Internal note** | Yes (staff only) | No |
+
+### End-to-end: Support / Complaint = live chat
+
+```
+Customer opens live chat / complaint form on website
+        │
+        ▼
+POST support.message.received  (channel=chat or web)
+        │
+        ▼
+AMS Support ticket → Conversation (chat thread)
+        │
+        ▼
+Agent Public reply → Send
+        │
+        ▼
+AMS Outgoing: support.reply.sent  (channel=chat|web|…)
+        │
+        ▼
+Website: show agent bubble in the same live-chat / complaint thread
+         (do NOT send SMS)
+```
+
+### End-to-end: SMS = SMS reply
+
+```
+Customer SMS → your website/gateway
+        │
+        ▼
+POST support.sms.received → AMS ticket (source=sms)
+        │
+        ▼
+Agent Public reply → Send
+        │
+        ▼
+AMS Outgoing: support.reply.sent + support.sms.sent
+        │
+        ▼
+Website / gateway: send body_plain as SMS to customer phone
+         (also store in your SMS history if you have one)
+```
+
+### AMS setup for replies (Outgoing webhook)
+
+In AMS UI (**after** Incoming is working):
+
+1. **Webhooks → Create**
+   - Direction: **Outgoing**
+   - URL: your website endpoint, e.g. `https://your-site.test/api/ams/support-replies`
+   - Company: same company as the Incoming webhook
+   - Status: **Active**
+   - Secret: shared secret (can match Incoming, or use a separate reply secret)
+   - Signature algorithm: `hmac_sha256`
+   - Subscribed events (recommended):  
+     `support.reply.sent`, `support.sms.sent`, `support.ticket.updated`
+2. Keep queue workers running (`webhooks` queue) so deliveries leave AMS
+3. Confirm deliveries under **Webhooks → Logs**
+
+### What the website must implement (receive AMS reply)
+
+| Item | Purpose |
+|------|---------|
+| Public HTTPS (or local) URL | AMS POSTs agent replies here |
+| HMAC verify | Same rules as Incoming (verify raw body) |
+| Idempotency on `message_uuid` / `message_id` | Ignore duplicate deliveries |
+| Thread mapping | Match `ticket_uuid` or original inbound `message_id` / `external_id` |
+| Live-chat UI insert | If `channel` is `chat` / `web` / `portal` / `api` → append bubble to Support/Complaint thread |
+| SMS send | If `channel` / event is SMS → send `body_plain` to customer phone |
+
+### Expected payload (contract)
+
+**Live chat / Support / Complaint** (`support.reply.sent`):
+
+```json
+{
+  "event": "support.reply.sent",
+  "timestamp": "2026-08-07T10:30:00+00:00",
+  "data": {
+    "ticket_uuid": "…",
+    "ticket_number": "TKT-…",
+    "message_uuid": "…",
+    "message_id": "…",
+    "visibility": "public",
+    "author_type": "agent",
+    "body": "<p>Thanks — we are looking into your complaint.</p>",
+    "body_plain": "Thanks — we are looking into your complaint.",
+    "channel": "chat",
+    "source": "chat",
+    "application_slug": "my-shop-app",
+    "external_message_id": "chat-thread-42"
+  }
+}
+```
+
+**SMS reply** (also fires `support.sms.sent` with the same `data`):
+
+```json
+{
+  "event": "support.sms.sent",
+  "data": {
+    "channel": "sms",
+    "source": "sms",
+    "body_plain": "Hello, how can I help you?",
+    "customer_phone": "+8801700000000",
+    "from": "+8801800000000",
+    "to": "+8801700000000",
+    "external_message_id": "sms-demo-1"
+  }
+}
+```
+
+Notes:
+
+- Only **`visibility=public`** agent replies leave AMS.
+- **Live chat rule:** if `channel` ≠ `sms` → show in website chat UI; do not SMS.
+- **SMS rule:** if `event=support.sms.sent` or `channel=sms` → send SMS with **`body_plain`**.
+- Prefer `body` (HTML) for chat UI; prefer `body_plain` for SMS.
+- Payload also includes `reply_mode`: `live_chat` or `sms` — use this if you do not want to branch on `channel` yourself.
+
+### Minimal PHP sketch (website receive)
+
+```php
+$raw = file_get_contents('php://input');
+$sig = $_SERVER['HTTP_X_AMS_SIGNATURE'] ?? '';
+$expected = 'sha256='.hash_hmac('sha256', $raw, env('AMS_WEBHOOK_SECRET'));
+
+if (! hash_equals($expected, $sig) && ! hash_equals(hash_hmac('sha256', $raw, env('AMS_WEBHOOK_SECRET')), $sig)) {
+    abort(401);
+}
+
+$payload = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+$event = $payload['event'] ?? '';
+$data = $payload['data'] ?? [];
+$mode = $data['reply_mode'] ?? (
+    (($data['channel'] ?? '') === 'sms' || $event === 'support.sms.sent') ? 'sms' : 'live_chat'
+);
+
+if ($mode === 'sms') {
+    // SMS reply → send text to customer phone
+    // SmsGateway::send($data['to'] ?? $data['customer_phone'], $data['body_plain']);
+} elseif ($event === 'support.reply.sent') {
+    // Support / Complaint → live chat bubble on same thread
+    // ChatThread::appendAgentReply($data['ticket_uuid'], $data['body'], $data['external_message_id']);
+}
+```
+
+### Current status (read before you connect)
+
+| Direction | Status |
+|-----------|--------|
+| App → AMS (SMS / chat / message) | **Ready** — Incoming webhook → Support ticket + Conversation |
+| App → AMS follow-up (`ticket_uuid`) | **Ready** — appends to same ticket Conversation |
+| AMS Conversation (live-chat style UI) | **Ready** — Public / Private / Internal |
+| AMS Support → App live chat (`support.reply.sent`) | **Ready** — Outgoing webhook on Public reply |
+| AMS Support → App SMS (`support.sms.sent`) | **Ready** — also fired when ticket `source=sms` |
+| AMS Compliance → App SMS / chat | **Ready** — Privacy Request linked conversation uses the same Public reply webhooks |
+
+Connect **Incoming** first (customer message → AMS).  
+Then ensure **Outgoing** webhook URL is set on the website so Public replies return as **live chat** or **SMS**.
 
 ---
 

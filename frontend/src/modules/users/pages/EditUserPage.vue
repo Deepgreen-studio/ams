@@ -15,6 +15,7 @@
         :loading="usersStore.saving"
         :errors="usersStore.fieldErrors"
         :error="usersStore.error || ''"
+        :role-options="roleOptions"
         submit-label="Save changes"
         :require-password="false"
         @submit="onSubmit"
@@ -25,18 +26,23 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import UserForm from '@/modules/users/components/UserForm.vue';
+import { useRolesStore } from '@/modules/roles/stores/roles';
 import { useUsersStore } from '@/modules/users/stores/users';
 
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
+const rolesStore = useRolesStore();
+
+const roleOptions = computed(() => rolesStore.roles || []);
 
 onMounted(() => {
   usersStore.fetchUser(route.params.id);
+  rolesStore.fetchRoles({ per_page: 100, sort_by: 'name', sort_dir: 'asc', page: 1 });
 });
 
 async function onSubmit(payload) {

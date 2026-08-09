@@ -1,9 +1,5 @@
 <template>
   <form class="space-y-6" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ error }}
-    </div>
-
     <div class="grid gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Display name</label>
@@ -30,7 +26,7 @@
         <textarea
           v-model="form.description"
           rows="3"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full rounded-[12px] border border-slate-300 px-3 py-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
         />
       </div>
     </div>
@@ -48,6 +44,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -59,6 +56,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['submit', 'cancel']);
+const toast = useToast();
 
 const form = reactive(createForm(props.initial));
 
@@ -66,6 +64,15 @@ watch(
   () => props.initial,
   (value) => Object.assign(form, createForm(value)),
   { deep: true }
+);
+
+watch(
+  () => props.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
 );
 
 function createForm(value = {}) {

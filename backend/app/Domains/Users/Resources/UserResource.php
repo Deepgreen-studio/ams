@@ -28,6 +28,15 @@ class UserResource extends JsonResource
             'timezone' => $this->timezone,
             'language' => $this->language,
             'status' => $this->status?->value ?? $this->status,
+            'roles' => $this->whenLoaded('roles', function () {
+                return $this->roles->map(static fn ($role) => [
+                    'id' => $role->id,
+                    'uuid' => $role->uuid,
+                    'name' => $role->name,
+                    'display_name' => $role->display_name,
+                    'is_system' => (bool) $role->is_system,
+                ])->values();
+            }),
             'is_active' => (bool) $this->is_active,
             'email_verified' => $this->hasVerifiedEmail(),
             'email_verified_at' => $this->email_verified_at,

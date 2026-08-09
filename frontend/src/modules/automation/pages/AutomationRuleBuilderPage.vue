@@ -16,41 +16,61 @@
 
     <AutomationSubnav />
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
-    </div>
-    <div v-if="store.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-      {{ store.successMessage }}
-    </div>
-
-    <form class="space-y-6" @submit.prevent="submit">
+    <form class="space-y-6" novalidate @submit.prevent="submit">
       <section class="rounded-xl border border-slate-200 bg-white p-5">
         <h2 class="mb-4 text-sm font-semibold text-slate-900">1. Trigger</h2>
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Name</span>
-            <input v-model="form.name" required class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model="form.name"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('name')"
+            />
+            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
           <label class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Trigger type</span>
-            <select v-model="form.trigger_type" required class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <select
+              v-model="form.trigger_type"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('trigger_type')"
+            >
               <option v-for="item in store.catalog.trigger_types" :key="item.value" :value="item.value">
                 {{ item.label }}
               </option>
             </select>
+            <p v-if="fieldErrors.trigger_type" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.trigger_type[0] }}
+            </p>
           </label>
           <label v-if="form.trigger_type !== 'schedule'" class="block text-sm md:col-span-2">
             <span class="mb-1 block font-medium text-slate-700">Event</span>
-            <select v-model="form.event_key" class="w-full rounded-lg border border-slate-300 px-3 py-2">
+            <select
+              v-model="form.event_key"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('event_key')"
+            >
               <option value="">Select event</option>
               <option v-for="item in store.catalog.events" :key="item.value" :value="item.value">
                 {{ item.label }}
               </option>
             </select>
+            <p v-if="fieldErrors.event_key" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.event_key[0] }}
+            </p>
           </label>
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Cron expression</span>
-            <input v-model="form.schedule_cron" placeholder="0 8 * * *" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model="form.schedule_cron"
+              placeholder="0 8 * * *"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('schedule_cron')"
+            />
+            <p v-if="fieldErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.schedule_cron[0] }}
+            </p>
           </label>
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Timezone</span>
@@ -58,7 +78,16 @@
           </label>
           <label v-if="form.trigger_type === 'time'" class="block text-sm">
             <span class="mb-1 block font-medium text-slate-700">Delay (minutes)</span>
-            <input v-model.number="form.delay_minutes" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <input
+              v-model.number="form.delay_minutes"
+              type="number"
+              min="1"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              :class="fieldClass('delay_minutes')"
+            />
+            <p v-if="fieldErrors.delay_minutes" class="mt-1 text-xs text-rose-600">
+              {{ fieldErrors.delay_minutes[0] }}
+            </p>
           </label>
           <label class="block text-sm md:col-span-2">
             <span class="mb-1 block font-medium text-slate-700">Description</span>
@@ -132,6 +161,8 @@
           </button>
         </div>
 
+        <p v-if="fieldErrors.actions" class="mb-3 text-xs text-rose-600">{{ fieldErrors.actions[0] }}</p>
+
         <div class="space-y-3">
           <div
             v-for="(action, index) in form.actions"
@@ -201,15 +232,18 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { useToast } from '@/composables/useToast';
 import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.vue';
 import { useAutomationStore } from '@/modules/automation/stores/automation';
 
 const store = useAutomationStore();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
+const fieldErrors = ref({});
 
 const isEdit = computed(() => Boolean(route.params.id));
 
@@ -238,6 +272,28 @@ const selectedEventFields = computed(() => {
   const event = store.catalog.events.find((item) => item.value === form.event_key);
   return event?.sample_fields || [];
 });
+
+watch(
+  () => store.error,
+  (message) => {
+    if (message) {
+      toast.error(message, 'Validation Failed');
+    }
+  }
+);
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (message) {
+      toast.success(message);
+    }
+  }
+);
+
+function fieldClass(field) {
+  return fieldErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
 
 function addCondition(field = '') {
   form.conditions.push({
@@ -293,9 +349,51 @@ function hydrate(rule) {
   if (!form.actions.length) {
     addAction();
   }
+  fieldErrors.value = {};
+}
+
+function validate() {
+  const next = {};
+
+  if (!String(form.name || '').trim()) {
+    next.name = ['The name field is required.'];
+  }
+
+  if (!String(form.trigger_type || '').trim()) {
+    next.trigger_type = ['The trigger type field is required.'];
+  }
+
+  if (form.trigger_type !== 'schedule' && !String(form.event_key || '').trim()) {
+    next.event_key = ['Please select an event.'];
+  }
+
+  if (form.trigger_type === 'schedule' && !String(form.schedule_cron || '').trim()) {
+    next.schedule_cron = ['The cron expression field is required.'];
+  }
+
+  if (form.trigger_type === 'time') {
+    const delay = Number(form.delay_minutes);
+    if (!Number.isInteger(delay) || delay < 1) {
+      next.delay_minutes = ['Delay must be at least 1 minute.'];
+    }
+  }
+
+  if (!form.actions.length) {
+    next.actions = ['Add at least one action.'];
+  }
+
+  fieldErrors.value = next;
+  return Object.keys(next).length === 0;
 }
 
 async function submit() {
+  if (!validate()) {
+    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+    return;
+  }
+
+  fieldErrors.value = {};
+
   const payload = {
     name: form.name,
     description: form.description,
@@ -318,18 +416,26 @@ async function submit() {
     })),
   };
 
-  const saved = await store.saveRule(payload, isEdit.value ? route.params.id : null);
-  if (!isEdit.value && saved?.uuid) {
-    await router.push({ name: 'automation.rules.edit', params: { id: saved.uuid } });
+  try {
+    const saved = await store.saveRule(payload, isEdit.value ? route.params.id : null);
+    if (!isEdit.value && saved?.uuid) {
+      await router.push({ name: 'automation.rules.edit', params: { id: saved.uuid } });
+    }
+  } catch {
+    // Store sets error; toast watch handles display.
   }
 }
 
 async function runTest() {
-  const result = await store.testRule(route.params.id, {
-    priority: 'high',
-    subject: 'Automation test context',
-  });
-  window.alert(`Test status: ${result?.status || 'unknown'}\n${result?.message || ''}`);
+  try {
+    const result = await store.testRule(route.params.id, {
+      priority: 'high',
+      subject: 'Automation test context',
+    });
+    toast.success(`Test status: ${result?.status || 'unknown'}. ${result?.message || ''}`.trim());
+  } catch {
+    // Store sets error; toast watch handles display.
+  }
 }
 
 onMounted(async () => {

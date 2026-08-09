@@ -177,8 +177,8 @@ const navigationSections = [
         title: 'Support & Governance',
         items: [
             { name: 'support.dashboard', label: 'Support', to: { name: 'support.dashboard' }, icon: LifebuoyIcon, match: ['support.'] },
-            { name: 'analytics.dashboard', label: 'Analytics', to: { name: 'analytics.dashboard' }, icon: ChartBarIcon, match: ['analytics.'] },
             { name: 'compliance.dashboard', label: 'Compliance', to: { name: 'compliance.dashboard' }, icon: ScaleIcon, match: ['compliance.'] },
+            { name: 'analytics.dashboard', label: 'Analytics', to: { name: 'analytics.dashboard' }, icon: ChartBarIcon, match: ['analytics.'] },
             { name: 'audit.activity', label: 'Audit Logs', to: { name: 'audit.activity' }, icon: ClipboardDocumentListIcon, match: ['audit.'] },
         ],
     },

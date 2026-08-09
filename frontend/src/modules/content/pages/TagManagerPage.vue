@@ -226,6 +226,7 @@
           <TagForm
             :initial="editing || {}"
             :loading="taxonomy.saving"
+            :errors="taxonomy.fieldErrors"
             :error="taxonomy.error || ''"
             :submit-label="editing ? 'Save changes' : 'Create tag'"
             @submit="saveTag"

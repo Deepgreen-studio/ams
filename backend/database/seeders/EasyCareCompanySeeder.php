@@ -38,6 +38,7 @@ class EasyCareCompanySeeder extends Seeder
         $integration = $this->seedIntegration($company, $actor);
         $this->seedApplication($company, $integration, $actor, ApplicationPlatform::Web, 'easycare-web');
         $this->seedIncomingWebhook($company, $integration, $actor);
+        $this->seedOutgoingWebhook($company, $integration, $actor);
     }
 
     private function seedCompany(?User $actor): Company
@@ -214,6 +215,69 @@ class EasyCareCompanySeeder extends Seeder
             .rtrim((string) config('app.url'), '/')
             .'/api/v1/webhooks/incoming/easycare'
         );
+
+        return $webhook->fresh();
+    }
+
+    private function seedOutgoingWebhook(Company $company, Integration $integration, ?User $actor): Webhook
+    {
+        $secret = (string) env('EASYCARE_AMS_WEBHOOK_SECRET', env('AMS_WEBHOOK_SECRET', 'easycare-ams-secret'));
+        $replyUrl = rtrim((string) env(
+            'EASYCARE_SUPPORT_REPLY_URL',
+            rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/').'/api/v1/ams/support-replies'
+        ), '/');
+
+        // Normalize if env base already includes path accidentally.
+        if (! str_contains($replyUrl, '/api/v1/ams/support-replies')) {
+            $replyUrl = rtrim($replyUrl, '/').'/api/v1/ams/support-replies';
+        }
+
+        $webhook = Webhook::query()->firstOrCreate(
+            [
+                'company_id' => $company->id,
+                'slug' => 'easycare-replies',
+            ],
+            [
+                'integration_id' => $integration->id,
+                'name' => 'EasyCare Support Replies',
+                'description' => 'Pushes AMS public agent replies to EasyCare (support.reply.sent / support.sms.sent).',
+                'direction' => WebhookDirection::Outgoing,
+                'url' => $replyUrl,
+                'status' => WebhookStatus::Active,
+                'secret' => $secret,
+                'signature_algorithm' => WebhookSignatureAlgorithm::HmacSha256,
+                'signature_header' => 'X-AMS-Signature',
+                'subscribed_events' => [
+                    'support.reply.sent',
+                    'support.sms.sent',
+                    'support.ticket.updated',
+                ],
+                'timeout' => 30,
+                'retry_attempts' => 3,
+                'retry_delay_seconds' => 60,
+                'verify_ssl' => false,
+                'created_by' => $actor?->id,
+                'updated_by' => $actor?->id,
+            ]
+        );
+
+        $webhook->forceFill([
+            'integration_id' => $integration->id,
+            'direction' => WebhookDirection::Outgoing,
+            'url' => $replyUrl,
+            'status' => WebhookStatus::Active,
+            'secret' => $secret,
+            'signature_algorithm' => WebhookSignatureAlgorithm::HmacSha256,
+            'signature_header' => 'X-AMS-Signature',
+            'subscribed_events' => [
+                'support.reply.sent',
+                'support.sms.sent',
+                'support.ticket.updated',
+            ],
+            'updated_by' => $actor?->id,
+        ])->save();
+
+        $this->command?->info('EasyCare outgoing reply URL: '.$replyUrl);
 
         return $webhook->fresh();
     }

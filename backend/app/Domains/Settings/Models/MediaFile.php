@@ -82,15 +82,25 @@ class MediaFile extends Model
 
     public function getPublicUrlAttribute(): ?string
     {
-        if (filled($this->url)) {
-            return $this->url;
-        }
-
         if (blank($this->path)) {
-            return null;
+            return filled($this->url) ? $this->url : null;
         }
 
-        return Storage::disk($this->disk)->url($this->path);
+        try {
+            $url = Storage::disk($this->disk)->url($this->path);
+        } catch (\Throwable) {
+            return filled($this->url) ? $this->url : null;
+        }
+
+        // Public disk: return a same-origin path so Vite/dev proxies and any host work.
+        // Absolute APP_URL hosts (e.g. ams.test) often differ from the API proxy target.
+        if ($this->disk === 'public') {
+            $path = parse_url($url, PHP_URL_PATH);
+
+            return is_string($path) && $path !== '' ? $path : $url;
+        }
+
+        return $url;
     }
 
     public function getHumanSizeAttribute(): string

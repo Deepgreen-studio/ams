@@ -106,6 +106,48 @@ class GenericSupportIncomingWebhookIngestTest extends TestCase
         $this->assertSame('sms', $ticket->source->value);
         $this->assertSame('I need help with my delivery.', strtok($ticket->description, "\n"));
         $this->assertNotNull($ticket->application_id);
+        $this->assertSame(1, $ticket->messages()->count());
+        $this->assertSame('customer', $ticket->messages()->first()->author_type->value);
+    }
+
+    public function test_follow_up_sms_appends_to_same_ticket_when_ticket_uuid_provided(): void
+    {
+        $first = [
+            'event' => 'support.sms.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'sms-thread-1',
+                'from' => '+8801700000099',
+                'to' => '+8801800000000',
+                'body' => 'First SMS',
+            ],
+        ];
+
+        $create = $this->postSigned($first)->assertOk();
+        $ticketUuid = $create->json('data.ingest.support_ticket_uuid');
+        $this->assertNotEmpty($ticketUuid);
+
+        $followUp = [
+            'event' => 'support.sms.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'sms-thread-2',
+                'from' => '+8801700000099',
+                'to' => '+8801800000000',
+                'body' => 'Second SMS on same thread',
+                'ticket_uuid' => $ticketUuid,
+            ],
+        ];
+
+        $this->postSigned($followUp)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.actions.0', 'support_ticket_message_appended')
+            ->assertJsonPath('data.ingest.support_ticket_uuid', $ticketUuid);
+
+        $this->assertSame(1, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $ticket = SupportTicket::query()->where('uuid', $ticketUuid)->first();
+        $this->assertNotNull($ticket);
+        $this->assertSame(2, $ticket->messages()->count());
     }
 
     public function test_support_message_received_uses_api_source_by_default(): void

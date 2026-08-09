@@ -140,7 +140,10 @@ class SupportTicketConversationService
             );
 
             event(new SupportTicketMessageCreated($message->loadMissing('ticket'), $actor));
-            $this->slaTrackingService->recordFirstResponse($ticket->fresh() ?? $ticket, $actor, $visibility);
+
+            if ($authorType === SupportTicketMessageAuthorType::Agent) {
+                $this->slaTrackingService->recordFirstResponse($ticket->fresh() ?? $ticket, $actor, $visibility);
+            }
 
             return $message->load(['author:id,uuid,full_name,email', 'attachments', 'reads']);
         });

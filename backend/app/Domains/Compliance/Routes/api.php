@@ -62,6 +62,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
                 ->middleware('permission:'.CompliancePermission::UPDATE);
             Route::post('/{privacyRequest}/complete', [PrivacyRequestController::class, 'complete'])
                 ->middleware('permission:'.CompliancePermission::UPDATE);
+            Route::get('/{privacyRequest}/conversation', [PrivacyRequestController::class, 'conversation'])
+                ->middleware('permission:'.CompliancePermission::VIEW);
+            Route::post('/{privacyRequest}/reply', [PrivacyRequestController::class, 'reply'])
+                ->middleware('permission:'.CompliancePermission::UPDATE);
         });
 
         Route::get('/consents/dashboard', [ConsentController::class, 'dashboard'])

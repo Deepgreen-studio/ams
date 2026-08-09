@@ -18,6 +18,16 @@
           <StatusBadge :status="user?.status" />
         </div>
         <p class="mt-1 text-sm text-slate-500">{{ user?.email }}</p>
+        <div v-if="roles.length" class="mt-2 flex flex-wrap gap-1.5">
+          <RoleBadge
+            v-for="role in roles"
+            :key="role.uuid || role.name"
+            :name="role.name"
+            :display-name="role.display_name"
+            :system="Boolean(role.is_system)"
+          />
+        </div>
+        <p v-else class="mt-2 text-xs text-slate-400">No role assigned</p>
       </div>
     </div>
 
@@ -53,6 +63,7 @@
 <script setup>
 import { computed } from 'vue';
 import { formatDate } from '@/utils/formatters';
+import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
 const props = defineProps({
@@ -61,6 +72,8 @@ const props = defineProps({
     default: null,
   },
 });
+
+const roles = computed(() => props.user?.roles || []);
 
 const initials = computed(() => {
   const first = props.user?.first_name?.[0] || '';

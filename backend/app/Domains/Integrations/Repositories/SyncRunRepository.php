@@ -98,6 +98,8 @@ class SyncRunRepository extends BaseRepository
 
         $totals = (clone $query)->selectRaw('
             COUNT(*) as total_runs,
+            SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = "queued" THEN 1 ELSE 0 END) as queued,
             SUM(CASE WHEN status = "running" THEN 1 ELSE 0 END) as running,
             SUM(CASE WHEN status = "completed" THEN 1 ELSE 0 END) as completed,
             SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) as failed,
@@ -117,6 +119,8 @@ class SyncRunRepository extends BaseRepository
         return [
             'totals' => [
                 'total_runs' => (int) ($totals->total_runs ?? 0),
+                'pending' => (int) ($totals->pending ?? 0),
+                'queued' => (int) ($totals->queued ?? 0),
                 'running' => (int) ($totals->running ?? 0),
                 'completed' => (int) ($totals->completed ?? 0),
                 'failed' => (int) ($totals->failed ?? 0),

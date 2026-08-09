@@ -227,6 +227,7 @@
             :initial="editing || {}"
             :parent-options="taxonomy.categories"
             :loading="taxonomy.saving"
+            :errors="taxonomy.fieldErrors"
             :error="taxonomy.error || ''"
             :submit-label="editing ? 'Save changes' : 'Create category'"
             @submit="saveCategory"

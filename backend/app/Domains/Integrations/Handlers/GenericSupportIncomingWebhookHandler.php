@@ -7,9 +7,14 @@ use App\Domains\Integrations\Contracts\IncomingWebhookHandlerInterface;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Domains\Support\Enums\SupportTicketCategory;
+use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
+use App\Domains\Support\Enums\SupportTicketMessageVisibility;
 use App\Domains\Support\Enums\SupportTicketPriority;
 use App\Domains\Support\Enums\SupportTicketSource;
+use App\Domains\Support\Enums\SupportTicketStatus;
 use App\Domains\Support\Models\SupportTicket;
+use App\Domains\Support\Models\SupportTicketMessage;
+use App\Domains\Support\Services\SupportTicketConversationService;
 use App\Domains\Support\Services\SupportTicketService;
 use App\Models\User;
 
@@ -18,6 +23,11 @@ use App\Models\User;
  *
  * External apps POST signed payloads to their AMS incoming webhook URL using
  * the standard Support events below. No app-specific slug is required.
+ *
+ * Two-way SMS/chat:
+ * - First message creates a Support ticket + customer Conversation bubble.
+ * - Follow-ups with ticket_uuid (or matching open SMS phone thread) append
+ *   to the same ticket Conversation instead of opening a new ticket.
  */
 class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInterface
 {
@@ -32,6 +42,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
 
     public function __construct(
         private readonly SupportTicketService $supportTicketService,
+        private readonly SupportTicketConversationService $conversationService,
     ) {}
 
     public function supports(Webhook $webhook): bool
@@ -67,12 +78,12 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         $externalId = $this->resolveExternalId($data, $log);
         $idempotencyTag = $this->idempotencyTag($webhook, $eventName, $externalId);
 
-        $existing = $this->findExistingTicket((int) $webhook->company_id, $idempotencyTag);
+        $existing = $this->findExistingByIdempotencyTag((int) $webhook->company_id, $idempotencyTag);
         if ($existing !== null) {
             return [
                 'handled' => true,
                 'skipped' => true,
-                'reason' => 'Idempotent skip — Support ticket already exists for this message.',
+                'reason' => 'Idempotent skip — Support ticket already ingested this message.',
                 'support_ticket_uuid' => $existing->uuid,
                 'support_ticket_number' => $existing->ticket_number,
                 'privacy_request_uuid' => $existing->privacyRequest?->uuid,
@@ -82,6 +93,25 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         }
 
         $source = $this->resolveSource($eventName, $data);
+        $threadTicket = $this->resolveThreadTicket((int) $webhook->company_id, $data, $source);
+
+        if ($threadTicket !== null) {
+            $this->appendCustomerMessage($threadTicket, $body, $actor);
+            $this->rememberIdempotencyTag($threadTicket, $idempotencyTag);
+
+            $threadTicket->loadMissing(['privacyRequest']);
+
+            return [
+                'handled' => true,
+                'skipped' => false,
+                'support_ticket_uuid' => $threadTicket->uuid,
+                'support_ticket_number' => $threadTicket->ticket_number,
+                'privacy_request_uuid' => $threadTicket->privacyRequest?->uuid,
+                'privacy_request_number' => $threadTicket->privacyRequest?->request_number,
+                'actions' => ['support_ticket_message_appended'],
+            ];
+        }
+
         $involvesPersonalData = filter_var($data['involves_personal_data'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $application = $this->resolveApplication($webhook, $data);
 
@@ -104,9 +134,10 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             'involves_personal_data' => $involvesPersonalData,
         ], $actor);
 
+        $this->appendCustomerMessage($ticket, $body, $actor);
         $ticket->loadMissing(['privacyRequest']);
 
-        $actions = ['support_ticket_created'];
+        $actions = ['support_ticket_created', 'support_ticket_message_created'];
         if ($ticket->privacy_request_id !== null) {
             $actions[] = 'compliance_privacy_request_created';
         }
@@ -120,6 +151,90 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             'privacy_request_number' => $ticket->privacyRequest?->request_number,
             'actions' => $actions,
         ];
+    }
+
+    private function appendCustomerMessage(SupportTicket $ticket, string $body, User $actor): void
+    {
+        $this->conversationService->createMessage(
+            $ticket->uuid,
+            [
+                'body' => '<p>'.e($body).'</p>',
+                'body_format' => 'html',
+                'visibility' => SupportTicketMessageVisibility::Public->value,
+                'author_type' => SupportTicketMessageAuthorType::Customer->value,
+            ],
+            $actor
+        );
+    }
+
+    private function rememberIdempotencyTag(SupportTicket $ticket, string $idempotencyTag): void
+    {
+        $description = (string) $ticket->description;
+        if (str_contains($description, $idempotencyTag)) {
+            return;
+        }
+
+        $ticket->forceFill([
+            'description' => rtrim($description)."\n".$idempotencyTag,
+        ])->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function resolveThreadTicket(int $companyId, array $data, SupportTicketSource $source): ?SupportTicket
+    {
+        $ticketUuid = trim((string) ($data['ticket_uuid'] ?? $data['support_ticket_uuid'] ?? ''));
+        if ($ticketUuid !== '') {
+            $byUuid = SupportTicket::query()
+                ->where('company_id', $companyId)
+                ->where('uuid', $ticketUuid)
+                ->with(['privacyRequest'])
+                ->first();
+
+            if ($byUuid !== null) {
+                return $byUuid;
+            }
+        }
+
+        $ticketNumber = trim((string) ($data['ticket_number'] ?? $data['support_ticket_number'] ?? ''));
+        if ($ticketNumber !== '') {
+            $byNumber = SupportTicket::query()
+                ->where('company_id', $companyId)
+                ->where('ticket_number', $ticketNumber)
+                ->with(['privacyRequest'])
+                ->first();
+
+            if ($byNumber !== null) {
+                return $byNumber;
+            }
+        }
+
+        if ($source !== SupportTicketSource::Sms) {
+            return null;
+        }
+
+        $from = trim((string) ($data['from'] ?? $data['sender'] ?? $data['customer_phone'] ?? $data['phone'] ?? ''));
+        if ($from === '') {
+            return null;
+        }
+
+        $closed = [
+            SupportTicketStatus::Closed->value,
+            SupportTicketStatus::Cancelled->value,
+        ];
+
+        return SupportTicket::query()
+            ->where('company_id', $companyId)
+            ->where('source', SupportTicketSource::Sms->value)
+            ->whereNotIn('status', $closed)
+            ->where(function ($query) use ($from): void {
+                $query->where('description', 'like', '%from: '.$from.'%')
+                    ->orWhere('description', 'like', '%customer_phone: '.$from.'%');
+            })
+            ->with(['privacyRequest'])
+            ->latest('id')
+            ->first();
     }
 
     /**
@@ -143,13 +258,25 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         return '[ams-support-ingest:'.$slug.':'.$eventName.':'.$externalId.']';
     }
 
-    private function findExistingTicket(int $companyId, string $idempotencyTag): ?SupportTicket
+    private function findExistingByIdempotencyTag(int $companyId, string $idempotencyTag): ?SupportTicket
     {
-        return SupportTicket::query()
+        $byDescription = SupportTicket::query()
             ->where('company_id', $companyId)
             ->where('description', 'like', '%'.$idempotencyTag.'%')
             ->with(['privacyRequest'])
             ->first();
+
+        if ($byDescription !== null) {
+            return $byDescription;
+        }
+
+        $message = SupportTicketMessage::query()
+            ->where('company_id', $companyId)
+            ->where('body', 'like', '%'.$idempotencyTag.'%')
+            ->with(['ticket.privacyRequest'])
+            ->first();
+
+        return $message?->ticket;
     }
 
     /**

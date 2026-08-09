@@ -92,9 +92,11 @@ export const useMonitoringStore = defineStore('monitoring', () => {
 
   async function fetchRealtime(params = {}) {
     state.loading.value = true;
+    state.clearMessages();
     try {
       const { data } = await monitoringService.realtime(params);
       realtime.value = data.data ?? null;
+      return realtime.value;
     } catch (err) {
       state.applyError(err, 'Unable to load real-time status');
       throw err;

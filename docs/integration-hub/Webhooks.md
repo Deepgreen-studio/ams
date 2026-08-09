@@ -45,8 +45,9 @@ Persist log → IncomingWebhookIngestService
         └─ Generic Support handler (support.sms.received / message / ticket)
 ```
 
-For connecting any external website/app so Support SMS lands in AMS, see
-[Connect Any App → Support](./Connect-Any-App-Support.md).
+For connecting any external website/app so Support SMS lands in AMS **and** agent Public replies return to the website / SMS gateway, see
+[Connect Any App → Support](./Connect-Any-App-Support.md)
+(sections: inbound ingest + **How agent replies show on the connected website**).
 
 ## Tables
 

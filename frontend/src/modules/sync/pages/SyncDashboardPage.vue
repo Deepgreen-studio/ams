@@ -131,6 +131,8 @@ const cards = computed(() => {
   const t = totals.value || {};
   return [
     { label: 'Total runs', value: t.total_runs ?? 0 },
+    { label: 'Pending', value: t.pending ?? 0 },
+    { label: 'Queued', value: t.queued ?? 0 },
     { label: 'Running', value: t.running ?? 0 },
     { label: 'Completed', value: t.completed ?? 0 },
     { label: 'Failed', value: t.failed ?? 0 },

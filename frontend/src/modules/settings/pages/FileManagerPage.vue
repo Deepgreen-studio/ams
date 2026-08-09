@@ -13,7 +13,7 @@
         <button
           type="button"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          @click="createFolder"
+          @click="openFolderModal"
         >
           New folder
         </button>
@@ -59,6 +59,13 @@
       </div>
     </SettingsTabs>
 
+    <CreateFolderModal
+      :open="folderModalOpen"
+      :loading="mediaStore.saving"
+      :error="folderModalError"
+      @cancel="closeFolderModal"
+      @submit="submitCreateFolder"
+    />
     <DeleteConfirmation
       :open="Boolean(pending)"
       title="Delete folder"
@@ -75,6 +82,7 @@ import { onMounted, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
 import SearchBar from '@/modules/settings/components/SearchBar.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useMediaStore } from '@/modules/settings/stores/settings';
@@ -82,6 +90,8 @@ import { useMediaStore } from '@/modules/settings/stores/settings';
 const mediaStore = useMediaStore();
 const search = ref('');
 const pending = ref(null);
+const folderModalOpen = ref(false);
+const folderModalError = ref(null);
 
 onMounted(load);
 
@@ -89,11 +99,27 @@ async function load() {
   await mediaStore.fetchFolders({ search: search.value });
 }
 
-async function createFolder() {
-  const name = window.prompt('Folder name');
-  if (!name) return;
-  await mediaStore.createFolder({ name });
-  await load();
+function openFolderModal() {
+  folderModalError.value = null;
+  folderModalOpen.value = true;
+}
+
+function closeFolderModal() {
+  if (mediaStore.saving) return;
+  folderModalOpen.value = false;
+  folderModalError.value = null;
+}
+
+async function submitCreateFolder({ name }) {
+  folderModalError.value = null;
+  try {
+    await mediaStore.createFolder({ name });
+    folderModalOpen.value = false;
+    await load();
+  } catch (err) {
+    folderModalError.value =
+      err?.errors?.name?.[0] || err?.message || 'Unable to create folder';
+  }
 }
 
 function openDelete(folder) {

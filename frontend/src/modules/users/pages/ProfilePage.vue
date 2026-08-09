@@ -32,6 +32,7 @@
           submit-label="Update profile"
           :show-password="false"
           :show-status="false"
+          :show-role="false"
           @submit="onSubmit"
           @cancel="usersStore.fetchProfile()"
         />

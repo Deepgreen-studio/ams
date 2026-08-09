@@ -1,0 +1,12 @@
+{
+  "event": "support.sms.received",
+  "timestamp": "2026-08-09T07:20:00+00:00",
+  "data": {
+    "message_id": "sms-9001",
+    "from": "+8801700000000",
+    "to": "+8801800000000",
+    "body": "Hello, I need help with my order.",
+    "application_slug": "my-shop-web",
+    "involves_personal_data": false
+  }
+}

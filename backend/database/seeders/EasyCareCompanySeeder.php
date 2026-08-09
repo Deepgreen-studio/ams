@@ -24,7 +24,7 @@ use Illuminate\Database\Seeder;
 /**
  * Local EasyCare API (k:\herd\easycare-api) connection for AMS Integration Hub.
  *
- * Default local base URL: http://127.0.0.1:8010
+ * Default local base URL: http://easycare-api.test
  * Override with EASYCARE_API_BASE_URL / EASYCARE_API_TOKEN / EASYCARE_AMS_WEBHOOK_SECRET.
  */
 class EasyCareCompanySeeder extends Seeder
@@ -43,21 +43,23 @@ class EasyCareCompanySeeder extends Seeder
 
     private function seedCompany(?User $actor): Company
     {
+        $base = rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/');
+
         $company = Company::query()->firstOrCreate(
             ['company_name' => 'EasyCare'],
             [
                 'legal_name' => 'EasyCare',
                 'email' => 'admin@easycare.test',
-                'website' => 'http://127.0.0.1:8010',
+                'website' => $base,
                 'country' => 'GB',
                 'timezone' => 'UTC',
                 'language' => 'en',
                 'currency' => 'GBP',
                 'status' => CompanyStatus::Active,
                 'settings' => [
-                    'api_base_url' => rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/'),
-                    'swagger_url' => rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/').'/api/documentation',
-                    'health_url' => rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/').'/health',
+                    'api_base_url' => $base,
+                    'swagger_url' => $base.'/api/documentation',
+                    'health_url' => $base.'/health',
                 ],
                 'created_by' => $actor?->id,
                 'updated_by' => $actor?->id,
@@ -76,7 +78,7 @@ class EasyCareCompanySeeder extends Seeder
 
     private function seedIntegration(Company $company, ?User $actor): Integration
     {
-        $baseUrl = rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/').'/';
+        $baseUrl = rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/').'/';
         $token = (string) env('EASYCARE_API_TOKEN', 'SEED_PLACEHOLDER_TOKEN');
 
         $integration = Integration::query()->firstOrCreate(
@@ -86,7 +88,7 @@ class EasyCareCompanySeeder extends Seeder
             ],
             [
                 'name' => 'EasyCare API',
-                'description' => 'Local EasyCare healthcare REST API (Sanctum bearer). Default http://127.0.0.1:8010.',
+                'description' => 'Local EasyCare healthcare REST API (Sanctum bearer). Default http://easycare-api.test.',
                 'type' => IntegrationType::RestApi,
                 'status' => IntegrationStatus::Active,
                 'authentication_type' => IntegrationAuthenticationType::BearerToken,
@@ -224,7 +226,7 @@ class EasyCareCompanySeeder extends Seeder
         $secret = (string) env('EASYCARE_AMS_WEBHOOK_SECRET', env('AMS_WEBHOOK_SECRET', 'easycare-ams-secret'));
         $replyUrl = rtrim((string) env(
             'EASYCARE_SUPPORT_REPLY_URL',
-            rtrim((string) env('EASYCARE_API_BASE_URL', 'http://127.0.0.1:8010'), '/').'/api/v1/ams/support-replies'
+            rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/').'/api/v1/ams/support-replies'
         ), '/');
 
         // Normalize if env base already includes path accidentally.

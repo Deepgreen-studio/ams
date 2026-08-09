@@ -32,7 +32,11 @@ class WebhookReceiver
         $secret = (string) ($webhook['secret'] ?? '');
         $algorithm = (string) ($webhook['signature_algorithm'] ?? 'hmac_sha256');
         $signatureHeader = (string) ($webhook['signature_header'] ?? 'X-AMS-Signature');
-        $provided = $request->header($signatureHeader) ?: $request->header('X-Hub-Signature-256');
+        // Prefer configured header, then common AMS / EasyCare / GitHub-style fallbacks.
+        $provided = $request->header($signatureHeader)
+            ?: $request->header('X-AMS-Signature')
+            ?: $request->header('X-EasyCare-Signature')
+            ?: $request->header('X-Hub-Signature-256');
 
         if ($secret !== '') {
             $this->signatureValidator->assertValid($rawBody, $secret, $provided, $algorithm);

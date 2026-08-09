@@ -1,0 +1,13 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T07:15:00+00:00",
+  "data": {
+    "message_id": "web-disable-12",
+    "subject": "Temporarily disable my account",
+    "body": "Please temporarily disable my account while I travel.",
+    "customer_email": "travel@example.com",
+    "channel": "web",
+    "application_slug": "my-shop-web",
+    "involves_personal_data": false
+  }
+}

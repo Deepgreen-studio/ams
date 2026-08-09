@@ -1,0 +1,16 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T07:00:00+00:00",
+  "data": {
+    "message_id": "web-help-1001",
+    "subject": "Cannot login",
+    "body": "I forgot my password and cannot reset it.",
+    "customer_name": "Rahim Ahmed",
+    "customer_email": "rahim@example.com",
+    "channel": "web",
+    "priority": "medium",
+    "category": "customer_support",
+    "application_slug": "my-shop-web",
+    "involves_personal_data": false
+  }
+}

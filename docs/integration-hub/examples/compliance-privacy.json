@@ -1,0 +1,16 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T07:10:00+00:00",
+  "data": {
+    "message_id": "web-privacy-77",
+    "subject": "Delete my health information",
+    "body": "Please erase my data and remove my health information under GDPR.",
+    "customer_name": "Nusrat Jahan",
+    "customer_email": "nusrat@example.com",
+    "customer_phone": "+8801700000000",
+    "channel": "web",
+    "priority": "high",
+    "application_slug": "my-shop-web",
+    "involves_personal_data": true
+  }
+}

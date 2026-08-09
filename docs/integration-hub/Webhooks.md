@@ -49,6 +49,10 @@ For connecting any external website/app so Support SMS lands in AMS **and** agen
 [Connect Any App → Support](./Connect-Any-App-Support.md)
 (sections: inbound ingest + **How agent replies show on the connected website**).
 
+For **Support vs Compliance auto-routing** (help / complaint / privacy forms) with copy-paste examples, see
+[Connect Website → Support + Compliance](./Connect-Website-Support-Compliance.md)
+and [example payloads](./examples/).
+
 ## Tables
 
 | Table | Purpose |

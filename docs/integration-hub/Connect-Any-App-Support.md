@@ -2,6 +2,10 @@
 
 Any website or mobile app can send support messages (including SMS) into AMS **Support** tickets using a signed **incoming webhook**. EasyCare is only one example — the same path works for every connected app.
 
+**Connecting another website with Support vs Compliance auto-routing?**  
+→ Use the dedicated guide: [Connect Website → Support + Compliance](./Connect-Website-Support-Compliance.md)  
+→ Copy-paste payloads: [examples/](./examples/)
+
 ## What AMS already provides
 
 1. **Company** — tenant that owns the app  
@@ -168,6 +172,19 @@ await fetch(process.env.AMS_WEBHOOK_URL, {
 | `channel` | Optional | Overrides source for non-SMS events (`email`, `chat`, `web`, …) |
 | `involves_personal_data` | Optional | `true` → auto Compliance privacy request |
 | `ticket_uuid` / `ticket_number` | Optional | **Follow-up** — append to existing AMS ticket Conversation instead of creating a new ticket |
+
+### Support vs Compliance (auto-route)
+
+Every ingest creates a **Support** ticket. AMS then decides Compliance escalation:
+
+| Website sends | Result |
+|---------------|--------|
+| `involves_personal_data: false` (help / complaint / disable account) | **Support only** |
+| `involves_personal_data: true` (GDPR / delete data / health privacy) | **Support + Compliance** Privacy Request (linked) |
+| Flag omitted, but subject/body matches privacy keywords | Same Compliance escalation (keyword fallback) |
+
+Full routing rules, form-mapping table, PHP/Node examples, and curl tests:  
+[Connect Website → Support + Compliance](./Connect-Website-Support-Compliance.md).
 
 ---
 

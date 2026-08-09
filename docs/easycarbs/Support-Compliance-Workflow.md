@@ -37,3 +37,10 @@ flowchart TD
 - Service: `SupportComplianceRoutingService`
 - Listener: `RoutePersonalDataTicketToCompliance` on `SupportTicketCreated`
 - Keyword fallback detects health/privacy language; operational “disable my account” is excluded from Compliance escalation
+
+## Connect any other website (same routing)
+
+This EasyCarbs flow is the product triage model. The same auto-route works for **any** connected website via Incoming webhook + `involves_personal_data`.
+
+- Guide: [Connect Website → Support + Compliance](../integration-hub/Connect-Website-Support-Compliance.md)
+- Example payloads: [integration-hub/examples](../integration-hub/examples/)

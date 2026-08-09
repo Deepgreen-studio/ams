@@ -4,8 +4,11 @@ namespace App\Domains\Integrations\Handlers;
 
 use App\Domains\Applications\Models\Application;
 use App\Domains\Integrations\Contracts\IncomingWebhookHandlerInterface;
+use App\Domains\Integrations\Enums\WebsiteFormDestination;
+use App\Domains\Integrations\Enums\WebsiteFormIntent;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
+use App\Domains\Integrations\Services\WebsiteFormIngestService;
 use App\Domains\Support\Enums\SupportTicketCategory;
 use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
 use App\Domains\Support\Enums\SupportTicketMessageVisibility;
@@ -43,6 +46,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     public function __construct(
         private readonly SupportTicketService $supportTicketService,
         private readonly SupportTicketConversationService $conversationService,
+        private readonly WebsiteFormIngestService $websiteFormIngestService,
     ) {}
 
     public function supports(Webhook $webhook): bool
@@ -77,6 +81,15 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
 
         $externalId = $this->resolveExternalId($data, $log);
         $idempotencyTag = $this->idempotencyTag($webhook, $eventName, $externalId);
+        $formIntent = $this->resolveFormIntent($data, $eventName);
+
+        $existingCompliance = $this->websiteFormIngestService->findExistingByIdempotencyTag(
+            (int) $webhook->company_id,
+            $idempotencyTag
+        );
+        if ($existingCompliance !== null) {
+            return $existingCompliance;
+        }
 
         $existing = $this->findExistingByIdempotencyTag((int) $webhook->company_id, $idempotencyTag);
         if ($existing !== null) {
@@ -84,6 +97,8 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
                 'handled' => true,
                 'skipped' => true,
                 'reason' => 'Idempotent skip — Support ticket already ingested this message.',
+                'form_type' => $formIntent?->value,
+                'destination' => $formIntent?->destination()->value,
                 'support_ticket_uuid' => $existing->uuid,
                 'support_ticket_number' => $existing->ticket_number,
                 'privacy_request_uuid' => $existing->privacyRequest?->uuid,
@@ -92,7 +107,27 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             ];
         }
 
+        $from = (string) ($data['from'] ?? $data['sender'] ?? $data['phone'] ?? '');
+        $subject = trim((string) ($data['subject'] ?? ''));
         $source = $this->resolveSource($eventName, $data);
+
+        if ($subject === '') {
+            $subject = $this->defaultSubject($formIntent, $source, $from, $webhook);
+        }
+
+        // Compliance-only intents insert into Cases / Breaches / DPIA / Privacy — not Support.
+        if ($formIntent !== null && ! $formIntent->createsSupportTicket()) {
+            return $this->websiteFormIngestService->ingest(
+                $formIntent,
+                $webhook,
+                $data,
+                $subject,
+                $body,
+                $idempotencyTag,
+                $actor,
+            );
+        }
+
         $threadTicket = $this->resolveThreadTicket((int) $webhook->company_id, $data, $source);
 
         if ($threadTicket !== null) {
@@ -104,6 +139,8 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             return [
                 'handled' => true,
                 'skipped' => false,
+                'form_type' => $formIntent?->value,
+                'destination' => $formIntent?->destination()->value ?? WebsiteFormDestination::Support->value,
                 'support_ticket_uuid' => $threadTicket->uuid,
                 'support_ticket_number' => $threadTicket->ticket_number,
                 'privacy_request_uuid' => $threadTicket->privacyRequest?->uuid,
@@ -112,22 +149,14 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             ];
         }
 
-        $involvesPersonalData = filter_var($data['involves_personal_data'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        $involvesPersonalData = $this->resolveInvolvesPersonalData($data, $formIntent);
         $application = $this->resolveApplication($webhook, $data);
-
-        $from = (string) ($data['from'] ?? $data['sender'] ?? $data['phone'] ?? '');
-        $subject = trim((string) ($data['subject'] ?? ''));
-        if ($subject === '') {
-            $subject = $source === SupportTicketSource::Sms
-                ? 'SMS support'.($from !== '' ? ' from '.$from : '')
-                : 'Support message from '.($webhook->name ?: ($webhook->slug ?? 'connected app'));
-        }
 
         $ticket = $this->supportTicketService->create([
             'company_id' => $webhook->company?->uuid ?? (string) $webhook->company_id,
             'application_id' => $application?->uuid,
             'subject' => mb_substr($subject, 0, 255),
-            'description' => $this->buildDescription($eventName, $data, $payload, $idempotencyTag, $log, $webhook, $body),
+            'description' => $this->buildDescription($eventName, $data, $payload, $idempotencyTag, $log, $webhook, $body, $formIntent),
             'category' => $this->resolveCategory($data)->value,
             'priority' => $this->resolvePriority($data)->value,
             'source' => $source->value,
@@ -142,15 +171,74 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             $actions[] = 'compliance_privacy_request_created';
         }
 
+        $destination = $ticket->privacy_request_id !== null
+            ? WebsiteFormDestination::SupportAndPrivacy
+            : ($formIntent?->destination() ?? WebsiteFormDestination::Support);
+
         return [
             'handled' => true,
             'skipped' => false,
+            'form_type' => $formIntent?->value,
+            'destination' => $destination->value,
             'support_ticket_uuid' => $ticket->uuid,
             'support_ticket_number' => $ticket->ticket_number,
             'privacy_request_uuid' => $ticket->privacyRequest?->uuid,
             'privacy_request_number' => $ticket->privacyRequest?->request_number,
             'actions' => $actions,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function resolveFormIntent(array $data, string $eventName): ?WebsiteFormIntent
+    {
+        $raw = $data['form_type'] ?? $data['website_intent'] ?? $data['intent'] ?? null;
+        $intent = WebsiteFormIntent::tryFromAlias(is_string($raw) ? $raw : null);
+
+        if ($intent !== null) {
+            return $intent;
+        }
+
+        if ($eventName === 'support.sms.received') {
+            return WebsiteFormIntent::Sms;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function resolveInvolvesPersonalData(array $data, ?WebsiteFormIntent $formIntent): bool
+    {
+        if (array_key_exists('involves_personal_data', $data)) {
+            return filter_var($data['involves_personal_data'], FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return $formIntent?->involvesPersonalData() ?? false;
+    }
+
+    private function defaultSubject(
+        ?WebsiteFormIntent $formIntent,
+        SupportTicketSource $source,
+        string $from,
+        Webhook $webhook,
+    ): string {
+        if ($formIntent !== null) {
+            return match ($formIntent) {
+                WebsiteFormIntent::Complaint => 'Website complaint',
+                WebsiteFormIntent::Privacy => 'Privacy / GDPR request',
+                WebsiteFormIntent::AccountDisable => 'Disable account request',
+                WebsiteFormIntent::Chat => 'Live chat message',
+                WebsiteFormIntent::Sms => 'SMS support'.($from !== '' ? ' from '.$from : ''),
+                default => 'Support message from '.($webhook->name ?: ($webhook->slug ?? 'connected app')),
+            };
+        }
+
+        return $source === SupportTicketSource::Sms
+            ? 'SMS support'.($from !== '' ? ' from '.$from : '')
+            : 'Support message from '.($webhook->name ?: ($webhook->slug ?? 'connected app'));
     }
 
     private function appendCustomerMessage(SupportTicket $ticket, string $body, User $actor): void
@@ -364,6 +452,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         WebhookLog $log,
         Webhook $webhook,
         string $body,
+        ?WebsiteFormIntent $formIntent = null,
     ): string {
         $lines = [
             $body,
@@ -375,6 +464,11 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             'Webhook log: '.$log->uuid,
             'Received at: '.($payload['timestamp'] ?? now()->toIso8601String()),
         ];
+
+        if ($formIntent !== null) {
+            $lines[] = 'form_type: '.$formIntent->value;
+            $lines[] = 'destination: '.$formIntent->destination()->value;
+        }
 
         foreach ([
             'from' => $data['from'] ?? $data['sender'] ?? null,

@@ -3,6 +3,7 @@
   "timestamp": "2026-08-09T07:00:00+00:00",
   "data": {
     "message_id": "web-help-1001",
+    "form_type": "support",
     "subject": "Cannot login",
     "body": "I forgot my password and cannot reset it.",
     "customer_name": "Rahim Ahmed",

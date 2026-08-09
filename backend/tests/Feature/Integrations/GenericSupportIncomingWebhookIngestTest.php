@@ -192,6 +192,125 @@ class GenericSupportIncomingWebhookIngestTest extends TestCase
         $this->assertSame(1, SupportTicket::query()->where('company_id', $this->company->id)->count());
     }
 
+    public function test_complaint_form_type_creates_support_only(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'form-complaint-1',
+                'form_type' => 'complaint',
+                'subject' => 'Complaint about delayed delivery',
+                'body' => 'My order is 5 days late.',
+                'channel' => 'web',
+                'involves_personal_data' => false,
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.form_type', 'complaint')
+            ->assertJsonPath('data.ingest.destination', 'support')
+            ->assertJsonPath('data.ingest.actions.0', 'support_ticket_created');
+
+        $this->assertSame(1, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $this->assertSame(0, \App\Domains\Compliance\Models\PrivacyRequest::query()->where('company_id', $this->company->id)->count());
+    }
+
+    public function test_compliance_case_form_type_skips_support(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'form-case-1',
+                'form_type' => 'compliance_case',
+                'subject' => 'Compliance case from website',
+                'body' => 'Please open a compliance case.',
+                'channel' => 'web',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.destination', 'compliance_case')
+            ->assertJsonPath('data.ingest.actions.0', 'compliance_case_created');
+
+        $this->assertSame(0, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $this->assertSame(1, \App\Domains\Compliance\Models\ComplianceCase::query()->where('company_id', $this->company->id)->count());
+    }
+
+    public function test_breach_form_type_creates_breach_only(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'form-breach-1',
+                'form_type' => 'breach',
+                'subject' => 'Possible data breach',
+                'body' => 'Personal data may have been exposed.',
+                'priority' => 'critical',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.destination', 'breach')
+            ->assertJsonPath('data.ingest.actions.0', 'compliance_breach_created');
+
+        $this->assertSame(0, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $this->assertSame(1, \App\Domains\Compliance\Models\DataBreach::query()->where('company_id', $this->company->id)->count());
+    }
+
+    public function test_consent_form_type_creates_privacy_request_only(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'form-consent-1',
+                'form_type' => 'consent',
+                'subject' => 'Withdraw my consent',
+                'body' => 'Please withdraw my marketing consent.',
+                'customer_email' => 'nadia@example.com',
+                'customer_name' => 'Nadia',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.destination', 'privacy_only')
+            ->assertJsonPath('data.ingest.actions.0', 'compliance_privacy_request_created');
+
+        $this->assertSame(0, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $privacy = \App\Domains\Compliance\Models\PrivacyRequest::query()->where('company_id', $this->company->id)->first();
+        $this->assertNotNull($privacy);
+        $this->assertSame('consent_withdrawal', $privacy->request_type->value);
+    }
+
+    public function test_dpia_form_type_creates_dpia_only(): void
+    {
+        $payload = [
+            'event' => 'support.message.received',
+            'timestamp' => now()->toIso8601String(),
+            'data' => [
+                'message_id' => 'form-dpia-1',
+                'form_type' => 'dpia',
+                'subject' => 'DPIA request',
+                'body' => 'Please start a DPIA.',
+            ],
+        ];
+
+        $this->postSigned($payload)
+            ->assertOk()
+            ->assertJsonPath('data.ingest.destination', 'dpia')
+            ->assertJsonPath('data.ingest.actions.0', 'compliance_dpia_created');
+
+        $this->assertSame(0, SupportTicket::query()->where('company_id', $this->company->id)->count());
+        $this->assertSame(1, \App\Domains\Compliance\Models\DpiaAssessment::query()->where('company_id', $this->company->id)->count());
+    }
+
     /**
      * @param  array<string, mixed>  $payload
      */

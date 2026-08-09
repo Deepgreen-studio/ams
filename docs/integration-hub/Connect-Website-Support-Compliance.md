@@ -1,13 +1,17 @@
 # Connect Any Website → Support + Compliance (Auto-Route)
 
-Use this guide when you want **another website or mobile app** to send helpdesk / complaint / privacy messages into AMS, and let AMS **automatically decide**:
+Use this guide when you want **another website or mobile app** to send helpdesk / complaint / privacy / compliance messages into AMS using `data.form_type`.
 
-| Destination | When |
-|-------------|------|
-| **Support only** | Normal help, login issues, complaints, account disable (operational) |
-| **Support + Compliance** | Personal data / GDPR / health / “delete my data” style requests |
+| `form_type` | Lands in AMS |
+|-------------|--------------|
+| `support`, `complaint`, `account_disable`, `chat`, `sms` | **Support** ticket only |
+| `privacy` (aliases: `gdpr`, `data_deletion`, …) | **Support + Privacy Request** |
+| `consent` | **Privacy Request only** (no Support ticket) |
+| `compliance_case` | **Compliance → Cases** only |
+| `breach` | **Compliance → Breaches** only |
+| `dpia` | **Compliance → DPIA** only |
 
-Incoming messages **always create a Support ticket first**. Compliance is an **auto-escalation** (linked Privacy Request), not a separate inbox API.
+Not every form creates a Support ticket. Compliance-only types insert directly into the matching Compliance module.
 
 Related docs:
 
@@ -37,22 +41,19 @@ Bridge services: `AmsSupportBridge`, `SupportComplianceIntent`, `AmsReplyIngestS
 ```
 Your website (form / chat / SMS gateway)
         │
-        │  POST signed JSON
+        │  POST signed JSON  (include data.form_type)
         ▼
 AMS Incoming Webhook
         │
-        ▼
-Support ticket created  ──────────────────────────────┐
-        │                                               │
-        │  involves_personal_data = true                │
-        │  OR keyword match (gdpr, delete my data, …)   │
-        ▼                                               │
-Compliance Privacy Request (linked)                     │
-        │                                               │
-        └──────────── both stay linked ─────────────────┘
+        ├─ form_type = support|complaint|chat|…  → Support ticket
+        ├─ form_type = privacy                   → Support + Privacy Request
+        ├─ form_type = consent                   → Privacy Request only
+        ├─ form_type = compliance_case           → Compliance Case only
+        ├─ form_type = breach                    → Data Breach only
+        └─ form_type = dpia                      → DPIA only
 ```
 
-**Complaint** is not a separate AMS module. Complaint forms use the same Support path (`support.message.received` + `channel=web|chat`).
+**Complaint** is not a separate AMS module. Complaint forms use the Support path (`form_type=complaint` + `support.message.received`).
 
 ---
 
@@ -98,17 +99,20 @@ AMS runs `SupportComplianceRoutingService` when a Support ticket is created.
 2. **Support-only operational phrases** — even if flagged, these stay Support-only (e.g. “disable my account”).  
 3. **Keyword fallback** — if flag is missing/`false`, subject + description are scanned for privacy/health language.
 
-### Website form → flag mapping (do this in your app)
+### Website form → destination mapping (do this in your app)
 
-| Website form / intent | Set `involves_personal_data` | Lands in AMS |
-|-----------------------|------------------------------|--------------|
-| Help / Support / Live chat | `false` | **Support** |
-| Complaint | `false` | **Support** (same conversation UX) |
-| Temporarily disable / suspend account | `false` | **Support** only |
-| Delete / erase my data, GDPR, privacy request | `true` | **Support + Compliance** Privacy Request |
-| Health / medical personal data request | `true` | **Support + Compliance** |
+| Website form / intent (`form_type`) | Creates Support? | Lands in AMS |
+|-------------------------------------|------------------|--------------|
+| `support` / `chat` / `sms` | Yes | **Support** |
+| `complaint` | Yes | **Support** |
+| `account_disable` | Yes | **Support** only |
+| `privacy` / `gdpr` / `data_deletion` | Yes | **Support + Privacy Request** |
+| `consent` | No | **Privacy Request** (`consent_withdrawal`) |
+| `compliance_case` | No | **Compliance Cases** |
+| `breach` | No | **Compliance Breaches** |
+| `dpia` | No | **Compliance DPIA** |
 
-Always send the flag from the website when you know the form type. Keywords are a safety net, not a substitute for clear product intent.
+Always send `form_type` from the website when you know the intent. `involves_personal_data` remains useful for privacy/Support escalation when `form_type` is omitted.
 
 ### Keyword fallback (AMS)
 
@@ -138,11 +142,13 @@ Breach / near-miss is **not** auto-opened from this path. That is a separate Com
 
 | Path | What you see |
 |------|----------------|
-| **Support → Tickets** | Always — new ticket |
+| **Support → Tickets** | Support / complaint / privacy / chat / SMS forms |
 | **Support → Ticket → Conversation** | Customer message + agent replies |
-| **Compliance → Privacy Requests** | Only when escalated |
-| **Privacy Request → Linked Support conversation** | Same thread when linked |
-| **Webhooks → Logs** | Ingest result + `actions` |
+| **Compliance → Privacy Requests** | `privacy` (linked) or `consent` (standalone) |
+| **Compliance → Cases** | `compliance_case` |
+| **Compliance → Breaches** | `breach` |
+| **Compliance → DPIA** | `dpia` |
+| **Webhooks → Logs** | Ingest result + `actions` + `destination` |
 
 Successful Compliance escalation often includes action `compliance_privacy_request_created` in the webhook ingest result.
 
@@ -308,16 +314,17 @@ use Illuminate\Support\Str;
 
 function amsIngestSupportMessage(array $input): void
 {
-    // Map your website form type → AMS routing flag
-    $formType = $input['form_type'] ?? 'support'; // support | complaint | privacy
-
-    $involvesPersonalData = in_array($formType, ['privacy', 'gdpr', 'data_deletion'], true);
+    // Map your website form type → AMS destination
+    $formType = $input['form_type'] ?? 'support';
+    // support|complaint|privacy|account_disable|chat|compliance_case|breach|consent|dpia
+    $involvesPersonalData = in_array($formType, ['privacy', 'gdpr', 'data_deletion', 'consent', 'breach'], true);
 
     $payload = [
         'event' => 'support.message.received',
         'timestamp' => now()->toIso8601String(),
         'data' => [
             'message_id' => (string) ($input['message_id'] ?? Str::uuid()),
+            'form_type' => $formType,
             'subject' => $input['subject'] ?? 'Website message',
             'body' => $input['body'] ?? $input['message'],
             'customer_name' => $input['name'] ?? null,
@@ -348,13 +355,14 @@ function amsIngestSupportMessage(array $input): void
 import crypto from 'crypto';
 
 async function amsIngestSupportMessage({ formType, subject, body, email, name }) {
-  const involvesPersonalData = ['privacy', 'gdpr', 'data_deletion'].includes(formType);
+  const involvesPersonalData = ['privacy', 'gdpr', 'data_deletion', 'consent', 'breach'].includes(formType);
 
   const payload = {
     event: 'support.message.received',
     timestamp: new Date().toISOString(),
     data: {
       message_id: crypto.randomUUID(),
+      form_type: formType,
       subject,
       body,
       customer_name: name,
@@ -430,10 +438,13 @@ echo \$body . PHP_EOL . \$sig . PHP_EOL;
 - [ ] Website stores `AMS_WEBHOOK_URL` + `AMS_WEBHOOK_SECRET`  
 - [ ] Website signs **raw JSON body** with HMAC-SHA256  
 - [ ] Every message has unique `message_id` (idempotency)  
-- [ ] Support / Complaint forms send `involves_personal_data: false`  
-- [ ] Privacy / GDPR forms send `involves_personal_data: true`  
+- [ ] Every message sends `form_type`  
+- [ ] Support / Complaint forms → Support only  
+- [ ] Privacy → Support + Privacy Request  
+- [ ] Case / Breach / Consent / DPIA → Compliance module only (no Support)  
 - [ ] Test Example A → appears under **Support → Tickets**  
 - [ ] Test Example C → also appears under **Compliance → Privacy Requests**  
+- [ ] Test compliance-case / breach / dpia examples → correct Compliance screens  
 - [ ] (Optional) Outgoing webhook so agent Public replies return to the site  
 
 ---
@@ -443,9 +454,11 @@ echo \$body . PHP_EOL . \$sig . PHP_EOL;
 | Piece | Location |
 |-------|----------|
 | Incoming generic ingest | `GenericSupportIncomingWebhookHandler` |
+| Form type enum | `WebsiteFormIntent` / `WebsiteFormDestination` |
+| Compliance-only insert | `WebsiteFormIngestService` |
 | Ticket create flag | `involves_personal_data` on Support ticket |
 | Listener | `RoutePersonalDataTicketToCompliance` on `SupportTicketCreated` |
-| Router | `SupportComplianceRoutingService` |
+| Privacy router | `SupportComplianceRoutingService` |
 | Feature tests | `SupportComplianceRoutingTest`, `GenericSupportIncomingWebhookIngestTest` |
 
 ```bash

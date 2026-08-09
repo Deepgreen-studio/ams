@@ -3,6 +3,7 @@
   "timestamp": "2026-08-09T07:10:00+00:00",
   "data": {
     "message_id": "web-privacy-77",
+    "form_type": "privacy",
     "subject": "Delete my health information",
     "body": "Please erase my data and remove my health information under GDPR.",
     "customer_name": "Nusrat Jahan",

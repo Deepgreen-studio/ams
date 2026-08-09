@@ -1,0 +1,15 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T08:00:00+00:00",
+  "data": {
+    "message_id": "web-case-10",
+    "form_type": "compliance_case",
+    "subject": "Compliance case from website",
+    "body": "Please open a compliance case for this governance issue.",
+    "customer_name": "Sara Ali",
+    "customer_email": "sara@example.com",
+    "channel": "web",
+    "priority": "high",
+    "application_slug": "my-shop-web"
+  }
+}

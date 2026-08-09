@@ -1,0 +1,16 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T08:10:00+00:00",
+  "data": {
+    "message_id": "web-consent-10",
+    "form_type": "consent",
+    "subject": "Withdraw my consent",
+    "body": "Please withdraw my marketing and processing consent.",
+    "customer_name": "Nadia Rahman",
+    "customer_email": "nadia@example.com",
+    "channel": "web",
+    "priority": "high",
+    "application_slug": "my-shop-web",
+    "involves_personal_data": true
+  }
+}

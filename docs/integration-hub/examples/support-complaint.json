@@ -3,6 +3,7 @@
   "timestamp": "2026-08-09T07:05:00+00:00",
   "data": {
     "message_id": "web-complaint-55",
+    "form_type": "complaint",
     "subject": "Complaint about delayed delivery",
     "body": "My order is 5 days late. Please resolve this complaint.",
     "customer_name": "Karim Hasan",

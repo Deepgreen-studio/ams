@@ -1,0 +1,15 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T08:15:00+00:00",
+  "data": {
+    "message_id": "web-dpia-10",
+    "form_type": "dpia",
+    "subject": "DPIA assessment request",
+    "body": "Please start a DPIA for this new processing activity.",
+    "customer_name": "Jamal Uddin",
+    "customer_email": "jamal@example.com",
+    "channel": "web",
+    "priority": "medium",
+    "application_slug": "my-shop-web"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "event": "support.message.received",
+  "timestamp": "2026-08-09T08:05:00+00:00",
+  "data": {
+    "message_id": "web-breach-10",
+    "form_type": "breach",
+    "subject": "Possible data breach report",
+    "body": "I believe personal data may have been exposed. Please investigate this incident.",
+    "customer_name": "Omar Khan",
+    "customer_email": "omar@example.com",
+    "channel": "web",
+    "priority": "critical",
+    "application_slug": "my-shop-web"
+  }
+}

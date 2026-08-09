@@ -11,6 +11,14 @@ export const useAppStore = defineStore('app', () => {
         sidebarOpen.value = !sidebarOpen.value;
     }
 
+    function closeSidebar() {
+        sidebarOpen.value = false;
+    }
+
+    function openSidebar() {
+        sidebarOpen.value = true;
+    }
+
     function toggleSidebarCollapse() {
         sidebarCollapsed.value = !sidebarCollapsed.value;
     }
@@ -29,6 +37,8 @@ export const useAppStore = defineStore('app', () => {
         isLoading,
         appName,
         toggleSidebar,
+        closeSidebar,
+        openSidebar,
         toggleSidebarCollapse,
         setSidebarCollapsed,
         setLoading,

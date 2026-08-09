@@ -1,37 +1,77 @@
 <template>
+    <!-- Mobile overlay -->
+    <div
+        v-if="appStore.sidebarOpen"
+        class="fixed inset-0 z-40 bg-black/40 lg:hidden"
+        aria-hidden="true"
+        @click="appStore.closeSidebar()"
+    />
+
     <aside
-        class="sticky top-0 hidden h-screen shrink-0 flex-col overflow-hidden border-r border-slate-200 bg-slate-50 transition-[width] duration-200 ease-in-out lg:flex"
-        :style="{ width: collapsed ? '4.5rem' : '17rem' }"
+        class="fixed inset-y-0 left-0 z-50 flex h-screen shrink-0 flex-col overflow-visible bg-shell transition-[width,transform] duration-200 ease-in-out lg:sticky lg:top-0 lg:translate-x-0"
+        :class="[
+            appStore.sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+        ]"
+        :style="{ width: collapsed ? '5rem' : '16.5rem' }"
     >
         <!-- Brand -->
         <div
-            class="flex shrink-0 items-center gap-3 border-b border-slate-200 py-4"
-            :class="collapsed ? 'justify-center px-2' : 'px-4'"
+            class="relative z-20 flex shrink-0 items-center gap-3 overflow-visible py-5"
+            :class="collapsed ? 'justify-center px-2' : 'px-5'"
         >
-            <div class="flex h-10 w-10 shrink-0 items-center justify-center" aria-hidden="true">
-                <svg viewBox="0 0 40 40" class="h-10 w-10" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <linearGradient id="ams-hex" x1="8" y1="4" x2="32" y2="36" gradientUnits="userSpaceOnUse">
-                            <stop stop-color="#60A5FA" />
-                            <stop offset="1" stop-color="#2563EB" />
-                        </linearGradient>
-                    </defs>
-                    <path d="M20 2.5L34.5 11V29L20 37.5L5.5 29V11L20 2.5Z" fill="url(#ams-hex)" />
-                    <path d="M20 8L29.5 13.5V24.5L20 30L10.5 24.5V13.5L20 8Z" fill="#EFF6FF" fill-opacity="0.95" />
-                    <path d="M20 12L25.5 15.2V21.8L20 25L14.5 21.8V15.2L20 12Z" fill="#3B82F6" />
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden="true">
+                <svg viewBox="0 0 40 40" class="h-9 w-9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" fill="#FF5C00" />
+                    <path
+                        d="M20 8.5L28.5 13.5V22.5L20 27.5L11.5 22.5V13.5L20 8.5Z"
+                        stroke="white"
+                        stroke-width="2"
+                        fill="none"
+                    />
+                    <circle cx="20" cy="18" r="3.5" fill="white" />
                 </svg>
             </div>
-            <div v-if="!collapsed" class="min-w-0 overflow-hidden">
-                <p class="truncate text-base font-bold leading-tight text-slate-900">AMS</p>
-                <p class="truncate text-[11px] leading-snug text-slate-400">
-                    Application Management System
-                </p>
-            </div>
+            <p v-if="!collapsed" class="truncate text-xl font-bold tracking-tight text-white">
+                {{ appStore.appName }}
+            </p>
+
+            <!-- Collapse edge control (desktop) — white pill so it stays visible on the light canvas -->
+            <button
+                type="button"
+                class="absolute -right-3.5 top-1/2 z-30 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-800 shadow-md ring-1 ring-black/5 hover:bg-zinc-50 lg:inline-flex"
+                :aria-expanded="!collapsed"
+                :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+                :title="collapsed ? 'Expand' : 'Collapse'"
+                @click="appStore.toggleSidebarCollapse()"
+            >
+                <ChevronLeftIcon
+                    class="h-4 w-4 transition-transform duration-200"
+                    :class="collapsed ? 'rotate-180' : ''"
+                />
+            </button>
+        </div>
+
+        <!-- Primary CTA -->
+        <div class="shrink-0 px-4 pb-4" :class="collapsed ? 'px-2' : 'px-4'">
+            <RouterLink
+                :to="{ name: 'applications.create' }"
+                class="flex items-center rounded-full bg-white text-sm font-semibold text-zinc-900 shadow-sm transition hover:bg-zinc-50"
+                :class="collapsed ? 'justify-center p-2' : 'gap-3 py-2.5 pl-2.5 pr-4'"
+                :title="collapsed ? 'Create application' : undefined"
+                @click="closeMobile"
+            >
+                <span
+                    class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-500 text-white"
+                >
+                    <PlusIcon class="h-4 w-4" />
+                </span>
+                <span v-if="!collapsed">Create application</span>
+            </RouterLink>
         </div>
 
         <!-- Navigation -->
         <nav
-            class="scrollbar-light min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-4"
+            class="scrollbar-dark min-h-0 flex-1 overflow-y-auto overflow-x-hidden py-2"
             :class="collapsed ? 'px-2' : 'px-3'"
         >
             <div
@@ -41,33 +81,34 @@
             >
                 <p
                     v-if="!collapsed"
-                    class="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400"
+                    class="mb-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-zinc-500"
                 >
                     {{ section.title }}
                 </p>
                 <div
                     v-else-if="sectionIndex > 0"
-                    class="mx-auto mb-2 h-px w-6 bg-slate-200"
+                    class="mx-auto mb-2 h-px w-6 bg-zinc-700"
                 />
 
-                <div class="space-y-0.5">
+                <div class="space-y-1">
                     <RouterLink
                         v-for="item in section.items"
                         :key="item.name"
                         :to="item.to"
                         :title="collapsed ? item.label : undefined"
-                        class="group flex items-center gap-3 rounded-lg py-2 text-sm font-medium transition"
+                        class="group flex items-center gap-3 rounded-full py-2.5 text-sm font-medium transition"
                         :class="[
                             collapsed ? 'justify-center px-2' : 'px-3',
                             isActive(item)
-                                ? 'bg-brand-500 text-white shadow-sm shadow-brand-500/25'
-                                : 'text-slate-700 hover:bg-slate-100',
+                                ? 'bg-white text-brand-500 shadow-sm'
+                                : 'text-zinc-300 hover:bg-white/5 hover:text-white',
                         ]"
+                        @click="closeMobile"
                     >
                         <component
                             :is="item.icon"
                             class="h-5 w-5 shrink-0"
-                            :class="isActive(item) ? 'text-white' : 'text-slate-400 group-hover:text-slate-500'"
+                            :class="isActive(item) ? 'text-brand-500' : 'text-zinc-400 group-hover:text-zinc-200'"
                         />
                         <span v-if="!collapsed" class="truncate">{{ item.label }}</span>
                     </RouterLink>
@@ -75,36 +116,29 @@
             </div>
         </nav>
 
-        <!-- Collapse -->
-        <div class="shrink-0 border-t border-slate-200 p-3">
-            <button
-                type="button"
-                class="flex w-full cursor-pointer items-center gap-2 rounded-lg py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
-                :class="collapsed ? 'justify-center px-2' : 'px-3'"
-                :aria-expanded="!collapsed"
-                :aria-label="collapsed ? 'Expand sidebar' : 'Collapse sidebar'"
-                :title="collapsed ? 'Expand' : 'Collapse'"
-                @click="collapsed = !collapsed"
+        <!-- Help -->
+        <div class="shrink-0 p-4" :class="collapsed ? 'flex justify-center' : ''">
+            <RouterLink
+                :to="{ name: 'support.dashboard' }"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-white shadow-sm transition hover:bg-brand-600"
+                title="Help & Support"
+                @click="closeMobile"
             >
-                <ChevronDoubleLeftIcon
-                    class="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200"
-                    :class="collapsed ? 'rotate-180' : ''"
-                />
-                <span v-if="!collapsed">Collapse</span>
-            </button>
+                <QuestionMarkCircleIcon class="h-5 w-5" />
+            </RouterLink>
         </div>
     </aside>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import {
     BellAlertIcon,
     BoltIcon,
     BuildingOffice2Icon,
     ChartBarIcon,
-    ChevronDoubleLeftIcon,
+    ChevronLeftIcon,
     ClipboardDocumentListIcon,
     ClockIcon,
     Cog6ToothIcon,
@@ -112,8 +146,10 @@ import {
     DocumentTextIcon,
     HomeIcon,
     LifebuoyIcon,
+    PlusIcon,
     PuzzlePieceIcon,
     PresentationChartLineIcon,
+    QuestionMarkCircleIcon,
     QueueListIcon,
     ScaleIcon,
     ShieldCheckIcon,
@@ -123,9 +159,12 @@ import {
     UserGroupIcon,
     UsersIcon,
 } from '@heroicons/vue/24/outline';
+import { useAppStore } from '@/stores/app';
 
-const collapsed = ref(false);
+const appStore = useAppStore();
 const route = useRoute();
+
+const collapsed = computed(() => appStore.sidebarCollapsed);
 
 const navigationSections = [
     {
@@ -190,6 +229,12 @@ const navigationSections = [
         ],
     },
 ];
+
+function closeMobile() {
+    if (window.matchMedia('(max-width: 1023px)').matches) {
+        appStore.closeSidebar();
+    }
+}
 
 function matchesPattern(name, pattern) {
     if (pattern.endsWith('.')) {

@@ -26,7 +26,7 @@
       </aside>
 
       <section class="xl:col-span-8">
-        <div class="rounded-[25px] bg-white p-6 sm:p-8">
+        <div class="rounded-[12px] bg-white p-6 sm:p-8">
 
           <UserForm
             v-if="usersStore.profile"

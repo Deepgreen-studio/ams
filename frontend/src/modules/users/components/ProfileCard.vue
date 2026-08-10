@@ -1,17 +1,18 @@
 <template>
-  <div :class="embedded ? '' : 'rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm'">
+  <div :class="embedded ? '' : 'rounded-[12px] bg-white p-6'">
     <div v-if="!hideAvatar" class="flex flex-col gap-4 sm:flex-row sm:items-center">
       <UserAvatar
-        :src="user?.avatar_url || ''"
+        :src="avatarSrc"
         :name="user?.full_name || user?.name || 'User'"
         :first-name="user?.first_name || ''"
         :last-name="user?.last_name || ''"
         size="lg"
-        class="ring-2 ring-white shadow-sm"
       />
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">{{ user?.full_name }}</h2>
+          <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">
+            {{ user?.full_name }}
+          </h2>
           <StatusBadge :status="user?.status" />
         </div>
         <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
@@ -30,7 +31,9 @@
 
     <div v-else class="text-center">
       <div class="flex flex-wrap items-center justify-center gap-2">
-        <h2 class="truncate text-lg font-semibold tracking-tight text-slate-900">{{ user?.full_name }}</h2>
+        <h2 class="truncate text-lg font-semibold tracking-tight text-slate-900">
+          {{ user?.full_name }}
+        </h2>
         <StatusBadge :status="user?.status" />
       </div>
       <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
@@ -50,7 +53,7 @@
       <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
         Account details
       </p>
-      <dl class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
+      <dl class="divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
         <div
           v-for="item in detailItems"
           :key="item.label"
@@ -67,6 +70,7 @@
 <script setup>
 import { computed } from 'vue';
 import { formatDate } from '@/utils/formatters';
+import { getUserAvatarUrl } from '@/utils/avatar';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue';
@@ -87,6 +91,7 @@ const props = defineProps({
 });
 
 const roles = computed(() => props.user?.roles || []);
+const avatarSrc = computed(() => getUserAvatarUrl(props.user));
 
 const detailItems = computed(() => [
   { label: 'Phone', value: props.user?.phone || '—' },

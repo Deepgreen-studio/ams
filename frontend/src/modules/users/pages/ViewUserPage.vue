@@ -26,16 +26,18 @@
       <RouterLink
           v-if="usersStore.currentUser"
           :to="{ name: 'users.edit', params: { id: usersStore.currentUser.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
+          <PencilSquareIcon class="h-4 w-4 text-slate-500" />
           Edit
         </RouterLink>
         <button
           v-if="usersStore.currentUser"
           type="button"
-          class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
         >
+          <TrashIcon class="h-4 w-4 text-white" />
           Delete
         </button>
     </Teleport>
@@ -49,7 +51,7 @@
       <div class="lg:col-span-2 space-y-6">
         <ProfileCard :user="usersStore.currentUser" />
 
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
+        <div class="rounded-[12px] bg-white p-6">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
               Roles & access
@@ -89,7 +91,7 @@
           </dl>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
+        <div class="rounded-[12px] bg-white p-6">
           <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
             Personal information
           </h3>
@@ -129,7 +131,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
+        <div class="rounded-[12px] bg-white p-6">
           <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
             Activity summary
           </h3>
@@ -160,9 +162,7 @@
           </ul>
         </div>
 
-        <div
-          class="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500"
-        >
+        <div class="rounded-[12px] bg-slate-50 p-6 text-sm text-slate-500">
           Login history is architecture-ready and will appear here when authentication session
           recording is enabled.
         </div>
@@ -184,6 +184,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import { TrashIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';

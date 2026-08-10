@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Activitylog\LogOptions;
@@ -147,9 +146,9 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             return $this->avatar;
         }
 
-        $disk = config('filesystems.avatar_disk', 'public');
-
-        return Storage::disk($disk)->url($this->avatar);
+        // Relative path so the SPA (Vite proxy / same origin) can load the file.
+        // Absolute APP_URL hosts (e.g. ams.test) are often unreachable from the Vite dev server.
+        return '/storage/'.ltrim((string) $this->avatar, '/');
     }
 
     public function isAccountActive(): bool

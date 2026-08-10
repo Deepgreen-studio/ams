@@ -1,6 +1,6 @@
 <template>
   <span
-    class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+    class="inline-flex items-center rounded-[8px] px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset"
     :class="system ? 'bg-amber-50 text-amber-800 ring-amber-600/20' : 'bg-brand-50 text-brand-700 ring-brand-600/20'"
   >
     {{ label }}

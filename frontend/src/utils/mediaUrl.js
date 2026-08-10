@@ -1,8 +1,9 @@
 /**
  * Resolve public storage / media URLs for the SPA.
  *
- * Backend often returns absolute APP_URL paths (e.g. http://ams.test/storage/...).
- * In local Vite dev, /storage is proxied to the API — absolute APP_URL hosts may be unreachable.
+ * Backend may return absolute APP_URL paths (e.g. http://ams.test/storage/...).
+ * Those hosts are often unreachable from the Vite dev server — rewrite storage
+ * URLs to same-origin /storage so the Vite proxy can serve them.
  */
 export function resolveMediaUrl(url) {
   if (url == null) {
@@ -21,7 +22,10 @@ export function resolveMediaUrl(url) {
   const apiBase = import.meta.env.VITE_API_BASE_URL || '';
 
   try {
-    const parsed = new URL(trimmed, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+    const parsed = new URL(
+      trimmed,
+      typeof window !== 'undefined' ? window.location.origin : 'http://localhost',
+    );
     const isStoragePath = parsed.pathname.startsWith('/storage/');
 
     if (!isStoragePath) {
@@ -30,15 +34,28 @@ export function resolveMediaUrl(url) {
         : `${parsed.pathname}${parsed.search}`;
     }
 
-    // Dev (empty API base): use same-origin path so Vite /storage proxy can serve the file.
+    // Always prefer same-origin storage paths in local Vite (empty API base).
     if (!apiBase) {
       return `${parsed.pathname}${parsed.search}`;
     }
 
     // Production / remote API: point storage at the API origin (not the /api/v1 suffix).
-    const apiOrigin = new URL(apiBase, typeof window !== 'undefined' ? window.location.origin : apiBase).origin;
+    const apiOrigin = new URL(
+      apiBase,
+      typeof window !== 'undefined' ? window.location.origin : apiBase,
+    ).origin;
+
+    // If the URL already points at the API origin, keep it; otherwise rewrite.
+    if (parsed.origin === apiOrigin) {
+      return trimmed;
+    }
+
     return `${apiOrigin}${parsed.pathname}${parsed.search}`;
   } catch {
+    // Raw disk path: avatars/foo.png
+    if (!trimmed.startsWith('/') && !trimmed.startsWith('http')) {
+      return `/storage/${trimmed.replace(/^\/+/, '')}`;
+    }
     return trimmed;
   }
 }

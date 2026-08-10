@@ -2,15 +2,14 @@
   <div class="flex flex-col items-center text-center">
     <div class="relative">
       <UserAvatar
-        :src="preview || user?.avatar_url || ''"
+        :src="avatarSrc"
         :name="user?.full_name || user?.name || 'User'"
         :first-name="user?.first_name || ''"
         :last-name="user?.last_name || ''"
         size="2xl"
-        class="ring-4 ring-white shadow-md shadow-slate-200/70"
       />
       <label
-        class="absolute bottom-1 right-1 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700"
+        class="absolute bottom-1 right-1 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-white text-slate-600 ring-1 ring-zinc-100 transition hover:bg-brand-50 hover:text-brand-700"
         title="Choose photo"
       >
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -29,14 +28,14 @@
 
     <div class="mt-4 flex w-full max-w-xs gap-2">
       <label
-        class="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+        class="flex-1 cursor-pointer rounded-[12px] bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
       >
         Choose file
         <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onFileChange" />
       </label>
       <button
         type="button"
-        class="flex-1 rounded-xl bg-brand-600 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
+        class="flex-1 rounded-[12px] bg-brand-600 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-50"
         :disabled="!file || loading"
         @click="$emit('upload', file)"
       >
@@ -51,6 +50,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue';
+import { getUserAvatarUrl } from '@/utils/avatar';
 
 const props = defineProps({
   user: {
@@ -73,9 +73,10 @@ const file = ref(null);
 const preview = ref('');
 
 const fileName = computed(() => file.value?.name || '');
+const avatarSrc = computed(() => preview.value || getUserAvatarUrl(props.user));
 
 watch(
-  () => props.user?.avatar_url,
+  () => props.user?.avatar_url || props.user?.avatar,
   () => {
     preview.value = '';
     file.value = null;

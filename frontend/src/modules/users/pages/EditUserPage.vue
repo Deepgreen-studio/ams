@@ -4,12 +4,12 @@
 
     <div
       v-if="usersStore.loading && !usersStore.currentUser"
-      class="rounded-[25px] bg-white p-6 sm:p-8"
+      class="rounded-[12px] bg-white p-6 sm:p-8"
     >
       <div class="h-40 animate-pulse rounded-xl bg-slate-100" />
     </div>
 
-    <div v-else class="rounded-[25px] bg-white p-6 sm:p-8">
+    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
       <UserForm
         :initial="usersStore.currentUser || {}"
         :loading="usersStore.saving"

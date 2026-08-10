@@ -11,7 +11,7 @@
       <div class="mt-6 flex justify-end gap-2">
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           :disabled="loading"
           @click="$emit('cancel')"
         >
@@ -19,11 +19,12 @@
         </button>
         <button
           type="button"
-          class="rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
-          :class="danger ? 'bg-rose-600 hover:bg-rose-700' : 'bg-brand-600 hover:bg-brand-700'"
+          class="inline-flex items-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+          :class="danger ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700'"
           :disabled="loading"
           @click="$emit('confirm')"
         >
+          <TrashIcon v-if="danger" class="h-4 w-4 text-white" />
           {{ loading ? 'Processing...' : confirmLabel }}
         </button>
       </div>
@@ -32,6 +33,8 @@
 </template>
 
 <script setup>
+import { TrashIcon } from '@heroicons/vue/24/outline';
+
 defineProps({
   open: {
     type: Boolean,

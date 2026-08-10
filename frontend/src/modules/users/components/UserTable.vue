@@ -30,7 +30,7 @@
                 @click="$emit('sort', 'full_name')"
               >
                 Name
-                <span class="text-[10px] leading-none text-zinc-300">
+                <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'full_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
@@ -42,7 +42,7 @@
                 @click="$emit('sort', 'email')"
               >
                 Email
-                <span class="text-[10px] leading-none text-zinc-300">
+                <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'email' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
@@ -57,7 +57,7 @@
                 @click="$emit('sort', 'status')"
               >
                 Status
-                <span class="text-[10px] leading-none text-zinc-300">
+                <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
@@ -69,7 +69,7 @@
                 @click="$emit('sort', 'created_at')"
               >
                 Created
-                <span class="text-[10px] leading-none text-zinc-300">
+                <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
@@ -86,7 +86,7 @@
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
                 <UserAvatar
-                  :src="user.avatar_url || ''"
+                  :src="getUserAvatarUrl(user)"
                   :name="user.full_name || user.name || 'User'"
                   :first-name="user.first_name || ''"
                   :last-name="user.last_name || ''"
@@ -95,7 +95,6 @@
                 />
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-slate-900">{{ user.full_name }}</p>
-                  <p class="truncate text-xs text-zinc-400">{{ user.uuid }}</p>
                 </div>
               </div>
             </td>
@@ -145,11 +144,11 @@
                   </RouterLink>
                   <button
                     type="button"
-                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
                     role="menuitem"
                     @click="onDelete(user)"
                   >
-                    <TrashIcon class="h-4 w-4" />
+                    <TrashIcon class="h-4 w-4 text-red-500" />
                     Delete
                   </button>
                 </div>
@@ -173,6 +172,7 @@ import { EllipsisVerticalIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@her
 import EmptyState from '@/components/ui/EmptyState.vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { formatDate } from '@/utils/formatters';
+import { getUserAvatarUrl } from '@/utils/avatar';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
 defineProps({

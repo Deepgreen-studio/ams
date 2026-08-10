@@ -1,94 +1,208 @@
 <template>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div v-if="loading" class="space-y-3 p-6">
-      <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
+  <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+    <div v-if="$slots.toolbar" class="border-b border-zinc-100 px-8 py-6">
+      <slot name="toolbar" />
+    </div>
+
+    <div v-if="loading" class="space-y-3 px-8 py-6">
+      <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
     </div>
 
     <EmptyState
       v-else-if="!roles.length"
       title="No roles found"
-      description="Adjust your filters or create a new role."
+      description="Try adjusting your search or create a new role."
+      class="px-8 py-6"
     >
       <template #action>
         <slot name="empty-action" />
       </template>
     </EmptyState>
 
-    <div v-else class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Role</th>
-            <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 md:table-cell">
-              Machine name
+    <div v-else class="overflow-x-auto px-3">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-100">
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'display_name')"
+              >
+                Role
+                <span class="text-[10px] leading-none text-zinc-300">
+                  {{ sortBy === 'display_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
             </th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Permissions</th>
-            <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'name')"
+              >
+                Machine name
+                <span class="text-[10px] leading-none text-zinc-300">
+                  {{ sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Permissions</th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Users
             </th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="role in roles" :key="role.uuid" class="hover:bg-slate-50/80">
-            <td class="px-4 py-3">
-              <div class="flex flex-wrap items-center gap-2">
-                <p class="font-medium text-slate-900">{{ role.display_name }}</p>
-                <RoleBadge v-if="role.is_system" name="System" system />
+        <tbody>
+          <tr
+            v-for="role in roles"
+            :key="role.uuid"
+            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+          >
+            <td class="px-5 py-4">
+              <div class="min-w-0">
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
+                  <RoleBadge v-if="role.is_system" name="System" system />
+                </div>
+                <p class="mt-0.5 max-w-md truncate text-xs text-zinc-400">
+                  {{ role.description || '—' }}
+                </p>
               </div>
-              <p class="mt-1 max-w-md text-xs text-slate-500">{{ role.description || '—' }}</p>
             </td>
-            <td class="hidden px-4 py-3 text-slate-600 md:table-cell">{{ role.name }}</td>
-            <td class="px-4 py-3 text-slate-700">{{ role.permissions_count ?? 0 }}</td>
-            <td class="hidden px-4 py-3 text-slate-700 lg:table-cell">
+            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">{{ role.name }}</td>
+            <td class="px-5 py-4 text-slate-600">{{ role.permissions_count ?? 0 }}</td>
+            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ role.users_count ?? 0 }}
             </td>
-            <td class="px-4 py-3">
-              <div class="flex justify-end gap-2">
-                <RouterLink
-                  :to="{ name: 'roles.show', params: { id: role.uuid } }"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
-                >
-                  View
-                </RouterLink>
-                <RouterLink
-                  :to="{ name: 'roles.edit', params: { id: role.uuid } }"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  Edit
-                </RouterLink>
-                <RouterLink
-                  :to="{ name: 'roles.permissions', params: { id: role.uuid } }"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  Permissions
-                </RouterLink>
+            <td class="px-5 py-4">
+              <div class="relative flex justify-end">
                 <button
-                  v-if="!role.is_system"
                   type="button"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
-                  @click="$emit('delete', role)"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+                  :aria-expanded="openMenuId === role.uuid"
+                  aria-haspopup="menu"
+                  aria-label="Open actions"
+                  @click.stop="toggleMenu(role.uuid)"
                 >
-                  Delete
+                  <EllipsisVerticalIcon class="h-5 w-5" />
                 </button>
+
+                <div
+                  v-if="openMenuId === role.uuid"
+                  class="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+                  role="menu"
+                >
+                  <RouterLink
+                    :to="{ name: 'roles.show', params: { id: role.uuid } }"
+                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+                    role="menuitem"
+                    @click="closeMenu"
+                  >
+                    <EyeIcon class="h-4 w-4 text-slate-400" />
+                    View
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'roles.edit', params: { id: role.uuid } }"
+                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+                    role="menuitem"
+                    @click="closeMenu"
+                  >
+                    <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+                    Edit
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'roles.permissions', params: { id: role.uuid } }"
+                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+                    role="menuitem"
+                    @click="closeMenu"
+                  >
+                    <KeyIcon class="h-4 w-4 text-slate-400" />
+                    Permissions
+                  </RouterLink>
+                  <button
+                    v-if="!role.is_system"
+                    type="button"
+                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                    role="menuitem"
+                    @click="onDelete(role)"
+                  >
+                    <TrashIcon class="h-4 w-4 text-red-500" />
+                    Delete
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
+
+    <div v-if="$slots.footer" class="border-t border-zinc-100 px-8 py-5">
+      <slot name="footer" />
+    </div>
   </div>
 </template>
 
 <script setup>
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import {
+  EllipsisVerticalIcon,
+  EyeIcon,
+  KeyIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 
 defineProps({
-  roles: { type: Array, default: () => [] },
-  loading: { type: Boolean, default: false },
+  roles: {
+    type: Array,
+    default: () => [],
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  sortBy: {
+    type: String,
+    default: 'name',
+  },
+  sortDir: {
+    type: String,
+    default: 'asc',
+  },
 });
 
-defineEmits(['delete']);
+const emit = defineEmits(['sort', 'delete']);
+
+const openMenuId = ref(null);
+
+function toggleMenu(id) {
+  openMenuId.value = openMenuId.value === id ? null : id;
+}
+
+function closeMenu() {
+  openMenuId.value = null;
+}
+
+function onDelete(role) {
+  closeMenu();
+  emit('delete', role);
+}
+
+function onDocumentClick() {
+  closeMenu();
+}
+
+onMounted(() => {
+  document.addEventListener('click', onDocumentClick);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick);
+});
 </script>

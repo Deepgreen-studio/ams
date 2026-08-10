@@ -228,6 +228,21 @@ export const useDepartmentsStore = defineStore('departments', () => {
     }
   }
 
+  async function updateDepartment(id, payload) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await companyService.updateDepartment(id, payload);
+      state.successMessage.value = data.message;
+      return data.data?.department;
+    } catch (err) {
+      state.applyError(err, 'Unable to update department');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function deleteDepartment(id) {
     state.saving.value = true;
     try {
@@ -240,7 +255,15 @@ export const useDepartmentsStore = defineStore('departments', () => {
     }
   }
 
-  return { departments, meta, ...state, fetchDepartments, createDepartment, deleteDepartment };
+  return {
+    departments,
+    meta,
+    ...state,
+    fetchDepartments,
+    createDepartment,
+    updateDepartment,
+    deleteDepartment,
+  };
 });
 
 export const useTeamsStore = defineStore('teams', () => {
@@ -277,6 +300,21 @@ export const useTeamsStore = defineStore('teams', () => {
     }
   }
 
+  async function updateTeam(id, payload) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await companyService.updateTeam(id, payload);
+      state.successMessage.value = data.message;
+      return data.data?.team;
+    } catch (err) {
+      state.applyError(err, 'Unable to update team');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function deleteTeam(id) {
     state.saving.value = true;
     try {
@@ -289,7 +327,7 @@ export const useTeamsStore = defineStore('teams', () => {
     }
   }
 
-  return { teams, meta, ...state, fetchTeams, createTeam, deleteTeam };
+  return { teams, meta, ...state, fetchTeams, createTeam, updateTeam, deleteTeam };
 });
 
 export const useLocationsStore = defineStore('locations', () => {
@@ -326,6 +364,21 @@ export const useLocationsStore = defineStore('locations', () => {
     }
   }
 
+  async function updateLocation(id, payload) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await companyService.updateLocation(id, payload);
+      state.successMessage.value = data.message;
+      return data.data?.location;
+    } catch (err) {
+      state.applyError(err, 'Unable to update location');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function deleteLocation(id) {
     state.saving.value = true;
     try {
@@ -338,5 +391,13 @@ export const useLocationsStore = defineStore('locations', () => {
     }
   }
 
-  return { locations, meta, ...state, fetchLocations, createLocation, deleteLocation };
+  return {
+    locations,
+    meta,
+    ...state,
+    fetchLocations,
+    createLocation,
+    updateLocation,
+    deleteLocation,
+  };
 });

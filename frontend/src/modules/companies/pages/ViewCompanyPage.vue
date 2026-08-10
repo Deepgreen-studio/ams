@@ -85,7 +85,10 @@
                 </span>
                 <span class="text-sm font-medium text-slate-700">{{ item.label }}</span>
               </div>
-              <span class="text-lg font-semibold text-slate-900">{{ item.count }}</span>
+              <div class="flex items-center gap-3">
+                <span class="text-lg font-semibold text-slate-900">{{ item.count }}</span>
+                <span class="text-sm font-medium text-brand-600">Manage</span>
+              </div>
             </RouterLink>
           </div>
         </div>

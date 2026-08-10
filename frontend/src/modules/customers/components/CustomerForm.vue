@@ -1,35 +1,29 @@
 <template>
-  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
-    <div class="grid gap-4 md:grid-cols-2">
+  <form class="space-y-8" novalidate @submit.prevent="onSubmit">
+    <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Owning company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Owning company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
+          size="lg"
+          placeholder="Select company"
+          :options="companyOptions"
           :disabled="Boolean(initial.uuid)"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+          :error="Boolean(displayErrors.company_id)"
+        />
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Customer type</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Customer type</label>
+        <SelectBox
           v-model="form.customer_type"
-          class="input"
-          :class="fieldClass('customer_type')"
-        >
-          <option value="individual">Individual</option>
-          <option value="business">Business</option>
-          <option value="enterprise">Enterprise</option>
-        </select>
+          size="lg"
+          :options="typeOptions"
+          :error="Boolean(displayErrors.customer_type)"
+        />
         <p v-if="displayErrors.customer_type" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.customer_type[0] }}
         </p>
@@ -37,11 +31,11 @@
 
       <template v-if="form.customer_type === 'individual'">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">First name</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">First name</label>
           <input
             v-model="form.first_name"
             type="text"
-            class="input"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('first_name')"
           />
           <p v-if="displayErrors.first_name" class="mt-1 text-xs text-rose-600">
@@ -49,11 +43,11 @@
           </p>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Last name</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Last name</label>
           <input
             v-model="form.last_name"
             type="text"
-            class="input"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('last_name')"
           />
           <p v-if="displayErrors.last_name" class="mt-1 text-xs text-rose-600">
@@ -63,11 +57,11 @@
       </template>
 
       <div v-if="form.customer_type !== 'individual'" class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company name</label>
         <input
           v-model="form.company_name"
           type="text"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('company_name')"
         />
         <p v-if="displayErrors.company_name" class="mt-1 text-xs text-rose-600">
@@ -76,20 +70,28 @@
       </div>
 
       <div v-if="form.customer_type !== 'individual'">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Contact first name</label>
-        <input v-model="form.first_name" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact first name</label>
+        <input
+          v-model="form.first_name"
+          type="text"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div v-if="form.customer_type !== 'individual'">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Contact last name</label>
-        <input v-model="form.last_name" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact last name</label>
+        <input
+          v-model="form.last_name"
+          type="text"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
         <input
           v-model="form.email"
           type="email"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('email')"
         />
         <p v-if="displayErrors.email" class="mt-1 text-xs text-rose-600">
@@ -97,11 +99,11 @@
         </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Phone</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
         <input
           v-model="form.phone"
           type="text"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('phone')"
         />
         <p v-if="displayErrors.phone" class="mt-1 text-xs text-rose-600">
@@ -109,12 +111,12 @@
         </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Website</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
         <input
           v-model="form.website"
           type="url"
-          class="input"
           placeholder="https://"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('website')"
         />
         <p v-if="displayErrors.website" class="mt-1 text-xs text-rose-600">
@@ -122,40 +124,47 @@
         </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Industry</label>
-        <input v-model="form.industry" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Industry</label>
+        <input
+          v-model="form.industry"
+          type="text"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Country</label>
-        <input v-model="form.country" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Country</label>
+        <input
+          v-model="form.country"
+          type="text"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Timezone</label>
-        <input v-model="form.timezone" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
+        <SelectBox v-model="form.timezone" size="lg" :options="timezoneOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Language</label>
-        <input v-model="form.language" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
+        <SelectBox v-model="form.language" size="lg" :options="languageOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="suspended">Suspended</option>
-          <option value="pending">Pending</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-        <textarea v-model="form.notes" rows="3" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Notes</label>
+        <textarea
+          v-model="form.notes"
+          rows="3"
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -163,7 +172,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -174,8 +183,10 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
+import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -190,12 +201,33 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const companies = ref([]);
 const localErrors = ref({});
+const timezoneOptionsBase = getTimezoneOptions();
 const form = reactive(createForm(props.initial));
+
+const typeOptions = [
+  { value: 'individual', label: 'Individual' },
+  { value: 'business', label: 'Business' },
+  { value: 'enterprise', label: 'Enterprise' },
+];
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'pending', label: 'Pending' },
+];
+
+const companyOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
 
 watch(
   () => props.initial,
   (value) => Object.assign(form, createForm(value)),
-  { deep: true }
+  { deep: true },
 );
 
 watch(
@@ -204,7 +236,7 @@ watch(
     if (message) {
       toast.error(message, 'Validation Failed');
     }
-  }
+  },
 );
 
 watch(
@@ -212,14 +244,14 @@ watch(
   () => {
     localErrors.value = {};
   },
-  { deep: true }
+  { deep: true },
 );
 
 watch(
   () => form.customer_type,
   () => {
     localErrors.value = {};
-  }
+  },
 );
 
 const displayErrors = computed(() => ({
@@ -227,13 +259,27 @@ const displayErrors = computed(() => ({
   ...props.errors,
 }));
 
+function withCurrentOption(options, current) {
+  if (current && !options.some((option) => option.value === current)) {
+    return [{ value: current, label: current }, ...options];
+  }
+  return options;
+}
+
+const timezoneOptions = computed(() => withCurrentOption(timezoneOptionsBase, form.timezone));
+const languageOptions = computed(() => withCurrentOption(LANGUAGE_OPTIONS, form.language));
+
 onMounted(async () => {
   if (props.hideCompany) {
     return;
   }
 
   try {
-    const { data } = await companyService.list({ per_page: 100, sort_by: 'company_name', sort_dir: 'asc' });
+    const { data } = await companyService.list({
+      per_page: 100,
+      sort_by: 'company_name',
+      sort_dir: 'asc',
+    });
     companies.value = data.data?.companies?.items ?? [];
   } catch {
     companies.value = [];
@@ -313,18 +359,3 @@ function onSubmit() {
   emit('submit', { ...form });
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

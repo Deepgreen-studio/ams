@@ -1,10 +1,6 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create customer"
-      description="Register an individual, business, or enterprise customer."
-    /> -->
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <CustomerForm
         :loading="customersStore.saving"
         :errors="customersStore.fieldErrors"
@@ -19,7 +15,6 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import CustomerForm from '@/modules/customers/components/CustomerForm.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 

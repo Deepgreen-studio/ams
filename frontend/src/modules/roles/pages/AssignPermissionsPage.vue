@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="`Permissions · ${rolesStore.currentRole?.display_name || 'Role'}`"
-      description="Assign module permissions using the grouped checkbox tree."
-    /> -->
-
     <div
       v-if="rolesStore.successMessage"
       class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
@@ -18,7 +13,14 @@
       {{ rolesStore.error }}
     </div>
 
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-[12px] bg-white p-6 sm:p-8">
+      <div class="mb-5 flex items-center justify-between gap-3">
+        <h3 class="text-base font-semibold text-slate-900">
+          Permissions · {{ rolesStore.currentRole?.display_name || 'Role' }}
+        </h3>
+        <span class="text-xs text-slate-500">{{ selectedPermissions.length }} selected</span>
+      </div>
+
       <PermissionTree
         :groups="permissionsStore.groups"
         :selected="selectedPermissions"
@@ -29,13 +31,13 @@
       <div class="mt-6 flex justify-end gap-2">
         <RouterLink
           :to="{ name: 'roles.show', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           Cancel
         </RouterLink>
         <button
           type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="rolesStore.saving"
           @click="onSave"
         >
@@ -49,7 +51,6 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import PermissionTree from '@/modules/roles/components/PermissionTree.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';
 
@@ -67,7 +68,7 @@ watch(
   (role) => {
     selectedPermissions.value = (role?.permissions || []).map((permission) => permission.name);
   },
-  { immediate: true },
+  { immediate: true }
 );
 
 async function onSave() {

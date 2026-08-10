@@ -30,20 +30,8 @@
                 @click="$emit('sort', 'display_name')"
               >
                 Role
-                <span class="text-[10px] leading-none text-zinc-300">
+                <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'display_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'name')"
-              >
-                Machine name
-                <span class="text-[10px] leading-none text-zinc-300">
-                  {{ sortBy === 'name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -61,17 +49,8 @@
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
           >
             <td class="px-5 py-4">
-              <div class="min-w-0">
-                <div class="flex flex-wrap items-center gap-2">
-                  <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
-                  <RoleBadge v-if="role.is_system" name="System" system />
-                </div>
-                <p class="mt-0.5 max-w-md truncate text-xs text-zinc-400">
-                  {{ role.description || '—' }}
-                </p>
-              </div>
+              <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
             </td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">{{ role.name }}</td>
             <td class="px-5 py-4 text-slate-600">{{ role.permissions_count ?? 0 }}</td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ role.users_count ?? 0 }}
@@ -156,7 +135,6 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 
 defineProps({
   roles: {

@@ -34,169 +34,129 @@
 
     <div v-else-if="rolesStore.currentRole" class="grid gap-6 lg:grid-cols-3">
       <div class="space-y-6 lg:col-span-2">
-        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+        <div class="rounded-[12px] bg-white p-6 sm:p-8">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start">
             <div
               class="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-[12px] bg-brand-50 text-base font-semibold text-brand-700"
             >
               {{ roleInitials }}
             </div>
             <div class="min-w-0 flex-1">
-              <div class="flex flex-wrap items-center gap-2">
-                <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">
-                  {{ rolesStore.currentRole.display_name }}
-                </h2>
-                <RoleBadge
-                  :name="rolesStore.currentRole.name"
-                  :display-name="rolesStore.currentRole.is_system ? 'System' : 'Custom'"
-                  :system="rolesStore.currentRole.is_system"
-                />
-              </div>
+              <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">
+                {{ rolesStore.currentRole.display_name }}
+              </h2>
               <p class="mt-1 text-sm text-slate-500">
                 {{ rolesStore.currentRole.description || 'No description provided.' }}
               </p>
-              <p class="mt-1 truncate text-xs text-zinc-400">{{ rolesStore.currentRole.uuid }}</p>
             </div>
           </div>
 
-          <div class="mt-6">
-            <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
-              Role details
-            </p>
-            <dl
-              class="divide-y divide-slate-100 overflow-hidden rounded-[12px] border border-slate-100 bg-slate-50/60"
-            >
-              <div
-                v-for="item in detailItems"
-                :key="item.label"
-                class="grid grid-cols-[7.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[8.5rem_1fr]"
-              >
-                <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
-                <dd class="truncate text-sm font-medium text-slate-900">{{ item.value }}</dd>
-              </div>
-            </dl>
+          <div class="mt-6 grid gap-3 sm:grid-cols-3">
+            <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
+              <p class="text-xs text-zinc-500">Permissions</p>
+              <p class="mt-1 text-lg font-semibold text-slate-900">{{ permissionCount }}</p>
+            </div>
+            <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
+              <p class="text-xs text-zinc-500">Users</p>
+              <p class="mt-1 text-lg font-semibold text-slate-900">
+                {{ rolesStore.currentRole.users_count ?? 0 }}
+              </p>
+            </div>
+            <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
+              <p class="text-xs text-zinc-500">Updated</p>
+              <p class="mt-1 text-sm font-semibold text-slate-900">
+                {{ formatDate(rolesStore.currentRole.updated_at) || '—' }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+        <div class="rounded-[12px] bg-white p-6 sm:p-8">
           <div class="flex flex-wrap items-center justify-between gap-3">
-            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-              Permissions & access
-            </h3>
+            <h3 class="text-base font-semibold text-slate-900">Permissions</h3>
             <RouterLink
               :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
-              class="text-sm font-medium text-brand-700 hover:text-brand-800"
+              class="text-sm font-medium text-brand-600 hover:text-brand-700"
             >
-              Manage permissions
+              Manage
             </RouterLink>
           </div>
 
-          <div v-if="assignedPermissions.length" class="mt-4 flex flex-wrap gap-2">
-            <span
+          <div v-if="assignedPermissions.length" class="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+            <div
               v-for="permission in visiblePermissions"
               :key="permission.id || permission.name"
-              class="rounded-[8px] bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+              class="rounded-[10px] bg-zinc-50 px-3.5 py-2.5 text-sm font-medium text-slate-800"
             >
               {{ permission.display_name || permission.name }}
-            </span>
-            <span
+            </div>
+            <button
               v-if="assignedPermissions.length > visiblePermissionLimit"
-              class="rounded-[8px] bg-brand-50 px-2 py-1 text-xs font-medium text-brand-700"
+              type="button"
+              class="rounded-[10px] bg-brand-50 px-3.5 py-2.5 text-left text-sm font-medium text-brand-700 hover:bg-brand-100"
+              @click="showAllPermissions = !showAllPermissions"
             >
-              +{{ assignedPermissions.length - visiblePermissionLimit }} more
-            </span>
+              {{
+                showAllPermissions
+                  ? 'Show less'
+                  : `+${assignedPermissions.length - visiblePermissionLimit} more`
+              }}
+            </button>
           </div>
-          <p v-else class="mt-4 text-sm text-slate-500">
-            No permissions assigned yet. Manage this role to assign permissions.
+          <p v-else class="mt-5 text-sm text-slate-500">
+            No permissions assigned yet.
           </p>
-
-          <dl class="mt-5 grid gap-4 border-t border-slate-100 pt-5 sm:grid-cols-2">
-            <div>
-              <dt class="text-xs text-slate-500">Permission count</dt>
-              <dd class="text-sm text-slate-900">{{ permissionCount }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-slate-500">Assigned users</dt>
-              <dd class="text-sm text-slate-900">{{ rolesStore.currentRole.users_count ?? 0 }}</dd>
-            </div>
-          </dl>
         </div>
+      </div>
 
-        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Role information
-          </h3>
-          <dl class="mt-4 grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt class="text-xs text-slate-500">Display name</dt>
-              <dd class="text-sm text-slate-900">{{ rolesStore.currentRole.display_name || '—' }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-slate-500">Machine name</dt>
-              <dd class="text-sm text-slate-900">{{ rolesStore.currentRole.name || '—' }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-slate-500">Guard</dt>
-              <dd class="text-sm text-slate-900">{{ rolesStore.currentRole.guard_name || '—' }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-slate-500">Type</dt>
-              <dd class="text-sm text-slate-900">
+      <div class="space-y-6">
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-base font-semibold text-slate-900">Details</h3>
+          <dl class="mt-4 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-sm text-zinc-500">Type</dt>
+              <dd class="text-sm font-medium text-slate-900">
                 {{ rolesStore.currentRole.is_system ? 'System' : 'Custom' }}
               </dd>
             </div>
-            <div>
-              <dt class="text-xs text-slate-500">Created</dt>
-              <dd class="text-sm text-slate-900">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-sm text-zinc-500">Created</dt>
+              <dd class="text-sm font-medium text-slate-900">
                 {{ formatDate(rolesStore.currentRole.created_at) || '—' }}
               </dd>
             </div>
-            <div>
-              <dt class="text-xs text-slate-500">Updated</dt>
-              <dd class="text-sm text-slate-900">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-sm text-zinc-500">Updated</dt>
+              <dd class="text-sm font-medium text-slate-900">
                 {{ formatDate(rolesStore.currentRole.updated_at) || '—' }}
               </dd>
             </div>
           </dl>
         </div>
-      </div>
 
-      <div class="space-y-6">
-        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Activity summary
-          </h3>
-          <p class="mt-3 text-3xl font-semibold text-slate-900">
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-base font-semibold text-slate-900">Activity</h3>
+          <p class="mt-2 text-2xl font-semibold text-slate-900">
             {{ rolesStore.activityHistory?.total ?? 0 }}
           </p>
-          <p class="text-sm text-slate-500">Logged events</p>
-          <p class="mt-4 text-xs text-slate-500">
-            Last activity:
-            {{ formatDate(lastActivityAt) || 'None yet' }}
-          </p>
+          <p class="text-sm text-zinc-500">Logged events</p>
 
           <ul class="mt-4 space-y-2">
             <li
               v-for="item in rolesStore.activityHistory?.recent || []"
               :key="item.id"
-              class="rounded-[12px] bg-slate-50 px-3 py-2 text-xs text-slate-600"
+              class="rounded-[10px] bg-zinc-50 px-3.5 py-2.5"
             >
-              <p class="font-medium text-slate-800">{{ item.description }}</p>
-              <p class="mt-0.5 text-slate-500">{{ formatDate(item.created_at) }}</p>
+              <p class="text-sm font-medium text-slate-800">{{ item.description }}</p>
+              <p class="mt-0.5 text-xs text-zinc-500">{{ formatDate(item.created_at) }}</p>
             </li>
             <li
               v-if="!(rolesStore.activityHistory?.recent || []).length"
-              class="text-sm text-slate-500"
+              class="text-sm text-zinc-500"
             >
               No recent activity.
             </li>
           </ul>
-        </div>
-
-        <div
-          class="rounded-[12px] border border-dashed border-zinc-300 bg-white p-6 text-sm text-slate-500"
-        >
-          User assignment history will appear here when role membership auditing is expanded.
         </div>
       </div>
     </div>
@@ -220,7 +180,6 @@ import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';
-import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 
 const route = useRoute();
@@ -228,23 +187,22 @@ const router = useRouter();
 const rolesStore = useRolesStore();
 const toast = useToast();
 const showDelete = ref(false);
-const visiblePermissionLimit = 24;
+const showAllPermissions = ref(false);
+const visiblePermissionLimit = 12;
 
 const assignedPermissions = computed(() => rolesStore.currentRole?.permissions || []);
 
 const visiblePermissions = computed(() =>
-  assignedPermissions.value.slice(0, visiblePermissionLimit),
+  showAllPermissions.value
+    ? assignedPermissions.value
+    : assignedPermissions.value.slice(0, visiblePermissionLimit)
 );
 
 const permissionCount = computed(
   () =>
     rolesStore.currentRole?.permissions_count ??
     rolesStore.currentRole?.permissions?.length ??
-    0,
-);
-
-const lastActivityAt = computed(
-  () => rolesStore.activityHistory?.recent?.[0]?.created_at || null,
+    0
 );
 
 const roleInitials = computed(() => {
@@ -257,22 +215,13 @@ const roleInitials = computed(() => {
     .join('');
 });
 
-const detailItems = computed(() => [
-  { label: 'Machine name', value: rolesStore.currentRole?.name || '—' },
-  { label: 'Guard', value: rolesStore.currentRole?.guard_name || '—' },
-  { label: 'Permissions', value: permissionCount.value },
-  { label: 'Users', value: rolesStore.currentRole?.users_count ?? 0 },
-  { label: 'Created', value: formatDate(rolesStore.currentRole?.created_at) || '—' },
-  { label: 'Updated', value: formatDate(rolesStore.currentRole?.updated_at) || '—' },
-]);
-
 watch(
   () => rolesStore.error,
   (message) => {
     if (message) {
       toast.error(message, 'Error');
     }
-  },
+  }
 );
 
 onMounted(() => {

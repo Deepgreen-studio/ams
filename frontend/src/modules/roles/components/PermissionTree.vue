@@ -4,24 +4,32 @@
       <input
         v-model="search"
         type="search"
-        placeholder="Filter permissions..."
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 sm:max-w-sm"
+        placeholder="Search permissions..."
+        class="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0 sm:max-w-xs"
       />
       <div class="flex gap-2">
-        <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" @click="selectAll">
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-zinc-50"
+          @click="selectAll"
+        >
           Select all
         </button>
-        <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50" @click="clearAll">
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-zinc-50"
+          @click="clearAll"
+        >
           Clear
         </button>
       </div>
     </div>
 
     <div v-if="loading" class="space-y-3">
-      <div v-for="n in 4" :key="n" class="h-24 animate-pulse rounded-xl bg-slate-100" />
+      <div v-for="n in 4" :key="n" class="h-20 animate-pulse rounded-[12px] bg-slate-100" />
     </div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="max-h-[32rem] space-y-3 overflow-y-auto pr-1">
       <PermissionGroup
         v-for="group in filteredGroups"
         :key="group.uuid || group.id"
@@ -32,7 +40,7 @@
       />
       <EmptyState
         v-if="!filteredGroups.length"
-        title="No permissions match"
+        title="No permissions found"
         description="Try a different search term."
       />
     </div>
@@ -96,7 +104,9 @@ function toggleGroup(group, checked) {
 }
 
 function selectAll() {
-  const names = props.groups.flatMap((group) => (group.permissions || []).map((permission) => permission.name));
+  const names = props.groups.flatMap((group) =>
+    (group.permissions || []).map((permission) => permission.name)
+  );
   emit('update:selected', [...new Set(names)]);
 }
 

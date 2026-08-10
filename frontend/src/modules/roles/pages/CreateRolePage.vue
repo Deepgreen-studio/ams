@@ -1,11 +1,7 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create role"
-      description="Define a new role and optionally seed permissions."
-    /> -->
     <div class="grid gap-6 lg:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
+      <div class="rounded-[12px] bg-white p-6 sm:p-8">
         <RoleForm
           :loading="rolesStore.saving"
           :errors="rolesStore.fieldErrors"
@@ -15,10 +11,12 @@
           @cancel="router.push({ name: 'roles.index' })"
         />
       </div>
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
-        <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Initial permissions
-        </h3>
+
+      <div class="rounded-[12px] bg-white p-6 sm:p-8">
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <h3 class="text-base font-semibold text-slate-900">Initial permissions</h3>
+          <span class="text-xs text-slate-500">{{ selectedPermissions.length }} selected</span>
+        </div>
         <PermissionTree
           :groups="permissionGroups"
           :selected="selectedPermissions"
@@ -33,7 +31,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import PermissionTree from '@/modules/roles/components/PermissionTree.vue';
 import RoleForm from '@/modules/roles/components/RoleForm.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';

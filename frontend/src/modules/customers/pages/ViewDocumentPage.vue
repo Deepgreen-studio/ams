@@ -53,52 +53,51 @@
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <template v-if="document">
-          <RouterLink
-            :to="{ name: 'customers.documents', params: { id: route.params.id } }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back
-          </RouterLink>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            @click="
-              store.downloadDocument(document.uuid, document.original_filename || document.name)
-            "
-          >
-            Download
-          </button>
-          <RouterLink
-            v-if="!document.deleted_at"
-            :to="{
-              name: 'customers.documents.edit',
-              params: { id: route.params.id, documentId: document.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            v-if="document.deleted_at"
-            type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            :disabled="store.saving"
-            @click="restore"
-          >
-            Restore
-          </button>
-          <button
-            v-else
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showArchive = true"
-          >
-            Archive
-          </button>
+        <RouterLink
+          :to="{ name: 'customers.documents', params: { id: route.params.id } }"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Back
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="store.downloadDocument(document.uuid, document.original_filename || document.name)"
+        >
+          Download
+        </button>
+        <button
+          v-if="!document.deleted_at"
+          type="button"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="openEdit"
+        >
+          <PencilSquareIcon class="h-4 w-4 text-slate-500" />
+          Edit
+        </button>
+        <button
+          v-if="document.deleted_at"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="restore"
+        >
+          Restore
+        </button>
+        <button
+          v-else
+          type="button"
+          class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
+          @click="showDelete = true"
+        >
+          <TrashIcon class="h-4 w-4 text-white" />
+          Delete
+        </button>
+      </template>
     </Teleport>
 
     <div
-      v-if="store.error"
+      v-if="store.error && !formOpen"
       class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
     >
       {{ store.error }}
@@ -114,7 +113,7 @@
 
     <div v-else-if="document" class="space-y-6">
       <div class="grid gap-6 lg:grid-cols-2">
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
+        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
           <div class="flex flex-wrap items-center gap-3">
             <DocumentStatusBadge :status="document.status" />
             <span class="text-xs uppercase tracking-wide text-slate-500">{{
@@ -148,8 +147,8 @@
           </dl>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Preview</h3>
+        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h3 class="text-base font-semibold text-slate-900">Preview</h3>
           <div
             class="mt-4 min-h-[18rem] overflow-hidden rounded-lg border border-slate-100 bg-slate-50"
           >
@@ -183,11 +182,9 @@
         </div>
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
+      <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Version history
-          </h3>
+          <h3 class="text-base font-semibold text-slate-900">Version history</h3>
           <label
             class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-brand-700"
           >
@@ -238,32 +235,46 @@
         <p v-else class="mt-3 text-sm text-slate-500">No versions loaded.</p>
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Timeline</h3>
-        <ul v-if="store.timeline.length" class="mt-4 space-y-3">
-          <li
-            v-for="(item, index) in store.timeline"
-            :key="index"
-            class="border-l-2 border-slate-200 pl-3 text-sm"
-          >
-            <p class="font-medium text-slate-900">
-              {{ item.description || item.event || 'Activity' }}
-            </p>
-            <p class="text-xs text-slate-500">{{ formatDate(item.created_at) }}</p>
+      <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+        <h3 class="text-base font-semibold text-slate-900">Timeline</h3>
+        <ol
+          v-if="store.timeline.length"
+          class="relative mt-6 space-y-5 border-l border-zinc-100 pl-6"
+        >
+          <li v-for="(item, index) in store.timeline" :key="index" class="relative">
+            <span
+              class="absolute -left-[1.55rem] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
+            />
+            <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+              <p class="text-sm font-medium text-slate-900">
+                {{ item.description || item.event || 'Activity' }}
+              </p>
+              <p class="mt-1 text-xs text-slate-500">{{ formatDate(item.created_at) }}</p>
+            </div>
           </li>
-        </ul>
+        </ol>
         <p v-else class="mt-3 text-sm text-slate-500">No timeline entries yet.</p>
       </div>
     </div>
 
-    <DeleteConfirmation
-      :open="showArchive"
-      title="Archive document"
-      :message="`Archive ${document?.name || 'this document'}?`"
-      confirm-label="Archive"
+    <DocumentFormModal
+      :open="formOpen"
       :loading="store.saving"
-      @cancel="showArchive = false"
-      @confirm="confirmArchive"
+      :document="document"
+      :errors="store.fieldErrors"
+      :error="store.error || ''"
+      @cancel="closeForm"
+      @submit="onSave"
+    />
+
+    <DeleteConfirmation
+      :open="showDelete"
+      title="Delete document"
+      :message="`Soft delete ${document?.name || 'this document'}? It can be restored later.`"
+      confirm-label="Delete"
+      :loading="store.saving"
+      @cancel="showDelete = false"
+      @confirm="confirmDelete"
     />
   </div>
 </template>
@@ -271,15 +282,17 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import DocumentFormModal from '@/modules/customers/components/DocumentFormModal.vue';
 import DocumentStatusBadge from '@/modules/customers/components/DocumentStatusBadge.vue';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';
 
 const route = useRoute();
 const router = useRouter();
 const store = useCustomerDocumentsStore();
-const showArchive = ref(false);
+const showDelete = ref(false);
+const formOpen = ref(false);
 const previewMessage = ref('Preview not loaded.');
 
 const document = computed(() => store.currentDocument);
@@ -325,6 +338,27 @@ function formatSize(bytes) {
   return `${(size / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function openEdit() {
+  store.clearMessages();
+  formOpen.value = true;
+}
+
+function closeForm() {
+  if (store.saving) return;
+  formOpen.value = false;
+  store.clearMessages();
+}
+
+async function onSave(payload) {
+  try {
+    await store.updateDocument(route.params.documentId, payload);
+    formOpen.value = false;
+    await store.fetchTimeline(route.params.documentId);
+  } catch {
+    // Field errors stay in the modal via the store.
+  }
+}
+
 async function onVersionUpload(event) {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -342,9 +376,9 @@ async function onVersionUpload(event) {
   if (next.is_previewable) await store.loadPreview(next.uuid);
 }
 
-async function confirmArchive() {
+async function confirmDelete() {
   await store.archiveDocument(route.params.documentId);
-  showArchive.value = false;
+  showDelete.value = false;
   await router.push({ name: 'customers.documents', params: { id: route.params.id } });
 }
 

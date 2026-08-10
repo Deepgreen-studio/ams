@@ -143,12 +143,29 @@ class CustomerNoteRepository extends BaseRepository
      */
     public function timeline(CustomerNote $note, int $limit = 50): Collection
     {
-        return activity()->forSubject($note)->latest()->limit($limit)->get()->map(static fn ($item): array => [
-            'id' => $item->id,
-            'description' => $item->description,
-            'event' => $item->properties['event'] ?? null,
-            'properties' => $item->properties,
-            'created_at' => $item->created_at,
-        ]);
+        $activityModel = config('activitylog.activity_model');
+
+        return $activityModel::query()
+            ->forSubject($note)
+            ->with(['causer:id,uuid,full_name,email'])
+            ->latest()
+            ->limit(max(1, min($limit, 100)))
+            ->get()
+            ->map(static function ($activity): array {
+                return [
+                    'id' => $activity->id,
+                    'description' => $activity->description,
+                    'event' => $activity->event,
+                    'log_name' => $activity->log_name,
+                    'created_at' => $activity->created_at,
+                    'properties' => $activity->properties,
+                    'causer' => $activity->causer ? [
+                        'id' => $activity->causer->id,
+                        'uuid' => $activity->causer->uuid,
+                        'full_name' => $activity->causer->full_name,
+                        'email' => $activity->causer->email,
+                    ] : null,
+                ];
+            });
     }
 }

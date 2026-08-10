@@ -1,14 +1,14 @@
 <template>
-  <aside class="rounded-xl border border-slate-200 bg-white p-3">
-    <p class="px-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Folders</p>
+  <aside class="rounded-[12px] bg-white p-3 ring-1 ring-zinc-100">
+    <p class="px-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">Folders</p>
     <nav class="mt-2 space-y-1">
       <button
         type="button"
-        class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition"
+        class="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-sm transition"
         :class="
           !modelValue
             ? 'bg-brand-50 font-medium text-brand-700'
-            : 'text-slate-700 hover:bg-slate-50'
+            : 'text-slate-700 hover:bg-zinc-50'
         "
         @click="$emit('update:modelValue', '')"
       >
@@ -19,11 +19,11 @@
         v-for="folder in folders"
         :key="folder.category"
         type="button"
-        class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition"
+        class="flex w-full items-center justify-between rounded-[12px] px-3 py-2.5 text-sm transition"
         :class="
           modelValue === folder.category
             ? 'bg-brand-50 font-medium text-brand-700'
-            : 'text-slate-700 hover:bg-slate-50'
+            : 'text-slate-700 hover:bg-zinc-50'
         "
         @click="$emit('update:modelValue', folder.category)"
       >

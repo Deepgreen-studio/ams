@@ -1,98 +1,144 @@
 <template>
-  <form class="space-y-4" @submit.prevent="$emit('submit', form)">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</div>
+  <form class="space-y-4" @submit.prevent="onSubmit">
+    <div
+      v-if="error"
+      class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
+      {{ error }}
+    </div>
 
     <div class="grid gap-4 md:grid-cols-2">
       <div v-if="!hideApplication">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Application</label>
-        <select v-model="form.application_id" class="input" required :disabled="Boolean(initial.uuid)" @change="onApplicationChange">
-          <option value="" disabled>Select application</option>
-          <option v-for="app in applications" :key="app.uuid" :value="app.uuid">
-            {{ app.name }}
-          </option>
-        </select>
-        <p v-if="errors.application_id" class="mt-1 text-xs text-rose-600">{{ errors.application_id[0] }}</p>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Application
+        </label>
+        <SelectBox
+          v-model="form.application_id"
+          wrapper-class="w-full"
+          size="lg"
+          placeholder="Select application"
+          :options="applicationOptions"
+          :disabled="loading || Boolean(initial.uuid)"
+          @change="onApplicationChange"
+        />
+        <p v-if="errors.application_id" class="mt-1 text-xs text-rose-600">
+          {{ errors.application_id[0] }}
+        </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Environment</label>
-        <select v-model="form.application_environment_id" class="input" :disabled="!form.application_id && !initial.uuid">
-          <option value="">None</option>
-          <option v-for="env in environments" :key="env.uuid" :value="env.uuid">
-            {{ env.name }} ({{ env.type }})
-          </option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Environment
+        </label>
+        <SelectBox
+          v-model="form.application_environment_id"
+          wrapper-class="w-full"
+          size="lg"
+          :options="environmentOptions"
+          :disabled="loading || (!form.application_id && !initial.uuid)"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Integration</label>
-        <select v-model="form.integration_id" class="input">
-          <option value="">Use application default</option>
-          <option v-for="integration in integrations" :key="integration.uuid" :value="integration.uuid">
-            {{ integration.name }}
-          </option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Integration
+        </label>
+        <SelectBox
+          v-model="form.integration_id"
+          wrapper-class="w-full"
+          size="lg"
+          :options="integrationOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Owner contact</label>
-        <select v-model="form.owner_contact_id" class="input">
-          <option value="">None</option>
-          <option v-for="contact in contacts" :key="contact.uuid" :value="contact.uuid">
-            {{ contact.name }} ({{ contact.contact_type }})
-          </option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Owner contact
+        </label>
+        <SelectBox
+          v-model="form.owner_contact_id"
+          wrapper-class="w-full"
+          size="lg"
+          :options="contactOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Ownership</label>
-        <select v-model="form.ownership_type" class="input" required>
-          <option value="customer_owned">Customer owned</option>
-          <option value="platform_managed">Platform managed</option>
-          <option value="shared">Shared</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Ownership
+        </label>
+        <SelectBox
+          v-model="form.ownership_type"
+          wrapper-class="w-full"
+          size="lg"
+          :options="ownershipOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input" required>
-          <option value="pending">Pending</option>
-          <option value="active">Active</option>
-          <option value="suspended">Suspended</option>
-          <option value="expired">Expired</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Status
+        </label>
+        <SelectBox
+          v-model="form.status"
+          wrapper-class="w-full"
+          size="lg"
+          :options="statusOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Activation date</label>
-        <input v-model="form.activated_at" type="datetime-local" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Activation date
+        </label>
+        <input
+          v-model="form.activated_at"
+          type="datetime-local"
+          class="input"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Expiration date</label>
-        <input v-model="form.expires_at" type="datetime-local" class="input" />
-        <p v-if="errors.expires_at" class="mt-1 text-xs text-rose-600">{{ errors.expires_at[0] }}</p>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Expiration date
+        </label>
+        <input
+          v-model="form.expires_at"
+          type="datetime-local"
+          class="input"
+          :disabled="loading"
+        />
+        <p v-if="errors.expires_at" class="mt-1 text-xs text-rose-600">
+          {{ errors.expires_at[0] }}
+        </p>
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-        <textarea v-model="form.notes" rows="3" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Notes
+        </label>
+        <textarea v-model="form.notes" rows="3" class="input" :disabled="loading" />
       </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-2 pt-1">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="loading"
         @click="$emit('cancel')"
       >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        :disabled="loading"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading || (!hideApplication && !form.application_id)"
       >
         {{ loading ? 'Saving...' : submitLabel }}
       </button>
@@ -101,7 +147,8 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { applicationService } from '@/modules/applications/services/applicationService';
 import { environmentService } from '@/modules/applications/services/environmentService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
@@ -118,13 +165,58 @@ const props = defineProps({
   hideApplication: { type: Boolean, default: false },
 });
 
-defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel']);
 
 const applications = ref([]);
 const environments = ref([]);
 const integrations = ref([]);
 const contacts = ref([]);
 const form = reactive(createForm(props.initial));
+
+const ownershipOptions = [
+  { value: 'customer_owned', label: 'Customer owned' },
+  { value: 'platform_managed', label: 'Platform managed' },
+  { value: 'shared', label: 'Shared' },
+];
+
+const statusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'active', label: 'Active' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'expired', label: 'Expired' },
+  { value: 'cancelled', label: 'Cancelled' },
+];
+
+const applicationOptions = computed(() =>
+  applications.value.map((app) => ({
+    value: app.uuid,
+    label: app.name,
+  })),
+);
+
+const environmentOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...environments.value.map((env) => ({
+    value: env.uuid,
+    label: `${env.name} (${env.type})`,
+  })),
+]);
+
+const integrationOptions = computed(() => [
+  { value: '', label: 'Use application default' },
+  ...integrations.value.map((integration) => ({
+    value: integration.uuid,
+    label: integration.name,
+  })),
+]);
+
+const contactOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...contacts.value.map((contact) => ({
+    value: contact.uuid,
+    label: `${contact.name} (${contact.contact_type})`,
+  })),
+]);
 
 watch(
   () => props.initial,
@@ -134,7 +226,7 @@ watch(
       await loadEnvironments(form.application_id);
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(async () => {
@@ -191,9 +283,7 @@ async function loadEnvironments(applicationId) {
 
   try {
     const { data } = await environmentService.list(applicationId, { per_page: 100 });
-    environments.value = data.data?.environments?.items
-      ?? data.data?.environments
-      ?? [];
+    environments.value = data.data?.environments?.items ?? data.data?.environments ?? [];
   } catch {
     environments.value = [];
   }
@@ -225,19 +315,38 @@ function createForm(value = {}) {
     notes: value.notes || '',
   };
 }
+
+function onSubmit() {
+  if (props.loading) return;
+  if (!props.hideApplication && !form.application_id) return;
+  emit('submit', { ...form });
+}
 </script>
 
 <style scoped>
 .input {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
+  color: #1e293b;
   outline: none;
+  box-shadow: none;
+}
+textarea.input {
+  height: auto;
+  min-height: 5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 .input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-brand-500, #f97316);
+}
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

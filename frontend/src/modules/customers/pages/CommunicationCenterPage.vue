@@ -1,25 +1,20 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Communication center"
-      :description="`Notes, tasks, emails, and reminders for ${customerName}.`"
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'customers.show', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'customers.show', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
+        :to="{ name: 'customers.show', params: { id: route.params.id } }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back
+      </RouterLink>
+      <button
+        v-if="primaryAction"
+        type="button"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="primaryAction.onClick"
+      >
+        {{ primaryAction.label }}
+      </button>
     </Teleport>
 
     <div
@@ -29,7 +24,7 @@
       {{ store.successMessage }}
     </div>
     <div
-      v-if="store.error"
+      v-if="store.error && !anyFormOpen"
       class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
     >
       {{ store.error }}
@@ -39,10 +34,10 @@
       <div
         v-for="card in statCards"
         :key="card.label"
-        class="rounded-xl border border-slate-200 bg-white p-4"
+        class="rounded-[12px] bg-white px-4 py-3 ring-1 ring-zinc-100"
       >
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-        <p class="mt-2 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500">{{ card.label }}</p>
+        <p class="mt-1 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
       </div>
     </div>
 
@@ -51,11 +46,11 @@
         v-for="tab in tabs"
         :key="tab.id"
         type="button"
-        class="rounded-lg px-3 py-2 text-sm font-medium transition"
+        class="rounded-[12px] px-4 py-2 text-sm font-medium transition"
         :class="
           activeTab === tab.id
             ? 'bg-brand-600 text-white'
-            : 'border border-slate-300 text-slate-700 hover:bg-slate-50'
+            : 'border border-zinc-200 text-slate-700 hover:bg-zinc-50'
         "
         @click="switchTab(tab.id)"
       >
@@ -64,337 +59,411 @@
     </div>
 
     <div
-      v-if="store.loading && activeTab === 'timeline'"
-      class="h-40 animate-pulse rounded-xl bg-slate-100"
+      v-if="store.loading && ['timeline', 'activity', 'calendar'].includes(activeTab)"
+      class="h-40 animate-pulse rounded-[12px] bg-slate-100"
     />
 
     <!-- Timeline -->
     <div
       v-else-if="activeTab === 'timeline'"
-      class="rounded-xl border border-slate-200 bg-white p-6"
+      class="rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100"
     >
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-        Communication timeline
-      </h3>
-      <ul v-if="store.timeline.length" class="mt-4 space-y-3">
+      <h3 class="text-base font-semibold text-slate-900">Communication timeline</h3>
+      <EmptyState
+        v-if="!store.timeline.length"
+        title="No timeline entries"
+        description="Notes, tasks, and communications will appear here."
+        class="py-10"
+      />
+      <ol v-else class="relative mt-6 space-y-5 border-l border-zinc-100 pl-6">
         <li
           v-for="(item, index) in store.timeline"
           :key="`${item.source}-${item.uuid}-${index}`"
-          class="border-l-2 border-slate-200 pl-3"
+          class="relative"
         >
-          <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
-          <p class="text-xs capitalize text-slate-500">
-            {{ item.source }} · {{ item.type }} · {{ formatDate(item.occurred_at) }}
-          </p>
-          <p v-if="item.summary" class="mt-1 text-sm text-slate-600">{{ item.summary }}</p>
+          <span
+            class="absolute -left-[1.55rem] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
+          />
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
+              <time class="shrink-0 text-xs text-slate-500">{{ formatDate(item.occurred_at) }}</time>
+            </div>
+            <p class="mt-1 text-xs capitalize text-slate-500">
+              {{ item.source }} · {{ item.type }}
+            </p>
+            <p v-if="item.summary" class="mt-1 text-sm text-slate-600">{{ item.summary }}</p>
+          </div>
         </li>
-      </ul>
-      <p v-else class="mt-3 text-sm text-slate-500">No timeline entries yet.</p>
+      </ol>
     </div>
 
     <!-- Notes -->
-    <div v-else-if="activeTab === 'notes'" class="grid gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
-      <form
-        class="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
-        @submit.prevent="submitNote"
-      >
-        <h3 class="text-sm font-semibold text-slate-800">Add note</h3>
-        <select v-model="noteForm.note_type" class="input" required>
-          <option value="general">Note</option>
-          <option value="internal">Internal comment</option>
-          <option value="meeting">Meeting note</option>
-        </select>
-        <input v-model="noteForm.title" type="text" class="input" placeholder="Title (optional)" />
-        <textarea
-          v-model="noteForm.body"
-          rows="4"
-          class="input"
-          required
-          placeholder="Write a note..."
-        />
-        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-          <input v-model="noteForm.is_pinned" type="checkbox" class="rounded border-slate-300" />
-          Pin note
-        </label>
-        <button
-          type="submit"
-          class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          :disabled="store.saving"
-        >
-          Save note
-        </button>
-      </form>
-      <div class="rounded-xl border border-slate-200 bg-white p-4">
-        <div class="mb-3 flex gap-2">
+    <div
+      v-else-if="activeTab === 'notes'"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
+        <div class="flex flex-wrap gap-2">
           <button
             v-for="type in noteFilters"
             :key="type.value"
             type="button"
-            class="rounded-md px-2 py-1 text-xs font-medium"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium transition"
             :class="
               noteTypeFilter === type.value
-                ? 'bg-brand-50 text-brand-700'
-                : 'bg-slate-100 text-slate-600'
+                ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-200'
+                : 'bg-zinc-50 text-slate-600 hover:bg-zinc-100'
             "
             @click="filterNotes(type.value)"
           >
             {{ type.label }}
           </button>
         </div>
-        <ul v-if="store.notes.length" class="divide-y divide-slate-100">
-          <li v-for="note in store.notes" :key="note.uuid" class="py-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <p class="text-sm font-medium text-slate-900">
-                  {{ note.title || note.note_type_label || note.note_type }}
-                  <span v-if="note.is_pinned" class="ml-2 text-xs text-amber-700">Pinned</span>
-                </p>
-                <p class="text-xs capitalize text-slate-500">
-                  {{ note.note_type }} · {{ formatDate(note.occurred_at || note.created_at) }}
-                </p>
-                <p class="mt-1 whitespace-pre-wrap text-sm text-slate-700">{{ note.body }}</p>
-              </div>
-              <button
-                type="button"
-                class="text-xs font-medium text-rose-700"
-                @click="archiveNote(note.uuid)"
-              >
-                Archive
-              </button>
-            </div>
-          </li>
-        </ul>
-        <p v-else class="text-sm text-slate-500">No notes yet.</p>
+        <button
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="noteFormOpen = true"
+        >
+          Add note
+        </button>
       </div>
+
+      <div v-if="store.loading" class="space-y-3 p-5">
+        <div v-for="n in 3" :key="n" class="h-16 animate-pulse rounded-[12px] bg-slate-100" />
+      </div>
+      <EmptyState
+        v-else-if="!store.notes.length"
+        title="No notes yet"
+        description="Add a note or meeting summary for this customer."
+      >
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+            @click="noteFormOpen = true"
+          >
+            Add note
+          </button>
+        </template>
+      </EmptyState>
+      <ul v-else class="divide-y divide-zinc-100">
+        <li
+          v-for="note in store.notes"
+          :key="note.uuid"
+          class="flex flex-wrap items-start justify-between gap-3 px-5 py-4"
+        >
+          <div class="min-w-0 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-sm font-medium text-slate-900">
+                {{ note.title || note.note_type_label || formatLabel(note.note_type) }}
+              </p>
+              <span
+                v-if="note.is_pinned"
+                class="inline-flex items-center rounded-full border border-amber-500 bg-white px-2 py-0.5 text-[11px] font-medium text-amber-700"
+              >
+                Pinned
+              </span>
+            </div>
+            <p class="mt-1 text-xs capitalize text-slate-500">
+              {{ formatLabel(note.note_type) }} · {{ formatDate(note.occurred_at || note.created_at) }}
+            </p>
+            <p class="mt-2 whitespace-pre-wrap text-sm text-slate-700">{{ note.body }}</p>
+          </div>
+          <button
+            type="button"
+            class="text-xs font-medium text-rose-700 hover:text-rose-800"
+            @click="pendingDelete = { type: 'note', item: note }"
+          >
+            Delete
+          </button>
+        </li>
+      </ul>
     </div>
 
     <!-- Tasks -->
-    <div v-else-if="activeTab === 'tasks'" class="grid gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
-      <form
-        class="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
-        @submit.prevent="submitTask"
-      >
-        <h3 class="text-sm font-semibold text-slate-800">Create task</h3>
-        <input
-          v-model="taskForm.title"
-          type="text"
-          class="input"
-          required
-          placeholder="Task title"
-        />
-        <textarea v-model="taskForm.description" rows="3" class="input" placeholder="Description" />
-        <select v-model="taskForm.priority" class="input">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-          <option value="urgent">Urgent</option>
-        </select>
-        <label class="block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Due at</label
-        >
-        <input v-model="taskForm.due_at" type="datetime-local" class="input" />
-        <label class="block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Remind at</label
-        >
-        <input v-model="taskForm.remind_at" type="datetime-local" class="input" />
+    <div
+      v-else-if="activeTab === 'tasks'"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
+        <h3 class="text-base font-semibold text-slate-900">Tasks</h3>
         <button
-          type="submit"
-          class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          :disabled="store.saving"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="taskFormOpen = true"
         >
-          Save task
+          Create task
         </button>
-      </form>
-      <div class="rounded-xl border border-slate-200 bg-white p-4">
-        <ul v-if="store.tasks.length" class="divide-y divide-slate-100">
-          <li
-            v-for="task in store.tasks"
-            :key="task.uuid"
-            class="flex flex-wrap items-center justify-between gap-3 py-3"
-          >
-            <div>
-              <p class="text-sm font-medium text-slate-900">{{ task.title }}</p>
-              <p class="text-xs capitalize text-slate-500">
-                {{ task.status?.replaceAll('_', '') }} · {{ task.priority }} · due
-                {{ formatDate(task.due_at) }}
-              </p>
-            </div>
-            <div class="flex gap-2">
-              <button
-                v-if="task.status !== 'completed'"
-                type="button"
-                class="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
-                @click="completeTask(task.uuid)"
-              >
-                Complete
-              </button>
-              <button
-                type="button"
-                class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
-                @click="archiveTask(task.uuid)"
-              >
-                Archive
-              </button>
-            </div>
-          </li>
-        </ul>
-        <p v-else class="text-sm text-slate-500">No tasks yet.</p>
       </div>
+
+      <div v-if="store.loading" class="space-y-3 p-5">
+        <div v-for="n in 3" :key="n" class="h-14 animate-pulse rounded-[12px] bg-slate-100" />
+      </div>
+      <EmptyState
+        v-else-if="!store.tasks.length"
+        title="No tasks yet"
+        description="Create a follow-up task or reminder for this customer."
+      >
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+            @click="taskFormOpen = true"
+          >
+            Create task
+          </button>
+        </template>
+      </EmptyState>
+      <ul v-else class="divide-y divide-zinc-100">
+        <li
+          v-for="task in store.tasks"
+          :key="task.uuid"
+          class="flex flex-wrap items-center justify-between gap-3 px-5 py-4"
+        >
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-slate-900">{{ task.title }}</p>
+            <p class="mt-1 text-xs text-slate-500">Due {{ formatDate(task.due_at) }}</p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <TaskStatusBadge :status="task.status" />
+              <TaskPriorityBadge :priority="task.priority" />
+            </div>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              v-if="task.status !== 'completed'"
+              type="button"
+              class="rounded-[10px] border border-emerald-200 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+              :disabled="store.saving"
+              @click="completeTask(task.uuid)"
+            >
+              Complete
+            </button>
+            <button
+              type="button"
+              class="rounded-[10px] border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50"
+              @click="pendingDelete = { type: 'task', item: task }"
+            >
+              Delete
+            </button>
+          </div>
+        </li>
+      </ul>
     </div>
 
-    <!-- Calendar -->
+    <!-- Calendar / reminders -->
     <div
       v-else-if="activeTab === 'calendar'"
-      class="rounded-xl border border-slate-200 bg-white p-6"
+      class="rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100"
     >
-      <div class="mb-4 flex flex-wrap items-end gap-3">
+      <div class="mb-5 flex flex-wrap items-end gap-3">
         <div>
           <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
             >From</label
           >
-          <input v-model="calendarFrom" type="date" class="input" />
+          <input
+            v-model="calendarFrom"
+            type="date"
+            class="h-10 rounded-[12px] border border-zinc-200 px-3 text-sm text-slate-800 focus:border-brand-500 focus:outline-none"
+          />
         </div>
         <div>
           <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
             >To</label
           >
-          <input v-model="calendarTo" type="date" class="input" />
+          <input
+            v-model="calendarTo"
+            type="date"
+            class="h-10 rounded-[12px] border border-zinc-200 px-3 text-sm text-slate-800 focus:border-brand-500 focus:outline-none"
+          />
         </div>
         <button
           type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
           @click="loadCalendar"
         >
           Refresh
         </button>
       </div>
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-        Reminder calendar
-      </h3>
-      <ul v-if="store.reminders.length" class="mt-4 divide-y divide-slate-100">
-        <li v-for="item in store.reminders" :key="item.uuid" class="py-3">
-          <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
-          <p class="text-xs text-slate-500">
-            Remind {{ formatDate(item.remind_at) }} · Due {{ formatDate(item.due_at) }} ·
-            {{ item.priority }}
+
+      <h3 class="text-base font-semibold text-slate-900">Reminder calendar</h3>
+      <EmptyState
+        v-if="!store.reminders.length"
+        title="No reminders in this range"
+        description="Tasks with reminder dates will show up here."
+        class="py-10"
+      />
+      <ul v-else class="mt-4 divide-y divide-zinc-100 overflow-hidden rounded-[12px] bg-slate-50/60">
+        <li v-for="item in store.reminders" :key="item.uuid" class="px-4 py-3.5">
+          <div class="flex flex-wrap items-start justify-between gap-2">
+            <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
+            <TaskPriorityBadge :priority="item.priority" />
+          </div>
+          <p class="mt-1 text-xs text-slate-500">
+            Remind {{ formatDate(item.remind_at) }} · Due {{ formatDate(item.due_at) }}
           </p>
         </li>
       </ul>
-      <p v-else class="mt-3 text-sm text-slate-500">No reminders in this range.</p>
     </div>
 
     <!-- Email / communications -->
-    <div v-else-if="activeTab === 'emails'" class="grid gap-4 lg:grid-cols-[22rem_minmax(0,1fr)]">
-      <form
-        class="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
-        @submit.prevent="submitCommunication"
-      >
-        <h3 class="text-sm font-semibold text-slate-800">Log communication</h3>
-        <select v-model="commForm.type" class="input" required>
-          <option value="email">Email</option>
-          <option value="call">Call log</option>
-          <option value="meeting">Meeting</option>
-        </select>
-        <select v-model="commForm.direction" class="input">
-          <option value="outbound">Outbound</option>
-          <option value="inbound">Inbound</option>
-          <option value="internal">Internal</option>
-        </select>
-        <input v-model="commForm.subject" type="text" class="input" placeholder="Subject" />
-        <textarea v-model="commForm.body" rows="4" class="input" placeholder="Summary / body" />
-        <input
-          v-if="commForm.type === 'call'"
-          v-model="commForm.duration_seconds"
-          type="number"
-          min="0"
-          class="input"
-          placeholder="Duration (seconds)"
-        />
-        <input v-model="commForm.occurred_at" type="datetime-local" class="input" />
-        <button
-          type="submit"
-          class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          :disabled="store.saving"
-        >
-          Log entry
-        </button>
-      </form>
-      <div class="rounded-xl border border-slate-200 bg-white p-4">
-        <div class="mb-3 flex gap-2">
+    <div
+      v-else-if="activeTab === 'emails'"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
+        <div class="flex flex-wrap gap-2">
           <button
             v-for="type in commFilters"
             :key="type.value"
             type="button"
-            class="rounded-md px-2 py-1 text-xs font-medium"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium transition"
             :class="
               commTypeFilter === type.value
-                ? 'bg-brand-50 text-brand-700'
-                : 'bg-slate-100 text-slate-600'
+                ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-200'
+                : 'bg-zinc-50 text-slate-600 hover:bg-zinc-100'
             "
             @click="filterCommunications(type.value)"
           >
             {{ type.label }}
           </button>
         </div>
-        <ul v-if="store.communications.length" class="divide-y divide-slate-100">
-          <li v-for="item in store.communications" :key="item.uuid" class="py-3">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <p class="text-sm font-medium text-slate-900">
-                  {{ item.subject || item.type_label || item.type }}
-                </p>
-                <p class="text-xs capitalize text-slate-500">
-                  {{ item.type }} · {{ item.direction }} · {{ formatDate(item.occurred_at) }}
-                </p>
-                <p v-if="item.body" class="mt-1 text-sm text-slate-700">{{ item.body }}</p>
-              </div>
-              <button
-                type="button"
-                class="text-xs font-medium text-rose-700"
-                @click="archiveCommunication(item.uuid)"
-              >
-                Archive
-              </button>
-            </div>
-          </li>
-        </ul>
-        <p v-else class="text-sm text-slate-500">No communications logged yet.</p>
+        <button
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          @click="commFormOpen = true"
+        >
+          Log communication
+        </button>
       </div>
+
+      <div v-if="store.loading" class="space-y-3 p-5">
+        <div v-for="n in 3" :key="n" class="h-16 animate-pulse rounded-[12px] bg-slate-100" />
+      </div>
+      <EmptyState
+        v-else-if="!store.communications.length"
+        title="No communications yet"
+        description="Log emails, calls, or meetings with this customer."
+      >
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+            @click="commFormOpen = true"
+          >
+            Log communication
+          </button>
+        </template>
+      </EmptyState>
+      <ul v-else class="divide-y divide-zinc-100">
+        <li
+          v-for="item in store.communications"
+          :key="item.uuid"
+          class="flex flex-wrap items-start justify-between gap-3 px-5 py-4"
+        >
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium text-slate-900">
+              {{ item.subject || item.type_label || formatLabel(item.type) }}
+            </p>
+            <p class="mt-1 text-xs capitalize text-slate-500">
+              {{ formatLabel(item.type) }} · {{ formatLabel(item.direction) }} ·
+              {{ formatDate(item.occurred_at) }}
+            </p>
+            <p v-if="item.body" class="mt-2 text-sm text-slate-700">{{ item.body }}</p>
+          </div>
+          <button
+            type="button"
+            class="text-xs font-medium text-rose-700 hover:text-rose-800"
+            @click="pendingDelete = { type: 'communication', item }"
+          >
+            Delete
+          </button>
+        </li>
+      </ul>
     </div>
 
     <!-- Activity -->
     <div
       v-else-if="activeTab === 'activity'"
-      class="rounded-xl border border-slate-200 bg-white p-6"
+      class="rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100"
     >
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-        Activity timeline
-      </h3>
-      <ul v-if="store.activity.length" class="mt-4 space-y-3">
-        <li
-          v-for="(item, index) in store.activity"
-          :key="item.id || index"
-          class="border-l-2 border-slate-200 pl-3"
-        >
-          <p class="text-sm font-medium text-slate-900">
-            {{ item.description || item.event || 'Activity' }}
-          </p>
-          <p class="text-xs text-slate-500">
-            {{ item.subject_type }} · {{ formatDate(item.created_at) }}
-          </p>
+      <h3 class="text-base font-semibold text-slate-900">Activity timeline</h3>
+      <EmptyState
+        v-if="!store.activity.length"
+        title="No activity yet"
+        description="Create notes, tasks, or communications to populate this feed."
+        class="py-10"
+      />
+      <ol v-else class="relative mt-6 space-y-5 border-l border-zinc-100 pl-6">
+        <li v-for="(item, index) in store.activity" :key="item.id || index" class="relative">
+          <span
+            class="absolute -left-[1.55rem] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
+          />
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <div class="flex flex-wrap items-start justify-between gap-2">
+              <p class="text-sm font-medium text-slate-900">
+                {{ item.description || item.event || 'Activity' }}
+              </p>
+              <time class="shrink-0 text-xs text-slate-500">{{ formatDate(item.created_at) }}</time>
+            </div>
+            <p class="mt-1 text-xs text-slate-500">
+              {{ formatSubjectType(item.subject_type) }}
+              <span v-if="item.causer?.full_name"> · {{ item.causer.full_name }}</span>
+            </p>
+          </div>
         </li>
-      </ul>
-      <p v-else class="mt-3 text-sm text-slate-500">
-        No activity yet. Create notes, tasks, or communications to populate this feed.
-      </p>
+      </ol>
     </div>
+
+    <NoteFormModal
+      :open="noteFormOpen"
+      :loading="store.saving"
+      :errors="store.fieldErrors"
+      :error="store.error || ''"
+      @cancel="closeNoteForm"
+      @submit="submitNote"
+    />
+
+    <TaskFormModal
+      :open="taskFormOpen"
+      :loading="store.saving"
+      :errors="store.fieldErrors"
+      :error="store.error || ''"
+      @cancel="closeTaskForm"
+      @submit="submitTask"
+    />
+
+    <CommunicationFormModal
+      :open="commFormOpen"
+      :loading="store.saving"
+      :errors="store.fieldErrors"
+      :error="store.error || ''"
+      @cancel="closeCommForm"
+      @submit="submitCommunication"
+    />
+
+    <DeleteConfirmation
+      :open="Boolean(pendingDelete)"
+      :title="deleteTitle"
+      :message="deleteMessage"
+      confirm-label="Delete"
+      :loading="store.saving"
+      @cancel="pendingDelete = null"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import EmptyState from '@/components/ui/EmptyState.vue';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import CommunicationFormModal from '@/modules/customers/components/CommunicationFormModal.vue';
+import NoteFormModal from '@/modules/customers/components/NoteFormModal.vue';
+import TaskFormModal from '@/modules/customers/components/TaskFormModal.vue';
+import TaskPriorityBadge from '@/modules/customers/components/TaskPriorityBadge.vue';
+import TaskStatusBadge from '@/modules/customers/components/TaskStatusBadge.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCommunicationStore } from '@/modules/customers/stores/communication';
 
@@ -404,9 +473,13 @@ const store = useCommunicationStore();
 
 const activeTab = ref('timeline');
 const noteTypeFilter = ref('');
-const commTypeFilter = ref('email');
+const commTypeFilter = ref('');
 const calendarFrom = ref('');
 const calendarTo = ref('');
+const noteFormOpen = ref(false);
+const taskFormOpen = ref(false);
+const commFormOpen = ref(false);
+const pendingDelete = ref(null);
 
 const tabs = [
   { id: 'timeline', label: 'Timeline' },
@@ -431,31 +504,22 @@ const commFilters = [
   { value: 'meeting', label: 'Meetings' },
 ];
 
-const noteForm = reactive({
-  note_type: 'general',
-  title: '',
-  body: '',
-  is_pinned: false,
-});
+const anyFormOpen = computed(
+  () => noteFormOpen.value || taskFormOpen.value || commFormOpen.value,
+);
 
-const taskForm = reactive({
-  title: '',
-  description: '',
-  priority: 'medium',
-  due_at: '',
-  remind_at: '',
+const primaryAction = computed(() => {
+  if (activeTab.value === 'notes') {
+    return { label: 'Add note', onClick: () => (noteFormOpen.value = true) };
+  }
+  if (activeTab.value === 'tasks') {
+    return { label: 'Create task', onClick: () => (taskFormOpen.value = true) };
+  }
+  if (activeTab.value === 'emails') {
+    return { label: 'Log communication', onClick: () => (commFormOpen.value = true) };
+  }
+  return null;
 });
-
-const commForm = reactive({
-  type: 'email',
-  direction: 'outbound',
-  subject: '',
-  body: '',
-  duration_seconds: '',
-  occurred_at: '',
-});
-
-const customerName = computed(() => customersStore.currentCustomer?.display_name || 'customer');
 
 const statCards = computed(() => {
   const stats = store.overview?.statistics || {};
@@ -467,6 +531,26 @@ const statCards = computed(() => {
   ];
 });
 
+const deleteTitle = computed(() => {
+  const type = pendingDelete.value?.type;
+  if (type === 'note') return 'Delete note';
+  if (type === 'task') return 'Delete task';
+  if (type === 'communication') return 'Delete communication';
+  return 'Delete';
+});
+
+const deleteMessage = computed(() => {
+  const entry = pendingDelete.value;
+  if (!entry) return '';
+  if (entry.type === 'note') {
+    return `Delete ${entry.item?.title || 'this note'}? You can restore it later if needed.`;
+  }
+  if (entry.type === 'task') {
+    return `Delete ${entry.item?.title || 'this task'}? You can restore it later if needed.`;
+  }
+  return `Delete ${entry.item?.subject || 'this communication'}? You can restore it later if needed.`;
+});
+
 onMounted(async () => {
   await customersStore.fetchCustomer(route.params.id);
   const now = new Date();
@@ -475,23 +559,26 @@ onMounted(async () => {
   calendarFrom.value = toDateInput(start);
   calendarTo.value = toDateInput(end);
   await store.fetchOverview(route.params.id);
+  await store.fetchTimeline({ customer: route.params.id });
 });
 
 async function switchTab(tab) {
   activeTab.value = tab;
   if (tab === 'timeline') await store.fetchTimeline({ customer: route.params.id });
-  if (tab === 'notes')
+  if (tab === 'notes') {
     await store.fetchNotes({
       customer: route.params.id,
       note_type: noteTypeFilter.value || undefined,
     });
+  }
   if (tab === 'tasks') await store.fetchTasks({ customer: route.params.id });
   if (tab === 'calendar') await loadCalendar();
-  if (tab === 'emails')
+  if (tab === 'emails') {
     await store.fetchCommunications({
       customer: route.params.id,
       type: commTypeFilter.value || undefined,
     });
+  }
   if (tab === 'activity') await store.fetchActivity({ customer: route.params.id });
 }
 
@@ -513,17 +600,31 @@ async function loadCalendar() {
   });
 }
 
-async function submitNote() {
+function closeNoteForm() {
+  if (store.saving) return;
+  noteFormOpen.value = false;
+  store.clearMessages();
+}
+
+function closeTaskForm() {
+  if (store.saving) return;
+  taskFormOpen.value = false;
+  store.clearMessages();
+}
+
+function closeCommForm() {
+  if (store.saving) return;
+  commFormOpen.value = false;
+  store.clearMessages();
+}
+
+async function submitNote(payload) {
   await store.createNote({
     customer_id: route.params.id,
-    note_type: noteForm.note_type,
-    title: noteForm.title || null,
-    body: noteForm.body,
-    is_pinned: noteForm.is_pinned,
+    ...payload,
   });
-  noteForm.title = '';
-  noteForm.body = '';
-  noteForm.is_pinned = false;
+  noteFormOpen.value = false;
+  activeTab.value = 'notes';
   await store.fetchNotes({
     customer: route.params.id,
     note_type: noteTypeFilter.value || undefined,
@@ -531,38 +632,35 @@ async function submitNote() {
   await store.fetchOverview(route.params.id);
 }
 
-async function submitTask() {
+async function submitTask(payload) {
   await store.createTask({
     customer_id: route.params.id,
-    title: taskForm.title,
-    description: taskForm.description || null,
-    priority: taskForm.priority,
-    due_at: taskForm.due_at ? new Date(taskForm.due_at).toISOString() : null,
-    remind_at: taskForm.remind_at ? new Date(taskForm.remind_at).toISOString() : null,
+    title: payload.title,
+    description: payload.description,
+    priority: payload.priority,
+    due_at: payload.due_at ? new Date(payload.due_at).toISOString() : null,
+    remind_at: payload.remind_at ? new Date(payload.remind_at).toISOString() : null,
   });
-  taskForm.title = '';
-  taskForm.description = '';
-  taskForm.due_at = '';
-  taskForm.remind_at = '';
+  taskFormOpen.value = false;
+  activeTab.value = 'tasks';
   await store.fetchTasks({ customer: route.params.id });
   await store.fetchOverview(route.params.id);
 }
 
-async function submitCommunication() {
+async function submitCommunication(payload) {
   await store.createCommunication({
     customer_id: route.params.id,
-    type: commForm.type,
-    direction: commForm.direction,
-    subject: commForm.subject || null,
-    body: commForm.body || null,
-    duration_seconds: commForm.duration_seconds ? Number(commForm.duration_seconds) : null,
-    occurred_at: commForm.occurred_at
-      ? new Date(commForm.occurred_at).toISOString()
+    type: payload.type,
+    direction: payload.direction,
+    subject: payload.subject,
+    body: payload.body,
+    duration_seconds: payload.duration_seconds,
+    occurred_at: payload.occurred_at
+      ? new Date(payload.occurred_at).toISOString()
       : new Date().toISOString(),
   });
-  commForm.subject = '';
-  commForm.body = '';
-  commForm.duration_seconds = '';
+  commFormOpen.value = false;
+  activeTab.value = 'emails';
   await store.fetchCommunications({
     customer: route.params.id,
     type: commTypeFilter.value || undefined,
@@ -576,25 +674,29 @@ async function completeTask(id) {
   await store.fetchOverview(route.params.id);
 }
 
-async function archiveNote(id) {
-  await store.archiveNote(id);
-  await store.fetchNotes({
-    customer: route.params.id,
-    note_type: noteTypeFilter.value || undefined,
-  });
-}
+async function confirmDelete() {
+  const entry = pendingDelete.value;
+  if (!entry) return;
 
-async function archiveTask(id) {
-  await store.archiveTask(id);
-  await store.fetchTasks({ customer: route.params.id });
-}
+  if (entry.type === 'note') {
+    await store.archiveNote(entry.item.uuid);
+    await store.fetchNotes({
+      customer: route.params.id,
+      note_type: noteTypeFilter.value || undefined,
+    });
+  } else if (entry.type === 'task') {
+    await store.archiveTask(entry.item.uuid);
+    await store.fetchTasks({ customer: route.params.id });
+  } else if (entry.type === 'communication') {
+    await store.archiveCommunication(entry.item.uuid);
+    await store.fetchCommunications({
+      customer: route.params.id,
+      type: commTypeFilter.value || undefined,
+    });
+  }
 
-async function archiveCommunication(id) {
-  await store.archiveCommunication(id);
-  await store.fetchCommunications({
-    customer: route.params.id,
-    type: commTypeFilter.value || undefined,
-  });
+  pendingDelete.value = null;
+  await store.fetchOverview(route.params.id);
 }
 
 function formatDate(value) {
@@ -602,23 +704,20 @@ function formatDate(value) {
   return new Date(value).toLocaleString();
 }
 
+function formatLabel(value) {
+  return String(value || '')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function formatSubjectType(value) {
+  if (!value) return 'System';
+  const parts = String(value).split('\\');
+  return formatLabel(parts[parts.length - 1] || value);
+}
+
 function toDateInput(date) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

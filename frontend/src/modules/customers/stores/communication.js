@@ -209,10 +209,10 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
     clearMessages();
     try {
       const { data } = await customerNoteService.remove(id);
-      successMessage.value = data.message || 'Note archived successfully.';
+      successMessage.value = data.message || 'Note deleted successfully.';
       return data;
     } catch (err) {
-      applyError(err, 'Unable to archive note');
+      applyError(err, 'Unable to delete note');
       throw err;
     } finally {
       saving.value = false;
@@ -224,10 +224,10 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
     clearMessages();
     try {
       const { data } = await customerTaskService.remove(id);
-      successMessage.value = data.message || 'Task archived successfully.';
+      successMessage.value = data.message || 'Task deleted successfully.';
       return data;
     } catch (err) {
-      applyError(err, 'Unable to archive task');
+      applyError(err, 'Unable to delete task');
       throw err;
     } finally {
       saving.value = false;
@@ -239,10 +239,10 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
     clearMessages();
     try {
       const { data } = await customerCommunicationService.remove(id);
-      successMessage.value = data.message || 'Communication archived successfully.';
+      successMessage.value = data.message || 'Communication deleted successfully.';
       return data;
     } catch (err) {
-      applyError(err, 'Unable to archive communication');
+      applyError(err, 'Unable to delete communication');
       throw err;
     } finally {
       saving.value = false;

@@ -31,13 +31,19 @@
 
     <div
       v-if="open"
-      class="absolute left-0 z-30 min-w-full overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-slate-200"
+      class="absolute left-0 z-[80] min-w-full overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-slate-200"
       :class="[
         dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5',
         size === 'lg' ? 'max-h-64 overflow-y-auto' : '',
       ]"
       role="listbox"
     >
+      <p
+        v-if="!options.length"
+        class="px-3.5 py-2.5 text-sm text-slate-500"
+      >
+        No options available
+      </p>
       <button
         v-for="option in options"
         :key="String(option.value)"

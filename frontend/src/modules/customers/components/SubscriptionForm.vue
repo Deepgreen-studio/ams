@@ -1,106 +1,174 @@
 <template>
-  <form class="space-y-4" @submit.prevent="$emit('submit', form)">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</div>
+  <form class="space-y-4" @submit.prevent="onSubmit">
+    <div
+      v-if="error"
+      class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
+      {{ error }}
+    </div>
 
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Plan type</label>
-        <select v-model="form.plan_type" class="input" required>
-          <option value="trial">Trial</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-          <option value="lifetime">Lifetime</option>
-          <option value="enterprise">Enterprise</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Plan type
+        </label>
+        <SelectBox
+          v-model="form.plan_type"
+          wrapper-class="w-full"
+          size="lg"
+          :options="planTypeOptions"
+          :disabled="loading"
+        />
         <p v-if="errors.plan_type" class="mt-1 text-xs text-rose-600">{{ errors.plan_type[0] }}</p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Plan name</label>
-        <input v-model="form.plan_name" type="text" class="input" placeholder="Optional display name" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Plan name
+        </label>
+        <input
+          v-model="form.plan_name"
+          type="text"
+          class="input"
+          placeholder="Optional display name"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="">Auto</option>
-          <option value="trialing">Trialing</option>
-          <option value="active">Active</option>
-          <option value="past_due">Past due</option>
-          <option value="suspended">Suspended</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="expired">Expired</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Status
+        </label>
+        <SelectBox
+          v-model="form.status"
+          wrapper-class="w-full"
+          size="lg"
+          :options="statusOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Payment status</label>
-        <select v-model="form.payment_status" class="input">
-          <option value="">Auto</option>
-          <option value="not_required">Not required</option>
-          <option value="pending">Pending</option>
-          <option value="paid">Paid</option>
-          <option value="failed">Failed</option>
-          <option value="past_due">Past due</option>
-          <option value="refunded">Refunded</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Payment status
+        </label>
+        <SelectBox
+          v-model="form.payment_status"
+          wrapper-class="w-full"
+          size="lg"
+          :options="paymentOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Amount</label>
-        <input v-model="form.amount" type="number" min="0" step="0.01" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Amount
+        </label>
+        <input
+          v-model="form.amount"
+          type="number"
+          min="0"
+          step="0.01"
+          class="input"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Currency</label>
-        <input v-model="form.currency" type="text" maxlength="3" class="input uppercase" placeholder="USD" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Currency
+        </label>
+        <input
+          v-model="form.currency"
+          type="text"
+          maxlength="3"
+          class="input uppercase"
+          placeholder="USD"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Starts at</label>
-        <input v-model="form.starts_at" type="datetime-local" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Starts at
+        </label>
+        <input v-model="form.starts_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Expires at</label>
-        <input v-model="form.expires_at" type="datetime-local" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Expires at
+        </label>
+        <input v-model="form.expires_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Renews at</label>
-        <input v-model="form.renews_at" type="datetime-local" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Renews at
+        </label>
+        <input v-model="form.renews_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Renewal reminder (days)</label>
-        <input v-model="form.renewal_reminder_days" type="number" min="1" max="365" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Renewal reminder (days)
+        </label>
+        <input
+          v-model="form.renewal_reminder_days"
+          type="number"
+          min="1"
+          max="365"
+          class="input"
+          :disabled="loading"
+        />
       </div>
 
       <div v-if="!initial.uuid" class="md:col-span-2">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-          <input v-model="form.issue_license" type="checkbox" class="rounded border-slate-300" />
+          <input
+            v-model="form.issue_license"
+            type="checkbox"
+            class="rounded border-zinc-300"
+            :disabled="loading"
+          />
           Automatically issue license key
         </label>
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Features (comma separated)</label>
-        <input v-model="featuresText" type="text" class="input" placeholder="dashboard, api_access, support" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Features (comma separated)
+        </label>
+        <input
+          v-model="featuresText"
+          type="text"
+          class="input"
+          placeholder="dashboard, api_access, support"
+          :disabled="loading"
+        />
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-        <textarea v-model="form.notes" rows="3" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Notes
+        </label>
+        <textarea v-model="form.notes" rows="3" class="input" :disabled="loading" />
       </div>
     </div>
 
-    <div class="flex justify-end gap-3 pt-2">
-      <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="$emit('cancel')">
+    <div class="flex justify-end gap-2 pt-1">
+      <button
+        type="button"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="loading"
+        @click="$emit('cancel')"
+      >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -111,6 +179,7 @@
 
 <script setup>
 import { reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -120,7 +189,35 @@ const props = defineProps({
   submitLabel: { type: String, default: 'Save subscription' },
 });
 
-defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel']);
+
+const planTypeOptions = [
+  { value: 'trial', label: 'Trial' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+  { value: 'lifetime', label: 'Lifetime' },
+  { value: 'enterprise', label: 'Enterprise' },
+];
+
+const statusOptions = [
+  { value: '', label: 'Auto' },
+  { value: 'trialing', label: 'Trialing' },
+  { value: 'active', label: 'Active' },
+  { value: 'past_due', label: 'Past due' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'expired', label: 'Expired' },
+];
+
+const paymentOptions = [
+  { value: '', label: 'Auto' },
+  { value: 'not_required', label: 'Not required' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'past_due', label: 'Past due' },
+  { value: 'refunded', label: 'Refunded' },
+];
 
 const form = reactive({
   plan_type: 'monthly',
@@ -154,11 +251,12 @@ watch(
     form.expires_at = toLocalInput(value.expires_at);
     form.renews_at = toLocalInput(value.renews_at);
     form.renewal_reminder_days = value.renewal_reminder_days ?? 14;
+    form.issue_license = value.issue_license ?? true;
     form.notes = value.notes || '';
     form.features = Array.isArray(value.features) ? value.features : [];
     featuresText.value = form.features.join(', ');
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
 watch(featuresText, (value) => {
@@ -175,19 +273,37 @@ function toLocalInput(value) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+function onSubmit() {
+  if (props.loading) return;
+  emit('submit', { ...form, features: [...form.features] });
+}
 </script>
 
 <style scoped>
 .input {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid rgb(203 213 225);
-  padding: 0.5rem 0.75rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
+  color: #1e293b;
   outline: none;
+  box-shadow: none;
+}
+textarea.input {
+  height: auto;
+  min-height: 5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 .input:focus {
-  border-color: rgb(37 99 235);
-  box-shadow: 0 0 0 2px rgb(37 99 235 / 0.2);
+  border-color: var(--color-brand-500, #f97316);
+}
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

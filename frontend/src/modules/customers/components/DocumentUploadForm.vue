@@ -1,59 +1,88 @@
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</div>
+    <div
+      v-if="error"
+      class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
+      {{ error }}
+    </div>
 
     <div class="grid gap-4 md:grid-cols-2">
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Document name</label>
-        <input v-model="form.name" type="text" class="input" placeholder="Optional display name" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Document name
+        </label>
+        <input
+          v-model="form.name"
+          type="text"
+          class="input"
+          placeholder="Optional display name"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Category / folder</label>
-        <select v-model="form.category" class="input" required>
-          <option value="contracts">Contracts</option>
-          <option value="nda">NDA</option>
-          <option value="invoices">Invoices</option>
-          <option value="certificates">Certificates</option>
-          <option value="attachments">Attachments</option>
-          <option value="custom">Custom Documents</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Category / folder
+        </label>
+        <SelectBox
+          v-model="form.category"
+          wrapper-class="w-full"
+          size="lg"
+          :options="categoryOptions"
+          :disabled="loading"
+        />
         <p v-if="errors.category" class="mt-1 text-xs text-rose-600">{{ errors.category[0] }}</p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="draft">Draft</option>
-          <option value="active">Active</option>
-          <option value="expired">Expired</option>
-        </select>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Status
+        </label>
+        <SelectBox
+          v-model="form.status"
+          wrapper-class="w-full"
+          size="lg"
+          :options="statusOptions"
+          :disabled="loading"
+        />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Expiry date</label>
-        <input v-model="form.expires_at" type="datetime-local" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Expiry date
+        </label>
+        <input v-model="form.expires_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">File</label>
-        <input type="file" class="input" required @change="onFileChange" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          File
+        </label>
+        <input type="file" class="input file:mr-3" :disabled="loading" @change="onFileChange" />
         <p v-if="errors.file" class="mt-1 text-xs text-rose-600">{{ errors.file[0] }}</p>
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-        <textarea v-model="form.notes" rows="3" class="input" />
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Notes
+        </label>
+        <textarea v-model="form.notes" rows="3" class="input" :disabled="loading" />
       </div>
     </div>
 
-    <div class="flex justify-end gap-3 pt-2">
-      <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="$emit('cancel')">
+    <div class="flex justify-end gap-2 pt-1">
+      <button
+        type="button"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="loading"
+        @click="$emit('cancel')"
+      >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading || !file"
       >
         {{ loading ? 'Uploading...' : submitLabel }}
@@ -63,7 +92,8 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
   loading: { type: Boolean, default: false },
@@ -75,6 +105,21 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 
+const categoryOptions = [
+  { value: 'contracts', label: 'Contracts' },
+  { value: 'nda', label: 'NDA' },
+  { value: 'invoices', label: 'Invoices' },
+  { value: 'certificates', label: 'Certificates' },
+  { value: 'attachments', label: 'Attachments' },
+  { value: 'custom', label: 'Custom Documents' },
+];
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'expired', label: 'Expired' },
+];
+
 const form = reactive({
   name: '',
   category: props.defaultCategory || 'contracts',
@@ -85,11 +130,19 @@ const form = reactive({
 
 const file = ref(null);
 
+watch(
+  () => props.defaultCategory,
+  (value) => {
+    if (value) form.category = value;
+  },
+);
+
 function onFileChange(event) {
   file.value = event.target.files?.[0] || null;
 }
 
 function onSubmit() {
+  if (!file.value || props.loading) return;
   emit('submit', { ...form, file: file.value });
 }
 </script>
@@ -97,14 +150,27 @@ function onSubmit() {
 <style scoped>
 .input {
   width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
+  height: 3rem;
+  border-radius: 12px;
+  border: 1px solid #e4e4e7;
+  background: #fff;
+  padding: 0.5rem 0.875rem;
   font-size: 0.875rem;
+  color: #1e293b;
   outline: none;
+  box-shadow: none;
+}
+textarea.input {
+  height: auto;
+  min-height: 5rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 .input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-brand-500, #f97316);
+}
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

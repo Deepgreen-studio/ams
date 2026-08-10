@@ -12,40 +12,42 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  status: { type: String, default: 'active' },
+  priority: {
+    type: String,
+    default: 'medium',
+  },
 });
 
-const label = computed(() =>
-  (props.status || 'active').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-);
+const label = computed(() => {
+  const value = props.priority || 'medium';
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+});
 
 const classes = computed(() => {
-  switch (props.status) {
-    case 'active':
-      return 'border-emerald-600 text-emerald-700';
-    case 'inactive':
-      return 'border-slate-400 text-slate-600';
-    case 'revoked':
+  switch (props.priority) {
+    case 'urgent':
       return 'border-rose-500 text-rose-700';
-    case 'expired':
+    case 'high':
       return 'border-orange-500 text-orange-700';
-    default:
+    case 'low':
       return 'border-slate-400 text-slate-600';
+    case 'medium':
+    default:
+      return 'border-amber-500 text-amber-700';
   }
 });
 
 const dotClass = computed(() => {
-  switch (props.status) {
-    case 'active':
-      return 'bg-emerald-600';
-    case 'inactive':
-      return 'bg-slate-400';
-    case 'revoked':
+  switch (props.priority) {
+    case 'urgent':
       return 'bg-rose-500';
-    case 'expired':
+    case 'high':
       return 'bg-orange-500';
-    default:
+    case 'low':
       return 'bg-slate-400';
+    case 'medium':
+    default:
+      return 'bg-amber-500';
   }
 });
 </script>

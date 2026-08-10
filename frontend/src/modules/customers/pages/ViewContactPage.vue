@@ -1,84 +1,42 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="contact?.name || 'Contact details'"
-      description="Contact profile and activity timeline."
-    >
-      <template #actions>
-        <template v-if="contact">
-          <RouterLink
-            :to="{ name: 'customers.contacts', params: { id: route.params.id } }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back to contacts
-          </RouterLink>
-          <RouterLink
-            :to="{
-              name: 'customers.contacts.edit',
-              params: { id: route.params.id, contactId: contact.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            v-if="contact.deleted_at"
-            type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            :disabled="contactsStore.saving"
-            @click="restore"
-          >
-            Restore
-          </button>
-          <button
-            v-else
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showArchive = true"
-          >
-            Archive
-          </button>
-        </template>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <template v-if="contact">
-          <RouterLink
-            :to="{ name: 'customers.contacts', params: { id: route.params.id } }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back to contacts
-          </RouterLink>
-          <RouterLink
-            :to="{
-              name: 'customers.contacts.edit',
-              params: { id: route.params.id, contactId: contact.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            v-if="contact.deleted_at"
-            type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            :disabled="contactsStore.saving"
-            @click="restore"
-          >
-            Restore
-          </button>
-          <button
-            v-else
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showArchive = true"
-          >
-            Archive
-          </button>
+        <RouterLink
+          :to="{ name: 'customers.contacts', params: { id: route.params.id } }"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Back to contacts
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="openEdit"
+        >
+          Edit
+        </button>
+        <button
+          v-if="contact.deleted_at"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          :disabled="contactsStore.saving"
+          @click="restore"
+        >
+          Restore
+        </button>
+        <button
+          v-else
+          type="button"
+          class="rounded-[12px] bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700"
+          @click="showArchive = true"
+        >
+          Archive
+        </button>
+      </template>
     </Teleport>
 
     <div
-      v-if="contactsStore.error"
+      v-if="contactsStore.error && !formOpen"
       class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
     >
       {{ contactsStore.error }}
@@ -86,11 +44,11 @@
 
     <div
       v-if="contactsStore.loading && !contact"
-      class="h-48 animate-pulse rounded-xl bg-slate-100"
+      class="h-48 animate-pulse rounded-[12px] bg-slate-100"
     />
 
     <div v-else-if="contact" class="space-y-6">
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
+      <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
         <div class="flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 class="text-xl font-semibold text-slate-900">{{ contact.name }}</h2>
@@ -137,6 +95,16 @@
       <ContactTimeline :items="contactsStore.timeline" :loading="timelineLoading" />
     </div>
 
+    <ContactFormModal
+      :open="formOpen"
+      :loading="contactsStore.saving"
+      :contact="contact"
+      :errors="contactsStore.fieldErrors"
+      :error="contactsStore.error || ''"
+      @cancel="closeForm"
+      @submit="onSave"
+    />
+
     <DeleteConfirmation
       :open="showArchive"
       title="Archive contact"
@@ -152,8 +120,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import ContactFormModal from '@/modules/customers/components/ContactFormModal.vue';
 import ContactTimeline from '@/modules/customers/components/ContactTimeline.vue';
 import ContactTypeBadge from '@/modules/customers/components/ContactTypeBadge.vue';
 import StatusBadge from '@/modules/customers/components/StatusBadge.vue';
@@ -163,6 +131,7 @@ const route = useRoute();
 const router = useRouter();
 const contactsStore = useCustomerContactsStore();
 const showArchive = ref(false);
+const formOpen = ref(false);
 const timelineLoading = ref(false);
 
 const contact = computed(() => contactsStore.currentContact);
@@ -176,6 +145,27 @@ onMounted(async () => {
     timelineLoading.value = false;
   }
 });
+
+function openEdit() {
+  contactsStore.clearMessages();
+  formOpen.value = true;
+}
+
+function closeForm() {
+  if (contactsStore.saving) return;
+  formOpen.value = false;
+  contactsStore.clearMessages();
+}
+
+async function onSave(payload) {
+  try {
+    await contactsStore.updateContact(route.params.contactId, payload);
+    formOpen.value = false;
+    await contactsStore.fetchTimeline(route.params.contactId);
+  } catch {
+    // Field errors stay in the modal via the store.
+  }
+}
 
 async function confirmArchive() {
   await contactsStore.archiveContact(route.params.contactId);

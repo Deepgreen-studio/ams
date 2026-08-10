@@ -12,40 +12,42 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  status: { type: String, default: 'active' },
+  status: {
+    type: String,
+    default: 'open',
+  },
 });
 
-const label = computed(() =>
-  (props.status || 'active').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-);
+const label = computed(() => {
+  const value = props.status || 'open';
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+});
 
 const classes = computed(() => {
   switch (props.status) {
-    case 'active':
+    case 'completed':
       return 'border-emerald-600 text-emerald-700';
-    case 'inactive':
+    case 'in_progress':
+      return 'border-brand-500 text-brand-700';
+    case 'cancelled':
       return 'border-slate-400 text-slate-600';
-    case 'revoked':
-      return 'border-rose-500 text-rose-700';
-    case 'expired':
-      return 'border-orange-500 text-orange-700';
+    case 'open':
     default:
-      return 'border-slate-400 text-slate-600';
+      return 'border-amber-500 text-amber-700';
   }
 });
 
 const dotClass = computed(() => {
   switch (props.status) {
-    case 'active':
+    case 'completed':
       return 'bg-emerald-600';
-    case 'inactive':
+    case 'in_progress':
+      return 'bg-brand-500';
+    case 'cancelled':
       return 'bg-slate-400';
-    case 'revoked':
-      return 'bg-rose-500';
-    case 'expired':
-      return 'bg-orange-500';
+    case 'open':
     default:
-      return 'bg-slate-400';
+      return 'bg-amber-500';
   }
 });
 </script>

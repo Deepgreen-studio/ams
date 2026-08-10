@@ -1149,8 +1149,7 @@ const router = createRouter({
         {
           path: 'customers/:id/contacts/create',
           name: 'customers.contacts.create',
-          component: () => import('@/modules/customers/pages/CreateContactPage.vue'),
-          meta: { title: 'Add Contact', requiresAuth: true },
+          redirect: (to) => ({ name: 'customers.contacts', params: { id: to.params.id } }),
         },
         {
           path: 'customers/:id/contacts/:contactId',
@@ -1161,8 +1160,10 @@ const router = createRouter({
         {
           path: 'customers/:id/contacts/:contactId/edit',
           name: 'customers.contacts.edit',
-          component: () => import('@/modules/customers/pages/EditContactPage.vue'),
-          meta: { title: 'Edit Contact', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.contacts.show',
+            params: { id: to.params.id, contactId: to.params.contactId },
+          }),
         },
         {
           path: 'customers/:id/applications',
@@ -1179,8 +1180,7 @@ const router = createRouter({
         {
           path: 'customers/:id/applications/create',
           name: 'customers.applications.create',
-          component: () => import('@/modules/customers/pages/CreateAssignmentPage.vue'),
-          meta: { title: 'Assign Application', requiresAuth: true },
+          redirect: (to) => ({ name: 'customers.applications', params: { id: to.params.id } }),
         },
         {
           path: 'customers/:id/applications/:assignmentId',
@@ -1191,8 +1191,10 @@ const router = createRouter({
         {
           path: 'customers/:id/applications/:assignmentId/edit',
           name: 'customers.applications.edit',
-          component: () => import('@/modules/customers/pages/EditAssignmentPage.vue'),
-          meta: { title: 'Edit Assignment', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.applications.show',
+            params: { id: to.params.id, assignmentId: to.params.assignmentId },
+          }),
         },
         {
           path: 'customers/:id/subscriptions',
@@ -1203,8 +1205,7 @@ const router = createRouter({
         {
           path: 'customers/:id/subscriptions/create',
           name: 'customers.subscriptions.create',
-          component: () => import('@/modules/customers/pages/CreateSubscriptionPage.vue'),
-          meta: { title: 'Create Subscription', requiresAuth: true },
+          redirect: (to) => ({ name: 'customers.subscriptions', params: { id: to.params.id } }),
         },
         {
           path: 'customers/:id/subscriptions/:subscriptionId',
@@ -1215,8 +1216,10 @@ const router = createRouter({
         {
           path: 'customers/:id/subscriptions/:subscriptionId/edit',
           name: 'customers.subscriptions.edit',
-          component: () => import('@/modules/customers/pages/EditSubscriptionPage.vue'),
-          meta: { title: 'Edit Subscription', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.subscriptions.show',
+            params: { id: to.params.id, subscriptionId: to.params.subscriptionId },
+          }),
         },
         {
           path: 'customers/:id/licenses',
@@ -1233,8 +1236,11 @@ const router = createRouter({
         {
           path: 'customers/:id/licenses/create',
           name: 'customers.licenses.create',
-          component: () => import('@/modules/customers/pages/CreateLicensePage.vue'),
-          meta: { title: 'Issue License', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.licenses',
+            params: { id: to.params.id },
+            query: to.query,
+          }),
         },
         {
           path: 'customers/:id/licenses/:licenseId',
@@ -1245,8 +1251,10 @@ const router = createRouter({
         {
           path: 'customers/:id/licenses/:licenseId/edit',
           name: 'customers.licenses.edit',
-          component: () => import('@/modules/customers/pages/EditLicensePage.vue'),
-          meta: { title: 'Edit License', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.licenses.show',
+            params: { id: to.params.id, licenseId: to.params.licenseId },
+          }),
         },
         {
           path: 'customers/:id/documents',
@@ -1257,8 +1265,11 @@ const router = createRouter({
         {
           path: 'customers/:id/documents/upload',
           name: 'customers.documents.upload',
-          component: () => import('@/modules/customers/pages/UploadDocumentPage.vue'),
-          meta: { title: 'Upload Document', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.documents',
+            params: { id: to.params.id },
+            query: to.query,
+          }),
         },
         {
           path: 'customers/:id/documents/:documentId',
@@ -1269,8 +1280,10 @@ const router = createRouter({
         {
           path: 'customers/:id/documents/:documentId/edit',
           name: 'customers.documents.edit',
-          component: () => import('@/modules/customers/pages/EditDocumentPage.vue'),
-          meta: { title: 'Edit Document', requiresAuth: true },
+          redirect: (to) => ({
+            name: 'customers.documents.show',
+            params: { id: to.params.id, documentId: to.params.documentId },
+          }),
         },
         {
           path: 'customers/:id/communications',

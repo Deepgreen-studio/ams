@@ -1,94 +1,98 @@
 <template>
-  <form
-    class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:flex-wrap md:items-end"
-    @submit.prevent="onSubmit"
-  >
-    <div class="min-w-[12rem] flex-1">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Search</label
-      >
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="relative min-w-0 flex-1 lg:max-w-sm">
+      <MagnifyingGlassIcon
+        class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
       <input
         v-model="local.search"
         type="search"
         placeholder="Name, email, phone, position..."
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+        class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        @keyup.enter="emitSubmit"
       />
     </div>
-    <div class="w-full md:w-44">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Type</label
-      >
-      <select
+
+    <div class="flex flex-wrap items-center gap-2">
+      <SelectBox
         v-model="local.contact_type"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="primary">Primary</option>
-        <option value="technical">Technical</option>
-        <option value="billing">Billing</option>
-        <option value="support">Support</option>
-        <option value="emergency">Emergency</option>
-      </select>
-    </div>
-    <div class="w-full md:w-40">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Status</label
-      >
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="typeOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.status"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-    </div>
-    <div class="w-full md:w-40">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Archived</label
-      >
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="statusOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.trashed"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">Exclude</option>
-        <option value="with">Include</option>
-        <option value="only">Only archived</option>
-      </select>
-    </div>
-    <div class="flex gap-2">
+        wrapper-class="min-w-[10rem]"
+        :options="trashedOptions"
+        @change="emitSubmit"
+      />
+
       <button
-        type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        type="button"
+        class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="emitSubmit"
       >
-        Filter
+        Apply
       </button>
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        @click="onReset"
+        class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        @click="emitReset"
       >
         Reset
       </button>
     </div>
-  </form>
+  </div>
 </template>
 
 <script setup>
 import { reactive, watch } from 'vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
-  modelValue: { type: Object, default: () => ({}) },
+  modelValue: {
+    type: Object,
+    required: true,
+  },
 });
 
-const emit = defineEmits(['submit', 'reset', 'update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'submit', 'reset']);
+
+const typeOptions = [
+  { value: '', label: 'Type: All' },
+  { value: 'primary', label: 'Primary' },
+  { value: 'technical', label: 'Technical' },
+  { value: 'billing', label: 'Billing' },
+  { value: 'support', label: 'Support' },
+  { value: 'emergency', label: 'Emergency' },
+];
+
+const statusOptions = [
+  { value: '', label: 'Status: All' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
+const trashedOptions = [
+  { value: '', label: 'Archived: Exclude' },
+  { value: 'with', label: 'Include archived' },
+  { value: 'only', label: 'Only archived' },
+];
 
 const local = reactive({
-  search: '',
-  status: '',
-  contact_type: '',
-  trashed: '',
-  page: 1,
+  search: props.modelValue.search || '',
+  status: props.modelValue.status || '',
+  contact_type: props.modelValue.contact_type || '',
+  trashed: props.modelValue.trashed || '',
 });
 
 watch(
@@ -99,22 +103,15 @@ watch(
     local.contact_type = value.contact_type || '';
     local.trashed = value.trashed || '';
   },
-  { immediate: true, deep: true },
+  { deep: true },
 );
 
-function onSubmit() {
-  const payload = {
-    search: local.search,
-    status: local.status,
-    contact_type: local.contact_type,
-    trashed: local.trashed,
-    page: 1,
-  };
-  emit('update:modelValue', { ...props.modelValue, ...payload });
-  emit('submit', payload);
+function emitSubmit() {
+  emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
+  emit('submit', { ...local, page: 1 });
 }
 
-function onReset() {
+function emitReset() {
   local.search = '';
   local.status = '';
   local.contact_type = '';

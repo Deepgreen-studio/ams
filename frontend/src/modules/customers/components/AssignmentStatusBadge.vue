@@ -1,5 +1,9 @@
 <template>
-  <span class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset" :class="classes">
+  <span
+    class="inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-xs font-medium"
+    :class="classes"
+  >
+    <span class="h-1.5 w-1.5 rounded-full" :class="dotClass" />
     {{ label }}
   </span>
 </template>
@@ -8,27 +12,47 @@
 import { computed } from 'vue';
 
 const props = defineProps({
-  status: { type: String, default: 'pending' },
+  status: {
+    type: String,
+    default: 'pending',
+  },
 });
 
 const label = computed(() =>
-  (props.status || 'pending').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  (props.status || 'pending').replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
 );
 
 const classes = computed(() => {
   switch (props.status) {
     case 'active':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+      return 'border-emerald-600 text-emerald-700';
     case 'pending':
-      return 'bg-amber-50 text-amber-800 ring-amber-600/20';
+      return 'border-amber-500 text-amber-700';
     case 'suspended':
-      return 'bg-rose-50 text-rose-700 ring-rose-600/20';
+      return 'border-rose-500 text-rose-700';
     case 'expired':
-      return 'bg-slate-50 text-slate-700 ring-slate-500/20';
+      return 'border-slate-400 text-slate-600';
     case 'cancelled':
-      return 'bg-orange-50 text-orange-700 ring-orange-600/20';
+      return 'border-orange-500 text-orange-700';
     default:
-      return 'bg-slate-50 text-slate-700 ring-slate-500/20';
+      return 'border-slate-400 text-slate-600';
+  }
+});
+
+const dotClass = computed(() => {
+  switch (props.status) {
+    case 'active':
+      return 'bg-emerald-600';
+    case 'pending':
+      return 'bg-amber-500';
+    case 'suspended':
+      return 'bg-rose-500';
+    case 'expired':
+      return 'bg-slate-400';
+    case 'cancelled':
+      return 'bg-orange-500';
+    default:
+      return 'bg-slate-400';
   }
 });
 </script>

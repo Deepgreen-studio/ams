@@ -1,11 +1,10 @@
 <template>
   <div>
-    <!-- <PageHeader title="Edit company" description="Update organization profile and settings." /> -->
     <div
       v-if="companiesStore.loading && !companiesStore.currentCompany"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
+    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
       <CompanyForm
         :initial="companiesStore.currentCompany || {}"
         :loading="companiesStore.saving"
@@ -22,7 +21,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import CompanyForm from '@/modules/companies/components/CompanyForm.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 

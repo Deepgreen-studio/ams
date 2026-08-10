@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- <PageHeader title="Create company" description="Register a new organization on the platform." /> -->
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <CompanyForm
         :loading="companiesStore.saving"
         :errors="companiesStore.fieldErrors"
@@ -16,7 +15,6 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import CompanyForm from '@/modules/companies/components/CompanyForm.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 

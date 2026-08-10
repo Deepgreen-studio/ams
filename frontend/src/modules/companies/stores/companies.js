@@ -164,6 +164,18 @@ export const useCompaniesStore = defineStore('companies', () => {
     }
   }
 
+  function resetFilters() {
+    filters.value = {
+      search: '',
+      status: '',
+      trashed: '',
+      sort_by: 'created_at',
+      sort_dir: 'desc',
+      per_page: 10,
+      page: 1,
+    };
+  }
+
   return {
     companies,
     meta,
@@ -178,6 +190,7 @@ export const useCompaniesStore = defineStore('companies', () => {
     restoreCompany,
     uploadLogo,
     updateBranding,
+    resetFilters,
   };
 });
 

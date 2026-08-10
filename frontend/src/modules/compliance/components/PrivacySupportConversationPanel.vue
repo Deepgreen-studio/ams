@@ -73,7 +73,7 @@
         <textarea
           v-model="body"
           rows="3"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           :placeholder="ticket.source === 'sms'
             ? 'Public reply will be sent as SMS via the connected app…'
             : 'Public reply will appear in the app live chat…'"

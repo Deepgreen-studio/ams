@@ -87,7 +87,7 @@
           <div
             v-for="(step, index) in form.steps"
             :key="step._id"
-            class="absolute w-44 cursor-grab rounded-lg border bg-white p-3 shadow-sm active:cursor-grabbing"
+            class="absolute w-44 cursor-grab rounded-lg border bg-white p-3 active:cursor-grabbing"
             :class="selectedIndex === index ? 'border-brand-500 ring-2 ring-brand-200' : 'border-slate-200'"
             :style="{ left: `${step.position_x}px`, top: `${step.position_y}px` }"
             draggable="true"

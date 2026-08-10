@@ -9,7 +9,7 @@
             <div
                 v-for="card in cards"
                 :key="card.title"
-                class="rounded-xl border border-slate-200 bg-white p-5 "
+                class=" bg-white p-5 "
             >
                 <p class="text-sm font-medium text-slate-500">{{ card.label }}</p>
                 <h2 class="mt-2 text-lg font-semibold text-slate-900">{{ card.title }}</h2>

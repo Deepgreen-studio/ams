@@ -115,7 +115,7 @@
       </div>
 
       <section
-        class="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-sm xl:col-span-7"
+        class="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 xl:col-span-7"
       >
         <header
           class="flex items-center justify-between border-b border-slate-800 px-5 py-3.5"

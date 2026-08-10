@@ -1,20 +1,21 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-6">
-    <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+  <div :class="embedded ? '' : 'rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm'">
+    <div v-if="!hideAvatar" class="flex flex-col gap-4 sm:flex-row sm:items-center">
       <UserAvatar
         :src="user?.avatar_url || ''"
         :name="user?.full_name || user?.name || 'User'"
         :first-name="user?.first_name || ''"
         :last-name="user?.last_name || ''"
         size="lg"
+        class="ring-2 ring-white shadow-sm"
       />
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-2">
-          <h2 class="truncate text-xl font-semibold text-slate-900">{{ user?.full_name }}</h2>
+          <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">{{ user?.full_name }}</h2>
           <StatusBadge :status="user?.status" />
         </div>
-        <p class="mt-1 text-sm text-slate-500">{{ user?.email }}</p>
-        <div v-if="roles.length" class="mt-2 flex flex-wrap gap-1.5">
+        <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
+        <div v-if="roles.length" class="mt-2.5 flex flex-wrap gap-1.5">
           <RoleBadge
             v-for="role in roles"
             :key="role.uuid || role.name"
@@ -27,32 +28,39 @@
       </div>
     </div>
 
-    <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Phone</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ user?.phone || '—' }}</dd>
+    <div v-else class="text-center">
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <h2 class="truncate text-lg font-semibold tracking-tight text-slate-900">{{ user?.full_name }}</h2>
+        <StatusBadge :status="user?.status" />
       </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Timezone</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ user?.timezone || '—' }}</dd>
+      <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
+      <div v-if="roles.length" class="mt-2.5 flex flex-wrap justify-center gap-1.5">
+        <RoleBadge
+          v-for="role in roles"
+          :key="role.uuid || role.name"
+          :name="role.name"
+          :display-name="role.display_name"
+          :system="Boolean(role.is_system)"
+        />
       </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Language</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ user?.language || '—' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Last login</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ formatDate(user?.last_login_at) || '—' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Created</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ formatDate(user?.created_at) || '—' }}</dd>
-      </div>
-      <div>
-        <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Created by</dt>
-        <dd class="mt-1 text-sm text-slate-900">{{ user?.created_by?.full_name || '—' }}</dd>
-      </div>
-    </dl>
+      <p v-else class="mt-2 text-xs text-slate-400">No role assigned</p>
+    </div>
+
+    <div :class="hideAvatar || !embedded ? 'mt-6' : 'mt-5'">
+      <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+        Account details
+      </p>
+      <dl class="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
+        <div
+          v-for="item in detailItems"
+          :key="item.label"
+          class="grid grid-cols-[7.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[8.5rem_1fr]"
+        >
+          <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
+          <dd class="truncate text-sm font-medium text-slate-900">{{ item.value }}</dd>
+        </div>
+      </dl>
+    </div>
   </div>
 </template>
 
@@ -68,7 +76,24 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  embedded: {
+    type: Boolean,
+    default: false,
+  },
+  hideAvatar: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const roles = computed(() => props.user?.roles || []);
+
+const detailItems = computed(() => [
+  { label: 'Phone', value: props.user?.phone || '—' },
+  { label: 'Timezone', value: props.user?.timezone || '—' },
+  { label: 'Language', value: props.user?.language || '—' },
+  { label: 'Last login', value: formatDate(props.user?.last_login_at) || '—' },
+  { label: 'Created', value: formatDate(props.user?.created_at) || '—' },
+  { label: 'Created by', value: props.user?.created_by?.full_name || '—' },
+]);
 </script>

@@ -102,7 +102,7 @@
         <div class="shrink-0 p-4" :class="collapsed ? 'flex justify-center' : ''">
             <RouterLink
                 :to="{ name: 'support.dashboard' }"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-white shadow-sm transition hover:bg-brand-600"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-white transition hover:bg-brand-600"
                 title="Help & Support"
                 @click="closeMobile"
             >

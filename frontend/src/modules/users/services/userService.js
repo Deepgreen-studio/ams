@@ -41,8 +41,7 @@ export const userService = {
     const formData = new FormData();
     formData.append('avatar', file);
 
-    return api.post('/users/avatar', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    });
+    // Let the browser set multipart boundary (do not force Content-Type).
+    return api.post('/users/avatar', formData);
   },
 };

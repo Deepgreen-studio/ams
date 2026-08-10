@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-100">
+  <div class="rounded-2xl bg-white p-5 ring-1 ring-zinc-100">
     <div class="mb-6 flex items-center justify-between gap-3">
       <h2 class="text-base font-semibold text-zinc-900">Team workload</h2>
       <span class="rounded-full border border-zinc-200 bg-white px-3 py-1.5 text-xs text-zinc-600">

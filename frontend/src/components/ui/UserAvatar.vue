@@ -6,7 +6,7 @@
   >
     <img
       v-if="showImage"
-      :src="src"
+      :src="resolvedSrc"
       :alt="name"
       class="h-full w-full object-cover"
       @error="onError"
@@ -18,6 +18,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue';
 import { getUserInitials } from '@/utils/avatar';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
   src: {
@@ -39,20 +40,22 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg', 'xl'].includes(value),
+    validator: (value) => ['sm', 'md', 'lg', 'xl', '2xl'].includes(value),
   },
 });
 
 const imageFailed = ref(false);
 
+const resolvedSrc = computed(() => resolveMediaUrl(props.src));
+
 watch(
-  () => props.src,
+  resolvedSrc,
   () => {
     imageFailed.value = false;
   },
 );
 
-const showImage = computed(() => Boolean(props.src) && !imageFailed.value);
+const showImage = computed(() => Boolean(resolvedSrc.value) && !imageFailed.value);
 
 const initials = computed(() =>
   getUserInitials({
@@ -69,6 +72,7 @@ const sizeClass = computed(() => {
     md: 'h-10 w-10 text-sm',
     lg: 'h-16 w-16 text-lg',
     xl: 'h-20 w-20 text-xl',
+    '2xl': 'h-28 w-28 text-2xl',
   };
   return map[props.size] || map.md;
 });

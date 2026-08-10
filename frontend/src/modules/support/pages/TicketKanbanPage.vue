@@ -74,7 +74,7 @@
             v-for="ticket in column.tickets"
             :key="ticket.uuid"
             :to="{ name: 'support.tickets.show', params: { id: ticket.uuid } }"
-            class="block rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:border-brand-300"
+            class="block rounded-lg border border-slate-200 bg-white p-3 transition hover:border-brand-300"
           >
             <div class="mb-2 flex items-start justify-between gap-2">
               <p class="text-sm font-medium text-slate-900">{{ ticket.subject }}</p>

@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-100">
+  <div class="rounded-2xl bg-white p-5 ring-1 ring-zinc-100">
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <h2 class="text-base font-semibold text-zinc-900">Application summary</h2>
       <div class="flex flex-wrap gap-2">

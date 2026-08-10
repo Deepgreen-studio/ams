@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-zinc-100">
+  <div class="rounded-2xl bg-white p-5 ring-1 ring-zinc-100">
     <div class="flex items-start justify-between gap-3">
       <div
         class="inline-flex h-11 w-11 items-center justify-center rounded-full"

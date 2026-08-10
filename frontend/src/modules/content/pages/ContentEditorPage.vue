@@ -220,7 +220,7 @@
                     class="flex cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-2 text-sm text-slate-700 hover:bg-white"
                     :class="
                       form.categories.includes(category.uuid)
-                        ? 'bg-white shadow-sm ring-1 ring-brand-100'
+                        ? 'bg-white ring-1 ring-brand-100'
                         : ''
                     "
                   >

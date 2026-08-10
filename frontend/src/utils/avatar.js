@@ -1,3 +1,5 @@
+import { resolveMediaUrl } from '@/utils/mediaUrl';
+
 /**
  * Build initials from a user-like object.
  * Prefers first/last name letters, then full name words.
@@ -33,5 +35,15 @@ export function getUserAvatarUrl(user) {
   }
 
   const url = user.avatar_url || user.avatar || '';
-  return typeof url === 'string' ? url.trim() : '';
+  if (typeof url !== 'string' || !url.trim()) {
+    return '';
+  }
+
+  // Raw storage paths (avatars/…) need a public /storage prefix.
+  const trimmed = url.trim();
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('/') && !trimmed.startsWith('blob:') && !trimmed.startsWith('data:')) {
+    return resolveMediaUrl(`/storage/${trimmed.replace(/^\/+/, '')}`);
+  }
+
+  return resolveMediaUrl(trimmed);
 }

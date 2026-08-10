@@ -10,7 +10,7 @@
                 </h1>
             </div>
 
-            <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class=" bg-white p-6">
                 <RouterView />
             </div>
         </div>

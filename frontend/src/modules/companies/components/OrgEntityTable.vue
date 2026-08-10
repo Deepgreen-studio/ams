@@ -19,18 +19,18 @@
       </template>
     </EmptyState>
 
-    <div v-else class="overflow-x-auto px-3">
+    <div v-else class="overflow-x-auto">
       <table class="min-w-full text-sm">
-        <thead>
+        <thead class="bg-slate-50">
           <tr class="border-b border-zinc-100">
             <th
               v-for="column in columns"
               :key="column.key"
-              class="px-5 py-3 text-left text-sm font-semibold text-zinc-500"
+              class="px-6 py-4 text-left text-sm font-semibold text-slate-600"
             >
               {{ column.label }}
             </th>
-            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -42,7 +42,7 @@
             <td
               v-for="column in columns"
               :key="column.key"
-              class="px-5 py-4 text-slate-700"
+              class="px-6 py-4 text-slate-700"
             >
               <slot :name="`cell-${column.key}`" :item="item">
                 <span
@@ -56,7 +56,7 @@
                 </span>
               </slot>
             </td>
-            <td class="px-5 py-4">
+            <td class="px-6 py-4">
               <div class="flex items-center justify-end gap-1">
                 <button
                   type="button"

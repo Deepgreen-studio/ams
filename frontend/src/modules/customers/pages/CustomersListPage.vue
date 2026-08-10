@@ -39,7 +39,7 @@
       :sort-by="customersStore.filters.sort_by"
       :sort-dir="customersStore.filters.sort_dir"
       @sort="onSort"
-      @archive="openArchive"
+      @delete="openDelete"
     >
       <template #toolbar>
         <CustomerSearchFilter
@@ -76,13 +76,13 @@
     </CustomerTable>
 
     <DeleteConfirmation
-      :open="Boolean(pendingArchive)"
-      title="Archive customer"
-      :message="`Archive ${pendingArchive?.display_name || 'this customer'}? They can be restored later.`"
-      confirm-label="Archive"
+      :open="Boolean(pendingDelete)"
+      title="Delete customer"
+      :message="`Soft delete ${pendingDelete?.display_name || 'this customer'}? It can be restored later.`"
+      confirm-label="Delete"
       :loading="customersStore.saving"
-      @cancel="pendingArchive = null"
-      @confirm="confirmArchive"
+      @cancel="pendingDelete = null"
+      @confirm="confirmDelete"
     />
   </div>
 </template>
@@ -97,7 +97,7 @@ import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const customersStore = useCustomersStore();
-const pendingArchive = ref(null);
+const pendingDelete = ref(null);
 
 const statCards = computed(() => [
   { label: 'Total', value: customersStore.statistics?.total ?? 0 },
@@ -137,14 +137,14 @@ function onSort(column) {
   customersStore.fetchCustomers({ sort_by: column, sort_dir: sortDir, page: 1 });
 }
 
-function openArchive(customer) {
-  pendingArchive.value = customer;
+function openDelete(customer) {
+  pendingDelete.value = customer;
 }
 
-async function confirmArchive() {
-  if (!pendingArchive.value) return;
-  await customersStore.archiveCustomer(pendingArchive.value.uuid);
-  pendingArchive.value = null;
+async function confirmDelete() {
+  if (!pendingDelete.value) return;
+  await customersStore.archiveCustomer(pendingDelete.value.uuid);
+  pendingDelete.value = null;
   await customersStore.fetchCustomers();
 }
 </script>

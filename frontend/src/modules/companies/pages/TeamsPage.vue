@@ -7,55 +7,16 @@
       >
         Back to company
       </RouterLink>
+      <button
+        type="button"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="openCreate"
+      >
+        Add team
+      </button>
     </Teleport>
 
     <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
-      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
-        <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
-          <SelectBox
-            v-model="form.department_id"
-            wrapper-class="min-w-[11rem]"
-            placeholder="Department"
-            :options="departmentOptions"
-          />
-          <input
-            v-model="form.name"
-            type="text"
-            placeholder="Team name"
-            class="h-10 min-w-0 flex-1 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0 lg:max-w-xs"
-            @keyup.enter="onSave"
-          />
-          <input
-            v-model="form.description"
-            type="text"
-            placeholder="Description (optional)"
-            class="h-10 min-w-0 flex-1 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-            @keyup.enter="onSave"
-          />
-          <SelectBox
-            v-model="form.status"
-            wrapper-class="min-w-[9.5rem]"
-            :options="statusOptions"
-          />
-          <button
-            type="button"
-            class="h-10 shrink-0 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-            :disabled="saving || !form.name.trim() || !form.department_id"
-            @click="onSave"
-          >
-            {{ submitLabel }}
-          </button>
-          <button
-            v-if="editingId"
-            type="button"
-            class="h-10 shrink-0 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-            @click="cancelEdit"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-
       <TeamTable
         :teams="teamsStore.teams"
         :loading="teamsStore.loading"
@@ -74,6 +35,15 @@
       </div>
     </div>
 
+    <TeamFormModal
+      :open="formOpen"
+      :loading="saving"
+      :team="editingTeam"
+      :department-options="departmentOptions"
+      @cancel="closeForm"
+      @submit="onSave"
+    />
+
     <DeleteConfirmation
       :open="Boolean(pending)"
       title="Delete team"
@@ -86,11 +56,11 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
-import SelectBox from '@/modules/users/components/SelectBox.vue';
+import TeamFormModal from '@/modules/companies/components/TeamFormModal.vue';
 import TeamTable from '@/modules/companies/components/TeamTable.vue';
 import {
   useCompaniesStore,
@@ -106,21 +76,10 @@ const companiesStore = useCompaniesStore();
 const departmentsStore = useDepartmentsStore();
 const teamsStore = useTeamsStore();
 const pending = ref(null);
-const editingId = ref(null);
+const editingTeam = ref(null);
+const formOpen = ref(false);
 const saving = ref(false);
 const perPage = ref(10);
-
-const form = reactive({
-  department_id: '',
-  name: '',
-  description: '',
-  status: 'active',
-});
-
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-];
 
 const departmentOptions = computed(() =>
   (departmentsStore.departments || []).map((dept) => ({
@@ -128,11 +87,6 @@ const departmentOptions = computed(() =>
     label: dept.name,
   })),
 );
-
-const submitLabel = computed(() => {
-  if (saving.value) return 'Saving...';
-  return editingId.value ? 'Update team' : 'Add team';
-});
 
 onMounted(async () => {
   await companiesStore.fetchCompany(route.params.id);
@@ -157,47 +111,28 @@ function onPerPageChange(value) {
   load(1);
 }
 
-function resetForm() {
-  form.department_id = '';
-  form.name = '';
-  form.description = '';
-  form.status = 'active';
-  editingId.value = null;
+function openCreate() {
+  editingTeam.value = null;
+  formOpen.value = true;
 }
 
 function openEdit(item) {
-  editingId.value = String(item.uuid || item.id || '');
-  form.department_id = item.department?.uuid || '';
-  form.name = item.name || '';
-  form.description = item.description || '';
-  form.status = item.status || 'active';
+  editingTeam.value = item;
+  formOpen.value = true;
 }
 
-function cancelEdit() {
-  resetForm();
+function closeForm() {
+  if (saving.value) return;
+  formOpen.value = false;
+  editingTeam.value = null;
 }
 
-async function onSave() {
-  if (!form.department_id) {
-    toast.error('Please select a department.', 'Validation Failed');
-    return;
-  }
-  if (!form.name.trim()) {
-    toast.error('Team name is required.', 'Validation Failed');
-    return;
-  }
-
-  const payload = {
-    department_id: form.department_id,
-    name: form.name.trim(),
-    description: form.description.trim() ? form.description.trim() : null,
-    status: form.status || 'active',
-  };
-
+async function onSave(payload) {
   saving.value = true;
   try {
-    if (editingId.value) {
-      const { data } = await companyService.updateTeam(editingId.value, payload);
+    const id = editingTeam.value?.uuid || editingTeam.value?.id;
+    if (id) {
+      const { data } = await companyService.updateTeam(id, payload);
       toast.success(data.message || 'Team updated successfully.');
     } else {
       const { data } = await companyService.createTeam({
@@ -206,7 +141,8 @@ async function onSave() {
       });
       toast.success(data.message || 'Team created successfully.');
     }
-    resetForm();
+    formOpen.value = false;
+    editingTeam.value = null;
     await load(teamsStore.meta?.current_page || 1);
   } catch (err) {
     toast.error(err?.message || 'Unable to save team.', 'Error');
@@ -225,7 +161,10 @@ async function confirmDelete() {
   try {
     await companyService.deleteTeam(id);
     toast.success('Team deleted successfully.');
-    if (editingId.value === id) resetForm();
+    if ((editingTeam.value?.uuid || editingTeam.value?.id) === id) {
+      formOpen.value = false;
+      editingTeam.value = null;
+    }
     pending.value = null;
     await load();
   } catch (err) {

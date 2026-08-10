@@ -22,10 +22,10 @@
           v-else
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
-          @click="showArchive = true"
+          @click="showDelete = true"
         >
-          <ArchiveBoxIcon class="h-4 w-4 text-white" />
-          Archive
+          <TrashIcon class="h-4 w-4 text-white" />
+          Delete
         </button>
       </template>
     </Teleport>
@@ -115,13 +115,13 @@
     </div>
 
     <DeleteConfirmation
-      :open="showArchive"
-      title="Archive customer"
-      :message="`Archive ${customer?.display_name || 'this customer'}?`"
-      confirm-label="Archive"
+      :open="showDelete"
+      title="Delete customer"
+      :message="`Soft delete ${customer?.display_name || 'this customer'}?`"
+      confirm-label="Delete"
       :loading="customersStore.saving"
-      @cancel="showArchive = false"
-      @confirm="confirmArchive"
+      @cancel="showDelete = false"
+      @confirm="confirmDelete"
     />
   </div>
 </template>
@@ -130,7 +130,6 @@
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
-  ArchiveBoxIcon,
   ChartBarIcon,
   ChatBubbleLeftRightIcon,
   ChevronRightIcon,
@@ -139,6 +138,7 @@ import {
   KeyIcon,
   PencilSquareIcon,
   PuzzlePieceIcon,
+  TrashIcon,
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { formatDate } from '@/utils/formatters';
@@ -151,7 +151,7 @@ import { useCustomersStore } from '@/modules/customers/stores/customers';
 const route = useRoute();
 const router = useRouter();
 const customersStore = useCustomersStore();
-const showArchive = ref(false);
+const showDelete = ref(false);
 
 const customer = computed(() => customersStore.currentCustomer);
 
@@ -178,9 +178,9 @@ onMounted(() => {
   customersStore.fetchCustomer(route.params.id);
 });
 
-async function confirmArchive() {
+async function confirmDelete() {
   await customersStore.archiveCustomer(route.params.id);
-  showArchive.value = false;
+  showDelete.value = false;
   await router.push({ name: 'customers.index' });
 }
 

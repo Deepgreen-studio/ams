@@ -109,51 +109,17 @@
               {{ customer.country || '—' }}
             </td>
             <td class="px-5 py-4">
-              <div class="relative flex justify-end">
+              <div class="flex justify-end">
                 <button
                   type="button"
                   class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
                   :aria-expanded="openMenuId === customer.uuid"
                   aria-haspopup="menu"
                   aria-label="Open actions"
-                  @click.stop="toggleMenu(customer.uuid)"
+                  @click.stop="toggleMenu(customer.uuid, $event)"
                 >
                   <EllipsisVerticalIcon class="h-5 w-5" />
                 </button>
-
-                <div
-                  v-if="openMenuId === customer.uuid"
-                  class="absolute right-0 top-10 z-20 w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
-                  role="menu"
-                >
-                  <RouterLink
-                    :to="{ name: 'customers.show', params: { id: customer.uuid } }"
-                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-                    role="menuitem"
-                    @click="closeMenu"
-                  >
-                    <EyeIcon class="h-4 w-4 text-slate-400" />
-                    View
-                  </RouterLink>
-                  <RouterLink
-                    :to="{ name: 'customers.edit', params: { id: customer.uuid } }"
-                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-                    role="menuitem"
-                    @click="closeMenu"
-                  >
-                    <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-                    Edit
-                  </RouterLink>
-                  <button
-                    type="button"
-                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-                    role="menuitem"
-                    @click="onArchive(customer)"
-                  >
-                    <ArchiveBoxIcon class="h-4 w-4 text-red-500" />
-                    Archive
-                  </button>
-                </div>
               </div>
             </td>
           </tr>
@@ -164,23 +130,61 @@
     <div v-if="$slots.footer" class="border-t border-zinc-100 px-8 py-5">
       <slot name="footer" />
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="openMenuId && activeCustomer"
+        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        role="menu"
+        :style="menuStyle"
+        @click.stop
+      >
+        <RouterLink
+          :to="{ name: 'customers.show', params: { id: activeCustomer.uuid } }"
+          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          <EyeIcon class="h-4 w-4 text-slate-400" />
+          View
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'customers.edit', params: { id: activeCustomer.uuid } }"
+          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+          Edit
+        </RouterLink>
+        <button
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+          role="menuitem"
+          @click="onDelete(activeCustomer)"
+        >
+          <TrashIcon class="h-4 w-4 text-red-500" />
+          Delete
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
-  ArchiveBoxIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
+  TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import StatusBadge from '@/modules/customers/components/StatusBadge.vue';
 import TypeBadge from '@/modules/customers/components/TypeBadge.vue';
 
-defineProps({
+const props = defineProps({
   customers: {
     type: Array,
     default: () => [],
@@ -199,9 +203,14 @@ defineProps({
   },
 });
 
-const emit = defineEmits(['sort', 'archive']);
+const emit = defineEmits(['sort', 'delete']);
 
 const openMenuId = ref(null);
+const menuStyle = ref({});
+
+const activeCustomer = computed(() =>
+  props.customers.find((customer) => customer.uuid === openMenuId.value) || null,
+);
 
 function initials(name) {
   return String(name || 'C')
@@ -210,28 +219,58 @@ function initials(name) {
     .toUpperCase();
 }
 
-function toggleMenu(id) {
-  openMenuId.value = openMenuId.value === id ? null : id;
+function toggleMenu(id, event) {
+  if (openMenuId.value === id) {
+    closeMenu();
+    return;
+  }
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuWidth = 160;
+  const menuHeight = 132;
+  const gap = 8;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < menuHeight + gap;
+
+  const top = openUp ? rect.top - menuHeight - gap : rect.bottom + gap;
+  const left = Math.min(
+    Math.max(8, rect.right - menuWidth),
+    window.innerWidth - menuWidth - 8,
+  );
+
+  menuStyle.value = {
+    top: `${Math.max(8, top)}px`,
+    left: `${left}px`,
+  };
+  openMenuId.value = id;
 }
 
 function closeMenu() {
   openMenuId.value = null;
 }
 
-function onArchive(customer) {
+function onDelete(customer) {
   closeMenu();
-  emit('archive', customer);
+  emit('delete', customer);
 }
 
 function onDocumentClick() {
   closeMenu();
 }
 
+function onScrollOrResize() {
+  closeMenu();
+}
+
 onMounted(() => {
   document.addEventListener('click', onDocumentClick);
+  window.addEventListener('scroll', onScrollOrResize, true);
+  window.addEventListener('resize', onScrollOrResize);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick);
+  window.removeEventListener('scroll', onScrollOrResize, true);
+  window.removeEventListener('resize', onScrollOrResize);
 });
 </script>

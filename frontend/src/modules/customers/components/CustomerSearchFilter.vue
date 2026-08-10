@@ -93,9 +93,9 @@ const statusOptions = [
 ];
 
 const trashedOptions = [
-  { value: '', label: 'Archived: Exclude' },
-  { value: 'with', label: 'Include archived' },
-  { value: 'only', label: 'Only archived' },
+  { value: '', label: 'Deleted: Exclude' },
+  { value: 'with', label: 'Include deleted' },
+  { value: 'only', label: 'Only deleted' },
 ];
 
 const companyOptions = computed(() => [

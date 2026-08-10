@@ -7,7 +7,7 @@
       :autocomplete="autocomplete"
       :required="required"
       :disabled="disabled"
-      class="w-full h-12 rounded-[12px] border border-slate-300 px-3 pr-10 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 disabled:bg-slate-50"
+      class="w-full h-12 rounded-[12px] border border-slate-300 px-3 pr-10 text-sm shadow-none outline-none focus:border-brand-500 focus:outline-none focus:ring-0 disabled:bg-slate-50"
       :class="inputClass"
       @input="$emit('update:modelValue', $event.target.value)"
     />

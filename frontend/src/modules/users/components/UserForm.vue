@@ -11,7 +11,7 @@
           <input
             v-model="form.first_name"
             type="text"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('first_name')"
           />
           <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
@@ -21,7 +21,7 @@
           <input
             v-model="form.last_name"
             type="text"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('last_name')"
           />
           <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
@@ -31,7 +31,7 @@
           <input
             v-model="form.email"
             type="email"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('email')"
           />
           <p v-if="errors.email" class="mt-1 text-xs text-rose-600">{{ errors.email[0] }}</p>
@@ -41,7 +41,7 @@
           <input
             v-model="form.phone"
             type="text"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('phone')"
             placeholder="+15551234567"
           />
@@ -51,7 +51,7 @@
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Gender</label>
           <select
             v-model="form.gender"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           >
             <option value="">Prefer not to say / unset</option>
             <option value="male">Male</option>
@@ -65,7 +65,7 @@
           <input
             v-model="form.date_of_birth"
             type="date"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10"
+            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           />
         </div>
       </div>
@@ -104,7 +104,7 @@
         <input
           v-model="form.first_name"
           type="text"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('first_name')"
         />
         <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
@@ -114,7 +114,7 @@
         <input
           v-model="form.last_name"
           type="text"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('last_name')"
         />
         <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
@@ -124,7 +124,7 @@
         <input
           v-model="form.email"
           type="email"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('email')"
         />
         <p v-if="errors.email" class="mt-1 text-xs text-rose-600">{{ errors.email[0] }}</p>
@@ -134,7 +134,7 @@
         <input
           v-model="form.phone"
           type="text"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('phone')"
           placeholder="+15551234567"
         />
@@ -144,7 +144,7 @@
         <label class="mb-1 block text-sm font-medium text-slate-700">Gender</label>
         <select
           v-model="form.gender"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         >
           <option value="">Prefer not to say / unset</option>
           <option value="male">Male</option>
@@ -158,7 +158,7 @@
         <input
           v-model="form.date_of_birth"
           type="date"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         />
       </div>
       <div>
@@ -168,7 +168,7 @@
           :options="timezoneOptions"
           placeholder="Select timezone"
           search-placeholder="Search timezone…"
-          button-class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          button-class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         />
       </div>
       <div>
@@ -178,7 +178,7 @@
           :options="languageOptions"
           placeholder="Select language"
           search-placeholder="Search language…"
-          button-class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          button-class="h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         />
       </div>
 
@@ -186,7 +186,7 @@
         <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
         <select
           v-model="form.status"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         >
           <option value="active">Active</option>
           <option value="inactive">Inactive</option>
@@ -199,7 +199,7 @@
         <label class="mb-1 block text-sm font-medium text-slate-700">Role</label>
         <select
           v-model="form.role"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('roles')"
         >
           <option value="">Select a role</option>
@@ -391,7 +391,7 @@ function createForm(value = {}) {
 }
 
 function fieldClass(field) {
-  return props.errors?.[field] ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-100' : '';
+  return props.errors?.[field] ? 'border-rose-400 focus:border-rose-500 focus:ring-0' : '';
 }
 
 function onSubmit() {

@@ -37,7 +37,7 @@
           ref="searchRef"
           v-model="query"
           type="search"
-          class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-2 focus:ring-brand-500/10"
+          class="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 shadow-none outline-none placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-0"
           :placeholder="searchPlaceholder"
           @keydown.esc.prevent="close"
           @keydown.down.prevent="move(1)"
@@ -94,7 +94,7 @@ const props = defineProps({
   buttonClass: {
     type: String,
     default:
-      'h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10',
+      'h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0',
   },
 });
 

@@ -13,7 +13,7 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
           :to="{ name: 'users.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
           Create user
         </RouterLink>
@@ -32,51 +32,55 @@
       {{ usersStore.error }}
     </div>
 
-    <div v-if="usersStore.statistics" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <div
         v-for="card in statCards"
         :key="card.label"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-3"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 ring-1 ring-zinc-100 transition hover:ring-brand-200"
       >
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-        <p class="mt-1 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+        <div class="min-w-0">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+          <p class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+        </div>
+        <div
+          class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] p-3"
+          :class="card.iconBg"
+        >
+          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+        </div>
       </div>
     </div>
 
-    <div class="space-y-4">
-      <UserSearchFilter :model-value="usersStore.filters" @submit="onFilter" @reset="onReset" />
+    <UserTable
+      :users="usersStore.users"
+      :loading="usersStore.loading"
+      :sort-by="usersStore.filters.sort_by"
+      :sort-dir="usersStore.filters.sort_dir"
+      @sort="onSort"
+      @delete="openDelete"
+    >
+      <template #toolbar>
+        <UserSearchFilter :model-value="usersStore.filters" @submit="onFilter" @reset="onReset" />
+      </template>
 
-      <div
-        v-if="usersStore.hasSelection"
-        class="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-3 text-sm text-slate-600"
-      >
-        {{ usersStore.selectedIds.length }} selected
-        <span class="text-slate-400">(bulk actions ready for a future milestone)</span>
-      </div>
+      <template #empty-action>
+        <RouterLink
+          :to="{ name: 'users.create' }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create user
+        </RouterLink>
+      </template>
 
-      <UserTable
-        :users="usersStore.users"
-        :selected-ids="usersStore.selectedIds"
-        :loading="usersStore.loading"
-        :sort-by="usersStore.filters.sort_by"
-        :sort-dir="usersStore.filters.sort_dir"
-        @toggle="usersStore.toggleSelection"
-        @toggle-all="onToggleAll"
-        @sort="onSort"
-        @delete="openDelete"
-      >
-        <template #empty-action>
-          <RouterLink
-            :to="{ name: 'users.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Create user
-          </RouterLink>
-        </template>
-      </UserTable>
-
-      <Pagination :meta="usersStore.meta" :loading="usersStore.loading" @change="onPageChange" />
-    </div>
+      <template #footer>
+        <Pagination
+          :meta="usersStore.meta"
+          :loading="usersStore.loading"
+          @change="onPageChange"
+          @per-page="onPerPageChange"
+        />
+      </template>
+    </UserTable>
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -93,6 +97,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import {
+  CheckCircleIcon,
+  NoSymbolIcon,
+  PauseCircleIcon,
+  TrashIcon,
+  UsersIcon,
+} from '@heroicons/vue/24/outline';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -104,11 +115,41 @@ const usersStore = useUsersStore();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
-  { label: 'Total', value: usersStore.statistics?.total ?? 0 },
-  { label: 'Active', value: usersStore.statistics?.active ?? 0 },
-  { label: 'Inactive', value: usersStore.statistics?.inactive ?? 0 },
-  { label: 'Suspended', value: usersStore.statistics?.suspended ?? 0 },
-  { label: 'Trashed', value: usersStore.statistics?.trashed ?? 0 },
+  {
+    label: 'Total',
+    value: usersStore.statistics?.total ?? 0,
+    icon: UsersIcon,
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-500',
+  },
+  {
+    label: 'Active',
+    value: usersStore.statistics?.active ?? 0,
+    icon: CheckCircleIcon,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+  },
+  {
+    label: 'Inactive',
+    value: usersStore.statistics?.inactive ?? 0,
+    icon: NoSymbolIcon,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-500',
+  },
+  {
+    label: 'Suspended',
+    value: usersStore.statistics?.suspended ?? 0,
+    icon: PauseCircleIcon,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+  },
+  {
+    label: 'Trashed',
+    value: usersStore.statistics?.trashed ?? 0,
+    icon: TrashIcon,
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-600',
+  },
 ]);
 
 onMounted(() => {
@@ -128,15 +169,15 @@ function onPageChange(page) {
   usersStore.fetchUsers({ page });
 }
 
+function onPerPageChange(perPage) {
+  usersStore.fetchUsers({ per_page: perPage, page: 1 });
+}
+
 function onSort(column) {
   const sortDir =
     usersStore.filters.sort_by === column && usersStore.filters.sort_dir === 'asc' ? 'desc' : 'asc';
 
   usersStore.fetchUsers({ sort_by: column, sort_dir: sortDir, page: 1 });
-}
-
-function onToggleAll() {
-  usersStore.toggleSelectAll(usersStore.users.map((user) => user.uuid));
 }
 
 function openDelete(user) {

@@ -188,6 +188,6 @@ function progressColor(progress) {
 }
 .dash-select:focus {
   border-color: #ff5c00;
-  box-shadow: 0 0 0 3px rgba(255, 92, 0, 0.12);
+  box-shadow: none;
 }
 </style>

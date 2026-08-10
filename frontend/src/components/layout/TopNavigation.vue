@@ -23,7 +23,7 @@
             v-model="searchQuery"
             type="search"
             placeholder="Search for anything..."
-            class="w-full rounded-full border-0 bg-white py-3 pl-5 pr-4 text-sm text-zinc-800 ring-1 ring-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-brand-500/25"
+            class="w-full rounded-full border-0 bg-white py-3 pl-5 pr-4 text-sm text-zinc-800 shadow-none ring-1 ring-zinc-100 placeholder:text-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-100"
           />
         </label>
 

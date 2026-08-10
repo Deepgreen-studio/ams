@@ -78,7 +78,7 @@
                         :key="item.name"
                         :to="item.to"
                         :title="collapsed ? item.label : undefined"
-                        class="group flex items-center gap-3 rounded-full py-2.5 text-sm font-medium transition"
+                        class="group flex items-center gap-3 rounded-[12px] py-2.5 text-sm font-medium transition"
                         :class="[
                             collapsed ? 'justify-center px-2' : 'px-3',
                             isActive(item)

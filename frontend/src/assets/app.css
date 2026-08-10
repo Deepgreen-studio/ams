@@ -35,9 +35,8 @@ body {
   line-height: 1.25rem;
   color: #0f172a;
   outline: none;
-  transition:
-    border-color 0.15s ease,
-    box-shadow 0.15s ease;
+  box-shadow: none;
+  transition: border-color 0.15s ease;
 }
 
 .input::placeholder {
@@ -46,7 +45,7 @@ body {
 
 .input:focus {
   border-color: #ff5c00;
-  box-shadow: 0 0 0 3px rgba(255, 92, 0, 0.12);
+  box-shadow: none;
 }
 
 .input:disabled {

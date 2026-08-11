@@ -1508,7 +1508,7 @@ const router = createRouter({
         {
           path: 'integrations/:id',
           name: 'integrations.show',
-          component: () => import('@/modules/integrations/pages/ViewIntegrationPage.vue'),
+          component: () => import('@/modules/integrations/pages/IntegrationDetailsPage.vue'),
           meta: { title: 'Integration Details', requiresAuth: true },
         },
         {

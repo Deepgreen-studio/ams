@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="API Configuration"
-      description="Headers, credentials, timeout, retries, and rate limits for this integration."
-    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -15,9 +11,9 @@
 
     <div
       v-if="integrationsStore.loading && !integrationsStore.currentIntegration"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
+    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
       <ApiConfigurationForm
         :initial="integrationsStore.currentIntegration || {}"
         :loading="integrationsStore.saving"
@@ -32,7 +28,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApiConfigurationForm from '@/modules/integrations/components/ApiConfigurationForm.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';

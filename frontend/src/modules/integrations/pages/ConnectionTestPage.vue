@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Connection Test"
-      description="Validate reachability and authentication through the API Connection Engine."
-    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -21,36 +17,36 @@
 
     <div
       v-if="integrationsStore.loading && !integration"
-      class="h-40 animate-pulse rounded-xl bg-slate-100"
+      class="h-40 animate-pulse rounded-[12px] bg-slate-100"
     />
 
-    <div v-else-if="integration" class="space-y-4">
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
-        <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div v-else-if="integration" class="space-y-6">
+      <div class="rounded-[12px] bg-white p-6 sm:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Base URL</dt>
-            <dd class="mt-1 break-all text-sm text-slate-900">{{ integration.base_url || '—' }}</dd>
+            <h3 class="text-base font-semibold text-slate-900">Connection summary</h3>
+            <p class="mt-1 text-sm text-slate-500">
+              Validate reachability and authentication for this integration.
+            </p>
           </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Health path</dt>
-            <dd class="mt-1 text-sm text-slate-900">{{ integration.health_check_path || '/' }}</dd>
-          </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Health status</dt>
-            <dd class="mt-1"><StatusBadge :status="integration.health_status" kind="health" /></dd>
-          </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Credentials</dt>
-            <dd class="mt-1 text-sm text-slate-900">
-              {{ integration.has_credentials ? 'Configured' : 'Missing' }}
-            </dd>
-          </div>
-        </dl>
+          <StatusBadge :status="integration.health_status" kind="health" />
+        </div>
 
-        <div class="mt-6 flex flex-wrap gap-3">
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div
+            v-for="card in summaryCards"
+            :key="card.label"
+            class="rounded-[12px] bg-zinc-50 px-4 py-3.5"
+          >
+            <p class="text-xs font-medium text-zinc-500">{{ card.label }}</p>
+            <p class="mt-1 break-all text-sm font-semibold text-slate-900">{{ card.value }}</p>
+          </div>
+        </div>
+
+        <div class="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-6">
           <button
             type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
             :disabled="integrationsStore.saving || !integration.base_url"
             @click="runConnection"
           >
@@ -58,7 +54,7 @@
           </button>
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            class="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50 disabled:opacity-60"
             :disabled="integrationsStore.saving || !integration.has_credentials"
             @click="runAuth"
           >
@@ -75,7 +71,6 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import ResponseViewer from '@/modules/integrations/components/ResponseViewer.vue';
 import StatusBadge from '@/modules/integrations/components/StatusBadge.vue';
@@ -84,6 +79,22 @@ import { useIntegrationsStore } from '@/modules/integrations/stores/integrations
 const route = useRoute();
 const integrationsStore = useIntegrationsStore();
 const integration = computed(() => integrationsStore.currentIntegration);
+
+const summaryCards = computed(() => [
+  { label: 'Base URL', value: integration.value?.base_url || '—' },
+  { label: 'Health path', value: integration.value?.health_check_path || '/' },
+  {
+    label: 'Auth type',
+    value:
+      integration.value?.authentication_type_label ||
+      integration.value?.authentication_type ||
+      '—',
+  },
+  {
+    label: 'Credentials',
+    value: integration.value?.has_credentials ? 'Configured' : 'Missing',
+  },
+]);
 
 onMounted(() => {
   integrationsStore.lastResponse = null;

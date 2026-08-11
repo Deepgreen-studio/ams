@@ -1,146 +1,149 @@
 <template>
-  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
-    <div class="grid gap-4 md:grid-cols-2">
+  <form class="space-y-8" novalidate @submit.prevent="onSubmit">
+    <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
+          size="lg"
+          placeholder="Select company"
+          :options="companyOptions"
           :disabled="Boolean(initial.uuid)"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+          :error="Boolean(displayErrors.company_id)"
+        />
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
         <input
           v-model="form.name"
           type="text"
-          class="input"
+          placeholder="EasyCare API"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
         <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.name[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Slug</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Slug</label>
         <input
           v-model="form.slug"
           type="text"
-          class="input"
           placeholder="auto-generated if empty"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
         <p v-if="displayErrors.slug" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.slug[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Type</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
+        <SelectBox
           v-model="form.type"
-          class="input"
-          :class="fieldClass('type')"
-        >
-          <option value="rest_api">REST API</option>
-          <option value="graphql">GraphQL</option>
-          <option value="webhook">Webhook</option>
-          <option value="sdk">SDK</option>
-          <option value="ftp">FTP</option>
-          <option value="database">Database</option>
-        </select>
+          size="lg"
+          :options="typeOptions"
+          :error="Boolean(displayErrors.type)"
+        />
         <p v-if="displayErrors.type" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.type[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Authentication</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Authentication</label>
+        <SelectBox
           v-model="form.authentication_type"
-          class="input"
-          :class="fieldClass('authentication_type')"
-        >
-          <option value="api_key">API Key</option>
-          <option value="bearer_token">Bearer Token</option>
-          <option value="basic_auth">Basic Auth</option>
-          <option value="jwt">JWT</option>
-          <option value="oauth2">OAuth2</option>
-        </select>
+          size="lg"
+          :options="authOptions"
+          :error="Boolean(displayErrors.authentication_type)"
+        />
         <p v-if="displayErrors.authentication_type" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.authentication_type[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="draft">Draft</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="error">Error</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Base URL</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Base URL</label>
         <input
           v-model="form.base_url"
           type="url"
-          class="input"
           placeholder="https://"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('base_url')"
         />
         <p v-if="displayErrors.base_url" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.base_url[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">API version</label>
-        <input v-model="form.api_version" type="text" class="input" placeholder="v1" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">API version</label>
+        <input
+          v-model="form.api_version"
+          type="text"
+          placeholder="v1"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
         <input
           v-model.number="form.timeout"
           type="number"
           min="1"
           max="300"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('timeout')"
         />
         <p v-if="displayErrors.timeout" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.timeout[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Retry attempts</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry attempts</label>
         <input
           v-model.number="form.retry_attempts"
           type="number"
           min="0"
           max="10"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('retry_attempts')"
         />
         <p v-if="displayErrors.retry_attempts" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.retry_attempts[0] }}
         </p>
       </div>
+
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-        <textarea v-model="form.description" rows="3" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+        <textarea
+          v-model="form.description"
+          rows="3"
+          placeholder="Short summary of this integration"
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
     </div>
-    <div class="flex justify-end gap-2">
+
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -148,7 +151,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -159,6 +162,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 
@@ -177,7 +181,42 @@ const companies = ref([]);
 const localErrors = ref({});
 const form = reactive(createForm(props.initial));
 
-watch(() => props.initial, (value) => Object.assign(form, createForm(value)), { deep: true });
+const typeOptions = [
+  { value: 'rest_api', label: 'REST API' },
+  { value: 'graphql', label: 'GraphQL' },
+  { value: 'webhook', label: 'Webhook' },
+  { value: 'sdk', label: 'SDK' },
+  { value: 'ftp', label: 'FTP' },
+  { value: 'database', label: 'Database' },
+];
+
+const authOptions = [
+  { value: 'api_key', label: 'API Key' },
+  { value: 'bearer_token', label: 'Bearer Token' },
+  { value: 'basic_auth', label: 'Basic Auth' },
+  { value: 'jwt', label: 'JWT' },
+  { value: 'oauth2', label: 'OAuth2' },
+];
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'error', label: 'Error' },
+];
+
+const companyOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+watch(
+  () => props.initial,
+  (value) => Object.assign(form, createForm(value)),
+  { deep: true },
+);
 
 watch(
   () => props.error,
@@ -185,7 +224,7 @@ watch(
     if (message) {
       toast.error(message, 'Validation Failed');
     }
-  }
+  },
 );
 
 watch(
@@ -193,7 +232,7 @@ watch(
   () => {
     localErrors.value = {};
   },
-  { deep: true }
+  { deep: true },
 );
 
 const displayErrors = computed(() => ({
@@ -228,7 +267,9 @@ function createForm(value = {}) {
 }
 
 function fieldClass(field) {
-  return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+  return displayErrors.value?.[field]
+    ? 'border-rose-400 focus:border-rose-500'
+    : '';
 }
 
 function isValidUrl(value) {
@@ -270,7 +311,11 @@ function validate() {
     }
   }
 
-  if (form.retry_attempts !== null && form.retry_attempts !== undefined && form.retry_attempts !== '') {
+  if (
+    form.retry_attempts !== null &&
+    form.retry_attempts !== undefined &&
+    form.retry_attempts !== ''
+  ) {
     const retries = Number(form.retry_attempts);
     if (!Number.isInteger(retries) || retries < 0 || retries > 10) {
       next.retry_attempts = ['Retry attempts must be between 0 and 10.'];
@@ -291,18 +336,3 @@ function onSubmit() {
   emit('submit', { ...form });
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

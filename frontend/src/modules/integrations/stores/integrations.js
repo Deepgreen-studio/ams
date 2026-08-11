@@ -221,6 +221,22 @@ export const useIntegrationsStore = defineStore('integrations', () => {
     }
   }
 
+  function resetFilters() {
+    filters.value = {
+      search: '',
+      status: '',
+      type: '',
+      authentication_type: '',
+      health_status: '',
+      company: '',
+      trashed: '',
+      sort_by: 'created_at',
+      sort_dir: 'desc',
+      per_page: 10,
+      page: 1,
+    };
+  }
+
   return {
     integrations,
     meta,
@@ -241,5 +257,6 @@ export const useIntegrationsStore = defineStore('integrations', () => {
     testAuthentication,
     executeRequest,
     fetchHistory,
+    resetFilters,
   };
 });

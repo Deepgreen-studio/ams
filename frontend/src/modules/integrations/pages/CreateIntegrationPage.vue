@@ -1,10 +1,6 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create integration"
-      description="Register a new external connection in the Integration Hub."
-    /> -->
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <IntegrationForm
         :loading="integrationsStore.saving"
         :errors="integrationsStore.fieldErrors"
@@ -19,7 +15,6 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationForm from '@/modules/integrations/components/IntegrationForm.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';
 

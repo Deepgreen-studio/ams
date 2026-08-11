@@ -1,38 +1,68 @@
 <template>
   <div>
-    <!-- <PageHeader title="Integrations" description="Manage external system connections for the Integration Hub.">
-      <template #actions>
-        <RouterLink :to="{ name: 'integrations.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
-          Create integration
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
-      <RouterLink :to="{ name: 'integrations.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
-          Create integration
-        </RouterLink>
+      <RouterLink
+        :to="{ name: 'integrations.create' }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Create integration
+      </RouterLink>
     </Teleport>
 
-    <div v-if="integrationsStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+    <div
+      v-if="integrationsStore.successMessage"
+      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+    >
       {{ integrationsStore.successMessage }}
     </div>
-    <div v-if="integrationsStore.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+    <div
+      v-if="integrationsStore.error"
+      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
       {{ integrationsStore.error }}
     </div>
 
-    <div class="space-y-4">
-      <SearchFilters :model-value="integrationsStore.filters" @submit="onFilter" @reset="onReset" />
+    <IntegrationTable
+      :integrations="integrationsStore.integrations"
+      :loading="integrationsStore.loading"
+      :sort-by="integrationsStore.filters.sort_by"
+      :sort-dir="integrationsStore.filters.sort_dir"
+      @sort="onSort"
+      @delete="openDelete"
+    >
+      <template #toolbar>
+        <SearchFilters
+          :model-value="integrationsStore.filters"
+          @submit="onFilter"
+          @reset="onReset"
+        />
+      </template>
 
-      <IntegrationTable :integrations="integrationsStore.integrations" :loading="integrationsStore.loading" @delete="openDelete">
-        <template #empty-action>
-          <RouterLink :to="{ name: 'integrations.create' }" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
-            Create integration
-          </RouterLink>
-        </template>
-      </IntegrationTable>
+      <template #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="onReset"
+        >
+          Reset
+        </button>
+        <RouterLink
+          :to="{ name: 'integrations.create' }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create integration
+        </RouterLink>
+      </template>
 
-      <Pagination :meta="integrationsStore.meta" :loading="integrationsStore.loading" @change="onPageChange" />
-    </div>
+      <template #footer>
+        <Pagination
+          :meta="integrationsStore.meta"
+          :loading="integrationsStore.loading"
+          @change="onPageChange"
+          @per-page="onPerPageChange"
+        />
+      </template>
+    </IntegrationTable>
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -49,7 +79,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import IntegrationTable from '@/modules/integrations/components/IntegrationTable.vue';
@@ -68,24 +97,25 @@ function onFilter(filters) {
 }
 
 function onReset() {
-  integrationsStore.filters = {
-    search: '',
-    status: '',
-    type: '',
-    authentication_type: '',
-    health_status: '',
-    company: '',
-    trashed: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  };
+  integrationsStore.resetFilters();
   integrationsStore.fetchIntegrations();
 }
 
 function onPageChange(page) {
   integrationsStore.fetchIntegrations({ page });
+}
+
+function onPerPageChange(perPage) {
+  integrationsStore.fetchIntegrations({ per_page: perPage, page: 1 });
+}
+
+function onSort(column) {
+  const sortDir =
+    integrationsStore.filters.sort_by === column && integrationsStore.filters.sort_dir === 'asc'
+      ? 'desc'
+      : 'asc';
+
+  integrationsStore.fetchIntegrations({ sort_by: column, sort_dir: sortDir, page: 1 });
 }
 
 function openDelete(integration) {

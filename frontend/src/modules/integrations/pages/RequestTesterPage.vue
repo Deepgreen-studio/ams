@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Request Tester"
-      description="Send GET/POST/PUT/PATCH/DELETE requests through the shared API Connection Engine."
-    /> -->
     <IntegrationSubnav v-if="route.params.id" :integration-id="route.params.id" />
 
     <div
@@ -25,8 +21,8 @@
       {{ integrationsStore.error }}
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="grid gap-6 xl:grid-cols-2">
+      <div class="rounded-[12px] bg-white p-6 sm:p-8">
         <RequestTesterForm
           :loading="integrationsStore.saving"
           :error="integrationsStore.error || ''"
@@ -41,7 +37,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import RequestTesterForm from '@/modules/integrations/components/RequestTesterForm.vue';
 import ResponseViewer from '@/modules/integrations/components/ResponseViewer.vue';

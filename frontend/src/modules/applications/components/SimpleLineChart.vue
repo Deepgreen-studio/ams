@@ -1,14 +1,15 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-4">
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <h3 class="text-sm font-semibold text-slate-900">{{ title }}</h3>
+  <div class="rounded-[12px] bg-white p-5 sm:p-6 ring-1 ring-zinc-100">
+    <div class="mb-4 flex items-center justify-between gap-2">
+      <h3 class="text-base font-semibold text-slate-900">{{ title }}</h3>
       <p v-if="hint" class="text-xs text-slate-500">{{ hint }}</p>
     </div>
     <div
       v-if="!normalizedPoints.length"
-      class="flex h-40 items-center justify-center text-sm text-slate-500"
+      class="flex h-40 flex-col items-center justify-center rounded-[12px] bg-zinc-50 text-center"
     >
-      No chart data
+      <p class="text-sm font-medium text-slate-700">No chart data</p>
+      <p class="mt-1 text-xs text-slate-500">Refresh the snapshot to populate trends.</p>
     </div>
     <svg v-else :viewBox="`0 0 ${width} ${height}`" class="h-44 w-full" role="img">
       <line

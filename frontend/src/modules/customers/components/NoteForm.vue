@@ -115,15 +115,15 @@ watch(
     form.body = value?.body || '';
     form.is_pinned = Boolean(value?.is_pinned);
   },
-  { immediate: true, deep: true },
+  { immediate: true },
 );
 
 function onSubmit() {
   emit('submit', {
-    note_type: form.note_type,
-    title: form.title || null,
+    note_type: form.note_type || 'general',
+    title: form.title?.trim() ? form.title.trim() : null,
     body: form.body,
-    is_pinned: form.is_pinned,
+    is_pinned: Boolean(form.is_pinned),
   });
 }
 </script>

@@ -75,18 +75,18 @@
         description="Notes, tasks, and communications will appear here."
         class="py-10"
       />
-      <ol v-else class="relative mt-6 space-y-5 border-l border-zinc-100 pl-6">
+      <ul v-else class="mt-6 space-y-4">
         <li
           v-for="(item, index) in store.timeline"
           :key="`${item.source}-${item.uuid}-${index}`"
-          class="relative"
+          class="flex items-center gap-4"
         >
           <span
-            class="absolute -left-[1.55rem] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
+            class="inline-flex h-3 w-3 shrink-0 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
           />
-          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
+          <div class="min-w-0 flex-1 rounded-[12px] bg-zinc-50 px-4 py-3.5 sm:px-5">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <p class="min-w-0 flex-1 text-sm font-medium text-slate-900">{{ item.title }}</p>
               <time class="shrink-0 text-xs text-slate-500">{{ formatDate(item.occurred_at) }}</time>
             </div>
             <p class="mt-1 text-xs capitalize text-slate-500">
@@ -95,7 +95,7 @@
             <p v-if="item.summary" class="mt-1 text-sm text-slate-600">{{ item.summary }}</p>
           </div>
         </li>
-      </ol>
+      </ul>
     </div>
 
     <!-- Notes -->
@@ -123,7 +123,7 @@
         <button
           type="button"
           class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          @click="noteFormOpen = true"
+          @click="openCreateNote"
         >
           Add note
         </button>
@@ -141,7 +141,7 @@
           <button
             type="button"
             class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="noteFormOpen = true"
+            @click="openCreateNote"
           >
             Add note
           </button>
@@ -170,13 +170,26 @@
             </p>
             <p class="mt-2 whitespace-pre-wrap text-sm text-slate-700">{{ note.body }}</p>
           </div>
-          <button
-            type="button"
-            class="text-xs font-medium text-rose-700 hover:text-rose-800"
-            @click="pendingDelete = { type: 'note', item: note }"
-          >
-            Delete
-          </button>
+          <div class="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Edit note"
+              title="Edit"
+              @click="openEditNote(note)"
+            >
+              <PencilSquareIcon class="h-4 w-4 text-slate-500" />
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Delete note"
+              title="Delete"
+              @click="pendingDelete = { type: 'note', item: note }"
+            >
+              <TrashIcon class="h-4 w-4 text-red-500" />
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -191,7 +204,7 @@
         <button
           type="button"
           class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          @click="taskFormOpen = true"
+          @click="openCreateTask"
         >
           Create task
         </button>
@@ -209,7 +222,7 @@
           <button
             type="button"
             class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="taskFormOpen = true"
+            @click="openCreateTask"
           >
             Create task
           </button>
@@ -241,10 +254,21 @@
             </button>
             <button
               type="button"
-              class="rounded-[10px] border border-rose-200 px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50"
+              class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Edit task"
+              title="Edit"
+              @click="openEditTask(task)"
+            >
+              <PencilSquareIcon class="h-4 w-4 text-slate-500" />
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Delete task"
+              title="Delete"
               @click="pendingDelete = { type: 'task', item: task }"
             >
-              Delete
+              <TrashIcon class="h-4 w-4 text-red-500" />
             </button>
           </div>
         </li>
@@ -331,7 +355,7 @@
         <button
           type="button"
           class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          @click="commFormOpen = true"
+          @click="openCreateCommunication"
         >
           Log communication
         </button>
@@ -349,7 +373,7 @@
           <button
             type="button"
             class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="commFormOpen = true"
+            @click="openCreateCommunication"
           >
             Log communication
           </button>
@@ -371,13 +395,26 @@
             </p>
             <p v-if="item.body" class="mt-2 text-sm text-slate-700">{{ item.body }}</p>
           </div>
-          <button
-            type="button"
-            class="text-xs font-medium text-rose-700 hover:text-rose-800"
-            @click="pendingDelete = { type: 'communication', item }"
-          >
-            Delete
-          </button>
+          <div class="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Edit communication"
+              title="Edit"
+              @click="openEditCommunication(item)"
+            >
+              <PencilSquareIcon class="h-4 w-4 text-slate-500" />
+            </button>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+              aria-label="Delete communication"
+              title="Delete"
+              @click="pendingDelete = { type: 'communication', item }"
+            >
+              <TrashIcon class="h-4 w-4 text-red-500" />
+            </button>
+          </div>
         </li>
       </ul>
     </div>
@@ -394,14 +431,18 @@
         description="Create notes, tasks, or communications to populate this feed."
         class="py-10"
       />
-      <ol v-else class="relative mt-6 space-y-5 border-l border-zinc-100 pl-6">
-        <li v-for="(item, index) in store.activity" :key="item.id || index" class="relative">
+      <ul v-else class="mt-6 space-y-4">
+        <li
+          v-for="(item, index) in store.activity"
+          :key="item.id || index"
+          class="flex items-center gap-4"
+        >
           <span
-            class="absolute -left-[1.55rem] top-1.5 h-3 w-3 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
+            class="inline-flex h-3 w-3 shrink-0 rounded-full border-2 border-white bg-brand-500 ring-1 ring-brand-200"
           />
-          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <p class="text-sm font-medium text-slate-900">
+          <div class="min-w-0 flex-1 rounded-[12px] bg-zinc-50 px-4 py-3.5 sm:px-5">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <p class="min-w-0 flex-1 text-sm font-medium text-slate-900">
                 {{ item.description || item.event || 'Activity' }}
               </p>
               <time class="shrink-0 text-xs text-slate-500">{{ formatDate(item.created_at) }}</time>
@@ -412,12 +453,13 @@
             </p>
           </div>
         </li>
-      </ol>
+      </ul>
     </div>
 
     <NoteFormModal
       :open="noteFormOpen"
       :loading="store.saving"
+      :note="editingNote"
       :errors="store.fieldErrors"
       :error="store.error || ''"
       @cancel="closeNoteForm"
@@ -427,6 +469,7 @@
     <TaskFormModal
       :open="taskFormOpen"
       :loading="store.saving"
+      :task="editingTask"
       :errors="store.fieldErrors"
       :error="store.error || ''"
       @cancel="closeTaskForm"
@@ -436,6 +479,7 @@
     <CommunicationFormModal
       :open="commFormOpen"
       :loading="store.saving"
+      :communication="editingCommunication"
       :errors="store.fieldErrors"
       :error="store.error || ''"
       @cancel="closeCommForm"
@@ -457,6 +501,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CommunicationFormModal from '@/modules/customers/components/CommunicationFormModal.vue';
@@ -479,6 +524,9 @@ const calendarTo = ref('');
 const noteFormOpen = ref(false);
 const taskFormOpen = ref(false);
 const commFormOpen = ref(false);
+const editingNote = ref(null);
+const editingTask = ref(null);
+const editingCommunication = ref(null);
 const pendingDelete = ref(null);
 
 const tabs = [
@@ -510,13 +558,13 @@ const anyFormOpen = computed(
 
 const primaryAction = computed(() => {
   if (activeTab.value === 'notes') {
-    return { label: 'Add note', onClick: () => (noteFormOpen.value = true) };
+    return { label: 'Add note', onClick: openCreateNote };
   }
   if (activeTab.value === 'tasks') {
-    return { label: 'Create task', onClick: () => (taskFormOpen.value = true) };
+    return { label: 'Create task', onClick: openCreateTask };
   }
   if (activeTab.value === 'emails') {
-    return { label: 'Log communication', onClick: () => (commFormOpen.value = true) };
+    return { label: 'Log communication', onClick: openCreateCommunication };
   }
   return null;
 });
@@ -600,56 +648,116 @@ async function loadCalendar() {
   });
 }
 
+function openCreateNote() {
+  editingNote.value = null;
+  noteFormOpen.value = true;
+}
+
+function openEditNote(note) {
+  editingNote.value = note;
+  noteFormOpen.value = true;
+}
+
+function openCreateTask() {
+  editingTask.value = null;
+  taskFormOpen.value = true;
+}
+
+function openEditTask(task) {
+  editingTask.value = task;
+  taskFormOpen.value = true;
+}
+
+function openCreateCommunication() {
+  editingCommunication.value = null;
+  commFormOpen.value = true;
+}
+
+function openEditCommunication(item) {
+  editingCommunication.value = item;
+  commFormOpen.value = true;
+}
+
 function closeNoteForm() {
   if (store.saving) return;
   noteFormOpen.value = false;
+  editingNote.value = null;
   store.clearMessages();
 }
 
 function closeTaskForm() {
   if (store.saving) return;
   taskFormOpen.value = false;
+  editingTask.value = null;
   store.clearMessages();
 }
 
 function closeCommForm() {
   if (store.saving) return;
   commFormOpen.value = false;
+  editingCommunication.value = null;
   store.clearMessages();
 }
 
 async function submitNote(payload) {
-  await store.createNote({
-    customer_id: route.params.id,
-    ...payload,
-  });
-  noteFormOpen.value = false;
-  activeTab.value = 'notes';
-  await store.fetchNotes({
-    customer: route.params.id,
-    note_type: noteTypeFilter.value || undefined,
-  });
-  await store.fetchOverview(route.params.id);
+  const noteId = editingNote.value?.uuid || null;
+
+  try {
+    if (noteId) {
+      await store.updateNote(noteId, payload);
+    } else {
+      await store.createNote({
+        customer_id: route.params.id,
+        ...payload,
+      });
+    }
+
+    noteFormOpen.value = false;
+    editingNote.value = null;
+    activeTab.value = 'notes';
+    // Show All so a type change does not hide the saved note.
+    noteTypeFilter.value = '';
+    await store.fetchNotes({
+      customer: route.params.id,
+    });
+    await store.fetchOverview(route.params.id);
+  } catch {
+    // Error is already stored for the modal.
+  }
 }
 
 async function submitTask(payload) {
-  await store.createTask({
-    customer_id: route.params.id,
+  const taskId = editingTask.value?.uuid || null;
+  const body = {
     title: payload.title,
     description: payload.description,
     priority: payload.priority,
     due_at: payload.due_at ? new Date(payload.due_at).toISOString() : null,
     remind_at: payload.remind_at ? new Date(payload.remind_at).toISOString() : null,
-  });
-  taskFormOpen.value = false;
-  activeTab.value = 'tasks';
-  await store.fetchTasks({ customer: route.params.id });
-  await store.fetchOverview(route.params.id);
+  };
+
+  try {
+    if (taskId) {
+      await store.updateTask(taskId, body);
+    } else {
+      await store.createTask({
+        customer_id: route.params.id,
+        ...body,
+      });
+    }
+    taskFormOpen.value = false;
+    editingTask.value = null;
+    activeTab.value = 'tasks';
+    await store.fetchTasks({ customer: route.params.id });
+    await store.fetchOverview(route.params.id);
+  } catch {
+    // Error is already stored for the modal.
+  }
 }
 
 async function submitCommunication(payload) {
-  await store.createCommunication({
-    customer_id: route.params.id,
+  const communicationId = editingCommunication.value?.uuid || null;
+  const body = {
     type: payload.type,
     direction: payload.direction,
     subject: payload.subject,
@@ -658,14 +766,28 @@ async function submitCommunication(payload) {
     occurred_at: payload.occurred_at
       ? new Date(payload.occurred_at).toISOString()
       : new Date().toISOString(),
-  });
-  commFormOpen.value = false;
-  activeTab.value = 'emails';
-  await store.fetchCommunications({
-    customer: route.params.id,
-    type: commTypeFilter.value || undefined,
-  });
-  await store.fetchOverview(route.params.id);
+  };
+
+  try {
+    if (communicationId) {
+      await store.updateCommunication(communicationId, body);
+    } else {
+      await store.createCommunication({
+        customer_id: route.params.id,
+        ...body,
+      });
+    }
+    commFormOpen.value = false;
+    editingCommunication.value = null;
+    activeTab.value = 'emails';
+    commTypeFilter.value = '';
+    await store.fetchCommunications({
+      customer: route.params.id,
+    });
+    await store.fetchOverview(route.params.id);
+  } catch {
+    // Error is already stored for the modal.
+  }
 }
 
 async function completeTask(id) {

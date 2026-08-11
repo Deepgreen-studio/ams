@@ -58,7 +58,8 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
 
   async function fetchNotes(params = {}) {
     loading.value = true;
-    clearMessages();
+    error.value = null;
+    fieldErrors.value = {};
     try {
       const { data } = await customerNoteService.list(params);
       notes.value = data.data?.notes?.items ?? [];
@@ -75,7 +76,8 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
 
   async function fetchTasks(params = {}) {
     loading.value = true;
-    clearMessages();
+    error.value = null;
+    fieldErrors.value = {};
     try {
       const { data } = await customerTaskService.list(params);
       tasks.value = data.data?.tasks?.items ?? [];
@@ -92,7 +94,8 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
 
   async function fetchCommunications(params = {}) {
     loading.value = true;
-    clearMessages();
+    error.value = null;
+    fieldErrors.value = {};
     try {
       const { data } = await customerCommunicationService.list(params);
       communications.value = data.data?.communications?.items ?? [];
@@ -159,6 +162,21 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
     }
   }
 
+  async function updateNote(id, payload) {
+    saving.value = true;
+    clearMessages();
+    try {
+      const { data } = await customerNoteService.update(id, payload);
+      successMessage.value = data.message || 'Note updated successfully.';
+      return data.data?.note;
+    } catch (err) {
+      applyError(err, 'Unable to update note');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   async function createTask(payload) {
     saving.value = true;
     clearMessages();
@@ -168,6 +186,21 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
       return data.data?.task;
     } catch (err) {
       applyError(err, 'Unable to create task');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
+  async function updateTask(id, payload) {
+    saving.value = true;
+    clearMessages();
+    try {
+      const { data } = await customerTaskService.update(id, payload);
+      successMessage.value = data.message || 'Task updated successfully.';
+      return data.data?.task;
+    } catch (err) {
+      applyError(err, 'Unable to update task');
       throw err;
     } finally {
       saving.value = false;
@@ -198,6 +231,21 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
       return data.data?.communication;
     } catch (err) {
       applyError(err, 'Unable to log communication');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
+  async function updateCommunication(id, payload) {
+    saving.value = true;
+    clearMessages();
+    try {
+      const { data } = await customerCommunicationService.update(id, payload);
+      successMessage.value = data.message || 'Communication updated successfully.';
+      return data.data?.communication;
+    } catch (err) {
+      applyError(err, 'Unable to update communication');
       throw err;
     } finally {
       saving.value = false;
@@ -276,9 +324,12 @@ export const useCommunicationStore = defineStore('customerCommunication', () => 
     fetchTimeline,
     fetchActivity,
     createNote,
+    updateNote,
     createTask,
+    updateTask,
     completeTask,
     createCommunication,
+    updateCommunication,
     archiveNote,
     archiveTask,
     archiveCommunication,

@@ -26,7 +26,7 @@ class ApplicationController
     {
         $this->authorize('viewAny', Application::class);
 
-        $applications = $this->applicationService->list($request->only([
+        $result = $this->applicationService->list($request->only([
             'search',
             'status',
             'platform',
@@ -44,7 +44,8 @@ class ApplicationController
         ]));
 
         return ApiResponse::success([
-            'applications' => (new ApplicationCollection($applications))->resolve(),
+            'applications' => (new ApplicationCollection($result['applications']))->resolve(),
+            'statistics' => $result['statistics'],
         ]);
     }
 

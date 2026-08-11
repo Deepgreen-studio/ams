@@ -26,8 +26,9 @@ class ApplicationService
 
     /**
      * @param  array<string, mixed>  $filters
+     * @return array{applications: LengthAwarePaginator, statistics: array<string, int>}
      */
-    public function list(array $filters = []): LengthAwarePaginator
+    public function list(array $filters = []): array
     {
         $companyIdentifier = $filters['company'] ?? $filters['company_id'] ?? null;
         if (! empty($companyIdentifier) && ! is_numeric($companyIdentifier)) {
@@ -41,7 +42,10 @@ class ApplicationService
             $filters['integration_id'] = $integration->id;
         }
 
-        return $this->applicationRepository->paginateFiltered($filters);
+        return [
+            'applications' => $this->applicationRepository->paginateFiltered($filters),
+            'statistics' => $this->applicationRepository->statistics(),
+        ];
     }
 
     public function find(string $identifier, bool $withTrashed = false): Application

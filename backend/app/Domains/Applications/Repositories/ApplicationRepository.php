@@ -166,4 +166,21 @@ class ApplicationRepository extends BaseRepository
 
         return $query->exists();
     }
+
+    /**
+     * @return array<string, int>
+     */
+    public function statistics(): array
+    {
+        $base = $this->model->newQuery();
+
+        return [
+            'total' => (clone $base)->count(),
+            'active' => (clone $base)->where('status', 'active')->count(),
+            'draft' => (clone $base)->where('status', 'draft')->count(),
+            'inactive' => (clone $base)->where('status', 'inactive')->count(),
+            'archived' => (clone $base)->where('status', 'archived')->count(),
+            'trashed' => (clone $base)->onlyTrashed()->count(),
+        ];
+    }
 }

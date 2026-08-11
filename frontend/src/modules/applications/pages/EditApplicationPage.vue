@@ -1,14 +1,10 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit application"
-      description="Update application profile, platform, and visibility settings."
-    /> -->
     <div
       v-if="applicationsStore.loading && !applicationsStore.currentApplication"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
+    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
       <ApplicationForm
         :initial="applicationsStore.currentApplication || {}"
         :loading="applicationsStore.saving"
@@ -26,7 +22,6 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationForm from '@/modules/applications/components/ApplicationForm.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 

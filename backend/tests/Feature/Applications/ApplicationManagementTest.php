@@ -73,7 +73,12 @@ class ApplicationManagementTest extends TestCase
 
         $this->getJson('/api/v1/applications?search=Customer')
             ->assertOk()
-            ->assertJsonPath('data.applications.meta.total', 1);
+            ->assertJsonPath('data.applications.meta.total', 1)
+            ->assertJsonStructure([
+                'data' => [
+                    'statistics' => ['total', 'active', 'draft', 'inactive', 'archived', 'trashed'],
+                ],
+            ]);
 
         $this->getJson('/api/v1/applications/'.$uuid)
             ->assertOk()

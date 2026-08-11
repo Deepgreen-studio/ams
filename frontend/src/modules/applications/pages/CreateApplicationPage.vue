@@ -1,10 +1,6 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create application"
-      description="Register a new customer application in the Application Management catalog."
-    /> -->
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <ApplicationForm
         :loading="applicationsStore.saving"
         :errors="applicationsStore.fieldErrors"
@@ -19,7 +15,6 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import ApplicationForm from '@/modules/applications/components/ApplicationForm.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 

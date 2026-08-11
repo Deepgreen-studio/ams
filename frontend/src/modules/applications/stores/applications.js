@@ -2,6 +2,20 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { applicationService } from '@/modules/applications/services/applicationService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  platform: '',
+  category: '',
+  visibility: '',
+  company: '',
+  trashed: '',
+  sort_by: 'created_at',
+  sort_dir: 'desc',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -26,21 +40,9 @@ function useAsyncState() {
 export const useApplicationsStore = defineStore('applications', () => {
   const applications = ref([]);
   const meta = ref(null);
+  const statistics = ref(null);
   const currentApplication = ref(null);
-  const viewMode = ref('table');
-  const filters = ref({
-    search: '',
-    status: '',
-    platform: '',
-    category: '',
-    visibility: '',
-    company: '',
-    trashed: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  });
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
 
   async function fetchApplications(overrides = {}) {
@@ -48,10 +50,13 @@ export const useApplicationsStore = defineStore('applications', () => {
     state.clearMessages();
     filters.value = { ...filters.value, ...overrides };
     try {
-      const params = Object.fromEntries(Object.entries(filters.value).filter(([, v]) => v !== '' && v != null));
+      const params = Object.fromEntries(
+        Object.entries(filters.value).filter(([, v]) => v !== '' && v != null),
+      );
       const { data } = await applicationService.list(params);
       applications.value = data.data?.applications?.items ?? [];
       meta.value = data.data?.applications?.meta ?? null;
+      statistics.value = data.data?.statistics ?? null;
     } catch (err) {
       state.applyError(err, 'Unable to load applications');
       throw err;
@@ -137,15 +142,15 @@ export const useApplicationsStore = defineStore('applications', () => {
     }
   }
 
-  function setViewMode(mode) {
-    viewMode.value = mode === 'card' ? 'card' : 'table';
+  function resetFilters() {
+    filters.value = defaultFilters();
   }
 
   return {
     applications,
     meta,
+    statistics,
     currentApplication,
-    viewMode,
     filters,
     ...state,
     fetchApplications,
@@ -154,6 +159,6 @@ export const useApplicationsStore = defineStore('applications', () => {
     updateApplication,
     deleteApplication,
     restoreApplication,
-    setViewMode,
+    resetFilters,
   };
 });

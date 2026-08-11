@@ -1,22 +1,12 @@
 <template>
   <div>
-    <!-- <PageHeader :title="title" description="Semantic version catalog for this application.">
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create version
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create version
-        </RouterLink>
+        :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Create version
+      </RouterLink>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
@@ -34,69 +24,77 @@
       {{ versionsStore.error }}
     </div>
 
-    <div
-      class="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:flex-row lg:items-end"
-    >
-      <div class="min-w-[12rem] flex-1">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Search</label
-        >
-        <input
-          v-model="localSearch"
-          type="search"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-          placeholder="Version, build, notes..."
-        />
-      </div>
-      <div class="w-full lg:w-40">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Status</label
-        >
-        <select
-          v-model="localStatus"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-        >
-          <option value="">All</option>
-          <option value="draft">Draft</option>
-          <option value="testing">Testing</option>
-          <option value="beta">Beta</option>
-          <option value="production">Production</option>
-          <option value="deprecated">Deprecated</option>
-          <option value="rollback">Rollback</option>
-        </select>
-      </div>
-      <button
-        type="button"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        @click="applyFilters"
-      >
-        Filter
-      </button>
-    </div>
-
     <VersionTable
       :application-id="route.params.id"
       :versions="versionsStore.versions"
       :loading="versionsStore.loading"
       @delete="openDelete"
     >
+      <template #toolbar>
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="relative min-w-0 flex-1 lg:max-w-sm">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              v-model="localSearch"
+              type="search"
+              placeholder="Version, build, notes..."
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              @keyup.enter="applyFilters"
+            />
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <SelectBox
+              v-model="localStatus"
+              wrapper-class="min-w-[9.5rem]"
+              :options="statusOptions"
+              @change="applyFilters"
+            />
+            <button
+              type="button"
+              class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+              @click="applyFilters"
+            >
+              Apply
+            </button>
+            <button
+              type="button"
+              class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="resetFilters"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </template>
+
       <template #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="resetFilters"
+        >
+          Reset
+        </button>
         <RouterLink
           :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
           Create version
         </RouterLink>
       </template>
-    </VersionTable>
 
-    <div class="mt-4">
-      <Pagination
-        :meta="versionsStore.meta"
-        :loading="versionsStore.loading"
-        @change="onPageChange"
-      />
-    </div>
+      <template #footer>
+        <Pagination
+          :meta="versionsStore.meta"
+          :loading="versionsStore.loading"
+          @change="onPageChange"
+          @per-page="onPerPageChange"
+        />
+      </template>
+    </VersionTable>
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -111,11 +109,12 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import VersionTable from '@/modules/applications/components/VersionTable.vue';
 import { useVersionsStore } from '@/modules/applications/stores/versions';
@@ -126,10 +125,15 @@ const pendingDelete = ref(null);
 const localSearch = ref('');
 const localStatus = ref('');
 
-const title = computed(() => {
-  const name = versionsStore.application?.name;
-  return name ? `${name} versions` : 'Versions';
-});
+const statusOptions = [
+  { value: '', label: 'Status: All' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'testing', label: 'Testing' },
+  { value: 'beta', label: 'Beta' },
+  { value: 'production', label: 'Production' },
+  { value: 'deprecated', label: 'Deprecated' },
+  { value: 'rollback', label: 'Rollback' },
+];
 
 onMounted(() => {
   versionsStore.fetchVersions(route.params.id);
@@ -143,8 +147,22 @@ function applyFilters() {
   });
 }
 
+function resetFilters() {
+  localSearch.value = '';
+  localStatus.value = '';
+  versionsStore.fetchVersions(route.params.id, {
+    search: '',
+    status: '',
+    page: 1,
+  });
+}
+
 function onPageChange(page) {
   versionsStore.fetchVersions(route.params.id, { page });
+}
+
+function onPerPageChange(perPage) {
+  versionsStore.fetchVersions(route.params.id, { per_page: perPage, page: 1 });
 }
 
 function openDelete(version) {

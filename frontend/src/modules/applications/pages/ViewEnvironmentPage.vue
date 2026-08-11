@@ -43,40 +43,41 @@
       </template>
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
-      <template v-if="environment">
-          <button
-            v-if="!environment.is_current"
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            :disabled="environmentsStore.saving"
-            @click="switchTo"
-          >
-            Switch to this
-          </button>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            :disabled="environmentsStore.saving"
-            @click="healthCheck"
-          >
-            Run health check
-          </button>
-          <RouterLink
-            :to="{
-              name: 'applications.environments.edit',
-              params: { id: route.params.id, environmentId: environment.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showDelete = true"
-          >
-            Delete
-          </button>
+      <div v-if="environment" class="flex flex-wrap items-center justify-end gap-2">
+        <button
+          v-if="!environment.is_current"
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          :disabled="environmentsStore.saving"
+          @click="switchTo"
+        >
+          Switch to this
+        </button>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          :disabled="environmentsStore.saving"
+          @click="healthCheck"
+        >
+          Run health check
+        </button>
+        <RouterLink
+          :to="{
+            name: 'applications.environments.edit',
+            params: { id: route.params.id, environmentId: environment.uuid },
+          }"
+          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Edit
+        </RouterLink>
+        <button
+          type="button"
+          class="rounded-[12px] bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          @click="showDelete = true"
+        >
+          Delete
+        </button>
+      </div>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />

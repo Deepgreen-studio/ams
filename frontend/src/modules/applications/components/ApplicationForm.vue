@@ -1,164 +1,165 @@
 <template>
-  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
-    <div class="grid gap-4 md:grid-cols-2">
+  <form class="space-y-8" novalidate @submit.prevent="onSubmit">
+    <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
+          size="lg"
+          placeholder="Select company"
+          :options="companyOptions"
           :disabled="Boolean(initial.uuid)"
+          :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+        />
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
         <input
           v-model="form.name"
           type="text"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
         <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.name[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Slug</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Slug</label>
         <input
           v-model="form.slug"
           type="text"
-          class="input"
           placeholder="auto-generated if empty"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
         <p v-if="displayErrors.slug" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.slug[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Platform</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Platform</label>
+        <SelectBox
           v-model="form.platform"
-          class="input"
-          :class="fieldClass('platform')"
-        >
-          <option value="android">Android</option>
-          <option value="ios">iOS</option>
-          <option value="web">Web</option>
-          <option value="desktop">Desktop (future)</option>
-        </select>
+          size="lg"
+          :options="platformOptions"
+          :error="Boolean(displayErrors.platform)"
+        />
         <p v-if="displayErrors.platform" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.platform[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Category</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Category</label>
+        <SelectBox
           v-model="form.category"
-          class="input"
-          :class="fieldClass('category')"
-        >
-          <option value="">Select category</option>
-          <option value="business">Business</option>
-          <option value="productivity">Productivity</option>
-          <option value="utilities">Utilities</option>
-          <option value="social">Social</option>
-          <option value="education">Education</option>
-          <option value="health">Health</option>
-          <option value="finance">Finance</option>
-          <option value="entertainment">Entertainment</option>
-          <option value="other">Other</option>
-        </select>
+          size="lg"
+          placeholder="Select category"
+          :options="categoryOptions"
+          :error="Boolean(displayErrors.category)"
+        />
         <p v-if="displayErrors.category" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.category[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="draft">Draft</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="archived">Archived</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Visibility</label>
-        <select v-model="form.visibility" class="input">
-          <option value="private">Private</option>
-          <option value="internal">Internal</option>
-          <option value="public">Public</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Visibility</label>
+        <SelectBox v-model="form.visibility" size="lg" :options="visibilityOptions" />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Integration</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Integration</label>
+        <SelectBox
           v-model="form.integration_id"
-          class="input"
-          :class="fieldClass('integration_id')"
+          size="lg"
+          placeholder="None"
+          :options="integrationOptions"
           :disabled="!form.company_id && !initial.uuid"
-        >
-          <option value="">None</option>
-          <option v-for="integration in integrations" :key="integration.uuid" :value="integration.uuid">
-            {{ integration.name }}
-          </option>
-        </select>
+          :error="Boolean(displayErrors.integration_id)"
+        />
         <p v-if="displayErrors.integration_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.integration_id[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Current version</label>
-        <input v-model="form.current_version" type="text" class="input" placeholder="1.0.0" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Current version</label>
+        <input
+          v-model="form.current_version"
+          type="text"
+          placeholder="1.0.0"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Minimum supported version</label>
-        <input v-model="form.minimum_supported_version" type="text" class="input" placeholder="1.0.0" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700"
+          >Minimum supported version</label
+        >
+        <input
+          v-model="form.minimum_supported_version"
+          type="text"
+          placeholder="1.0.0"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Icon URL</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Icon URL</label>
         <input
           v-model="form.icon"
           type="url"
-          class="input"
           placeholder="https://"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('icon')"
         />
         <p v-if="displayErrors.icon" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.icon[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Banner URL</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Banner URL</label>
         <input
           v-model="form.banner"
           type="url"
-          class="input"
           placeholder="https://"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('banner')"
         />
         <p v-if="displayErrors.banner" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.banner[0] }}
         </p>
       </div>
+
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-        <textarea v-model="form.description" rows="3" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+        <textarea
+          v-model="form.description"
+          rows="3"
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
     </div>
-    <div class="flex justify-end gap-2">
+
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -166,7 +167,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -177,6 +178,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
@@ -197,10 +199,67 @@ const integrations = ref([]);
 const localErrors = ref({});
 const form = reactive(createForm(props.initial));
 
-watch(() => props.initial, (value) => {
-  Object.assign(form, createForm(value));
-  loadIntegrations(form.company_id || value.company?.uuid);
-}, { deep: true });
+const platformOptions = [
+  { value: 'android', label: 'Android' },
+  { value: 'ios', label: 'iOS' },
+  { value: 'web', label: 'Web' },
+  { value: 'desktop', label: 'Desktop' },
+];
+
+const categoryOptions = [
+  { value: '', label: 'Select category' },
+  { value: 'business', label: 'Business' },
+  { value: 'productivity', label: 'Productivity' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'social', label: 'Social' },
+  { value: 'education', label: 'Education' },
+  { value: 'health', label: 'Health' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'other', label: 'Other' },
+];
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const visibilityOptions = [
+  { value: 'private', label: 'Private' },
+  { value: 'internal', label: 'Internal' },
+  { value: 'public', label: 'Public' },
+];
+
+const companyOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const integrationOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...integrations.value.map((integration) => ({
+    value: integration.uuid,
+    label: integration.name,
+  })),
+]);
+
+const displayErrors = computed(() => ({
+  ...localErrors.value,
+  ...props.errors,
+}));
+
+watch(
+  () => props.initial,
+  (value) => {
+    Object.assign(form, createForm(value));
+    loadIntegrations(form.company_id || value.company?.uuid);
+  },
+  { deep: true },
+);
 
 watch(
   () => props.error,
@@ -208,7 +267,7 @@ watch(
     if (message) {
       toast.error(message, 'Validation Failed');
     }
-  }
+  },
 );
 
 watch(
@@ -216,13 +275,8 @@ watch(
   () => {
     localErrors.value = {};
   },
-  { deep: true }
+  { deep: true },
 );
-
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
 
 onMounted(async () => {
   if (!props.hideCompany && !props.initial?.uuid) {
@@ -252,7 +306,11 @@ async function loadIntegrations(companyUuid) {
   }
 
   try {
-    const { data } = await integrationService.list({ company: companyUuid, per_page: 100, status: 'active' });
+    const { data } = await integrationService.list({
+      company: companyUuid,
+      per_page: 100,
+      status: 'active',
+    });
     integrations.value = data.data?.integrations?.items ?? [];
   } catch {
     integrations.value = [];
@@ -327,18 +385,3 @@ function onSubmit() {
   emit('submit', { ...form });
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

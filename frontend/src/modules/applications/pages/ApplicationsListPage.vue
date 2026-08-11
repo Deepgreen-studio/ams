@@ -1,25 +1,12 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Applications"
-      description="Manage customer Android, iOS, and Web applications from one dashboard."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'applications.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create application
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'applications.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create application
-        </RouterLink>
+        :to="{ name: 'applications.create' }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Create application
+      </RouterLink>
     </Teleport>
 
     <div
@@ -35,76 +22,66 @@
       {{ applicationsStore.error }}
     </div>
 
-    <div class="space-y-4">
-      <SearchFilters :model-value="applicationsStore.filters" @submit="onFilter" @reset="onReset" />
-
-      <div class="flex justify-end">
-        <div class="inline-flex rounded-lg border border-slate-200 bg-white p-1">
-          <button
-            type="button"
-            class="rounded-md px-3 py-1.5 text-xs font-medium"
-            :class="
-              applicationsStore.viewMode === 'table'
-                ? 'bg-brand-50 text-brand-700'
-                : 'text-slate-600 hover:bg-slate-50'
-            "
-            @click="applicationsStore.setViewMode('table')"
-          >
-            Table
-          </button>
-          <button
-            type="button"
-            class="rounded-md px-3 py-1.5 text-xs font-medium"
-            :class="
-              applicationsStore.viewMode === 'card'
-                ? 'bg-brand-50 text-brand-700'
-                : 'text-slate-600 hover:bg-slate-50'
-            "
-            @click="applicationsStore.setViewMode('card')"
-          >
-            Cards
-          </button>
+    <div v-if="applicationsStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div
+        v-for="card in statCards"
+        :key="card.label"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 ring-1 ring-zinc-100 transition hover:ring-brand-200"
+      >
+        <div class="min-w-0">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+          <p class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+        </div>
+        <div
+          class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] p-3"
+          :class="card.iconBg"
+        >
+          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
         </div>
       </div>
-
-      <ApplicationTable
-        v-if="applicationsStore.viewMode === 'table'"
-        :applications="applicationsStore.applications"
-        :loading="applicationsStore.loading"
-        @delete="openDelete"
-      >
-        <template #empty-action>
-          <RouterLink
-            :to="{ name: 'applications.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Create application
-          </RouterLink>
-        </template>
-      </ApplicationTable>
-
-      <ApplicationCardGrid
-        v-else
-        :applications="applicationsStore.applications"
-        :loading="applicationsStore.loading"
-        @delete="openDelete"
-      >
-        <template #empty-action>
-          <RouterLink
-            :to="{ name: 'applications.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Create application
-          </RouterLink>
-        </template>
-      </ApplicationCardGrid>
-
-      <Pagination
-        :meta="applicationsStore.meta"
-        :loading="applicationsStore.loading"
-        @change="onPageChange"
-      />
     </div>
+
+    <ApplicationTable
+      :applications="applicationsStore.applications"
+      :loading="applicationsStore.loading"
+      :sort-by="applicationsStore.filters.sort_by"
+      :sort-dir="applicationsStore.filters.sort_dir"
+      @sort="onSort"
+      @delete="openDelete"
+    >
+      <template #toolbar>
+        <SearchFilters
+          :model-value="applicationsStore.filters"
+          @submit="onFilter"
+          @reset="onReset"
+        />
+      </template>
+
+      <template #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="onReset"
+        >
+          Reset
+        </button>
+        <RouterLink
+          :to="{ name: 'applications.create' }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create application
+        </RouterLink>
+      </template>
+
+      <template #footer>
+        <Pagination
+          :meta="applicationsStore.meta"
+          :loading="applicationsStore.loading"
+          @change="onPageChange"
+          @per-page="onPerPageChange"
+        />
+      </template>
+    </ApplicationTable>
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -119,18 +96,61 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  ArchiveBoxIcon,
+  CheckCircleIcon,
+  DocumentTextIcon,
+  NoSymbolIcon,
+  Squares2X2Icon,
+} from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
-import ApplicationCardGrid from '@/modules/applications/components/ApplicationCardGrid.vue';
 import ApplicationTable from '@/modules/applications/components/ApplicationTable.vue';
 import SearchFilters from '@/modules/applications/components/SearchFilters.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 
 const applicationsStore = useApplicationsStore();
 const pendingDelete = ref(null);
+
+const statCards = computed(() => [
+  {
+    label: 'Total',
+    value: applicationsStore.statistics?.total ?? 0,
+    icon: Squares2X2Icon,
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-500',
+  },
+  {
+    label: 'Active',
+    value: applicationsStore.statistics?.active ?? 0,
+    icon: CheckCircleIcon,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+  },
+  {
+    label: 'Draft',
+    value: applicationsStore.statistics?.draft ?? 0,
+    icon: DocumentTextIcon,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+  },
+  {
+    label: 'Inactive',
+    value: applicationsStore.statistics?.inactive ?? 0,
+    icon: NoSymbolIcon,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-500',
+  },
+  {
+    label: 'Archived',
+    value: applicationsStore.statistics?.archived ?? 0,
+    icon: ArchiveBoxIcon,
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-600',
+  },
+]);
 
 onMounted(() => {
   applicationsStore.fetchApplications();
@@ -141,24 +161,25 @@ function onFilter(filters) {
 }
 
 function onReset() {
-  applicationsStore.filters = {
-    search: '',
-    status: '',
-    platform: '',
-    category: '',
-    visibility: '',
-    company: '',
-    trashed: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  };
+  applicationsStore.resetFilters();
   applicationsStore.fetchApplications();
 }
 
 function onPageChange(page) {
   applicationsStore.fetchApplications({ page });
+}
+
+function onPerPageChange(perPage) {
+  applicationsStore.fetchApplications({ per_page: perPage, page: 1 });
+}
+
+function onSort(column) {
+  const sortDir =
+    applicationsStore.filters.sort_by === column && applicationsStore.filters.sort_dir === 'asc'
+      ? 'desc'
+      : 'asc';
+
+  applicationsStore.fetchApplications({ sort_by: column, sort_dir: sortDir, page: 1 });
 }
 
 function openDelete(application) {

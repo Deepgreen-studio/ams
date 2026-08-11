@@ -1,130 +1,135 @@
 <template>
-  <form
-    class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:flex-row lg:flex-wrap lg:items-end"
-    @submit.prevent="onSubmit"
-  >
-    <div class="min-w-[12rem] flex-1">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Search</label
-      >
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="relative min-w-0 flex-1 lg:max-w-sm">
+      <MagnifyingGlassIcon
+        class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
       <input
         v-model="local.search"
         type="search"
         placeholder="Name, slug, version..."
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+        class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        @keyup.enter="emitSubmit"
       />
     </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Status</label
-      >
-      <select
+
+    <div class="flex flex-wrap items-center gap-2">
+      <SelectBox
         v-model="local.status"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="draft">Draft</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="archived">Archived</option>
-      </select>
-    </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Platform</label
-      >
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="statusOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.platform"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="android">Android</option>
-        <option value="ios">iOS</option>
-        <option value="web">Web</option>
-        <option value="desktop">Desktop</option>
-      </select>
-    </div>
-    <div class="w-full lg:w-40">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Category</label
-      >
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="platformOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.category"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="business">Business</option>
-        <option value="productivity">Productivity</option>
-        <option value="utilities">Utilities</option>
-        <option value="social">Social</option>
-        <option value="education">Education</option>
-        <option value="health">Health</option>
-        <option value="finance">Finance</option>
-        <option value="entertainment">Entertainment</option>
-        <option value="other">Other</option>
-      </select>
-    </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Visibility</label
-      >
-      <select
+        wrapper-class="min-w-[10.5rem]"
+        :options="categoryOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.visibility"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option value="private">Private</option>
-        <option value="internal">Internal</option>
-        <option value="public">Public</option>
-      </select>
-    </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-        >Deleted</label
-      >
-      <select
+        wrapper-class="min-w-[10rem]"
+        :options="visibilityOptions"
+        @change="emitSubmit"
+      />
+
+      <SelectBox
         v-model="local.trashed"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">Exclude</option>
-        <option value="with">Include</option>
-        <option value="only">Only deleted</option>
-      </select>
-    </div>
-    <div class="flex gap-2">
+        wrapper-class="min-w-[10rem]"
+        :options="trashedOptions"
+        @change="emitSubmit"
+      />
+
       <button
-        type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+        type="button"
+        class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="emitSubmit"
       >
-        Filter
+        Apply
       </button>
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        @click="onReset"
+        class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        @click="emitReset"
       >
         Reset
       </button>
     </div>
-  </form>
+  </div>
 </template>
 
 <script setup>
 import { reactive, watch } from 'vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
-  modelValue: { type: Object, default: () => ({}) },
+  modelValue: {
+    type: Object,
+    required: true,
+  },
 });
-const emit = defineEmits(['submit', 'reset', 'update:modelValue']);
+
+const emit = defineEmits(['update:modelValue', 'submit', 'reset']);
+
+const statusOptions = [
+  { value: '', label: 'Status: All' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const platformOptions = [
+  { value: '', label: 'Platform: All' },
+  { value: 'android', label: 'Android' },
+  { value: 'ios', label: 'iOS' },
+  { value: 'web', label: 'Web' },
+  { value: 'desktop', label: 'Desktop' },
+];
+
+const categoryOptions = [
+  { value: '', label: 'Category: All' },
+  { value: 'business', label: 'Business' },
+  { value: 'productivity', label: 'Productivity' },
+  { value: 'utilities', label: 'Utilities' },
+  { value: 'social', label: 'Social' },
+  { value: 'education', label: 'Education' },
+  { value: 'health', label: 'Health' },
+  { value: 'finance', label: 'Finance' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'other', label: 'Other' },
+];
+
+const visibilityOptions = [
+  { value: '', label: 'Visibility: All' },
+  { value: 'private', label: 'Private' },
+  { value: 'internal', label: 'Internal' },
+  { value: 'public', label: 'Public' },
+];
+
+const trashedOptions = [
+  { value: '', label: 'Deleted: Exclude' },
+  { value: 'with', label: 'Include deleted' },
+  { value: 'only', label: 'Only deleted' },
+];
 
 const local = reactive({
-  search: '',
-  status: '',
-  platform: '',
-  category: '',
-  visibility: '',
-  trashed: '',
-  page: 1,
+  search: props.modelValue.search || '',
+  status: props.modelValue.status || '',
+  platform: props.modelValue.platform || '',
+  category: props.modelValue.category || '',
+  visibility: props.modelValue.visibility || '',
+  trashed: props.modelValue.trashed || '',
 });
 
 watch(
@@ -137,24 +142,15 @@ watch(
     local.visibility = value.visibility || '';
     local.trashed = value.trashed || '';
   },
-  { immediate: true, deep: true },
+  { deep: true },
 );
 
-function onSubmit() {
-  const payload = {
-    search: local.search,
-    status: local.status,
-    platform: local.platform,
-    category: local.category,
-    visibility: local.visibility,
-    trashed: local.trashed,
-    page: 1,
-  };
-  emit('update:modelValue', { ...props.modelValue, ...payload });
-  emit('submit', payload);
+function emitSubmit() {
+  emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
+  emit('submit', { ...local, page: 1 });
 }
 
-function onReset() {
+function emitReset() {
   local.search = '';
   local.status = '';
   local.platform = '';

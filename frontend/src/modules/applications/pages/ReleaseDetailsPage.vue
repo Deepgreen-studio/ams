@@ -47,44 +47,45 @@
       </template>
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
-      <template v-if="release">
-          <RouterLink
-            v-if="release.approval_status === 'pending'"
-            :to="{
-              name: 'applications.releases.approval',
-              params: { id: route.params.id, releaseId: release.uuid },
-            }"
-            class="rounded-lg border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
-          >
-            Approval screen
-          </RouterLink>
-          <button
-            v-if="canSchedule"
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-            :disabled="releasesStore.saving"
-            @click="onSchedule"
-          >
-            Schedule
-          </button>
-          <button
-            v-if="canDeploy"
-            type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-            :disabled="releasesStore.saving"
-            @click="onDeploy"
-          >
-            Mark deployed
-          </button>
-          <button
-            v-if="canRollback"
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
-            :disabled="releasesStore.saving"
-            @click="onRollback"
-          >
-            Rollback
-          </button>
+      <div v-if="release" class="flex flex-wrap items-center justify-end gap-2">
+        <RouterLink
+          v-if="release.approval_status === 'pending'"
+          :to="{
+            name: 'applications.releases.approval',
+            params: { id: route.params.id, releaseId: release.uuid },
+          }"
+          class="rounded-[12px] border border-amber-300 px-4 py-2 text-sm font-medium text-amber-800 hover:bg-amber-50"
+        >
+          Approval screen
+        </RouterLink>
+        <button
+          v-if="canSchedule"
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+          :disabled="releasesStore.saving"
+          @click="onSchedule"
+        >
+          Schedule
+        </button>
+        <button
+          v-if="canDeploy"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          :disabled="releasesStore.saving"
+          @click="onDeploy"
+        >
+          Mark deployed
+        </button>
+        <button
+          v-if="canRollback"
+          type="button"
+          class="rounded-[12px] bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
+          :disabled="releasesStore.saving"
+          @click="onRollback"
+        >
+          Rollback
+        </button>
+      </div>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />

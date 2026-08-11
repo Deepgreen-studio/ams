@@ -1,13 +1,20 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-4">
-    <div class="mb-3 flex items-center justify-between gap-3">
-      <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">{{ title }}</h3>
+  <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 sm:p-6">
+    <div class="mb-4 flex items-center justify-between gap-3">
+      <h3 class="text-base font-semibold text-slate-900">{{ title }}</h3>
       <span v-if="subtitle" class="text-xs text-slate-500">{{ subtitle }}</span>
     </div>
-    <div v-if="!points.length" class="py-10 text-center text-sm text-slate-500">No chart data.</div>
-    <svg v-else :viewBox="`0 0 ${width} ${height}`" class="h-40 w-full" preserveAspectRatio="none">
-      <polyline fill="none" :stroke="stroke" stroke-width="2" :points="polyline" />
-      <polygon v-if="filled" :points="area" :fill="fill" opacity="0.15" />
+    <div v-if="!points.length" class="py-12 text-center text-sm text-slate-500">
+      No chart data.
+    </div>
+    <svg
+      v-else
+      :viewBox="`0 0 ${width} ${height}`"
+      class="h-44 w-full"
+      preserveAspectRatio="none"
+    >
+      <polygon v-if="filled" :points="area" :fill="fill" opacity="0.12" />
+      <polyline fill="none" :stroke="stroke" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" :points="polyline" />
     </svg>
   </div>
 </template>
@@ -20,8 +27,8 @@ const props = defineProps({
   subtitle: { type: String, default: '' },
   points: { type: Array, default: () => [] },
   valueKey: { type: String, default: 'value' },
-  stroke: { type: String, default: '#2563eb' },
-  fill: { type: String, default: '#2563eb' },
+  stroke: { type: String, default: '#f97316' },
+  fill: { type: String, default: '#f97316' },
   filled: { type: Boolean, default: true },
 });
 
@@ -42,7 +49,7 @@ const polyline = computed(() => {
         height - pad - ((value - min.value) / (max.value - min.value || 1)) * (height - pad * 2);
       return `${x},${y}`;
     })
-    .join('');
+    .join(' ');
 });
 
 const area = computed(() => {

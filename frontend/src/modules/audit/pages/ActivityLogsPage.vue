@@ -1,20 +1,15 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Activity logs"
-      description="Cross-module activity trail powered by Spatie Activity Log."
-    >
-      <template #actions>
-        <ExportButton :loading="exporting" @click="onExport" />
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <ExportButton :loading="exporting" @click="onExport" />
     </Teleport>
+
     <AuditTabs />
-    <div class="mt-4 space-y-4">
+
+    <div class="space-y-4">
       <SearchFilters :model-value="store.filters" @submit="store.fetchList" @reset="onReset" />
-      <div class="grid gap-6 lg:grid-cols-3">
+
+      <div class="grid gap-4 lg:grid-cols-3">
         <div class="lg:col-span-2">
           <ActivityTable
             :items="store.items"
@@ -29,14 +24,16 @@
             />
           </div>
         </div>
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
+          <h3 class="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Timeline
           </h3>
           <TimelineComponent :items="store.items.slice(0, 8)" />
         </div>
       </div>
     </div>
+
     <LogDetailsModal
       :open="Boolean(selected)"
       :item="selected"
@@ -49,7 +46,6 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ActivityTable from '@/modules/audit/components/ActivityTable.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';

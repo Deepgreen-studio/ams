@@ -36,9 +36,11 @@ export const useMonitoringStore = defineStore('monitoring', () => {
   const alertEventsMeta = ref(null);
   const state = useAsyncState();
 
-  async function fetchDashboard(params = {}) {
+  async function fetchDashboard(params = {}, options = {}) {
     state.loading.value = true;
-    state.clearMessages();
+    if (!options.preserveMessages) {
+      state.clearMessages();
+    }
     try {
       const { data } = await monitoringService.dashboard(params);
       dashboard.value = data.data ?? null;
@@ -90,9 +92,11 @@ export const useMonitoringStore = defineStore('monitoring', () => {
     }
   }
 
-  async function fetchRealtime(params = {}) {
+  async function fetchRealtime(params = {}, options = {}) {
     state.loading.value = true;
-    state.clearMessages();
+    if (!options.preserveMessages) {
+      state.clearMessages();
+    }
     try {
       const { data } = await monitoringService.realtime(params);
       realtime.value = data.data ?? null;
@@ -150,7 +154,7 @@ export const useMonitoringStore = defineStore('monitoring', () => {
     state.clearMessages();
     try {
       const { data } = await monitoringService.capture(payload);
-      state.successMessage.value = data.message;
+      state.successMessage.value = data.message || 'Health snapshot captured.';
       return data.data;
     } catch (err) {
       state.applyError(err, 'Unable to capture snapshot');

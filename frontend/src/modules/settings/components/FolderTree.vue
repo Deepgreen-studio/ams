@@ -1,10 +1,10 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-4">
+  <div class="rounded-[12px] bg-white p-4 ring-1 ring-zinc-100 sm:p-5">
     <div class="mb-3 flex items-center justify-between">
       <h3 class="text-sm font-semibold text-slate-900">Folders</h3>
       <button
         type="button"
-        class="text-xs font-medium text-brand-700 hover:underline"
+        class="rounded-lg px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
         @click="$emit('create')"
       >
         New
@@ -12,8 +12,8 @@
     </div>
     <button
       type="button"
-      class="mb-1 w-full rounded-lg px-3 py-2 text-left text-sm"
-      :class="!selected ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-50'"
+      class="mb-1 w-full rounded-[10px] px-3 py-2 text-left text-sm transition"
+      :class="!selected ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-zinc-50'"
       @click="$emit('select', null)"
     >
       All files
@@ -22,9 +22,9 @@
       v-for="folder in folders"
       :key="folder.uuid"
       type="button"
-      class="mb-1 flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm"
+      class="mb-1 flex w-full items-center justify-between rounded-[10px] px-3 py-2 text-left text-sm transition"
       :class="
-        selected === folder.uuid ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-slate-50'
+        selected === folder.uuid ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-zinc-50'
       "
       @click="$emit('select', folder)"
     >

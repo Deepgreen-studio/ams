@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="File manager" description="Nested folders and media organization." /> -->
     <SettingsTabs>
       <div
         v-if="mediaStore.error"
@@ -9,45 +8,55 @@
         {{ mediaStore.error }}
       </div>
 
-      <div class="mb-4 flex flex-wrap gap-2">
+      <div
+        class="mb-4 flex flex-col gap-3 rounded-[12px] bg-white px-5 py-5 ring-1 ring-zinc-100 sm:flex-row sm:items-center sm:px-6"
+      >
         <button
           type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="h-10 shrink-0 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
           @click="openFolderModal"
         >
           New folder
         </button>
-        <SearchBar v-model="search" class="min-w-[240px] flex-1" @search="load" />
+        <SearchBar v-model="search" class="min-w-0 flex-1" @search="load" />
       </div>
 
-      <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
         <EmptyState
           v-if="!mediaStore.folders.length"
           title="No folders yet"
           description="Create folders to organize uploads."
         />
-        <table v-else class="min-w-full divide-y divide-slate-200 text-sm">
-          <thead class="bg-slate-50">
+        <table v-else class="min-w-full divide-y divide-zinc-100 text-sm">
+          <thead class="bg-zinc-50/80">
             <tr>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Name</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Slug</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Files</th>
-              <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Name
+              </th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Slug
+              </th>
+              <th class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Files
+              </th>
+              <th class="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Actions
+              </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody class="divide-y divide-zinc-100">
             <tr
               v-for="folder in mediaStore.folders"
               :key="folder.uuid"
-              class="hover:bg-slate-50/80"
+              class="hover:bg-zinc-50/80"
             >
-              <td class="px-4 py-3 font-medium text-slate-900">{{ folder.name }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ folder.slug }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ folder.media_count ?? 0 }}</td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-5 py-3.5 font-medium text-slate-900">{{ folder.name }}</td>
+              <td class="px-5 py-3.5 text-slate-600">{{ folder.slug }}</td>
+              <td class="px-5 py-3.5 text-slate-600">{{ folder.media_count ?? 0 }}</td>
+              <td class="px-5 py-3.5 text-right">
                 <button
                   type="button"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
+                  class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50"
                   @click="openDelete(folder)"
                 >
                   Delete
@@ -80,7 +89,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
 import SearchBar from '@/modules/settings/components/SearchBar.vue';

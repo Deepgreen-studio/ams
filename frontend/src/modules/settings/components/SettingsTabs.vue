@@ -1,15 +1,24 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-3">
-      <RouterLink
-        v-for="tab in tabs"
-        :key="tab.to"
-        :to="{ name: tab.to }"
-        class="rounded-lg px-3 py-1.5 text-sm font-medium transition"
-        :class="isActive(tab.to) ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'"
+  <div>
+    <div class="mb-6 border-b border-zinc-200">
+      <nav
+        class="-mb-px flex gap-x-0.5 overflow-x-auto"
+        aria-label="Settings sections"
       >
-        {{ tab.label }}
-      </RouterLink>
+        <RouterLink
+          v-for="tab in tabs"
+          :key="tab.to"
+          :to="{ name: tab.to }"
+          class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
+          :class="
+            isActive(tab.to)
+              ? 'border-brand-600 text-brand-700'
+              : 'border-transparent text-slate-500 hover:border-zinc-300 hover:text-slate-800'
+          "
+        >
+          {{ tab.label }}
+        </RouterLink>
+      </nav>
     </div>
     <slot />
   </div>

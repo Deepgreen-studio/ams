@@ -1,18 +1,27 @@
 <template>
   <div>
-    <!-- <PageHeader title="Login history" description="Successful logins, sessions, browsers, and devices." /> -->
     <AuditTabs />
-    <div class="mt-4 space-y-4">
-      <SearchFilters :model-value="store.filters" :show-module="false" :show-action="false" @submit="store.fetchList" @reset="onReset" />
+
+    <div class="space-y-4">
+      <SearchFilters
+        :model-value="store.filters"
+        :show-module="false"
+        :show-action="false"
+        @submit="store.fetchList"
+        @reset="onReset"
+      />
       <LoginHistoryTable :items="store.items" :loading="store.loading" />
-      <Pagination :meta="store.meta" :loading="store.loading" @change="(page) => store.fetchList({ page })" />
+      <Pagination
+        :meta="store.meta"
+        :loading="store.loading"
+        @change="(page) => store.fetchList({ page })"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import AuditTabs from '@/modules/audit/components/AuditTabs.vue';
 import LoginHistoryTable from '@/modules/audit/components/LoginHistoryTable.vue';
@@ -20,9 +29,18 @@ import SearchFilters from '@/modules/audit/components/SearchFilters.vue';
 import { useLoginHistoryStore } from '@/modules/audit/stores/audit';
 
 const store = useLoginHistoryStore();
+
 onMounted(() => store.fetchList());
+
 function onReset() {
-  store.filters = { search: '', date_from: '', date_to: '', status: '', per_page: 15, page: 1 };
+  store.filters = {
+    search: '',
+    date_from: '',
+    date_to: '',
+    status: '',
+    per_page: 15,
+    page: 1,
+  };
   store.fetchList();
 }
 </script>

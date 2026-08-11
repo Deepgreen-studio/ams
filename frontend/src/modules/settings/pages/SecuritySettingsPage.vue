@@ -1,11 +1,13 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Security settings"
-      description="Password rules, sessions, and API rate limits."
-    /> -->
     <SettingsTabs>
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
+      <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-6">
+          <h2 class="text-base font-semibold text-slate-900">Security settings</h2>
+          <p class="mt-1 text-sm text-slate-500">
+            Password rules, sessions, and API rate limits.
+          </p>
+        </div>
         <SettingsForm
           :fields="fields"
           :initial="settingsStore.current"
@@ -22,7 +24,6 @@
 
 <script setup>
 import { onMounted } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';

@@ -1,70 +1,89 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="isEdit ? 'Edit Notification Template' : 'Create Notification Template'"
-      description="Configure channel content, localization, placeholders, and workflow."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'notifications.templates' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'notifications.templates' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
+        :to="{ name: 'notifications.templates' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back
+      </RouterLink>
     </Teleport>
 
     <NotificationsSubnav />
 
-    <p v-if="store.successMessage" class="mb-4 text-sm text-emerald-700">{{ store.successMessage }}</p>
-    <p v-if="formError" class="mb-4 text-sm text-rose-600">{{ formError }}</p>
+    <div
+      v-if="store.successMessage"
+      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+    >
+      {{ store.successMessage }}
+    </div>
+    <div
+      v-if="formError"
+      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
+      {{ formError }}
+    </div>
 
     <form class="grid gap-4 lg:grid-cols-3" @submit.prevent="save">
       <div class="space-y-4 lg:col-span-2">
-        <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
+        <div class="space-y-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
           <input
             v-model="form.name"
             required
             placeholder="Template name"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-900"
           />
           <div class="grid gap-3 sm:grid-cols-2">
-            <select v-model="form.event_key" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm" :disabled="isEdit && form.is_system">
-              <option v-for="event in store.templateEvents" :key="event.value" :value="event.value">{{ event.label }}</option>
+            <select
+              v-model="form.event_key"
+              required
+              class="rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+              :disabled="isEdit && form.is_system"
+            >
+              <option v-for="event in store.templateEvents" :key="event.value" :value="event.value">
+                {{ event.label }}
+              </option>
             </select>
-            <select v-model="form.channel" required class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <select
+              v-model="form.channel"
+              required
+              class="rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+            >
               <option v-for="channel in store.templateChannels" :key="channel.value" :value="channel.value">
                 {{ channel.label }}{{ channel.implemented ? '' : ' (Future)' }}
               </option>
             </select>
           </div>
           <div class="grid gap-3 sm:grid-cols-3">
-            <select v-model="form.locale" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <option v-for="locale in store.templateLocales" :key="locale.value" :value="locale.value">{{ locale.label }}</option>
+            <select
+              v-model="form.locale"
+              class="rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+            >
+              <option v-for="locale in store.templateLocales" :key="locale.value" :value="locale.value">
+                {{ locale.label }}
+              </option>
             </select>
-            <select v-model="form.priority" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
+            <select
+              v-model="form.priority"
+              class="rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+            >
               <option value="low">Low</option>
               <option value="normal">Normal</option>
               <option value="high">High</option>
               <option value="urgent">Urgent</option>
             </select>
-            <label class="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <input v-model="form.is_active" type="checkbox" class="rounded" /> Active
+            <label
+              class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+            >
+              <input v-model="form.is_active" type="checkbox" class="rounded border-zinc-300 text-brand-600" />
+              Active
             </label>
           </div>
           <input
             v-if="usesSubject"
             v-model="form.subject"
             placeholder="Subject / title"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-900"
           />
           <div v-if="usesRichEditor">
             <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">HTML body</p>
@@ -75,23 +94,21 @@
             v-model="form.body"
             required
             rows="10"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm"
+            class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 font-mono text-sm text-slate-900"
             placeholder="Plain text body with {{placeholders}}"
           />
           <input
             v-model="form.change_summary"
             placeholder="Change summary"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-900"
           />
         </div>
       </div>
 
       <div class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="text-sm font-semibold text-slate-900">Channel configuration</h3>
-          <p class="mt-1 text-xs text-slate-500">
-            {{ channelHelp }}
-          </p>
+        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h3 class="text-base font-semibold text-slate-900">Channel configuration</h3>
+          <p class="mt-1 text-xs text-slate-500">{{ channelHelp }}</p>
           <ul class="mt-3 space-y-2 text-xs text-slate-600">
             <li>Email / Webhook / Slack / Teams: HTML or rich text supported</li>
             <li>Push / SMS / WhatsApp / In-App: plain text preferred</li>
@@ -99,14 +116,14 @@
           </ul>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="text-sm font-semibold text-slate-900">Variables</h3>
+        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h3 class="text-base font-semibold text-slate-900">Variables</h3>
           <div class="mt-3 flex flex-wrap gap-2">
             <button
               v-for="variable in availableVariables"
               :key="variable"
               type="button"
-              class="rounded bg-slate-100 px-2 py-1 font-mono text-[11px] text-slate-700 hover:bg-brand-50"
+              class="rounded-[8px] bg-zinc-100 px-2 py-1 font-mono text-[11px] text-slate-700 hover:bg-brand-50 hover:text-brand-700"
               @click="appendVariable(variable)"
             >
               {{ '{' + '{' + variable + '}' + '}' }}
@@ -114,15 +131,43 @@
           </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-2">
-          <button type="submit" class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">
+        <div class="space-y-2 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <button
+            type="submit"
+            class="w-full rounded-[12px] bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            :disabled="store.saving"
+          >
             {{ store.saving ? 'Saving…' : 'Save template' }}
           </button>
           <template v-if="isEdit">
-            <button type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="goPreview">Preview</button>
-            <button type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="submitReview">Submit for review</button>
-            <button type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="publish">Publish</button>
-            <button type="button" class="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="goVersions">Version history</button>
+            <button
+              type="button"
+              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="goPreview"
+            >
+              Preview
+            </button>
+            <button
+              type="button"
+              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="submitReview"
+            >
+              Submit for review
+            </button>
+            <button
+              type="button"
+              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="publish"
+            >
+              Publish
+            </button>
+            <button
+              type="button"
+              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="goVersions"
+            >
+              Version history
+            </button>
           </template>
         </div>
       </div>
@@ -133,7 +178,6 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import TemplateRichTextEditor from '@/modules/notifications/components/TemplateRichTextEditor.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';

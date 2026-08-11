@@ -1,30 +1,16 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Health Dashboard"
-      description="Integration Hub health, performance, uptime, and operational monitors."
-    >
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="onCapture"
-        >
-          Capture snapshot
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="onCapture"
-        >
-          Capture snapshot
-        </button>
+        type="button"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+        :disabled="store.saving"
+        @click="onCapture"
+      >
+        {{ store.saving ? 'Capturing…' : 'Capture snapshot' }}
+      </button>
     </Teleport>
+
     <MonitoringSubnav />
 
     <div
@@ -40,26 +26,42 @@
       {{ store.error }}
     </div>
 
-    <div v-if="store.loading && !dash" class="grid gap-4 md:grid-cols-5">
-      <div v-for="n in 5" :key="n" class="h-24 animate-pulse rounded-xl bg-slate-100" />
+    <div v-if="store.loading && !dash" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div v-for="n in 5" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
+
     <template v-else-if="dash">
-      <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div
           v-for="card in scoreCards"
           :key="card.label"
-          class="rounded-xl border border-slate-200 bg-white p-4"
+          class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
         >
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+          <div class="min-w-0">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+              {{ card.label }}
+            </p>
+            <p
+              class="mt-1 text-2xl font-bold tracking-tight"
+              :class="card.tone || 'text-slate-900'"
+            >
+              {{ card.value }}
+            </p>
+          </div>
+          <div
+            class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+            :class="card.iconBg"
+          >
+            <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+          </div>
         </div>
       </div>
 
-      <div class="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div
           v-for="status in statusCards"
           :key="status.label"
-          class="rounded-xl border border-slate-200 bg-white p-4"
+          class="rounded-[12px] bg-white px-5 py-4 ring-1 ring-zinc-100"
         >
           <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
             {{ status.label }}
@@ -87,57 +89,55 @@
         />
       </div>
 
-      <div class="mt-6 grid gap-4 lg:grid-cols-3">
-        <section class="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">API</h2>
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between">
+      <div class="mt-4 grid gap-4 lg:grid-cols-3">
+        <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h2 class="mb-4 text-base font-semibold text-slate-900">API</h2>
+          <dl class="space-y-3 text-sm">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Requests</dt>
-              <dd>{{ dash.api?.total ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.api?.total ?? 0 }}</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Failed</dt>
-              <dd>{{ dash.api?.failed ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.api?.failed ?? 0 }}</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Avg ms</dt>
-              <dd>{{ dash.api?.avg_response_ms ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.api?.avg_response_ms ?? 0 }}</dd>
             </div>
           </dl>
         </section>
-        <section class="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Webhooks
-          </h2>
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between">
+        <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h2 class="mb-4 text-base font-semibold text-slate-900">Webhooks</h2>
+          <dl class="space-y-3 text-sm">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Total</dt>
-              <dd>{{ dash.webhooks?.total ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.webhooks?.total ?? 0 }}</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Success rate</dt>
-              <dd>{{ dash.webhooks?.success_rate ?? 0 }}%</dd>
+              <dd class="font-medium text-slate-900">{{ dash.webhooks?.success_rate ?? 0 }}%</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Failed</dt>
-              <dd>{{ dash.webhooks?.failed ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.webhooks?.failed ?? 0 }}</dd>
             </div>
           </dl>
         </section>
-        <section class="rounded-xl border border-slate-200 bg-white p-5">
-          <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">Queue</h2>
-          <dl class="space-y-2 text-sm">
-            <div class="flex justify-between">
+        <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+          <h2 class="mb-4 text-base font-semibold text-slate-900">Queue</h2>
+          <dl class="space-y-3 text-sm">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Pending</dt>
-              <dd>{{ dash.queue?.pending ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.queue?.pending ?? 0 }}</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Failed</dt>
-              <dd>{{ dash.queue?.failed ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.queue?.failed ?? 0 }}</dd>
             </div>
-            <div class="flex justify-between">
+            <div class="flex justify-between gap-3">
               <dt class="text-slate-500">Health</dt>
-              <dd>{{ dash.queue?.health_score ?? 0 }}</dd>
+              <dd class="font-medium text-slate-900">{{ dash.queue?.health_score ?? 0 }}</dd>
             </div>
           </dl>
         </section>
@@ -148,22 +148,63 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  HeartIcon,
+  BoltIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import SimpleLineChart from '@/modules/monitoring/components/SimpleLineChart.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 
 const store = useMonitoringStore();
+const toast = useToast();
 const dash = computed(() => store.dashboard);
 
 const scoreCards = computed(() => {
   const s = dash.value?.scores || {};
   return [
-    { label: 'Health score', value: s.health_score ?? 0 },
-    { label: 'Performance', value: s.performance_score ?? 0 },
-    { label: 'Uptime', value: `${s.uptime_percent ?? 0}%` },
-    { label: 'Downtime', value: `${s.downtime_percent ?? 0}%` },
-    { label: 'Error rate', value: `${s.error_rate ?? 0}%` },
+    {
+      label: 'Health score',
+      value: s.health_score ?? 0,
+      icon: HeartIcon,
+      iconBg: 'bg-brand-50',
+      iconColor: 'text-brand-500',
+    },
+    {
+      label: 'Performance',
+      value: s.performance_score ?? 0,
+      icon: BoltIcon,
+      iconBg: 'bg-amber-50',
+      iconColor: 'text-amber-500',
+    },
+    {
+      label: 'Uptime',
+      value: `${s.uptime_percent ?? 0}%`,
+      icon: ArrowTrendingUpIcon,
+      iconBg: 'bg-emerald-50',
+      iconColor: 'text-emerald-500',
+      tone: (s.uptime_percent ?? 0) < 50 ? 'text-rose-600' : 'text-slate-900',
+    },
+    {
+      label: 'Downtime',
+      value: `${s.downtime_percent ?? 0}%`,
+      icon: ArrowTrendingDownIcon,
+      iconBg: 'bg-rose-50',
+      iconColor: 'text-rose-500',
+      tone: (s.downtime_percent ?? 0) > 50 ? 'text-rose-600' : 'text-slate-900',
+    },
+    {
+      label: 'Error rate',
+      value: `${s.error_rate ?? 0}%`,
+      icon: ExclamationTriangleIcon,
+      iconBg: 'bg-rose-50',
+      iconColor: 'text-rose-500',
+      tone: (s.error_rate ?? 0) > 50 ? 'text-rose-600' : 'text-slate-900',
+    },
   ];
 });
 
@@ -184,8 +225,14 @@ const healthPoints = computed(() => dash.value?.charts?.health_trend || []);
 onMounted(() => store.fetchDashboard());
 
 async function onCapture() {
-  await store.capture();
-  await store.fetchDashboard();
+  if (store.saving) return;
+  try {
+    await store.capture();
+    toast.success(store.successMessage || 'Health snapshot captured.');
+    await store.fetchDashboard({}, { preserveMessages: true });
+  } catch (err) {
+    toast.error(err?.message || store.error || 'Unable to capture snapshot');
+  }
 }
 
 function statusClass(value) {

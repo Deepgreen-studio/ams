@@ -34,7 +34,7 @@ class MonitoringPolicy
         return $user->can(MonitoringPermission::MANAGE);
     }
 
-    public function manage(User $user): bool
+    public function manage(User $user, mixed $model = null): bool
     {
         return $user->can(MonitoringPermission::MANAGE);
     }

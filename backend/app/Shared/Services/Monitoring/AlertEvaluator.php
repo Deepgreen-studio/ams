@@ -26,7 +26,7 @@ class AlertEvaluator
                 continue;
             }
 
-            $metric = $alert->metric?->value ?? (string) $alert->metric;
+            $metric = $this->normalizeMetric($alert->metric);
             $value = $this->metricValue($metric, $metrics);
             if ($value === null) {
                 continue;
@@ -47,7 +47,7 @@ class AlertEvaluator
      */
     protected function createEvent(MonitoringAlert $alert, float $value, array $metrics): MonitoringAlertEvent
     {
-            $metric = $alert->metric?->value ?? (string) $alert->metric;
+            $metric = $this->normalizeMetric($alert->metric);
             $event = MonitoringAlertEvent::query()->create([
             'monitoring_alert_id' => $alert->id,
             'severity' => $this->severityFor($metric, $value),
@@ -76,6 +76,19 @@ class AlertEvaluator
         $alert->forceFill(['last_triggered_at' => now()])->save();
 
         return $event;
+    }
+
+    protected function normalizeMetric(mixed $metric): string
+    {
+        if ($metric instanceof \BackedEnum) {
+            return (string) $metric->value;
+        }
+
+        if (is_object($metric) && property_exists($metric, 'value')) {
+            return (string) $metric->value;
+        }
+
+        return (string) $metric;
     }
 
     /**

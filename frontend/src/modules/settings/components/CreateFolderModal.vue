@@ -5,7 +5,7 @@
     @click.self="onCancel"
   >
     <div
-      class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+      class="w-full max-w-md rounded-[12px] bg-white p-6 shadow-xl ring-1 ring-zinc-100"
       role="dialog"
       aria-modal="true"
       aria-labelledby="settings-create-folder-title"
@@ -21,7 +21,7 @@
         <div>
           <label
             for="settings-folder-name"
-            class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+            class="mb-1.5 block text-sm font-medium text-slate-700"
           >
             Folder name
           </label>
@@ -33,8 +33,8 @@
             maxlength="255"
             required
             autocomplete="off"
-            class="h-12 w-full rounded-[12px] border border-slate-300 px-3 text-sm focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200"
-            :class="{ 'border-rose-400 focus:border-rose-500 focus:ring-rose-200': Boolean(error) }"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+            :class="{ 'border-rose-400 focus:border-rose-500': Boolean(error) }"
             placeholder="e.g. Product images"
             :disabled="loading"
             @keydown.esc.prevent="onCancel"
@@ -45,7 +45,7 @@
         <div class="flex justify-end gap-2 pt-1">
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+            class="rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
             :disabled="loading"
             @click="onCancel"
           >
@@ -53,7 +53,7 @@
           </button>
           <button
             type="submit"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             :disabled="loading || !name.trim()"
           >
             {{ loading ? 'Creating…' : 'Create folder' }}

@@ -1,9 +1,18 @@
 <template>
   <div>
-    <!-- <PageHeader title="Media library" description="Upload, preview, and organize platform media assets." /> -->
     <SettingsTabs>
-      <div v-if="mediaStore.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ mediaStore.successMessage }}</div>
-      <div v-if="mediaStore.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ mediaStore.error }}</div>
+      <div
+        v-if="mediaStore.successMessage"
+        class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
+      >
+        {{ mediaStore.successMessage }}
+      </div>
+      <div
+        v-if="mediaStore.error"
+        class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      >
+        {{ mediaStore.error }}
+      </div>
 
       <div class="grid gap-6 lg:grid-cols-4">
         <FolderTree
@@ -13,10 +22,28 @@
           @create="openFolderModal"
         />
         <div class="space-y-4 lg:col-span-3">
-          <SearchBar v-model="search" @search="reload" />
+          <div
+            class="rounded-[12px] bg-white px-5 py-5 ring-1 ring-zinc-100 sm:px-6"
+          >
+            <SearchBar v-model="search" @search="reload" />
+          </div>
           <MediaUpload :progress="progress" @files="onUpload" />
-          <MediaGrid :items="mediaStore.items" :loading="mediaStore.loading" @preview="preview = $event" @delete="openDelete" />
-          <Pagination :meta="mediaStore.meta" :loading="mediaStore.loading" @change="(page) => reload(page)" />
+          <MediaGrid
+            :items="mediaStore.items"
+            :loading="mediaStore.loading"
+            @preview="preview = $event"
+            @delete="openDelete"
+          />
+          <div
+            v-if="mediaStore.meta"
+            class="rounded-[12px] bg-white px-6 py-4 ring-1 ring-zinc-100"
+          >
+            <Pagination
+              :meta="mediaStore.meta"
+              :loading="mediaStore.loading"
+              @change="(page) => reload(page)"
+            />
+          </div>
         </div>
       </div>
     </SettingsTabs>
@@ -42,7 +69,6 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
@@ -107,7 +133,9 @@ async function onUpload(fileList) {
   progress.value = 40;
   await mediaStore.upload(fileList, selectedFolder.value);
   progress.value = 100;
-  setTimeout(() => { progress.value = 0; }, 400);
+  setTimeout(() => {
+    progress.value = 0;
+  }, 400);
   await reload();
   await mediaStore.fetchFolders();
 }

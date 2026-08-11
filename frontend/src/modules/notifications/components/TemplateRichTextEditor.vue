@@ -1,12 +1,12 @@
 <template>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="flex flex-wrap items-center gap-1 border-b border-slate-200 bg-slate-50 p-2">
+  <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+    <div class="flex flex-wrap items-center gap-1 border-b border-zinc-100 bg-zinc-50 p-2">
       <button
         v-for="action in actions"
         :key="action.key"
         type="button"
-        class="rounded px-2 py-1 text-xs font-medium text-slate-700 hover:bg-white"
-        :class="{ 'bg-white ring-1 ring-slate-200': action.active?.() }"
+        class="rounded-[8px] px-2 py-1 text-xs font-medium text-slate-700 hover:bg-white"
+        :class="{ 'bg-white ring-1 ring-zinc-200': action.active?.() }"
         @click="action.run"
       >
         {{ action.label }}
@@ -16,14 +16,14 @@
           v-for="variable in variables"
           :key="variable"
           type="button"
-          class="rounded bg-white px-2 py-1 font-mono text-[11px] text-brand-700 ring-1 ring-slate-200 hover:bg-brand-50"
+          class="rounded-[8px] bg-white px-2 py-1 font-mono text-[11px] text-brand-700 ring-1 ring-zinc-200 hover:bg-brand-50"
           @click="insertVariable(variable)"
         >
           {{ '{' + '{' + variable + '}' + '}' }}
         </button>
       </div>
     </div>
-    <editor-content :editor="editor" class="prose max-w-none min-h-[12rem] px-3 py-2 focus:outline-none" />
+    <editor-content :editor="editor" class="prose max-w-none min-h-[12rem] px-3.5 py-3 focus:outline-none" />
   </div>
 </template>
 

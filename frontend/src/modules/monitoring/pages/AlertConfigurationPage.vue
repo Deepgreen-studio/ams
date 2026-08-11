@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Alert Configuration"
-      description="Configure thresholds for Integration Hub health metrics."
-    /> -->
     <MonitoringSubnav />
 
     <div
@@ -20,22 +16,29 @@
     </div>
 
     <form
-      class="mb-6 grid gap-3 rounded-xl border border-slate-200 bg-white p-5 md:grid-cols-2"
+      class="mb-6 grid gap-5 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8 md:grid-cols-2"
       @submit.prevent="create"
     >
+      <div class="md:col-span-2">
+        <h2 class="text-base font-semibold text-slate-900">Create alert</h2>
+        <p class="mt-1 text-sm text-slate-500">
+          Configure thresholds for Integration Hub health metrics.
+        </p>
+      </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
         <input
           v-model="form.name"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           required
         />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Metric</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Metric</label>
         <select
           v-model="form.metric"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         >
           <option value="error_rate">Error rate</option>
           <option value="avg_response_ms">Avg response ms</option>
@@ -48,10 +51,10 @@
         </select>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Operator</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Operator</label>
         <select
           v-model="form.operator"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         >
           <option value="gte">≥</option>
           <option value="gt">></option>
@@ -61,19 +64,19 @@
         </select>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Threshold</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Threshold</label>
         <input
           v-model.number="form.threshold"
           type="number"
           step="0.01"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           required
         />
       </div>
-      <div class="md:col-span-2">
+      <div class="md:col-span-2 flex justify-end border-t border-zinc-100 pt-5">
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
         >
           Create alert
@@ -81,32 +84,59 @@
       </div>
     </form>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <table class="min-w-full divide-y divide-zinc-100 text-sm">
+        <thead class="bg-zinc-50/80">
           <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Alert</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Rule</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Enabled</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th
+              class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+            >
+              Alert
+            </th>
+            <th
+              class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+            >
+              Rule
+            </th>
+            <th
+              class="px-5 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+            >
+              Enabled
+            </th>
+            <th
+              class="px-5 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in store.alerts" :key="item.uuid">
-            <td class="px-4 py-3">
+        <tbody class="divide-y divide-zinc-100">
+          <tr v-for="item in store.alerts" :key="item.uuid" class="hover:bg-zinc-50/80">
+            <td class="px-5 py-3.5">
               <p class="font-medium text-slate-900">{{ item.name }}</p>
               <p class="text-xs text-slate-500">
                 Cooldown triggered {{ formatDate(item.last_triggered_at) }}
               </p>
             </td>
-            <td class="px-4 py-3 text-slate-700">
+            <td class="px-5 py-3.5 text-slate-700">
               {{ item.metric }} {{ item.operator }} {{ item.threshold }}
             </td>
-            <td class="px-4 py-3">{{ item.is_enabled ? 'Yes' : 'No' }}</td>
-            <td class="px-4 py-3 text-right">
+            <td class="px-5 py-3.5">
+              <span
+                class="rounded-lg px-2.5 py-1 text-xs font-medium"
+                :class="
+                  item.is_enabled
+                    ? 'bg-emerald-50 text-emerald-700'
+                    : 'bg-zinc-100 text-slate-600'
+                "
+              >
+                {{ item.is_enabled ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-right">
               <button
                 type="button"
-                class="mr-2 text-xs font-medium text-brand-700 hover:underline"
+                class="mr-2 rounded-lg px-2.5 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50 disabled:opacity-60"
                 :disabled="store.saving"
                 @click="toggle(item)"
               >
@@ -114,7 +144,7 @@
               </button>
               <button
                 type="button"
-                class="text-xs font-medium text-rose-700 hover:underline"
+                class="rounded-lg px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-60"
                 :disabled="store.saving"
                 @click="remove(item.uuid)"
               >
@@ -123,20 +153,20 @@
             </td>
           </tr>
           <tr v-if="!store.alerts.length">
-            <td colspan="4" class="px-4 py-10 text-center text-slate-500">No alerts configured.</td>
+            <td colspan="4" class="px-5 py-10 text-center text-slate-500">
+              No alerts configured.
+            </td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <section class="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 class="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-        Recent alert events
-      </h2>
-      <ul class="divide-y divide-slate-100 text-sm">
-        <li v-for="event in store.alertEvents" :key="event.uuid" class="py-3">
+    <section class="mt-6 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+      <h2 class="mb-4 text-base font-semibold text-slate-900">Recent alert events</h2>
+      <ul class="divide-y divide-zinc-100 text-sm">
+        <li v-for="event in store.alertEvents" :key="event.uuid" class="py-3.5 first:pt-0 last:pb-0">
           <p class="font-medium text-slate-900">{{ event.message }}</p>
-          <p class="text-xs capitalize text-slate-500">
+          <p class="mt-0.5 text-xs capitalize text-slate-500">
             {{ event.severity }} · {{ event.status }} · {{ formatDate(event.created_at) }}
           </p>
         </li>
@@ -150,7 +180,6 @@
 
 <script setup>
 import { onMounted, reactive } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';
 

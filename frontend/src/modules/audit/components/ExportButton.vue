@@ -1,11 +1,11 @@
 <template>
   <button
     type="button"
-    class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+    class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
     :disabled="loading"
     @click="$emit('click')"
   >
-    {{ loading ? 'Exporting...' : label }}
+    {{ loading ? 'Exporting…' : label }}
   </button>
 </template>
 

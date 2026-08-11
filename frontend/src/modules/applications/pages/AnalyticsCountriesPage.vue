@@ -1,87 +1,109 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Country statistics"
-      description="User, session, and install distribution by country."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'applications.analytics', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >Dashboard</RouterLink
-        >
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
-      <RouterLink
-          :to="{ name: 'applications.analytics', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >Dashboard</RouterLink
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <RouterLink
+          v-for="link in navLinks"
+          :key="link.name"
+          :to="{ name: link.name, params: { id: route.params.id } }"
+          class="inline-flex items-center gap-2 rounded-[12px] px-5 py-2.5 text-sm font-medium transition"
+          :class="
+            isActive(link.name)
+              ? 'bg-brand-600 text-white hover:bg-brand-700'
+              : 'border border-zinc-200 text-slate-700 hover:bg-zinc-50'
+          "
         >
+          {{ link.label }}
+        </RouterLink>
+      </div>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div
-      v-if="analyticsStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      v-if="analyticsStore.loading && !analyticsStore.countries.length"
+      class="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
     >
-      {{ analyticsStore.error }}
+      <div v-for="n in 6" :key="n" class="h-32 animate-pulse rounded-[12px] bg-slate-100" />
     </div>
 
-    <div class="mb-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <div
+      v-else-if="analyticsStore.countries.length"
+      class="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+    >
       <div
         v-for="item in analyticsStore.countries"
         :key="item.country_code"
-        class="rounded-xl border border-slate-200 bg-white p-4"
+        class="rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
       >
-        <div class="flex items-start justify-between gap-2">
-          <div>
-            <p class="text-sm font-semibold text-slate-900">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-base font-semibold text-slate-900">
               {{ item.country_name || item.country_code }}
             </p>
-            <p class="text-xs text-slate-500">{{ item.country_code }}</p>
+            <p class="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              {{ item.country_code }}
+            </p>
           </div>
-          <span class="rounded-md bg-teal-50 px-2 py-1 text-xs font-medium text-teal-800">{{
-            intensity(item.users)
-          }}</span>
+          <span
+            class="inline-flex shrink-0 rounded-[12px] px-2.5 py-1 text-xs font-medium"
+            :class="intensityClass(item.users)"
+          >
+            {{ intensity(item.users) }}
+          </span>
         </div>
-        <div class="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+        <div class="mt-4 h-2 overflow-hidden rounded-full bg-zinc-100">
           <div
-            class="h-full rounded-full bg-teal-600"
+            class="h-full rounded-full bg-brand-600"
             :style="{ width: `${barWidth(item.users)}%` }"
           />
         </div>
-        <p class="mt-2 text-xs text-slate-600">
+        <p class="mt-3 text-xs text-slate-600">
           {{ item.users }} users · {{ item.sessions }} sessions · {{ item.installs }} installs
         </p>
       </div>
     </div>
 
-    <EmptyState
-      v-if="!analyticsStore.loading && !analyticsStore.countries.length"
-      title="No country data"
-      description="Ingest analytics with country breakdowns to see geo statistics."
-    />
+    <div
+      v-else-if="!analyticsStore.loading"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <EmptyState
+        title="No country data"
+        description="Ingest analytics with country breakdowns to see geo statistics."
+        class="px-6 py-10"
+      />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useAnalyticsStore } from '@/modules/applications/stores/analytics';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const analyticsStore = useAnalyticsStore();
+const toast = useToast();
+
+const navLinks = [
+  { name: 'applications.analytics', label: 'Dashboard' },
+  { name: 'applications.analytics.trends', label: 'Trends' },
+  { name: 'applications.analytics.heatmap', label: 'Heatmap' },
+  { name: 'applications.analytics.countries', label: 'Countries' },
+  { name: 'applications.analytics.devices', label: 'Devices' },
+];
 
 const maxUsers = computed(() =>
   Math.max(1, ...analyticsStore.countries.map((item) => Number(item.users) || 0)),
 );
 
-onMounted(() => analyticsStore.fetchCountries(route.params.id));
+function isActive(name) {
+  return route.name === name;
+}
 
 function barWidth(users) {
   return Math.round(((Number(users) || 0) / maxUsers.value) * 100);
@@ -93,4 +115,20 @@ function intensity(users) {
   if (ratio >= 0.33) return 'Medium';
   return 'Low';
 }
+
+function intensityClass(users) {
+  const ratio = (Number(users) || 0) / maxUsers.value;
+  if (ratio >= 0.66) return 'bg-emerald-50 text-emerald-700';
+  if (ratio >= 0.33) return 'bg-amber-50 text-amber-700';
+  return 'bg-zinc-100 text-zinc-600';
+}
+
+watch(
+  () => analyticsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Unable to load country analytics');
+  },
+);
+
+onMounted(() => analyticsStore.fetchCountries(route.params.id));
 </script>

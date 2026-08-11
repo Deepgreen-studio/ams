@@ -1,80 +1,134 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Compare versions"
-      description="Diff two semantic versions for this application."
-    /> -->
+    <Teleport defer to="#page-header-actions">
+      <div class="flex flex-wrap items-center justify-end gap-2">
+        <RouterLink
+          :to="{ name: 'applications.versions', params: { id: route.params.id } }"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
+        >
+          All versions
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create version
+        </RouterLink>
+      </div>
+    </Teleport>
+
     <ApplicationSubnav :application-id="route.params.id" />
 
-    <div class="mb-4 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-3">
+    <div
+      class="mb-4 grid gap-4 rounded-[12px] bg-white p-5 sm:p-6 ring-1 ring-zinc-100 md:grid-cols-[1fr_1fr_auto]"
+    >
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >From</label
-        >
-        <select
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          From
+        </label>
+        <SelectBox
           v-model="fromId"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-        >
-          <option value="" disabled>Select version</option>
-          <option v-for="item in versionsStore.versions" :key="item.uuid" :value="item.uuid">
-            {{ item.version_number }} ({{ item.status }})
-          </option>
-        </select>
+          size="lg"
+          placeholder="Select version"
+          :options="versionOptions"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >To</label
-        >
-        <select v-model="toId" class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm">
-          <option value="" disabled>Select version</option>
-          <option v-for="item in versionsStore.versions" :key="item.uuid" :value="item.uuid">
-            {{ item.version_number }} ({{ item.status }})
-          </option>
-        </select>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          To
+        </label>
+        <SelectBox
+          v-model="toId"
+          size="lg"
+          placeholder="Select version"
+          :options="versionOptions"
+        />
       </div>
       <div class="flex items-end">
         <button
           type="button"
-          class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="!fromId || !toId || fromId === toId || versionsStore.loading"
+          class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-brand-600 px-6 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60 md:min-w-[9rem]"
+          :disabled="!canCompare"
           @click="runCompare"
         >
+          <ArrowsRightLeftIcon class="h-4 w-4" />
           Compare
         </button>
       </div>
     </div>
 
-    <div
-      v-if="versionsStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ versionsStore.error }}
+    <div v-if="versionsStore.loading" class="space-y-4">
+      <div class="h-24 animate-pulse rounded-[12px] bg-slate-100" />
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="h-48 animate-pulse rounded-[12px] bg-slate-100" />
+        <div class="h-48 animate-pulse rounded-[12px] bg-slate-100" />
+      </div>
     </div>
 
-    <div v-if="versionsStore.loading" class="h-40 animate-pulse rounded-xl bg-slate-100" />
+    <div
+      v-else-if="!comparison && !versionsStore.versions.length"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <EmptyState
+        title="No versions to compare"
+        description="Create at least two versions before running a comparison."
+        class="px-6 py-10"
+      >
+        <template #action>
+          <RouterLink
+            :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          >
+            Create version
+          </RouterLink>
+        </template>
+      </EmptyState>
+    </div>
 
-    <div v-else-if="comparison" class="space-y-4">
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
+    <div
+      v-else-if="!comparison"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+    >
+      <EmptyState
+        title="Ready to compare"
+        description="Select a From and To version, then click Compare."
+        class="px-6 py-10"
+      />
+    </div>
+
+    <div v-else class="space-y-4">
+      <div
+        class="flex flex-wrap items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100"
+      >
         <div class="flex flex-wrap items-center gap-3">
-          <span class="text-sm text-slate-600">Semver result:</span>
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Semver result</p>
           <span
-            class="rounded-md px-2 py-1 text-xs font-semibold uppercase ring-1 ring-inset"
+            class="inline-flex rounded-[12px] px-3 py-1 text-xs font-semibold uppercase"
             :class="resultClass"
           >
             {{ comparison.comparison.result }}
           </span>
-          <span class="text-sm text-slate-500">
-            Δ major {{ comparison.comparison.semver_diff.major }}, minor
-            {{ comparison.comparison.semver_diff.minor }}, patch
-            {{ comparison.comparison.semver_diff.patch }}
+        </div>
+        <div class="flex flex-wrap gap-4 text-sm text-slate-600">
+          <span>
+            <span class="font-medium text-slate-900">{{ comparison.comparison.semver_diff.major }}</span>
+            major
+          </span>
+          <span>
+            <span class="font-medium text-slate-900">{{ comparison.comparison.semver_diff.minor }}</span>
+            minor
+          </span>
+          <span>
+            <span class="font-medium text-slate-900">{{ comparison.comparison.semver_diff.patch }}</span>
+            patch
           </span>
         </div>
       </div>
 
       <div class="grid gap-4 lg:grid-cols-2">
-        <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">From</h3>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">
+        <article class="rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">From</p>
+          <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             {{ comparison.from.version_number }}
           </p>
           <p class="mt-1 text-sm text-slate-500">
@@ -84,9 +138,9 @@
             {{ comparison.from.release_notes || 'No release notes.' }}
           </p>
         </article>
-        <article class="rounded-xl border border-slate-200 bg-white p-5">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">To</h3>
-          <p class="mt-2 text-2xl font-semibold text-slate-900">
+        <article class="rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">To</p>
+          <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
             {{ comparison.to.version_number }}
           </p>
           <p class="mt-1 text-sm text-slate-500">
@@ -98,56 +152,94 @@
         </article>
       </div>
 
-      <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-          <thead class="bg-slate-50">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Field</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">From</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">To</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="(diff, field) in comparison.comparison.changes" :key="field">
-              <td class="px-4 py-3 font-medium text-slate-800">{{ field }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ displayValue(diff.from) }}</td>
-              <td class="px-4 py-3 text-slate-600">{{ displayValue(diff.to) }}</td>
-            </tr>
-            <tr v-if="!Object.keys(comparison.comparison.changes || {}).length">
-              <td colspan="3" class="px-4 py-6 text-center text-slate-500">
-                No field-level differences.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+        <div class="flex items-center justify-between gap-3 border-b border-zinc-100 px-6 py-4">
+          <h3 class="text-base font-semibold text-slate-900">Field differences</h3>
+          <p class="text-xs text-slate-500">
+            {{ Object.keys(comparison.comparison.changes || {}).length }} changed
+          </p>
+        </div>
+
+        <div
+          v-if="!Object.keys(comparison.comparison.changes || {}).length"
+          class="px-6 py-10 text-center text-sm text-slate-500"
+        >
+          No field-level differences.
+        </div>
+
+        <div v-else class="overflow-x-auto px-3">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="border-b border-zinc-100">
+                <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Field</th>
+                <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">From</th>
+                <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">To</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(diff, field) in comparison.comparison.changes"
+                :key="field"
+                class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+              >
+                <td class="px-5 py-4 font-semibold text-slate-900">{{ field }}</td>
+                <td class="px-5 py-4 text-slate-600">{{ displayValue(diff.from) }}</td>
+                <td class="px-5 py-4 text-slate-600">{{ displayValue(diff.to) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
-import { useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import { ArrowsRightLeftIcon } from '@heroicons/vue/24/outline';
+import EmptyState from '@/components/ui/EmptyState.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useVersionsStore } from '@/modules/applications/stores/versions';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const versionsStore = useVersionsStore();
+const toast = useToast();
 const fromId = ref('');
 const toId = ref('');
 
 const comparison = computed(() => versionsStore.comparison);
+
+const versionOptions = computed(() =>
+  (versionsStore.versions || []).map((item) => ({
+    value: item.uuid,
+    label: `${item.version_number} (${item.status})`,
+  })),
+);
+
+const canCompare = computed(
+  () => Boolean(fromId.value && toId.value && fromId.value !== toId.value && !versionsStore.loading),
+);
+
 const resultClass = computed(() => {
   switch (comparison.value?.comparison?.result) {
     case 'upgrade':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+      return 'bg-emerald-50 text-emerald-700';
     case 'downgrade':
-      return 'bg-rose-50 text-rose-700 ring-rose-600/20';
+      return 'bg-rose-50 text-rose-700';
     default:
-      return 'bg-slate-50 text-slate-700 ring-slate-500/20';
+      return 'bg-zinc-100 text-zinc-700';
   }
 });
+
+watch(
+  () => versionsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Unable to compare versions');
+  },
+);
 
 onMounted(async () => {
   await versionsStore.fetchVersions(route.params.id, {

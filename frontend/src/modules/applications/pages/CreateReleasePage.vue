@@ -1,123 +1,124 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Plan release"
-      description="Create a release plan linked to an existing application version."
-    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <form
-      class="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+      class="space-y-8 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8"
+      novalidate
       @submit.prevent="onSubmit"
     >
-      <div
-        v-if="releasesStore.error"
-        class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-      >
-        {{ releasesStore.error }}
-      </div>
-
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
-          <input v-model="form.name" type="text" class="input" required />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+          <input
+            v-model="form.name"
+            type="text"
+            required
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Version</label>
-          <select v-model="form.application_version_id" class="input" required>
-            <option value="" disabled>Select version</option>
-            <option v-for="version in versions" :key="version.uuid" :value="version.uuid">
-              {{ version.version_number }} ({{ version.status }})
-            </option>
-          </select>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Version</label>
+          <SelectBox
+            v-model="form.application_version_id"
+            size="lg"
+            :options="versionOptions"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Release type</label>
-          <select v-model="form.release_type" class="input">
-            <option value="major">Major</option>
-            <option value="minor">Minor</option>
-            <option value="patch">Patch</option>
-            <option value="hotfix">Hotfix</option>
-            <option value="custom">Custom</option>
-          </select>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Release type</label>
+          <SelectBox v-model="form.release_type" size="lg" :options="releaseTypeOptions" />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700"
+          <label class="mb-1.5 block text-sm font-medium text-slate-700"
             >Environment (optional)</label
           >
-          <select v-model="form.environment_id" class="input">
-            <option value="">None</option>
-            <option v-for="env in environments" :key="env.uuid" :value="env.uuid">
-              {{ env.name }} ({{ env.type }})
-            </option>
-          </select>
+          <SelectBox v-model="form.environment_id" size="lg" :options="environmentOptions" />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Scheduled at</label>
-          <input v-model="form.scheduled_at" type="datetime-local" class="input" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Scheduled at</label>
+          <input
+            v-model="form.scheduled_at"
+            type="datetime-local"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Deployment date</label>
-          <input v-model="form.deployment_date" type="datetime-local" class="input" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Deployment date</label>
+          <input
+            v-model="form.deployment_date"
+            type="datetime-local"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-slate-700">Plan summary</label>
-          <textarea v-model="form.plan_summary" rows="3" class="input" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Plan summary</label>
+          <textarea
+            v-model="form.plan_summary"
+            rows="3"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div class="md:col-span-2">
-          <label class="inline-flex items-center gap-2 text-sm text-slate-700">
+          <label class="inline-flex cursor-pointer items-center gap-2.5 text-sm text-slate-700">
             <input
               v-model="form.requires_approval"
               type="checkbox"
-              class="rounded border-slate-300"
+              class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
             Requires approval before deployment
           </label>
         </div>
       </div>
 
-      <div class="rounded-xl border border-slate-200 p-4">
-        <div class="mb-3 flex items-center justify-between">
+      <div class="rounded-[12px] bg-zinc-50/70 p-4 ring-1 ring-zinc-100 sm:p-5">
+        <div class="mb-4 flex items-center justify-between gap-2">
           <h3 class="text-sm font-semibold text-slate-900">Release notes</h3>
           <button
             type="button"
-            class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-50"
             @click="addNote"
           >
             Add note
           </button>
         </div>
+
+        <div v-if="!form.notes.length" class="text-sm text-slate-500">
+          No release notes yet. Add one if needed.
+        </div>
+
         <div
           v-for="(note, index) in form.notes"
           :key="index"
-          class="mb-3 grid gap-3 border-b border-slate-100 pb-3 last:mb-0 last:border-0 last:pb-0 md:grid-cols-2"
+          class="mb-4 rounded-[12px] bg-white p-4 ring-1 ring-zinc-100 last:mb-0"
         >
-          <div>
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >Title</label
-            >
-            <input v-model="note.title" type="text" class="input" required />
+          <div class="grid gap-x-6 gap-y-4 md:grid-cols-2">
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
+              <input
+                v-model="note.title"
+                type="text"
+                required
+                class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+              />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Audience</label>
+              <SelectBox v-model="note.audience" size="lg" :options="audienceOptions" />
+            </div>
+            <div class="md:col-span-2">
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Content</label>
+              <textarea
+                v-model="note.content"
+                rows="3"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+              />
+            </div>
           </div>
-          <div>
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >Audience</label
-            >
-            <select v-model="note.audience" class="input">
-              <option value="public">Public</option>
-              <option value="internal">Internal</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
-          <div class="md:col-span-2">
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >Content</label
-            >
-            <textarea v-model="note.content" rows="2" class="input" />
-          </div>
-          <div class="md:col-span-2 flex justify-end">
+          <div class="mt-3 flex justify-end">
             <button
               type="button"
-              class="text-xs font-medium text-rose-600 hover:underline"
+              class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-rose-600 transition hover:bg-rose-50"
               @click="form.notes.splice(index, 1)"
             >
               Remove
@@ -126,17 +127,17 @@
         </div>
       </div>
 
-      <div class="flex justify-end gap-2">
+      <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           @click="router.push({ name: 'applications.releases', params: { id: route.params.id } })"
         >
           Cancel
         </button>
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
           :disabled="releasesStore.saving"
         >
           {{ releasesStore.saving ? 'Saving...' : 'Create release' }}
@@ -147,17 +148,19 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useReleasesStore } from '@/modules/applications/stores/releases';
 import { versionService } from '@/modules/applications/services/versionService';
 import { environmentService } from '@/modules/applications/services/environmentService';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
 const releasesStore = useReleasesStore();
+const toast = useToast();
 const versions = ref([]);
 const environments = ref([]);
 
@@ -173,6 +176,50 @@ const form = reactive({
   notes: [{ title: '', content: '', audience: 'public' }],
 });
 
+const releaseTypeOptions = [
+  { value: 'major', label: 'Major' },
+  { value: 'minor', label: 'Minor' },
+  { value: 'patch', label: 'Patch' },
+  { value: 'hotfix', label: 'Hotfix' },
+  { value: 'custom', label: 'Custom' },
+];
+
+const audienceOptions = [
+  { value: 'public', label: 'Public' },
+  { value: 'internal', label: 'Internal' },
+  { value: 'both', label: 'Both' },
+];
+
+const versionOptions = computed(() => [
+  { value: '', label: 'Select version' },
+  ...versions.value.map((version) => ({
+    value: version.uuid,
+    label: `${version.version_number} (${version.status})`,
+  })),
+]);
+
+const environmentOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...environments.value.map((env) => ({
+    value: env.uuid,
+    label: `${env.name} (${env.type})`,
+  })),
+]);
+
+watch(
+  () => releasesStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Validation Failed');
+  },
+);
+
+watch(
+  () => releasesStore.successMessage,
+  (message) => {
+    if (message) toast.success(message);
+  },
+);
+
 onMounted(async () => {
   try {
     const [{ data: versionData }, { data: envData }] = await Promise.all([
@@ -184,6 +231,7 @@ onMounted(async () => {
   } catch {
     versions.value = [];
     environments.value = [];
+    toast.error('Unable to load versions or environments');
   }
 });
 
@@ -197,31 +245,30 @@ function toIsoOrNull(value) {
 }
 
 async function onSubmit() {
-  const release = await releasesStore.createRelease(route.params.id, {
-    name: form.name,
-    application_version_id: form.application_version_id,
-    environment_id: form.environment_id || null,
-    release_type: form.release_type,
-    scheduled_at: toIsoOrNull(form.scheduled_at),
-    deployment_date: toIsoOrNull(form.deployment_date),
-    plan_summary: form.plan_summary || null,
-    requires_approval: form.requires_approval,
-    notes: form.notes.filter((note) => note.title),
-  });
+  if (!form.application_version_id) {
+    toast.error('Please select a version.', 'Validation Failed');
+    return;
+  }
 
-  await router.push({
-    name: 'applications.releases.show',
-    params: { id: route.params.id, releaseId: release.uuid },
-  });
+  try {
+    const release = await releasesStore.createRelease(route.params.id, {
+      name: form.name,
+      application_version_id: form.application_version_id,
+      environment_id: form.environment_id || null,
+      release_type: form.release_type,
+      scheduled_at: toIsoOrNull(form.scheduled_at),
+      deployment_date: toIsoOrNull(form.deployment_date),
+      plan_summary: form.plan_summary || null,
+      requires_approval: form.requires_approval,
+      notes: form.notes.filter((note) => note.title),
+    });
+
+    await router.push({
+      name: 'applications.releases.show',
+      params: { id: route.params.id, releaseId: release.uuid },
+    });
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-</style>

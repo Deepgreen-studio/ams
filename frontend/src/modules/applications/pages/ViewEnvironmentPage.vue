@@ -1,64 +1,24 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="environment?.name || 'Environment details'"
-      description="Environment configuration, health status, and switch controls."
-    >
-      <template #actions>
-        <template v-if="environment">
-          <button
-            v-if="!environment.is_current"
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            :disabled="environmentsStore.saving"
-            @click="switchTo"
-          >
-            Switch to this
-          </button>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            :disabled="environmentsStore.saving"
-            @click="healthCheck"
-          >
-            Run health check
-          </button>
-          <RouterLink
-            :to="{
-              name: 'applications.environments.edit',
-              params: { id: route.params.id, environmentId: environment.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showDelete = true"
-          >
-            Delete
-          </button>
-        </template>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <div v-if="environment" class="flex flex-wrap items-center justify-end gap-2">
         <button
           v-if="!environment.is_current"
           type="button"
-          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
           :disabled="environmentsStore.saving"
           @click="switchTo"
         >
+          <ArrowPathIcon class="h-4 w-4 text-slate-500" />
           Switch to this
         </button>
         <button
           type="button"
-          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
           :disabled="environmentsStore.saving"
           @click="healthCheck"
         >
+          <HeartIcon class="h-4 w-4 text-slate-500" />
           Run health check
         </button>
         <RouterLink
@@ -66,15 +26,17 @@
             name: 'applications.environments.edit',
             params: { id: route.params.id, environmentId: environment.uuid },
           }"
-          class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
+          <PencilSquareIcon class="h-4 w-4 text-slate-500" />
           Edit
         </RouterLink>
         <button
           type="button"
-          class="rounded-[12px] bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
+          class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
         >
+          <TrashIcon class="h-4 w-4 text-white" />
           Delete
         </button>
       </div>
@@ -83,34 +45,27 @@
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div
-      v-if="environmentsStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ environmentsStore.error }}
-    </div>
-    <div
-      v-if="environmentsStore.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ environmentsStore.successMessage }}
-    </div>
-
-    <div
       v-if="environmentsStore.loading && !environment"
-      class="h-48 animate-pulse rounded-xl bg-slate-100"
+      class="h-48 animate-pulse rounded-[12px] bg-slate-100"
     />
 
-    <div v-else-if="environment" class="space-y-4">
-      <div class="rounded-xl border border-slate-200 bg-white p-6">
-        <div class="flex flex-wrap items-start justify-between gap-3">
-          <div>
+    <div v-else-if="environment" class="space-y-6">
+      <div
+        class="rounded-[12px] bg-white p-6 sm:p-8 ring-1 transition"
+        :class="environment.is_current ? 'ring-brand-600' : 'ring-zinc-100'"
+      >
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
-              <h2 class="text-xl font-semibold text-slate-900">{{ environment.name }}</h2>
+              <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">
+                {{ environment.name }}
+              </h2>
               <span
                 v-if="environment.is_current"
-                class="rounded-md bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700 ring-1 ring-inset ring-brand-600/20"
-                >Current</span
+                class="inline-flex items-center rounded-md bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-700"
               >
+                Current
+              </span>
             </div>
             <p class="mt-1 text-sm text-slate-500">
               {{ environment.type_label || environment.type }} · {{ environment.slug }}
@@ -122,85 +77,96 @@
           </div>
         </div>
 
-        <dl class="mt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">API URL</dt>
-            <dd class="mt-1 break-all text-sm text-slate-900">{{ environment.api_url || '—' }}</dd>
+        <div class="mt-6 grid gap-3 sm:grid-cols-2">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">API URL</p>
+            <p class="mt-1 break-all text-sm font-semibold text-slate-900">
+              {{ environment.api_url || '—' }}
+            </p>
           </div>
-          <div>
-            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Web URL</dt>
-            <dd class="mt-1 break-all text-sm text-slate-900">{{ environment.web_url || '—' }}</dd>
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Web URL</p>
+            <p class="mt-1 break-all text-sm font-semibold text-slate-900">
+              {{ environment.web_url || '—' }}
+            </p>
           </div>
-          <div>
-            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">
-              Last health check
-            </dt>
-            <dd class="mt-1 text-sm text-slate-900">
-              {{ formatDate(environment.last_health_check) }}
-            </dd>
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Last health check</p>
+            <p class="mt-1 text-sm font-semibold text-slate-900">
+              {{ formatDateTime(environment.last_health_check) }}
+            </p>
           </div>
-          <div>
-            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Updated by</dt>
-            <dd class="mt-1 text-sm text-slate-900">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Updated by</p>
+            <p class="mt-1 text-sm font-semibold text-slate-900">
               {{ environment.updater?.full_name || environment.creator?.full_name || '—' }}
-            </dd>
+            </p>
           </div>
-        </dl>
+        </div>
       </div>
 
       <div
         v-if="environmentsStore.lastHealthCheck"
-        class="rounded-xl border border-slate-200 bg-white p-5"
+        class="rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100"
       >
-        <h3 class="text-sm font-semibold text-slate-800">Latest health check</h3>
-        <dl class="mt-3 grid gap-3 sm:grid-cols-4 text-sm">
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Result</dt>
-            <dd class="mt-1">
+        <h3 class="text-base font-semibold text-slate-900">Latest health check</h3>
+        <p class="mt-1 text-sm text-slate-500">Most recent probe result for this environment.</p>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Result</p>
+            <div class="mt-2">
               <EnvironmentHealthBadge :status="environmentsStore.lastHealthCheck.health_status" />
-            </dd>
+            </div>
           </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Status code</dt>
-            <dd class="mt-1 text-slate-900">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Status code</p>
+            <p class="mt-1.5 text-sm font-semibold text-slate-900">
               {{ environmentsStore.lastHealthCheck.status_code ?? '—' }}
-            </dd>
+            </p>
           </div>
-          <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Latency</dt>
-            <dd class="mt-1 text-slate-900">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5">
+            <p class="text-xs font-medium text-zinc-500">Latency</p>
+            <p class="mt-1.5 text-sm font-semibold text-slate-900">
               {{ environmentsStore.lastHealthCheck.latency_ms ?? '—' }} ms
-            </dd>
+            </p>
           </div>
-          <div class="sm:col-span-1">
-            <dt class="text-xs uppercase tracking-wide text-slate-500">Message</dt>
-            <dd class="mt-1 text-slate-900">
+          <div class="rounded-[12px] bg-zinc-50 px-4 py-3.5 sm:col-span-2 xl:col-span-1">
+            <p class="text-xs font-medium text-zinc-500">Message</p>
+            <p class="mt-1.5 break-words text-sm font-medium text-slate-900">
               {{ environmentsStore.lastHealthCheck.message || '—' }}
-            </dd>
+            </p>
           </div>
-        </dl>
+        </div>
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="text-sm font-semibold text-slate-800">Environment variables</h3>
-        <p class="mt-1 text-xs text-slate-500">
-          Secret values are encrypted and always masked in responses.
-        </p>
-        <div class="mt-4 overflow-x-auto">
-          <table class="min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50">
-              <tr>
-                <th class="px-4 py-3 text-left font-semibold text-slate-600">Key</th>
-                <th class="px-4 py-3 text-left font-semibold text-slate-600">Value</th>
+      <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+        <div class="border-b border-zinc-100 px-6 py-5 sm:px-8">
+          <h3 class="text-base font-semibold text-slate-900">Environment variables</h3>
+          <p class="mt-1 text-sm text-slate-500">
+            Secret values are encrypted and always masked in responses.
+          </p>
+        </div>
+
+        <div class="overflow-x-auto px-3">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="border-b border-zinc-100">
+                <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Key</th>
+                <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Value</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="item in environment.variables || []" :key="item.key">
-                <td class="px-4 py-3 font-medium text-slate-800">{{ item.key }}</td>
-                <td class="px-4 py-3 font-mono text-slate-600">{{ item.masked_value || '—' }}</td>
+            <tbody>
+              <tr
+                v-for="item in environment.variables || []"
+                :key="item.key"
+                class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+              >
+                <td class="px-5 py-4 font-semibold text-slate-900">{{ item.key }}</td>
+                <td class="px-5 py-4 font-mono text-slate-600">{{ item.masked_value || '—' }}</td>
               </tr>
               <tr v-if="!(environment.variables || []).length">
-                <td colspan="2" class="px-4 py-6 text-center text-slate-500">
+                <td colspan="2" class="px-5 py-10 text-center text-slate-500">
                   No variables configured.
                 </td>
               </tr>
@@ -223,9 +189,15 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  ArrowPathIcon,
+  HeartIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import EnvironmentHealthBadge from '@/modules/applications/components/EnvironmentHealthBadge.vue';
@@ -234,32 +206,61 @@ import { useEnvironmentsStore } from '@/modules/applications/stores/environments
 const route = useRoute();
 const router = useRouter();
 const environmentsStore = useEnvironmentsStore();
+const toast = useToast();
 const showDelete = ref(false);
 
 const environment = computed(() => environmentsStore.selectedEnvironment);
+
+watch(
+  () => environmentsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Error');
+  },
+);
+
+watch(
+  () => environmentsStore.successMessage,
+  (message) => {
+    if (message) toast.success(message);
+  },
+);
 
 onMounted(() => {
   environmentsStore.fetchEnvironment(route.params.id, route.params.environmentId);
 });
 
-function formatDate(value) {
+function formatDateTime(value) {
   if (!value) return 'Never';
-  return new Date(value).toLocaleString();
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString();
 }
 
 async function switchTo() {
-  await environmentsStore.switchEnvironment(route.params.id, route.params.environmentId);
-  await environmentsStore.fetchEnvironment(route.params.id, route.params.environmentId);
+  try {
+    await environmentsStore.switchEnvironment(route.params.id, route.params.environmentId);
+    await environmentsStore.fetchEnvironment(route.params.id, route.params.environmentId);
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 
 async function healthCheck() {
-  await environmentsStore.runHealthCheck(route.params.id, route.params.environmentId);
-  await environmentsStore.fetchEnvironment(route.params.id, route.params.environmentId);
+  try {
+    await environmentsStore.runHealthCheck(route.params.id, route.params.environmentId);
+    await environmentsStore.fetchEnvironment(route.params.id, route.params.environmentId);
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 
 async function confirmDelete() {
-  await environmentsStore.deleteEnvironment(route.params.id, route.params.environmentId);
-  showDelete.value = false;
-  await router.push({ name: 'applications.environments', params: { id: route.params.id } });
+  try {
+    await environmentsStore.deleteEnvironment(route.params.id, route.params.environmentId);
+    showDelete.value = false;
+    await router.push({ name: 'applications.environments', params: { id: route.params.id } });
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 </script>

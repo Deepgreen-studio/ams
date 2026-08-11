@@ -1,64 +1,31 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="title"
-      description="Manage feature flags, remote config, maintenance mode, and API keys as validated JSON."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'applications.configurations.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Add configuration
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'applications.configurations.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Add configuration
-        </RouterLink>
+        :to="{ name: 'applications.configurations.create', params: { id: route.params.id } }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Add configuration
+      </RouterLink>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
-    <div
-      class="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:flex-row lg:items-end"
-    >
-      <div class="w-full lg:w-72">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Environment scope</label
-        >
-        <select
-          v-model="environmentFilter"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-          @change="reload"
-        >
-          <option value="">Application-wide</option>
-          <option v-for="env in environments" :key="env.uuid" :value="env.uuid">
-            {{ env.name }} ({{ env.type }})
-          </option>
-        </select>
-      </div>
-    </div>
-
-    <div
-      v-if="configurationsStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ configurationsStore.error }}
-    </div>
-    <div
-      v-if="configurationsStore.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ configurationsStore.successMessage }}
+    <div class="mb-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+      <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-zinc-500">
+        Environment scope
+      </label>
+      <SelectBox
+        v-model="environmentFilter"
+        wrapper-class="w-full max-w-md"
+        size="lg"
+        :options="environmentOptions"
+        @change="reload"
+      />
     </div>
 
     <div v-if="configurationsStore.loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <div v-for="n in 6" :key="n" class="h-36 animate-pulse rounded-xl bg-slate-100" />
+      <div v-for="n in 6" :key="n" class="h-40 animate-pulse rounded-[12px] bg-slate-100" />
     </div>
 
     <EmptyState
@@ -69,7 +36,7 @@
       <template #action>
         <RouterLink
           :to="{ name: 'applications.configurations.create', params: { id: route.params.id } }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
           Add configuration
         </RouterLink>
@@ -80,30 +47,43 @@
       <article
         v-for="item in configurationsStore.configurations"
         :key="item.uuid"
-        class="rounded-xl border border-slate-200 bg-white p-5"
+        class="flex h-full flex-col rounded-[12px] bg-white p-5 ring-1 transition"
+        :class="
+          item.status === 'published'
+            ? 'ring-brand-600 hover:ring-brand-700'
+            : 'ring-zinc-100 hover:ring-brand-200'
+        "
       >
-        <div class="flex items-start justify-between gap-2">
-          <div>
-            <h3 class="text-base font-semibold text-slate-900">{{ item.name }}</h3>
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <h3 class="truncate text-base font-semibold tracking-tight text-slate-900">
+              {{ item.name }}
+            </h3>
             <p class="mt-1 text-sm text-slate-500">{{ item.type_label || item.type }}</p>
           </div>
           <span
-            class="rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
-            :class="statusClass(item.status)"
+            class="inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-xs font-medium"
+            :class="statusClasses(item.status)"
           >
-            {{ item.status }}
+            <span class="h-1.5 w-1.5 rounded-full" :class="statusDot(item.status)" />
+            {{ statusLabel(item.status) }}
           </span>
         </div>
-        <p class="mt-3 text-xs text-slate-500">
-          Version {{ item.version }} · {{ item.environment?.name || 'Application-wide' }}
-        </p>
-        <div class="mt-4 flex flex-wrap gap-2">
+
+        <div class="mt-4 rounded-[12px] bg-zinc-50 px-3.5 py-3">
+          <p class="text-xs font-medium text-zinc-500">Scope</p>
+          <p class="mt-1 text-sm font-semibold text-slate-900">
+            Version {{ item.version }} · {{ item.environment?.name || 'Application-wide' }}
+          </p>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-2 border-t border-zinc-100 pt-4">
           <RouterLink
             :to="{
               name: 'applications.configurations.edit',
               params: { id: route.params.id, configurationId: item.uuid },
             }"
-            class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-50"
           >
             Manage
           </RouterLink>
@@ -113,7 +93,7 @@
               name: 'applications.configurations.flags',
               params: { id: route.params.id, configurationId: item.uuid },
             }"
-            class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-zinc-100"
           >
             Feature flags
           </RouterLink>
@@ -122,7 +102,7 @@
               name: 'applications.configurations.history',
               params: { id: route.params.id, configurationId: item.uuid },
             }"
-            class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+            class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-zinc-100"
           >
             History
           </RouterLink>
@@ -133,23 +113,42 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';
 import { environmentService } from '@/modules/applications/services/environmentService';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const configurationsStore = useConfigurationsStore();
+const toast = useToast();
 const environments = ref([]);
 const environmentFilter = ref('');
 
-const title = computed(() => {
-  const name = configurationsStore.application?.name;
-  return name ? `${name} configuration` : 'Configuration Manager';
-});
+const environmentOptions = computed(() => [
+  { value: '', label: 'Application-wide' },
+  ...environments.value.map((env) => ({
+    value: env.uuid,
+    label: `${env.name} (${env.type})`,
+  })),
+]);
+
+watch(
+  () => configurationsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Error');
+  },
+);
+
+watch(
+  () => configurationsStore.successMessage,
+  (message) => {
+    if (message) toast.success(message);
+  },
+);
 
 onMounted(async () => {
   try {
@@ -162,17 +161,38 @@ onMounted(async () => {
 });
 
 async function reload() {
-  await configurationsStore.fetchManager(route.params.id, environmentFilter.value || null);
+  try {
+    await configurationsStore.fetchManager(route.params.id, environmentFilter.value || null);
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 
-function statusClass(status) {
+function statusLabel(status) {
+  return String(status || 'draft')
+    .replaceAll('_', ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function statusClasses(status) {
   switch (status) {
     case 'published':
-      return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+      return 'border-emerald-600 text-emerald-700';
     case 'archived':
-      return 'bg-slate-50 text-slate-600 ring-slate-500/20';
+      return 'border-slate-400 text-slate-600';
     default:
-      return 'bg-amber-50 text-amber-800 ring-amber-600/20';
+      return 'border-amber-500 text-amber-700';
+  }
+}
+
+function statusDot(status) {
+  switch (status) {
+    case 'published':
+      return 'bg-emerald-600';
+    case 'archived':
+      return 'bg-slate-400';
+    default:
+      return 'bg-amber-500';
   }
 }
 </script>

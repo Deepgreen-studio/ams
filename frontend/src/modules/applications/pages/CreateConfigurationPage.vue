@@ -1,73 +1,65 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create configuration"
-      description="Initialize a typed JSON configuration for this application scope."
-    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
 
     <form
-      class="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+      class="space-y-8 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8"
+      novalidate
       @submit.prevent="onSubmit"
     >
-      <div
-        v-if="configurationsStore.error"
-        class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-      >
-        {{ configurationsStore.error }}
-      </div>
-
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Type</label>
-          <select v-model="form.type" class="input" required @change="onTypeChange">
-            <option v-for="(meta, type) in typeOptions" :key="type" :value="type">
-              {{ meta.label }}
-            </option>
-          </select>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
+          <SelectBox
+            v-model="form.type"
+            size="lg"
+            :options="typeSelectOptions"
+            @change="onTypeChange"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700"
+          <label class="mb-1.5 block text-sm font-medium text-slate-700"
             >Environment (optional)</label
           >
-          <select v-model="form.environment_id" class="input">
-            <option value="">Application-wide</option>
-            <option v-for="env in environments" :key="env.uuid" :value="env.uuid">
-              {{ env.name }} ({{ env.type }})
-            </option>
-          </select>
+          <SelectBox v-model="form.environment_id" size="lg" :options="environmentOptions" />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
-          <input v-model="form.name" type="text" class="input" required />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+          <input
+            v-model="form.name"
+            type="text"
+            required
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-          <select v-model="form.status" class="input">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+          <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-          <textarea v-model="form.description" rows="2" class="input" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+          <textarea
+            v-model="form.description"
+            rows="3"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <JsonEditor
+            v-model="jsonText"
+            label="Initial JSON payload"
+            :validating="configurationsStore.saving"
+            :validation="configurationsStore.validationResult"
+            :error="jsonError"
+            @validate="onValidate"
+          />
         </div>
       </div>
 
-      <JsonEditor
-        v-model="jsonText"
-        label="Initial JSON payload"
-        :validating="configurationsStore.saving"
-        :validation="configurationsStore.validationResult"
-        :error="jsonError"
-        @validate="onValidate"
-      />
-
-      <div class="flex justify-end gap-2">
+      <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           @click="
             router.push({ name: 'applications.configurations', params: { id: route.params.id } })
           "
@@ -76,7 +68,7 @@
         </button>
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
           :disabled="configurationsStore.saving"
         >
           {{ configurationsStore.saving ? 'Saving...' : 'Create configuration' }}
@@ -87,18 +79,20 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import JsonEditor from '@/modules/applications/components/JsonEditor.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';
 import { configurationService } from '@/modules/applications/services/configurationService';
 import { environmentService } from '@/modules/applications/services/environmentService';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
 const configurationsStore = useConfigurationsStore();
+const toast = useToast();
 const environments = ref([]);
 const catalog = ref({});
 const jsonText = ref('{\n"flags": []\n}');
@@ -112,7 +106,40 @@ const form = reactive({
   status: 'draft',
 });
 
-const typeOptions = computed(() => catalog.value || {});
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+  { value: 'archived', label: 'Archived' },
+];
+
+const typeSelectOptions = computed(() =>
+  Object.entries(catalog.value || {}).map(([type, meta]) => ({
+    value: type,
+    label: meta.label || type,
+  })),
+);
+
+const environmentOptions = computed(() => [
+  { value: '', label: 'Application-wide' },
+  ...environments.value.map((env) => ({
+    value: env.uuid,
+    label: `${env.name} (${env.type})`,
+  })),
+]);
+
+watch(
+  () => configurationsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Validation Failed');
+  },
+);
+
+watch(
+  () => configurationsStore.successMessage,
+  (message) => {
+    if (message) toast.success(message);
+  },
+);
 
 onMounted(async () => {
   try {
@@ -142,9 +169,20 @@ async function onValidate() {
     payload = JSON.parse(jsonText.value);
   } catch {
     jsonError.value = 'Invalid JSON syntax.';
+    toast.error('Invalid JSON syntax.', 'Validation Failed');
     return;
   }
-  await configurationsStore.validateConfiguration(route.params.id, { type: form.type, payload });
+  try {
+    await configurationsStore.validateConfiguration(route.params.id, {
+      type: form.type,
+      payload,
+    });
+    if (configurationsStore.validationResult?.valid) {
+      toast.success('Payload is valid');
+    }
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 
 async function onSubmit() {
@@ -154,34 +192,29 @@ async function onSubmit() {
     payload = JSON.parse(jsonText.value);
   } catch {
     jsonError.value = 'Invalid JSON syntax.';
+    toast.error('Invalid JSON syntax.', 'Validation Failed');
     return;
   }
 
-  const configuration = await configurationsStore.createConfiguration(route.params.id, {
-    type: form.type,
-    environment_id: form.environment_id || null,
-    name: form.name,
-    description: form.description || null,
-    status: form.status,
-    payload,
-  });
+  try {
+    const configuration = await configurationsStore.createConfiguration(route.params.id, {
+      type: form.type,
+      environment_id: form.environment_id || null,
+      name: form.name,
+      description: form.description || null,
+      status: form.status,
+      payload,
+    });
 
-  await router.push({
-    name:
-      form.type === 'feature_flags'
-        ? 'applications.configurations.flags'
-        : 'applications.configurations.edit',
-    params: { id: route.params.id, configurationId: configuration.uuid },
-  });
+    await router.push({
+      name:
+        form.type === 'feature_flags'
+          ? 'applications.configurations.flags'
+          : 'applications.configurations.edit',
+      params: { id: route.params.id, configurationId: configuration.uuid },
+    });
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-</style>

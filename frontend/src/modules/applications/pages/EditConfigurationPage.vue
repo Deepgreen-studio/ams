@@ -1,125 +1,93 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="configuration?.name || 'Edit configuration'"
-      description="Update validated JSON configuration and publish status."
-    >
-      <template #actions>
-        <RouterLink
-          v-if="configuration"
-          :to="{
-            name: 'applications.configurations.history',
-            params: { id: route.params.id, configurationId: configuration.uuid },
-          }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          History
-        </RouterLink>
-        <RouterLink
-          v-if="configuration?.type === 'feature_flags'"
-          :to="{
-            name: 'applications.configurations.flags',
-            params: { id: route.params.id, configurationId: configuration.uuid },
-          }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Feature flags
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
-      <RouterLink
-          v-if="configuration"
+      <div v-if="configuration" class="flex flex-wrap items-center justify-end gap-2">
+        <RouterLink
           :to="{
             name: 'applications.configurations.history',
             params: { id: route.params.id, configurationId: configuration.uuid },
           }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           History
         </RouterLink>
         <RouterLink
-          v-if="configuration?.type === 'feature_flags'"
+          v-if="configuration.type === 'feature_flags'"
           :to="{
             name: 'applications.configurations.flags',
             params: { id: route.params.id, configurationId: configuration.uuid },
           }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           Feature flags
         </RouterLink>
+      </div>
     </Teleport>
 
     <ApplicationSubnav :application-id="route.params.id" />
 
     <div
       v-if="configurationsStore.loading && !configuration"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
 
     <form
       v-else
-      class="space-y-4 rounded-xl border border-slate-200 bg-white p-6"
+      class="space-y-8 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8"
+      novalidate
       @submit.prevent="onSubmit"
     >
-      <div
-        v-if="configurationsStore.error"
-        class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-      >
-        {{ configurationsStore.error }}
-      </div>
-      <div
-        v-if="configurationsStore.successMessage"
-        class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-      >
-        {{ configurationsStore.successMessage }}
-      </div>
-
-      <div class="grid gap-4 md:grid-cols-2">
+      <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
-          <input v-model="form.name" type="text" class="input" required />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+          <input
+            v-model="form.name"
+            type="text"
+            required
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-          <select v-model="form.status" class="input">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-            <option value="archived">Archived</option>
-          </select>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+          <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-slate-700">Change summary</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Change summary</label>
           <input
             v-model="form.change_summary"
             type="text"
-            class="input"
             placeholder="Describe this change for history"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-          <textarea v-model="form.description" rows="2" class="input" />
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+          <textarea
+            v-model="form.description"
+            rows="3"
+            class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          />
+        </div>
+        <div class="md:col-span-2">
+          <JsonEditor
+            v-model="jsonText"
+            :hint="
+              configuration?.is_sensitive
+                ? 'Sensitive values are masked. Leave ******** to keep existing secrets.'
+                : ''
+            "
+            :validating="configurationsStore.saving"
+            :validation="configurationsStore.validationResult"
+            :error="jsonError"
+            @validate="onValidate"
+          />
         </div>
       </div>
 
-      <JsonEditor
-        v-model="jsonText"
-        :hint="
-          configuration?.is_sensitive
-            ? 'Sensitive values are masked. Leave ******** to keep existing secrets.'
-            : ''
-        "
-        :validating="configurationsStore.saving"
-        :validation="configurationsStore.validationResult"
-        :error="jsonError"
-        @validate="onValidate"
-      />
-
-      <div class="flex justify-end gap-2">
+      <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+          class="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
           @click="
             router.push({ name: 'applications.configurations', params: { id: route.params.id } })
           "
@@ -128,7 +96,7 @@
         </button>
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
           :disabled="configurationsStore.saving"
         >
           {{ configurationsStore.saving ? 'Saving...' : 'Save configuration' }}
@@ -141,14 +109,16 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import JsonEditor from '@/modules/applications/components/JsonEditor.vue';
 import { useConfigurationsStore } from '@/modules/applications/stores/configurations';
+import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
 const configurationsStore = useConfigurationsStore();
+const toast = useToast();
 const jsonText = ref('{}');
 const jsonError = ref('');
 const form = reactive({
@@ -158,7 +128,27 @@ const form = reactive({
   change_summary: '',
 });
 
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+  { value: 'archived', label: 'Archived' },
+];
+
 const configuration = computed(() => configurationsStore.currentConfiguration);
+
+watch(
+  () => configurationsStore.error,
+  (message) => {
+    if (message) toast.error(message, 'Validation Failed');
+  },
+);
+
+watch(
+  () => configurationsStore.successMessage,
+  (message) => {
+    if (message) toast.success(message);
+  },
+);
 
 onMounted(async () => {
   await configurationsStore.fetchConfiguration(route.params.id, route.params.configurationId);
@@ -183,12 +173,20 @@ async function onValidate() {
     payload = JSON.parse(jsonText.value);
   } catch {
     jsonError.value = 'Invalid JSON syntax.';
+    toast.error('Invalid JSON syntax.', 'Validation Failed');
     return;
   }
-  await configurationsStore.validateConfiguration(route.params.id, {
-    type: configuration.value.type,
-    payload,
-  });
+  try {
+    await configurationsStore.validateConfiguration(route.params.id, {
+      type: configuration.value.type,
+      payload,
+    });
+    if (configurationsStore.validationResult?.valid) {
+      toast.success('Payload is valid');
+    }
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 
 async function onSubmit() {
@@ -198,25 +196,20 @@ async function onSubmit() {
     payload = JSON.parse(jsonText.value);
   } catch {
     jsonError.value = 'Invalid JSON syntax.';
+    toast.error('Invalid JSON syntax.', 'Validation Failed');
     return;
   }
 
-  await configurationsStore.updateConfiguration(route.params.id, route.params.configurationId, {
-    name: form.name,
-    description: form.description || null,
-    status: form.status,
-    change_summary: form.change_summary || 'Configuration updated',
-    payload,
-  });
+  try {
+    await configurationsStore.updateConfiguration(route.params.id, route.params.configurationId, {
+      name: form.name,
+      description: form.description || null,
+      status: form.status,
+      change_summary: form.change_summary || 'Configuration updated',
+      payload,
+    });
+  } catch {
+    // Toast handled by watcher.
+  }
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-}
-</style>

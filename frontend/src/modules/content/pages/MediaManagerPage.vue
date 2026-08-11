@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Media library"
-      description="Enterprise CMS media manager with folders, previews, replace, and version history."
-    /> -->
     <ContentSubnav />
 
     <div
@@ -29,43 +25,36 @@
 
       <div class="space-y-4 lg:col-span-3">
         <div
-          class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:items-end"
+          class="flex flex-col gap-3 rounded-[12px] bg-white px-5 py-5 ring-1 ring-zinc-100 sm:px-6 lg:flex-row lg:items-center lg:justify-between"
         >
-          <div class="flex-1">
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >Search</label
-            >
+          <div class="relative min-w-0 flex-1 lg:max-w-sm">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
             <input
               v-model="search"
               type="search"
-              class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               placeholder="Search by name, caption, extension…"
               @keyup.enter="reload()"
             />
           </div>
-          <div class="w-full md:w-40">
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-              >Type</label
-            >
-            <select
+
+          <div class="flex flex-wrap items-center gap-2">
+            <SelectBox
               v-model="typeFilter"
-              class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+              wrapper-class="min-w-[10rem]"
+              :options="typeOptions"
               @change="reload()"
+            />
+            <button
+              type="button"
+              class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+              @click="reload()"
             >
-              <option value="">All types</option>
-              <option value="image">Images</option>
-              <option value="video">Videos</option>
-              <option value="document">Documents</option>
-              <option value="archive">Archives</option>
-            </select>
+              Apply
+            </button>
           </div>
-          <button
-            type="button"
-            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
-            @click="reload()"
-          >
-            Filter
-          </button>
         </div>
 
         <MediaUploadDropzone
@@ -84,7 +73,16 @@
           @delete="openDelete"
         />
 
-        <Pagination :meta="store.meta" :loading="store.loading" @change="(page) => reload(page)" />
+        <div
+          v-if="store.meta"
+          class="rounded-[12px] bg-white px-6 py-4 ring-1 ring-zinc-100"
+        >
+          <Pagination
+            :meta="store.meta"
+            :loading="store.loading"
+            @change="(page) => reload(page)"
+          />
+        </div>
       </div>
     </div>
 
@@ -120,9 +118,10 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import CreateMediaFolderModal from '@/modules/content/components/media/CreateMediaFolderModal.vue';
 import ImageCropModal from '@/modules/content/components/media/ImageCropModal.vue';
@@ -146,6 +145,14 @@ const replaceInput = ref(null);
 const cropOpen = ref(false);
 const folderModalOpen = ref(false);
 const folderModalError = ref(null);
+
+const typeOptions = [
+  { value: '', label: 'Type: All' },
+  { value: 'image', label: 'Images' },
+  { value: 'video', label: 'Videos' },
+  { value: 'document', label: 'Documents' },
+  { value: 'archive', label: 'Archives' },
+];
 
 const selectedFolderLabel = computed(() => {
   if (!selectedFolder.value) return null;

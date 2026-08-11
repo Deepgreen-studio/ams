@@ -93,10 +93,10 @@
       </div>
     </div>
 
-    <div class="flex justify-end gap-2 border-t border-slate-100 pt-4">
+    <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-4">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-[12px] border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -104,7 +104,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}

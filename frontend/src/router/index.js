@@ -211,12 +211,6 @@ const router = createRouter({
           meta: { title: 'Categories', requiresAuth: true },
         },
         {
-          path: 'content/categories/tree',
-          name: 'content.categories.tree',
-          component: () => import('@/modules/content/pages/CategoryTreePage.vue'),
-          meta: { title: 'Category Tree', requiresAuth: true },
-        },
-        {
           path: 'content/tags',
           name: 'content.tags',
           component: () => import('@/modules/content/pages/TagManagerPage.vue'),

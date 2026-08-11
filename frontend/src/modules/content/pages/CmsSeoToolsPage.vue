@@ -6,12 +6,12 @@
     /> -->
     <ContentSubnav />
 
-    <div class="mb-4 grid gap-3 sm:grid-cols-3">
+    <div class="mb-5 grid gap-3 sm:grid-cols-2">
       <a
         :href="sitemapUrl"
         target="_blank"
         rel="noreferrer"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-brand-700 hover:bg-slate-50"
+        class="rounded-[12px] bg-white px-4 py-3.5 text-sm font-medium text-brand-700 ring-1 ring-zinc-100 transition hover:bg-brand-50 hover:ring-brand-200"
       >
         Open /sitemap.xml
       </a>
@@ -19,20 +19,14 @@
         :href="robotsUrl"
         target="_blank"
         rel="noreferrer"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-brand-700 hover:bg-slate-50"
+        class="rounded-[12px] bg-white px-4 py-3.5 text-sm font-medium text-brand-700 ring-1 ring-zinc-100 transition hover:bg-brand-50 hover:ring-brand-200"
       >
         Open /robots.txt
       </a>
-      <RouterLink
-        :to="{ name: 'content.api-explorer' }"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-brand-700 hover:bg-slate-50"
-      >
-        API Explorer
-      </RouterLink>
     </div>
 
     <div class="grid gap-4 xl:grid-cols-2">
-      <div class="rounded-xl border border-slate-200 bg-white p-4">
+      <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
         <div class="mb-3 flex items-center justify-between">
           <h2 class="text-sm font-semibold text-slate-900">Sitemap entries</h2>
           <button
@@ -48,18 +42,25 @@
           <li
             v-for="entry in sitemapEntries"
             :key="entry.loc"
-            class="rounded-lg bg-slate-50 px-3 py-2"
+            class="rounded-[12px] bg-zinc-50 px-3.5 py-2.5"
           >
             <p class="break-all font-medium text-slate-800">{{ entry.loc }}</p>
-            <p class="text-xs text-slate-500">
-              {{ entry.lastmod || '—' }} · {{ entry.changefreq }} · {{ entry.priority }}
-            </p>
+            <div class="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <span>{{ entry.lastmod || '—' }}</span>
+              <span>·</span>
+              <span>{{ entry.changefreq }}</span>
+              <span
+                class="inline-flex items-center rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-medium text-brand-700"
+              >
+                {{ entry.priority }}
+              </span>
+            </div>
           </li>
         </ul>
       </div>
 
       <div class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-slate-950 p-4">
+        <div class="rounded-[12px] bg-slate-950 p-5">
           <div class="mb-3 flex items-center justify-between">
             <h2 class="text-sm font-semibold text-slate-200">robots.txt</h2>
             <button
@@ -73,21 +74,21 @@
           <pre class="overflow-auto text-xs leading-relaxed text-emerald-300">{{ robotsText }}</pre>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-4">
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h2 class="mb-3 text-sm font-semibold text-slate-900">SEO field checker</h2>
-          <label class="mb-1 block text-sm font-medium text-slate-700"
+          <label class="mb-1.5 block text-sm font-medium text-slate-700"
             >Published content UUID / slug</label
           >
           <div class="mb-3 flex gap-2">
             <input
               v-model="seoId"
               type="text"
-              class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               placeholder="uuid or slug"
             />
             <button
               type="button"
-              class="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              class="shrink-0 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
               @click="loadSeo"
             >
               Load
@@ -116,15 +117,29 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import SeoPreviewPanel from '@/modules/content/components/SeoPreviewPanel.vue';
 import { contentService } from '@/modules/content/services/contentService';
 
-const apiBase = import.meta.env.VITE_API_BASE_URL || '';
-const sitemapUrl = computed(() => `${apiBase}/sitemap.xml`);
-const robotsUrl = computed(() => `${apiBase}/robots.txt`);
+/** Public crawler endpoints live on the backend root (not under /api/v1). */
+function publicBackendUrl(path) {
+  const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
+  if (!apiBase) {
+    return path;
+  }
+
+  try {
+    const parsed = new URL(apiBase, typeof window !== 'undefined' ? window.location.origin : apiBase);
+    return `${parsed.origin}${path}`;
+  } catch {
+    return path;
+  }
+}
+
+const sitemapUrl = computed(() => publicBackendUrl('/sitemap.xml'));
+const robotsUrl = computed(() => publicBackendUrl('/robots.txt'));
 
 const sitemapEntries = ref([]);
 const sitemapCount = ref(0);

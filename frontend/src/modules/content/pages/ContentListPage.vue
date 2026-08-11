@@ -1,37 +1,18 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Content"
-      description="Manage headless CMS content for Android, iOS, Web, and future applications."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'content.dashboard' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Dashboard
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'content.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create content
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'content.dashboard' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Dashboard
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'content.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create content
-        </RouterLink>
+        :to="{ name: 'content.dashboard' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Dashboard
+      </RouterLink>
+      <RouterLink
+        :to="{ name: 'content.create' }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Create content
+      </RouterLink>
     </Teleport>
 
     <ContentSubnav />
@@ -49,48 +30,66 @@
       {{ contentStore.error }}
     </div>
 
-    <div v-if="contentStore.statistics" class="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div v-if="contentStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <div
         v-for="card in statCards"
         :key="card.label"
-        class="rounded-xl border border-slate-200 bg-white px-4 py-3"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 ring-1 ring-zinc-100 transition hover:ring-brand-200"
       >
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-        <p class="mt-1 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+        <div class="min-w-0">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+          <p class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+        </div>
+        <div
+          class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] p-3"
+          :class="card.iconBg"
+        >
+          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+        </div>
       </div>
     </div>
 
-    <div class="space-y-4">
-      <ContentSearchFilter
-        :model-value="contentStore.filters"
-        :types="contentStore.types"
-        :statuses="contentStore.statuses"
-        :categories="contentStore.categories"
-        @submit="onFilter"
-        @reset="onReset"
-      />
+    <ContentTable
+      :contents="contentStore.contents"
+      :loading="contentStore.loading"
+      @delete="openDelete"
+    >
+      <template #toolbar>
+        <ContentSearchFilter
+          :model-value="contentStore.filters"
+          :types="contentStore.types"
+          :statuses="contentStore.statuses"
+          :categories="contentStore.categories"
+          @submit="onFilter"
+          @reset="onReset"
+        />
+      </template>
 
-      <ContentTable
-        :contents="contentStore.contents"
-        :loading="contentStore.loading"
-        @delete="openDelete"
-      >
-        <template #empty-action>
-          <RouterLink
-            :to="{ name: 'content.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Create content
-          </RouterLink>
-        </template>
-      </ContentTable>
+      <template #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="onReset"
+        >
+          Reset
+        </button>
+        <RouterLink
+          :to="{ name: 'content.create' }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Create content
+        </RouterLink>
+      </template>
 
-      <Pagination
-        :meta="contentStore.meta"
-        :loading="contentStore.loading"
-        @change="onPageChange"
-      />
-    </div>
+      <template #footer>
+        <Pagination
+          :meta="contentStore.meta"
+          :loading="contentStore.loading"
+          @change="onPageChange"
+          @per-page="onPerPageChange"
+        />
+      </template>
+    </ContentTable>
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
@@ -107,7 +106,13 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  ArchiveBoxIcon,
+  CheckCircleIcon,
+  DocumentTextIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ContentSearchFilter from '@/modules/content/components/ContentSearchFilter.vue';
@@ -119,11 +124,41 @@ const contentStore = useContentStore();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
-  { label: 'Total', value: contentStore.statistics?.total ?? 0 },
-  { label: 'Published', value: contentStore.statistics?.published ?? 0 },
-  { label: 'Draft', value: contentStore.statistics?.draft ?? 0 },
-  { label: 'Archived', value: contentStore.statistics?.archived ?? 0 },
-  { label: 'Trashed', value: contentStore.statistics?.trashed ?? 0 },
+  {
+    label: 'Total',
+    value: contentStore.statistics?.total ?? 0,
+    icon: DocumentTextIcon,
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-500',
+  },
+  {
+    label: 'Published',
+    value: contentStore.statistics?.published ?? 0,
+    icon: CheckCircleIcon,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+  },
+  {
+    label: 'Draft',
+    value: contentStore.statistics?.draft ?? 0,
+    icon: PencilSquareIcon,
+    iconBg: 'bg-slate-100',
+    iconColor: 'text-slate-500',
+  },
+  {
+    label: 'Archived',
+    value: contentStore.statistics?.archived ?? 0,
+    icon: ArchiveBoxIcon,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+  },
+  {
+    label: 'Trashed',
+    value: contentStore.statistics?.trashed ?? 0,
+    icon: TrashIcon,
+    iconBg: 'bg-rose-50',
+    iconColor: 'text-rose-600',
+  },
 ]);
 
 onMounted(async () => {
@@ -142,6 +177,10 @@ function onReset() {
 
 function onPageChange(page) {
   contentStore.fetchContents({ page });
+}
+
+function onPerPageChange(perPage) {
+  contentStore.fetchContents({ per_page: perPage, page: 1 });
 }
 
 function openDelete(item) {

@@ -1,25 +1,12 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="content?.title || 'Content review'"
-      description="Review screen for the linear approval workflow."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'content.workflow' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back to queue
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'content.workflow' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back to queue
-        </RouterLink>
+        :to="{ name: 'content.workflow' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back to queue
+      </RouterLink>
     </Teleport>
 
     <ContentItemSubnav v-if="content" :content-id="content.uuid" />
@@ -39,27 +26,39 @@
 
     <div
       v-if="contentStore.loading && !content"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-zinc-100"
     />
 
     <div v-else-if="content" class="grid gap-4 lg:grid-cols-3">
       <section class="space-y-4 lg:col-span-2">
-        <div class="rounded-xl border border-slate-200 bg-white p-6">
+        <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
           <div class="mb-4 flex flex-wrap items-center gap-2">
             <StatusBadge :status="content.status?.slug" :label="content.status?.name" />
-            <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{{
-              content.type?.name
-            }}</span>
-            <span class="rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600"
-              >v{{ content.version || 1 }}</span
-            >
+            <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+              {{ content.type?.name }}
+            </span>
+            <span class="rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+              v{{ content.version || 1 }}
+            </span>
           </div>
-          <h2 class="text-xl font-semibold text-slate-900">{{ content.title }}</h2>
-          <p class="mt-2 text-sm text-slate-600">
+          <h2 class="text-xl font-semibold tracking-tight text-slate-900">{{ content.title }}</h2>
+          <p class="mt-2 text-sm leading-relaxed text-slate-600">
             {{ content.summary || content.excerpt || 'No summary.' }}
           </p>
-          <div class="prose mt-6 max-w-none whitespace-pre-wrap text-sm text-slate-700">
-            {{ content.body || '—' }}
+
+          <div class="mt-6 border-t border-zinc-100 pt-6">
+            <div
+              v-if="!content.body"
+              class="rounded-[12px] border border-dashed border-zinc-200 bg-zinc-50 px-4 py-10 text-center text-sm text-slate-500"
+            >
+              No body content yet.
+            </div>
+            <ContentPreview
+              v-else
+              body-only
+              :body="content.body"
+              :body-format="content.body_format || 'rich'"
+            />
           </div>
         </div>
 
@@ -67,16 +66,16 @@
       </section>
 
       <aside class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
-          <p class="text-xs uppercase tracking-wide text-slate-500">Current stage</p>
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 sm:p-6">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Current stage</p>
           <p class="mt-1 text-base font-semibold text-slate-900">{{ content.status?.name }}</p>
           <p class="mt-1 text-sm text-slate-500">Next level: {{ nextLevelLabel }}</p>
 
-          <label class="mb-1 mt-4 block text-sm font-medium text-slate-700">Comments</label>
+          <label class="mb-1.5 mt-5 block text-sm font-medium text-slate-700">Comments</label>
           <textarea
             v-model="comments"
             rows="4"
-            class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
+            class="w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-zinc-400 focus:border-brand-500"
             placeholder="Reviewer comments…"
           />
 
@@ -84,7 +83,7 @@
             <button
               v-if="status === 'draft' || status === 'rejected'"
               type="button"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+              class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('submit')"
             >
@@ -93,7 +92,7 @@
             <button
               v-if="status === 'pending_review'"
               type="button"
-              class="rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
+              class="rounded-[12px] bg-violet-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('review')"
             >
@@ -102,7 +101,7 @@
             <button
               v-if="status === 'reviewed'"
               type="button"
-              class="rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
+              class="rounded-[12px] bg-teal-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('approve')"
             >
@@ -111,7 +110,7 @@
             <button
               v-if="status === 'approved'"
               type="button"
-              class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
+              class="rounded-[12px] bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('publish')"
             >
@@ -120,7 +119,7 @@
             <button
               v-if="['pending_review', 'reviewed', 'approved'].includes(status)"
               type="button"
-              class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
+              class="rounded-[12px] bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('reject')"
             >
@@ -129,7 +128,7 @@
             <button
               v-if="status === 'rejected' || status === 'pending_review'"
               type="button"
-              class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('returnToDraft')"
             >
@@ -138,7 +137,7 @@
             <button
               v-if="status === 'published'"
               type="button"
-              class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
               :disabled="contentStore.saving"
               @click="act('archive')"
             >
@@ -147,23 +146,25 @@
           </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5 text-sm text-slate-600">
-          <p>
-            <span class="font-medium text-slate-800">Submitted:</span>
-            {{ formatDate(content.submitted_at) }}
-          </p>
-          <p class="mt-2">
-            <span class="font-medium text-slate-800">Reviewed:</span>
-            {{ formatDate(content.reviewed_at) }}
-          </p>
-          <p class="mt-2">
-            <span class="font-medium text-slate-800">Approved:</span>
-            {{ formatDate(content.approved_at) }}
-          </p>
-          <p class="mt-2">
-            <span class="font-medium text-slate-800">Published:</span>
-            {{ formatDate(content.published_at) }}
-          </p>
+        <div class="rounded-[12px] bg-white p-5 text-sm text-slate-600 ring-1 ring-zinc-100 sm:p-6">
+          <dl class="space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-slate-500">Submitted</dt>
+              <dd class="font-medium text-slate-800">{{ formatDate(content.submitted_at) }}</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-slate-500">Reviewed</dt>
+              <dd class="font-medium text-slate-800">{{ formatDate(content.reviewed_at) }}</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-slate-500">Approved</dt>
+              <dd class="font-medium text-slate-800">{{ formatDate(content.approved_at) }}</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
+              <dt class="text-slate-500">Published</dt>
+              <dd class="font-medium text-slate-800">{{ formatDate(content.published_at) }}</dd>
+            </div>
+          </dl>
         </div>
       </aside>
     </div>
@@ -173,8 +174,8 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';
+import ContentPreview from '@/modules/content/components/ContentPreview.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import WorkflowTimeline from '@/modules/content/components/WorkflowTimeline.vue';
 import { useContentStore } from '@/modules/content/stores/content';

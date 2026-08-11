@@ -1,21 +1,24 @@
 <template>
-  <nav class="mb-5 overflow-x-auto rounded-xl border border-slate-200 bg-white p-1.5">
-    <div class="flex min-w-max gap-1">
+  <div class="mb-6 border-b border-zinc-200">
+    <nav
+      class="-mb-px flex gap-x-0.5 overflow-x-auto"
+      aria-label="Content sections"
+    >
       <RouterLink
         v-for="item in items"
         :key="item.name"
         :to="{ name: item.name }"
-        class="whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition"
+        class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
         :class="
           isActive(item)
-            ? 'bg-brand-50 text-brand-700'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            ? 'border-brand-600 text-brand-700'
+            : 'border-transparent text-slate-500 hover:border-zinc-300 hover:text-slate-800'
         "
       >
         {{ item.label }}
       </RouterLink>
-    </div>
-  </nav>
+    </nav>
+  </div>
 </template>
 
 <script setup>
@@ -37,7 +40,6 @@ const items = [
     label: 'Categories',
     match: ['content.categories', 'content.categories.create', 'content.categories.edit'],
   },
-  { name: 'content.categories.tree', label: 'Category Tree', match: ['content.categories.tree'] },
   {
     name: 'content.tags',
     label: 'Tags',

@@ -6,36 +6,40 @@
     /> -->
     <ContentSubnav />
 
-    <div class="mb-4 flex flex-wrap gap-2">
-      <button
-        v-for="tab in tabs"
-        :key="tab.id"
-        type="button"
-        class="rounded-lg px-3 py-1.5 text-sm font-medium"
-        :class="
-          activeTab === tab.id ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'
-        "
-        @click="activeTab = tab.id"
-      >
-        {{ tab.label }}
-      </button>
+    <div class="mb-5 border-b border-zinc-200">
+      <nav class="-mb-px flex gap-x-0.5" aria-label="Delivery preview tabs">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          type="button"
+          class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
+          :class="
+            activeTab === tab.id
+              ? 'border-brand-600 text-brand-700'
+              : 'border-transparent text-slate-500 hover:border-zinc-300 hover:text-slate-800'
+          "
+          @click="activeTab = tab.id"
+        >
+          {{ tab.label }}
+        </button>
+      </nav>
     </div>
 
     <div
       v-if="error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      class="mb-4 rounded-[12px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
     >
       {{ error }}
     </div>
 
     <div v-if="activeTab === 'content'" class="grid gap-4 xl:grid-cols-5">
       <div class="space-y-4 xl:col-span-2">
-        <div class="rounded-xl border border-slate-200 bg-white p-5 ">
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Content UUID or slug</label>
           <input
             v-model="contentId"
             type="text"
-            class="mb-3 w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            class="mb-3 h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
             placeholder="uuid or slug"
           />
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
@@ -44,27 +48,27 @@
           <input
             v-model="contentType"
             type="text"
-            class="mb-4 w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            class="mb-4 h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
             placeholder="page, blog…"
           />
           <div class="flex flex-wrap gap-2">
             <button
               type="button"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+              class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
               @click="loadPublicContent"
             >
               Load public
             </button>
             <button
               type="button"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="loadPrivatePreview"
             >
               Private preview
             </button>
           </div>
         </div>
-        <div v-if="seo" class="rounded-xl border border-slate-200 bg-white p-4">
+        <div v-if="seo" class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Canonical</p>
           <p class="break-all text-sm text-slate-700">{{ seo.canonical_url }}</p>
           <p class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Views</p>
@@ -110,19 +114,19 @@
     </div>
 
     <div v-else class="grid gap-4 xl:grid-cols-5">
-      <div class="rounded-xl border border-slate-200 bg-white p-5  xl:col-span-2">
+      <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 xl:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Search query</label>
         <div class="flex gap-2">
           <input
             v-model="searchQuery"
             type="search"
-            class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+            class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
             placeholder="Search published content…"
             @keyup.enter="runSearch"
           />
           <button
             type="button"
-            class="shrink-0 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            class="shrink-0 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
             @click="runSearch"
           >
             Search
@@ -131,21 +135,21 @@
         <div class="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium"
+            class="rounded-[12px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
             @click="loadCollection('featured')"
           >
             Featured
           </button>
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium"
+            class="rounded-[12px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
             @click="loadCollection('latest')"
           >
             Latest
           </button>
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium"
+            class="rounded-[12px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
             @click="loadCollection('popular')"
           >
             Popular
@@ -153,36 +157,38 @@
         </div>
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-4 xl:col-span-3">
-        <div class="mb-3 flex items-center justify-between">
+      <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100 xl:col-span-3">
+        <div class="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
           <h2 class="text-sm font-semibold text-slate-900">{{ collectionLabel }}</h2>
           <span class="text-xs text-slate-500">{{ results.length }} result(s)</span>
         </div>
-        <div v-if="loading" class="space-y-3">
-          <div v-for="n in 4" :key="n" class="h-16 animate-pulse rounded bg-slate-100" />
-        </div>
-        <div
-          v-else-if="results.length === 0"
-          class="rounded-lg border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-500"
-        >
-          No published content matched.
-        </div>
-        <ul v-else class="divide-y divide-slate-100">
-          <li
-            v-for="item in results"
-            :key="item.uuid"
-            class="cursor-pointer py-3 hover:bg-slate-50"
-            @click="openResult(item)"
+        <div class="p-4">
+          <div v-if="loading" class="space-y-3">
+            <div v-for="n in 4" :key="n" class="h-16 animate-pulse rounded-[12px] bg-zinc-100" />
+          </div>
+          <div
+            v-else-if="results.length === 0"
+            class="rounded-[12px] border border-dashed border-zinc-200 px-4 py-10 text-center text-sm text-slate-500"
           >
-            <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-              {{ item.type?.slug }} · /{{ item.slug }} · views {{ item.view_count || 0 }}
-            </p>
-            <p class="mt-1 line-clamp-2 text-sm text-slate-600">
-              {{ item.excerpt || item.summary }}
-            </p>
-          </li>
-        </ul>
+            No published content matched.
+          </div>
+          <ul v-else class="divide-y divide-zinc-100">
+            <li
+              v-for="item in results"
+              :key="item.uuid"
+              class="-mx-1 cursor-pointer rounded-[12px] px-3 py-3 transition hover:bg-brand-50/60"
+              @click="openResult(item)"
+            >
+              <p class="text-sm font-medium text-slate-900">{{ item.title }}</p>
+              <p class="mt-1 text-xs text-slate-500">
+                {{ item.type?.slug }} · /{{ item.slug }} · views {{ item.view_count || 0 }}
+              </p>
+              <p class="mt-1 line-clamp-2 text-sm text-slate-600">
+                {{ item.excerpt || item.summary }}
+              </p>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

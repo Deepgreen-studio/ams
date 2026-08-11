@@ -1,15 +1,15 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-5">
+  <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 sm:p-6">
     <div class="mb-4 flex items-center justify-between gap-3">
       <div>
         <h3 class="text-sm font-semibold text-slate-900">Workflow timeline</h3>
-        <p class="text-xs text-slate-500">
+        <p class="mt-0.5 text-xs text-slate-500">
           Approval levels: Writer → Editor → Manager → Administrator
         </p>
       </div>
     </div>
     <div v-if="loading" class="space-y-3">
-      <div v-for="n in 4" :key="n" class="h-12 animate-pulse rounded bg-slate-100" />
+      <div v-for="n in 4" :key="n" class="h-12 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
     <EmptyState
       v-else-if="!history.length"
@@ -20,7 +20,7 @@
       <li v-for="(item, index) in history" :key="item.uuid" class="flex gap-3">
         <div class="relative flex w-8 shrink-0 flex-col items-center">
           <span class="z-10 mt-1 h-3 w-3 rounded-full bg-brand-600" />
-          <span v-if="index < history.length - 1" class="absolute top-4 h-full w-px bg-slate-200" />
+          <span v-if="index < history.length - 1" class="absolute top-4 h-full w-px bg-zinc-200" />
         </div>
         <div class="min-w-0 flex-1 pb-2">
           <p class="text-sm font-medium text-slate-900">
@@ -36,7 +36,7 @@
           </p>
           <p
             v-if="item.comments"
-            class="mt-2 whitespace-pre-wrap rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700"
+            class="mt-2 whitespace-pre-wrap rounded-[10px] bg-zinc-50 px-3 py-2 text-sm text-slate-700"
           >
             {{ item.comments }}
           </p>

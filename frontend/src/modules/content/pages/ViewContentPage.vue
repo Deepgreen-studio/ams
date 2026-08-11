@@ -1,111 +1,55 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="content?.title || 'Content details'"
-      description="Headless CMS content entry details."
-    >
-      <template #actions>
-        <template v-if="content">
-          <div class="flex flex-wrap items-center justify-end gap-2">
-            <RouterLink
-              :to="{ name: 'content.review', params: { id: content.uuid } }"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            >
-              Review / Approve
-            </RouterLink>
-            <button
-              v-if="content.status?.slug === 'published'"
-              type="button"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-              :disabled="contentStore.saving"
-              @click="unpublish"
-            >
-              Unpublish
-            </button>
-            <RouterLink
-              :to="{ name: 'content.edit', params: { id: content.uuid } }"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Edit
-            </RouterLink>
-            <RouterLink
-              :to="{ name: 'content.versions', params: { id: content.uuid } }"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Version history
-            </RouterLink>
-            <button
-              v-if="content.deleted_at"
-              type="button"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-              :disabled="contentStore.saving"
-              @click="restore"
-            >
-              Restore
-            </button>
-            <button
-              v-else
-              type="button"
-              class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-              @click="showDelete = true"
-            >
-              Delete
-            </button>
-          </div>
-        </template>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <template v-if="content">
-          <div class="flex flex-wrap items-center justify-end gap-2">
-            <RouterLink
-              :to="{ name: 'content.review', params: { id: content.uuid } }"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            >
-              Review / Approve
-            </RouterLink>
-            <button
-              v-if="content.status?.slug === 'published'"
-              type="button"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-              :disabled="contentStore.saving"
-              @click="unpublish"
-            >
-              Unpublish
-            </button>
-            <RouterLink
-              :to="{ name: 'content.edit', params: { id: content.uuid } }"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Edit
-            </RouterLink>
-            <RouterLink
-              :to="{ name: 'content.versions', params: { id: content.uuid } }"
-              class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Version history
-            </RouterLink>
-            <button
-              v-if="content.deleted_at"
-              type="button"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-              :disabled="contentStore.saving"
-              @click="restore"
-            >
-              Restore
-            </button>
-            <button
-              v-else
-              type="button"
-              class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-              @click="showDelete = true"
-            >
-              Delete
-            </button>
-          </div>
+        <RouterLink
+          :to="{ name: 'content.review', params: { id: content.uuid } }"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        >
+          Review / Approve
+        </RouterLink>
+        <button
+          v-if="content.status?.slug === 'published'"
+          type="button"
+          class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+          :disabled="contentStore.saving"
+          @click="unpublish"
+        >
+          Unpublish
+        </button>
+        <RouterLink
+          :to="{ name: 'content.edit', params: { id: content.uuid } }"
+          class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Edit
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'content.versions', params: { id: content.uuid } }"
+          class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Version history
+        </RouterLink>
+        <button
+          v-if="content.deleted_at"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          :disabled="contentStore.saving"
+          @click="restore"
+        >
+          Restore
+        </button>
+        <button
+          v-else
+          type="button"
+          class="rounded-[12px] bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700"
+          @click="showDelete = true"
+        >
+          Delete
+        </button>
+      </template>
     </Teleport>
 
-    <ContentItemSubnav v-if="content" :content-id="content.uuid" />
+    <ContentItemSubnav v-if="contentId" :content-id="contentId" />
 
     <div
       v-if="contentStore.successMessage"
@@ -124,13 +68,27 @@
       v-if="contentStore.loading && !content"
       class="grid gap-4 lg:grid-cols-3"
     >
-      <div class="h-80 animate-pulse rounded-xl bg-slate-100 lg:col-span-2" />
-      <div class="h-80 animate-pulse rounded-xl bg-slate-100" />
+      <div class="h-80 animate-pulse rounded-[12px] bg-zinc-100 lg:col-span-2" />
+      <div class="h-80 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div v-else-if="content" class="grid gap-4 lg:grid-cols-3">
+    <div
+      v-else-if="!content"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Content not found</p>
+      <p class="mt-1 text-sm text-slate-500">This entry could not be loaded.</p>
+      <RouterLink
+        :to="{ name: 'content.index' }"
+        class="mt-4 inline-flex rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Back to content
+      </RouterLink>
+    </div>
+
+    <div v-else class="grid gap-4 lg:grid-cols-3">
       <section class="space-y-4 lg:col-span-2">
-        <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
+        <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
           <div
             v-if="content.featured_image"
             class="aspect-[21/9] bg-slate-100"
@@ -190,8 +148,8 @@
           </div>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white">
-          <div class="flex items-center justify-between border-b border-slate-200 px-6 py-3.5">
+        <div class="rounded-[12px] bg-white ring-1 ring-zinc-100">
+          <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-3.5">
             <h3 class="text-sm font-semibold text-slate-900">Body</h3>
             <span
               class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-500"
@@ -219,7 +177,7 @@
       </section>
 
       <aside class="space-y-4">
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="mb-4 text-sm font-semibold text-slate-900">Details</h3>
           <dl class="space-y-4">
             <div>
@@ -287,7 +245,7 @@
           </dl>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <div class="mb-4 flex items-center justify-between gap-2">
             <h3 class="text-sm font-semibold text-slate-900">SEO preview</h3>
             <RouterLink
@@ -344,7 +302,7 @@
           </dl>
         </div>
 
-        <div class="rounded-xl border border-slate-200 bg-white p-5">
+        <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="mb-4 text-sm font-semibold text-slate-900">Social &amp; Open Graph</h3>
           <SeoPreviewPanel
             mode="social"
@@ -384,9 +342,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vue';
@@ -399,7 +356,14 @@ const route = useRoute();
 const router = useRouter();
 const contentStore = useContentStore();
 const showDelete = ref(false);
-const content = computed(() => contentStore.currentContent);
+
+const contentId = computed(() => String(route.params.id || ''));
+const content = computed(() => {
+  const current = contentStore.currentContent;
+  if (!current) return null;
+  if (contentId.value && current.uuid !== contentId.value) return null;
+  return current;
+});
 
 const resolvedCategories = computed(() => {
   if (!content.value) return [];
@@ -415,9 +379,22 @@ const bodyFormatLabel = computed(() => {
   return 'Rich text';
 });
 
-onMounted(async () => {
-  await contentStore.fetchContent(route.params.id);
-  await contentStore.fetchWorkflowHistory(route.params.id);
+async function loadContent(id) {
+  if (!id) return;
+  try {
+    await contentStore.fetchContent(id);
+    await contentStore.fetchWorkflowHistory(id).catch(() => {});
+  } catch {
+    /* store handles error */
+  }
+}
+
+onMounted(() => {
+  loadContent(contentId.value);
+});
+
+watch(contentId, (id) => {
+  loadContent(id);
 });
 
 function formatDate(value) {
@@ -426,15 +403,15 @@ function formatDate(value) {
 }
 
 async function unpublish() {
-  await contentStore.unpublishContent(route.params.id);
+  await contentStore.unpublishContent(contentId.value);
 }
 
 async function restore() {
-  await contentStore.restoreContent(route.params.id);
+  await contentStore.restoreContent(contentId.value);
 }
 
 async function confirmDelete() {
-  await contentStore.deleteContent(route.params.id);
+  await contentStore.deleteContent(contentId.value);
   showDelete.value = false;
   await router.push({ name: 'content.index' });
 }

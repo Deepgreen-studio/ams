@@ -31,6 +31,15 @@ export default defineConfig(({ mode }) => {
           target: proxyTarget,
           changeOrigin: true,
         },
+        // Public SEO discovery endpoints (crawler-facing web routes)
+        '/sitemap.xml': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
+        '/robots.txt': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
       },
     },
   };

@@ -6,16 +6,16 @@
     /> -->
     <ContentSubnav />
 
-    <div class="mb-5 inline-flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+    <div class="mb-5 inline-flex rounded-[12px] bg-white p-1 ring-1 ring-zinc-100">
       <button
         v-for="tab in tabs"
         :key="tab.id"
         type="button"
-        class="rounded-lg px-4 py-2 text-sm font-medium transition"
+        class="rounded-[10px] px-4 py-2 text-sm font-medium transition"
         :class="
           activeTab === tab.id
-            ? 'bg-brand-50 text-brand-700 shadow-sm'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            ? 'bg-brand-50 text-brand-700'
+            : 'text-slate-600 hover:bg-zinc-50 hover:text-slate-900'
         "
         @click="activeTab = tab.id"
       >
@@ -25,8 +25,8 @@
 
     <div v-if="activeTab === 'explorer'" class="grid items-stretch gap-5 xl:grid-cols-12">
       <div class="flex flex-col gap-4 xl:col-span-5">
-        <section class="flex-1 rounded-xl border border-slate-200 bg-white shadow-sm">
-          <header class="border-b border-slate-100 px-5 py-4">
+        <section class="flex-1 rounded-[12px] bg-white ring-1 ring-zinc-100">
+          <header class="border-b border-zinc-100 px-5 py-4">
             <h2 class="text-sm font-semibold text-slate-900">Request</h2>
             <p class="mt-0.5 text-xs text-slate-500">
               Choose a scope and endpoint, then send a live CMS request.
@@ -36,32 +36,22 @@
           <div class="space-y-4 p-5">
             <div class="grid gap-4 sm:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="api-scope"
-                  >Scope</label
-                >
-                <select
-                  id="api-scope"
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Scope</label>
+                <SelectBox
                   v-model="form.scope"
-                  class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-                >
-                  <option value="public">Public API</option>
-                  <option value="private">Private API</option>
-                  <option value="seo">SEO helpers</option>
-                </select>
+                  :options="scopeOptions"
+                  size="lg"
+                  wrapper-class="w-full"
+                />
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700" for="api-endpoint"
-                  >Endpoint</label
-                >
-                <select
-                  id="api-endpoint"
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Endpoint</label>
+                <SelectBox
                   v-model="form.endpoint"
-                  class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 font-mono text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-                >
-                  <option v-for="item in endpointOptions" :key="item.path" :value="item.path">
-                    {{ item.label }}
-                  </option>
-                </select>
+                  :options="endpointSelectOptions"
+                  size="lg"
+                  wrapper-class="w-full"
+                />
               </div>
             </div>
 
@@ -73,12 +63,12 @@
                 id="api-extra"
                 v-model="form.pathExtra"
                 type="text"
-                class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 font-mono text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
                 placeholder=":uuid, ?q=hello, ?type=page"
               />
               <p class="mt-1.5 text-xs text-slate-500">
-                Replace <code class="rounded bg-slate-100 px-1">{id}</code> /
-                <code class="rounded bg-slate-100 px-1">{slug}</code> or append query strings.
+                Replace <code class="rounded bg-zinc-100 px-1">{id}</code> /
+                <code class="rounded bg-zinc-100 px-1">{slug}</code> or append query strings.
               </p>
             </div>
 
@@ -90,12 +80,12 @@
                 id="api-key"
                 v-model="form.apiKey"
                 type="text"
-                class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 font-mono text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+                class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
                 placeholder="cms_… (optional for public)"
               />
             </div>
 
-            <div class="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+            <div class="rounded-[12px] bg-zinc-50 px-3.5 py-3 ring-1 ring-zinc-100">
               <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                 Resolved URL
               </p>
@@ -104,7 +94,7 @@
 
             <button
               type="button"
-              class="w-full rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+              class="w-full rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="loading"
               @click="runRequest"
             >
@@ -115,7 +105,7 @@
       </div>
 
       <section
-        class="flex min-h-[28rem] flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 xl:col-span-7"
+        class="flex min-h-[28rem] flex-col overflow-hidden rounded-[12px] bg-slate-950 xl:col-span-7"
       >
         <header
           class="flex items-center justify-between border-b border-slate-800 px-5 py-3.5"
@@ -142,8 +132,8 @@
     </div>
 
     <div v-else class="grid gap-5 lg:grid-cols-2">
-      <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
-        <header class="border-b border-slate-100 px-5 py-4">
+      <section class="rounded-[12px] bg-white ring-1 ring-zinc-100">
+        <header class="border-b border-zinc-100 px-5 py-4">
           <h2 class="text-sm font-semibold text-slate-900">Create CMS API key</h2>
           <p class="mt-0.5 text-xs text-slate-500">
             Keys authenticate private headless delivery without a dashboard session.
@@ -158,13 +148,13 @@
               id="key-name"
               v-model="keyForm.name"
               type="text"
-              class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+              class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               placeholder="Mobile app production"
             />
           </div>
           <button
             type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             :disabled="keyLoading"
             @click="createKey"
           >
@@ -172,7 +162,7 @@
           </button>
           <div
             v-if="plainTextKey"
-            class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-900"
+            class="rounded-[12px] border border-amber-200 bg-amber-50 px-3.5 py-3 text-sm text-amber-900"
           >
             <p class="font-medium">Copy now — shown once</p>
             <p class="mt-1 break-all font-mono text-xs">{{ plainTextKey }}</p>
@@ -181,8 +171,8 @@
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
-        <header class="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+      <section class="rounded-[12px] bg-white ring-1 ring-zinc-100">
+        <header class="flex items-center justify-between border-b border-zinc-100 px-5 py-4">
           <div>
             <h2 class="text-sm font-semibold text-slate-900">Existing keys</h2>
             <p class="mt-0.5 text-xs text-slate-500">Active and revoked delivery keys.</p>
@@ -198,11 +188,11 @@
         <div class="p-5">
           <div
             v-if="keys.length === 0"
-            class="rounded-lg border border-dashed border-slate-200 px-4 py-10 text-center text-sm text-slate-500"
+            class="rounded-[12px] border border-dashed border-zinc-200 px-4 py-10 text-center text-sm text-slate-500"
           >
             No API keys yet.
           </div>
-          <ul v-else class="divide-y divide-slate-100">
+          <ul v-else class="divide-y divide-zinc-100">
             <li
               v-for="key in keys"
               :key="key.uuid"
@@ -211,7 +201,16 @@
               <div>
                 <p class="text-sm font-medium text-slate-900">{{ key.name }}</p>
                 <p class="mt-0.5 text-xs text-slate-500">
-                  {{ key.key_prefix }}… · {{ key.is_active ? 'Active' : 'Revoked' }}
+                  {{ key.key_prefix }}… ·
+                  <span
+                    :class="
+                      key.is_active
+                        ? 'inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700'
+                        : 'inline-flex rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium text-slate-500'
+                    "
+                  >
+                    {{ key.is_active ? 'Active' : 'Revoked' }}
+                  </span>
                 </p>
               </div>
               <button
@@ -233,6 +232,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { contentService } from '@/modules/content/services/contentService';
 
 const tabs = [
@@ -259,6 +259,12 @@ const form = reactive({
 const keyForm = reactive({
   name: '',
 });
+
+const scopeOptions = [
+  { value: 'public', label: 'Public API' },
+  { value: 'private', label: 'Private API' },
+  { value: 'seo', label: 'SEO helpers' },
+];
 
 const catalog = {
   public: [
@@ -292,6 +298,13 @@ const catalog = {
 };
 
 const endpointOptions = computed(() => catalog[form.scope] || []);
+
+const endpointSelectOptions = computed(() =>
+  endpointOptions.value.map((item) => ({
+    value: item.path,
+    label: item.label,
+  })),
+);
 
 const resolvedUrl = computed(() => {
   const base =

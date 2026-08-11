@@ -2,8 +2,12 @@
   <li>
     <button
       type="button"
-      class="flex w-full items-center rounded-lg px-3 py-2 text-left text-sm"
-      :class="selected === folder.uuid ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-50'"
+      class="flex w-full items-center rounded-[10px] px-3 py-2 text-left text-sm transition"
+      :class="
+        selected === folder.uuid
+          ? 'bg-brand-50 font-medium text-brand-700'
+          : 'text-slate-700 hover:bg-zinc-50'
+      "
       :style="{ paddingLeft: `${12 + depth * 14}px` }"
       @click="$emit('select', folder)"
     >

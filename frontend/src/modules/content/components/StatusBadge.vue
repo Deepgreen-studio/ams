@@ -1,6 +1,6 @@
 <template>
   <span
-    class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
+    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
     :class="toneClass"
   >
     {{ label }}
@@ -35,7 +35,7 @@ const toneClass = computed(() => {
       return 'bg-slate-100 text-slate-600';
     case 'draft':
     default:
-      return 'bg-slate-50 text-slate-700';
+      return 'bg-transparent text-slate-500';
   }
 });
 </script>

@@ -177,9 +177,18 @@ export const useMediaStore = defineStore('media', () => {
   }
 
   async function fetchFolders(params = {}) {
-    const { data } = await mediaService.listFolders(params);
-    folders.value = data.data?.folders ?? [];
-    return folders.value;
+    state.loading.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await mediaService.listFolders(params);
+      folders.value = data.data?.folders ?? [];
+      return folders.value;
+    } catch (err) {
+      state.applyError(err, 'Unable to load folders');
+      throw err;
+    } finally {
+      state.loading.value = false;
+    }
   }
 
   async function upload(files, folderId = null) {

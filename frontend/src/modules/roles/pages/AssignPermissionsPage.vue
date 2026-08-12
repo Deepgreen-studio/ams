@@ -1,18 +1,5 @@
 <template>
   <div>
-    <div
-      v-if="rolesStore.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ rolesStore.successMessage }}
-    </div>
-    <div
-      v-if="rolesStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ rolesStore.error }}
-    </div>
-
     <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <div class="mb-5 flex items-center justify-between gap-3">
         <h3 class="text-base font-semibold text-slate-900">
@@ -51,15 +38,19 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { useToast } from '@/composables/useToast';
 import PermissionTree from '@/modules/roles/components/PermissionTree.vue';
 import { usePermissionsStore, useRolesStore } from '@/modules/roles/stores/roles';
 
 const route = useRoute();
 const rolesStore = useRolesStore();
 const permissionsStore = usePermissionsStore();
+const toast = useToast();
 const selectedPermissions = ref([]);
 
 onMounted(async () => {
+  rolesStore.successMessage = null;
+  rolesStore.error = null;
   await Promise.all([rolesStore.fetchRole(route.params.id), permissionsStore.fetchGroups()]);
 });
 
@@ -69,6 +60,24 @@ watch(
     selectedPermissions.value = (role?.permissions || []).map((permission) => permission.name);
   },
   { immediate: true }
+);
+
+watch(
+  () => rolesStore.successMessage,
+  (message) => {
+    if (!message) return;
+    toast.success(message);
+    rolesStore.successMessage = null;
+  }
+);
+
+watch(
+  () => rolesStore.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    rolesStore.error = null;
+  }
 );
 
 async function onSave() {

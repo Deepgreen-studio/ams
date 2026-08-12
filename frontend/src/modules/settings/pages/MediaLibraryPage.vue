@@ -69,6 +69,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CreateFolderModal from '@/modules/settings/components/CreateFolderModal.vue';
@@ -80,6 +81,7 @@ import SearchBar from '@/modules/settings/components/SearchBar.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useMediaStore } from '@/modules/settings/stores/settings';
 
+const route = useRoute();
 const mediaStore = useMediaStore();
 const search = ref('');
 const selectedFolder = ref(null);
@@ -90,6 +92,10 @@ const folderModalOpen = ref(false);
 const folderModalError = ref(null);
 
 onMounted(async () => {
+  const folderFromQuery = typeof route.query.folder === 'string' ? route.query.folder : null;
+  if (folderFromQuery) {
+    selectedFolder.value = folderFromQuery;
+  }
   await mediaStore.fetchFolders();
   await reload();
 });

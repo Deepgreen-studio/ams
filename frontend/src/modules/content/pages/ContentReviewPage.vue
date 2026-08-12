@@ -81,7 +81,7 @@
 
           <div class="mt-4 flex flex-col gap-2">
             <button
-              v-if="status === 'draft' || status === 'rejected'"
+              v-if="(status === 'draft' || status === 'rejected') && can('content.submit')"
               type="button"
               class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -90,7 +90,7 @@
               Submit for review
             </button>
             <button
-              v-if="status === 'pending_review'"
+              v-if="status === 'pending_review' && can('content.review')"
               type="button"
               class="rounded-[12px] bg-violet-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-violet-700 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -99,7 +99,7 @@
               Mark reviewed
             </button>
             <button
-              v-if="status === 'reviewed'"
+              v-if="status === 'reviewed' && can('content.approve')"
               type="button"
               class="rounded-[12px] bg-teal-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-teal-700 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -108,7 +108,7 @@
               Approve
             </button>
             <button
-              v-if="status === 'approved'"
+              v-if="status === 'approved' && can('content.publish')"
               type="button"
               class="rounded-[12px] bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -117,7 +117,7 @@
               Publish
             </button>
             <button
-              v-if="['pending_review', 'reviewed', 'approved'].includes(status)"
+              v-if="['pending_review', 'reviewed', 'approved'].includes(status) && canAny('content.review', 'content.approve', 'content.publish')"
               type="button"
               class="rounded-[12px] bg-rose-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -126,7 +126,7 @@
               Reject
             </button>
             <button
-              v-if="status === 'rejected' || status === 'pending_review'"
+              v-if="(status === 'rejected' || status === 'pending_review') && canAny('content.submit', 'content.update')"
               type="button"
               class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -135,7 +135,7 @@
               Return to draft
             </button>
             <button
-              v-if="status === 'published'"
+              v-if="status === 'published' && canAny('content.publish', 'content.update')"
               type="button"
               class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
               :disabled="contentStore.saving"
@@ -178,10 +178,12 @@ import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vu
 import ContentPreview from '@/modules/content/components/ContentPreview.vue';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import WorkflowTimeline from '@/modules/content/components/WorkflowTimeline.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useContentStore } from '@/modules/content/stores/content';
 
 const route = useRoute();
 const contentStore = useContentStore();
+const { can, canAny } = usePermissions();
 const comments = ref('');
 const content = computed(() => contentStore.currentContent);
 const status = computed(() => content.value?.status?.slug || '');

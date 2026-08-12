@@ -19,7 +19,12 @@
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Severity</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Affected</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-4 py-3 text-right font-semibold text-slate-600"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -40,9 +45,10 @@
             <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">
               {{ item.affected_user_count ?? 0 }}
             </td>
-            <td class="px-4 py-3">
+            <td v-if="hasAnyAction" class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <RouterLink
+                  v-if="can('compliance.view')"
                   :to="{ name: 'compliance.breaches.show', params: { id: item.uuid } }"
                   class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
                 >
@@ -58,8 +64,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import BreachStatusBadge from '@/modules/compliance/components/BreachStatusBadge.vue';
 import BreachSeverityBadge from '@/modules/compliance/components/BreachSeverityBadge.vue';
 
@@ -67,4 +75,7 @@ defineProps({
   breaches: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
 });
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() => canAny('compliance.view'));
 </script>

@@ -25,6 +25,10 @@ export const roleService = {
     return api.post(`/roles/${id}/restore`);
   },
 
+  forceDelete(id) {
+    return api.delete(`/roles/${id}/force-delete`);
+  },
+
   syncPermissions(id, permissions) {
     return api.post(`/roles/${id}/permissions`, { permissions });
   },

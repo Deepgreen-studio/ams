@@ -74,7 +74,12 @@
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -108,7 +113,7 @@
             <td class="hidden px-5 py-4 text-slate-600 xl:table-cell">
               {{ customer.country || '—' }}
             </td>
-            <td class="px-5 py-4">
+            <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="flex justify-end">
                 <button
                   type="button"
@@ -134,12 +139,13 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeCustomer"
-        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
       >
         <RouterLink
+          v-if="can('customers.view')"
           :to="{ name: 'customers.show', params: { id: activeCustomer.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -148,24 +154,40 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </RouterLink>
-        <RouterLink
-          :to="{ name: 'customers.edit', params: { id: activeCustomer.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </RouterLink>
-        <button
-          type="button"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-          role="menuitem"
-          @click="onDelete(activeCustomer)"
-        >
-          <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
-        </button>
+        <template v-if="isTrashed(activeCustomer)">
+          <button
+            v-if="can('customers.restore')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="onRestore(activeCustomer)"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+            Restore
+          </button>
+        </template>
+        <template v-else>
+          <RouterLink
+            v-if="can('customers.update')"
+            :to="{ name: 'customers.edit', params: { id: activeCustomer.uuid } }"
+            class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="closeMenu"
+          >
+            <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+            Edit
+          </RouterLink>
+          <button
+            v-if="can('customers.delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onDelete(activeCustomer)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Delete
+          </button>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -175,12 +197,14 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
+  ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/customers/components/StatusBadge.vue';
 import TypeBadge from '@/modules/customers/components/TypeBadge.vue';
 
@@ -203,20 +227,22 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'delete', 'restore']);
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('customers.view', 'customers.update', 'customers.delete', 'customers.restore'),
+);
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
 
-const activeCustomer = computed(() =>
-  props.customers.find((customer) => customer.uuid === openMenuId.value) || null,
+const activeCustomer = computed(
+  () => props.customers.find((customer) => customer.uuid === openMenuId.value) || null,
 );
 
-function initials(name) {
-  return String(name || 'C')
-    .trim()
-    .slice(0, 2)
-    .toUpperCase();
+function isTrashed(customer) {
+  return Boolean(customer?.deleted_at);
 }
 
 function toggleMenu(id, event) {
@@ -225,18 +251,19 @@ function toggleMenu(id, event) {
     return;
   }
 
+  const customer = props.customers.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
-  const menuHeight = 132;
+  const menuWidth = 176;
+  const itemCount = isTrashed(customer)
+    ? [can('customers.view'), can('customers.restore')].filter(Boolean).length
+    : [can('customers.view'), can('customers.update'), can('customers.delete')].filter(Boolean)
+        .length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;
-
   const top = openUp ? rect.top - menuHeight - gap : rect.bottom + gap;
-  const left = Math.min(
-    Math.max(8, rect.right - menuWidth),
-    window.innerWidth - menuWidth - 8,
-  );
+  const left = Math.min(Math.max(8, rect.right - menuWidth), window.innerWidth - menuWidth - 8);
 
   menuStyle.value = {
     top: `${Math.max(8, top)}px`,
@@ -252,6 +279,11 @@ function closeMenu() {
 function onDelete(customer) {
   closeMenu();
   emit('delete', customer);
+}
+
+function onRestore(customer) {
+  closeMenu();
+  emit('restore', customer);
 }
 
 function onDocumentClick() {

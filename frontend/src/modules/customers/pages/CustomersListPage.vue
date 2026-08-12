@@ -2,6 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('customers.create')"
         :to="{ name: 'customers.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -40,6 +41,7 @@
       :sort-dir="customersStore.filters.sort_dir"
       @sort="onSort"
       @delete="openDelete"
+      @restore="confirmRestore"
     >
       <template #toolbar>
         <CustomerSearchFilter
@@ -58,6 +60,7 @@
           Reset
         </button>
         <RouterLink
+          v-if="can('customers.create')"
           :to="{ name: 'customers.create' }"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -90,6 +93,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CustomerSearchFilter from '@/modules/customers/components/CustomerSearchFilter.vue';
@@ -97,6 +101,7 @@ import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const customersStore = useCustomersStore();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
@@ -145,6 +150,11 @@ async function confirmDelete() {
   if (!pendingDelete.value) return;
   await customersStore.archiveCustomer(pendingDelete.value.uuid);
   pendingDelete.value = null;
+  await customersStore.fetchCustomers();
+}
+
+async function confirmRestore(customer) {
+  await customersStore.restoreCustomer(customer.uuid);
   await customersStore.fetchCustomers();
 }
 </script>

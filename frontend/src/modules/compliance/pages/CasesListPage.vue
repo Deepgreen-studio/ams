@@ -27,6 +27,7 @@
           Dashboard
         </RouterLink>
         <RouterLink
+          v-if="can('compliance.create')"
           :to="{ name: 'compliance.cases.create' }"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -55,6 +56,7 @@
       <CaseTable :cases="store.cases" :loading="store.loading" @delete="openDelete">
         <template #empty-action>
           <RouterLink
+            v-if="can('compliance.create')"
             :to="{ name: 'compliance.cases.create' }"
             class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
@@ -82,6 +84,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import CaseSearchFilters from '@/modules/compliance/components/CaseSearchFilters.vue';
 import CaseTable from '@/modules/compliance/components/CaseTable.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
@@ -91,6 +94,7 @@ import Pagination from '@/modules/users/components/Pagination.vue';
 
 const route = useRoute();
 const store = useComplianceStore();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 onMounted(() => {

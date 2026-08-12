@@ -179,6 +179,25 @@ class RoleService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $role = $this->roleRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if ($role->is_system) {
+                throw new ApiException('System roles cannot be permanently deleted.', 422);
+            }
+
+            if ($role->users()->exists()) {
+                throw new ApiException('Cannot permanently delete a role that is still assigned to users.', 422);
+            }
+
+            $this->roleRepository->forceDeleteRole($role);
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            event(new RoleDeleted($role, $actor));
+        });
+    }
+
     /**
      * @param  list<string|int>  $permissionIdentifiers
      */

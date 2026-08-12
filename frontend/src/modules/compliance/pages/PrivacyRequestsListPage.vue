@@ -27,6 +27,7 @@
           Dashboard
         </RouterLink>
         <RouterLink
+          v-if="can('compliance.create')"
           :to="{ name: 'compliance.privacy.create' }"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -55,6 +56,7 @@
       <PrivacyRequestTable :requests="store.requests" :loading="store.loading" @delete="openDelete">
         <template #empty-action>
           <RouterLink
+            v-if="can('compliance.create')"
             :to="{ name: 'compliance.privacy.create' }"
             class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
@@ -82,6 +84,7 @@
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PrivacyRequestTable from '@/modules/compliance/components/PrivacyRequestTable.vue';
 import PrivacySearchFilters from '@/modules/compliance/components/PrivacySearchFilters.vue';
@@ -91,6 +94,7 @@ import Pagination from '@/modules/users/components/Pagination.vue';
 
 const route = useRoute();
 const store = usePrivacyRequestsStore();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 onMounted(() => {

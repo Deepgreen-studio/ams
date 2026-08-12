@@ -27,6 +27,7 @@
           Dashboard
         </RouterLink>
         <RouterLink
+          v-if="can('compliance.create')"
           :to="{ name: 'compliance.consents.create' }"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -54,6 +55,7 @@
       <ConsentTable :consents="store.consents" :loading="store.loading" @withdraw="onWithdraw">
         <template #empty-action>
           <RouterLink
+            v-if="can('compliance.create')"
             :to="{ name: 'compliance.consents.create' }"
             class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
@@ -70,6 +72,7 @@
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import ConsentSearchFilters from '@/modules/compliance/components/ConsentSearchFilters.vue';
 import ConsentTable from '@/modules/compliance/components/ConsentTable.vue';
@@ -77,6 +80,7 @@ import { useConsentStore } from '@/modules/compliance/stores/consents';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
 const store = useConsentStore();
+const { can } = usePermissions();
 
 onMounted(() => {
   store.fetchConsents();

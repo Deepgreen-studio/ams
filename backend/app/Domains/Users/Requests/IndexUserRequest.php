@@ -33,6 +33,7 @@ class IndexUserRequest extends FormRequest
                 'status',
                 'created_at',
                 'updated_at',
+                'deleted_at',
                 'last_login_at',
             ])],
             'sort_dir' => ['nullable', Rule::in(['asc', 'desc'])],

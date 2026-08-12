@@ -2,18 +2,28 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="canAny('roles.view', 'roles.restore', 'roles.force-delete')"
+        :to="{ name: 'roles.trash' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Trash
+      </RouterLink>
+      <RouterLink
+        v-if="can('roles.view')"
         :to="{ name: 'roles.matrix' }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Permission matrix
       </RouterLink>
       <RouterLink
+        v-if="can('roles.assign')"
         :to="{ name: 'roles.assign' }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Assign roles
       </RouterLink>
       <RouterLink
+        v-if="can('roles.create')"
         :to="{ name: 'roles.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -55,6 +65,7 @@
           Reset
         </button>
         <RouterLink
+          v-if="can('roles.create')"
           :to="{ name: 'roles.create' }"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -87,6 +98,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';
 import RoleSearchFilter from '@/modules/roles/components/RoleSearchFilter.vue';
@@ -94,14 +106,15 @@ import RoleTable from '@/modules/roles/components/RoleTable.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 
 const rolesStore = useRolesStore();
+const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
 onMounted(() => {
-  rolesStore.fetchRoles();
+  rolesStore.fetchRoles({ trashed: '' });
 });
 
 function onFilter(filters) {
-  rolesStore.fetchRoles(filters);
+  rolesStore.fetchRoles({ ...filters, trashed: '' });
 }
 
 function onReset() {

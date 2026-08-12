@@ -1,22 +1,26 @@
 <template>
   <div>
-    <!-- <PageHeader title="Users" description="Manage platform users, status, and profiles.">
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'users.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create user
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'users.create' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        v-if="canAny('users.view', 'users.restore', 'users.force-delete')"
+        :to="{ name: 'users.trash' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Trash
+        <span
+          v-if="usersStore.statistics?.trashed"
+          class="ml-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-xs font-semibold text-rose-600"
         >
-          Create user
-        </RouterLink>
+          {{ usersStore.statistics.trashed }}
+        </span>
+      </RouterLink>
+      <RouterLink
+        v-if="can('users.create')"
+        :to="{ name: 'users.create' }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Create user
+      </RouterLink>
     </Teleport>
 
     <div
@@ -33,10 +37,13 @@
     </div>
 
     <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <div
+      <button
         v-for="card in statCards"
         :key="card.label"
-        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 ring-1 ring-zinc-100 transition hover:ring-brand-200"
+        type="button"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 text-left ring-1 ring-zinc-100 transition hover:ring-brand-200"
+        :class="card.active ? 'ring-brand-300' : ''"
+        @click="card.onClick?.()"
       >
         <div class="min-w-0">
           <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
@@ -48,7 +55,7 @@
         >
           <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
         </div>
-      </div>
+      </button>
     </div>
 
     <UserTable
@@ -72,6 +79,7 @@
           Reset
         </button>
         <RouterLink
+          v-if="can('users.create')"
           :to="{ name: 'users.create' }"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -103,7 +111,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   CheckCircleIcon,
   NoSymbolIcon,
@@ -111,14 +119,16 @@ import {
   TrashIcon,
   UsersIcon,
 } from '@heroicons/vue/24/outline';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import UserSearchFilter from '@/modules/users/components/UserSearchFilter.vue';
 import UserTable from '@/modules/users/components/UserTable.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useUsersStore } from '@/modules/users/stores/users';
 
+const router = useRouter();
 const usersStore = useUsersStore();
+const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
@@ -128,6 +138,8 @@ const statCards = computed(() => [
     icon: UsersIcon,
     iconBg: 'bg-brand-50',
     iconColor: 'text-brand-500',
+    active: !usersStore.filters.status,
+    onClick: () => usersStore.fetchUsers({ status: '', page: 1 }),
   },
   {
     label: 'Active',
@@ -135,6 +147,8 @@ const statCards = computed(() => [
     icon: CheckCircleIcon,
     iconBg: 'bg-emerald-50',
     iconColor: 'text-emerald-600',
+    active: usersStore.filters.status === 'active',
+    onClick: () => usersStore.fetchUsers({ status: 'active', page: 1 }),
   },
   {
     label: 'Inactive',
@@ -142,6 +156,8 @@ const statCards = computed(() => [
     icon: NoSymbolIcon,
     iconBg: 'bg-slate-100',
     iconColor: 'text-slate-500',
+    active: usersStore.filters.status === 'inactive',
+    onClick: () => usersStore.fetchUsers({ status: 'inactive', page: 1 }),
   },
   {
     label: 'Suspended',
@@ -149,6 +165,8 @@ const statCards = computed(() => [
     icon: PauseCircleIcon,
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-600',
+    active: usersStore.filters.status === 'suspended',
+    onClick: () => usersStore.fetchUsers({ status: 'suspended', page: 1 }),
   },
   {
     label: 'Trashed',
@@ -156,15 +174,17 @@ const statCards = computed(() => [
     icon: TrashIcon,
     iconBg: 'bg-rose-50',
     iconColor: 'text-rose-600',
+    active: false,
+    onClick: () => router.push({ name: 'users.trash' }),
   },
 ]);
 
 onMounted(() => {
-  usersStore.fetchUsers();
+  usersStore.fetchUsers({ trashed: '', page: usersStore.filters.page || 1 });
 });
 
 function onFilter(filters) {
-  usersStore.fetchUsers(filters);
+  usersStore.fetchUsers({ ...filters, trashed: '' });
 }
 
 function onReset() {

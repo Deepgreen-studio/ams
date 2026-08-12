@@ -20,7 +20,12 @@
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Assignee</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 xl:table-cell">Company</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-4 py-3 text-right font-semibold text-slate-600"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -44,15 +49,17 @@
             <td class="hidden px-4 py-3 text-slate-600 xl:table-cell">
               {{ ticket.company?.company_name || '—' }}
             </td>
-            <td class="px-4 py-3">
+            <td v-if="hasAnyAction" class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <RouterLink
+                  v-if="can('support.view')"
                   :to="{ name: 'support.tickets.show', params: { id: ticket.uuid } }"
                   class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
                 >
                   View
                 </RouterLink>
                 <button
+                  v-if="can('support.delete')"
                   type="button"
                   class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
                   @click="$emit('archive', ticket)"
@@ -69,8 +76,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import TicketCategoryBadge from '@/modules/support/components/TicketCategoryBadge.vue';
 import PriorityIndicator from '@/modules/support/components/PriorityIndicator.vue';
 import TicketStatusBadge from '@/modules/support/components/TicketStatusBadge.vue';
@@ -81,4 +90,7 @@ defineProps({
 });
 
 defineEmits(['archive']);
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() => canAny('support.view', 'support.delete'));
 </script>

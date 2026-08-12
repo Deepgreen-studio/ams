@@ -12,6 +12,7 @@
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
+          v-if="can('compliance.create')"
           :to="{ name: 'compliance.breaches.create' }"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -37,6 +38,7 @@
     <BreachTable :breaches="store.breaches" :loading="store.loading">
       <template #empty-action>
         <RouterLink
+          v-if="can('compliance.create')"
           :to="{ name: 'compliance.breaches.create' }"
           class="mt-3 inline-flex rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white"
         >
@@ -59,6 +61,7 @@
 import { onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import BreachSearchFilters from '@/modules/compliance/components/BreachSearchFilters.vue';
 import BreachTable from '@/modules/compliance/components/BreachTable.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
@@ -66,6 +69,7 @@ import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
 const store = useDataBreachStore();
+const { can } = usePermissions();
 
 onMounted(() => {
   store.fetchBreaches();

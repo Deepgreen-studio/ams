@@ -20,6 +20,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.RolePermission::DELETE);
         Route::post('/{role}/restore', [RoleController::class, 'restore'])
             ->middleware('permission:'.RolePermission::RESTORE);
+        Route::delete('/{role}/force-delete', [RoleController::class, 'forceDelete'])
+            ->middleware('permission:'.RolePermission::FORCE_DELETE);
         Route::post('/{role}/permissions', [RoleController::class, 'syncPermissions'])
             ->middleware('permission:'.RolePermission::ASSIGN);
     });

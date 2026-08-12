@@ -19,7 +19,12 @@
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Version</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Source</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-4 py-3 text-right font-semibold text-slate-600"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -38,16 +43,17 @@
             <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">
               {{ item.source_label || item.source }}
             </td>
-            <td class="px-4 py-3">
+            <td v-if="hasAnyAction" class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <RouterLink
+                  v-if="can('compliance.view')"
                   :to="{ name: 'compliance.consents.show', params: { id: item.uuid } }"
                   class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
                 >
                   View
                 </RouterLink>
                 <button
-                  v-if="item.granted"
+                  v-if="item.granted && can('compliance.update')"
                   type="button"
                   class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
                   @click="$emit('withdraw', item)"
@@ -64,8 +70,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import ConsentStatusBadge from '@/modules/compliance/components/ConsentStatusBadge.vue';
 
 defineProps({
@@ -74,4 +82,7 @@ defineProps({
 });
 
 defineEmits(['withdraw']);
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() => canAny('compliance.view', 'compliance.update'));
 </script>

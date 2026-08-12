@@ -102,6 +102,18 @@ class RoleController
         ], 'Role restored successfully.');
     }
 
+    public function forceDelete(Request $request, string $role): JsonResponse
+    {
+        $existing = $this->roleRepository->findByIdentifierOrFail($role, withTrashed: true);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->roleService->forceDelete($role, $actor);
+
+        return ApiResponse::success(null, 'Role permanently deleted.');
+    }
+
     public function syncPermissions(AssignPermissionRequest $request, string $role): JsonResponse
     {
         $existing = $this->roleRepository->findByIdentifierOrFail($role);

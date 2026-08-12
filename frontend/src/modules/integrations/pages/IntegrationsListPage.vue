@@ -2,6 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('integrations.create')"
         :to="{ name: 'integrations.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -47,6 +48,7 @@
           Reset
         </button>
         <RouterLink
+          v-if="can('integrations.create')"
           :to="{ name: 'integrations.create' }"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -79,6 +81,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import IntegrationTable from '@/modules/integrations/components/IntegrationTable.vue';
@@ -86,6 +89,7 @@ import SearchFilters from '@/modules/integrations/components/SearchFilters.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';
 
 const integrationsStore = useIntegrationsStore();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 onMounted(() => {

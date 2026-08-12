@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import AuthenticationLayout from '@/layouts/AuthenticationLayout.vue';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
+import { resolveRoutePermission } from '@/utils/routePermissions';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -55,6 +56,12 @@ const router = createRouter({
           meta: { title: 'Users', requiresAuth: true },
         },
         {
+          path: 'users/trash',
+          name: 'users.trash',
+          component: () => import('@/modules/users/pages/UsersTrashPage.vue'),
+          meta: { title: 'Users Trash', requiresAuth: true },
+        },
+        {
           path: 'users/create',
           name: 'users.create',
           component: () => import('@/modules/users/pages/CreateUserPage.vue'),
@@ -77,6 +84,12 @@ const router = createRouter({
           name: 'roles.index',
           component: () => import('@/modules/roles/pages/RolesListPage.vue'),
           meta: { title: 'Roles', requiresAuth: true },
+        },
+        {
+          path: 'roles/trash',
+          name: 'roles.trash',
+          component: () => import('@/modules/roles/pages/RolesTrashPage.vue'),
+          meta: { title: 'Roles Trash', requiresAuth: true },
         },
         {
           path: 'roles/create',
@@ -1888,6 +1901,15 @@ router.beforeEach(async (to) => {
 
   if (to.meta.portal && authStore.isAuthenticated && !authStore.isPortalCustomer) {
     return { name: 'dashboard' };
+  }
+
+  if (authStore.isAuthenticated && !authStore.isPortalCustomer && to.meta.requiresAuth) {
+    const required =
+      to.meta.permission ?? resolveRoutePermission(typeof to.name === 'string' ? to.name : null);
+
+    if (required && !authStore.hasAnyPermission(...(Array.isArray(required) ? required : [required]))) {
+      return { name: 'dashboard' };
+    }
   }
 
   return true;

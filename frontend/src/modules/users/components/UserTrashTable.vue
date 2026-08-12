@@ -10,8 +10,8 @@
 
     <EmptyState
       v-else-if="!users.length"
-      title="No users found"
-      description="Try adjusting your search or create a new user."
+      title="Trash is empty"
+      description="Soft-deleted users will appear here."
       class="px-8 py-6"
     >
       <template #action>
@@ -35,42 +35,19 @@
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'email')"
-              >
-                Email
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'email' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Email</th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              Phone
-            </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'status')"
-              >
-                Status
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
+              Status
             </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'created_at')"
+                @click="$emit('sort', 'deleted_at')"
               >
-                Created
+                Deleted
                 <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{ sortBy === 'deleted_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -98,18 +75,15 @@
                   size="sm"
                   class="!rounded-[12px]"
                 />
-                <div class="min-w-0">
-                  <p class="truncate font-semibold text-slate-900">{{ user.full_name }}</p>
-                </div>
+                <p class="truncate font-semibold text-slate-900">{{ user.full_name }}</p>
               </div>
             </td>
             <td class="px-5 py-4 text-slate-600">{{ user.email }}</td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">{{ user.phone || '—' }}</td>
-            <td class="px-5 py-4">
+            <td class="hidden px-5 py-4 md:table-cell">
               <StatusBadge :status="user.status" />
             </td>
-            <td class="hidden px-5 py-4 lg:table-cell">
-              <p class="font-medium text-slate-800">{{ formatDate(user.created_at) }}</p>
+            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+              {{ formatDate(user.deleted_at) }}
             </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
@@ -152,25 +126,25 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </RouterLink>
-        <RouterLink
-          v-if="can('users.update') && !isTrashed(activeUser)"
-          :to="{ name: 'users.edit', params: { id: activeUser.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </RouterLink>
         <button
-          v-if="can('users.delete') && !isTrashed(activeUser)"
+          v-if="can('users.restore')"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onRestore(activeUser)"
+        >
+          <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+          Restore
+        </button>
+        <button
+          v-if="can('users.force-delete')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
-          @click="onDelete(activeUser)"
+          @click="onForceDelete(activeUser)"
         >
           <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
+          Force delete
         </button>
       </div>
     </Teleport>
@@ -180,7 +154,12 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { EllipsisVerticalIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import {
+  ArrowUturnLeftIcon,
+  EllipsisVerticalIcon,
+  EyeIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { usePermissions } from '@/composables/usePermissions';
@@ -189,29 +168,17 @@ import { getUserAvatarUrl } from '@/utils/avatar';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
 const props = defineProps({
-  users: {
-    type: Array,
-    default: () => [],
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  sortBy: {
-    type: String,
-    default: 'created_at',
-  },
-  sortDir: {
-    type: String,
-    default: 'desc',
-  },
+  users: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  sortBy: { type: String, default: 'deleted_at' },
+  sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'restore', 'force-delete']);
 
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('users.view', 'users.update', 'users.delete'),
+  canAny('users.view', 'users.restore', 'users.force-delete'),
 );
 
 const openMenuId = ref(null);
@@ -221,10 +188,6 @@ const activeUser = computed(
   () => props.users.find((user) => user.uuid === openMenuId.value) || null,
 );
 
-function isTrashed(user) {
-  return Boolean(user?.deleted_at);
-}
-
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {
     closeMenu();
@@ -232,11 +195,11 @@ function toggleMenu(id, event) {
   }
 
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
+  const menuWidth = 176;
   const itemCount = [
     can('users.view'),
-    can('users.update'),
-    can('users.delete'),
+    can('users.restore'),
+    can('users.force-delete'),
   ].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
@@ -256,9 +219,14 @@ function closeMenu() {
   openMenuId.value = null;
 }
 
-function onDelete(user) {
+function onRestore(user) {
   closeMenu();
-  emit('delete', user);
+  emit('restore', user);
+}
+
+function onForceDelete(user) {
+  closeMenu();
+  emit('force-delete', user);
 }
 
 function onDocumentClick() {

@@ -65,21 +65,21 @@
         {{ autosaveLabel }}
       </span>
       <RouterLink
-        v-if="!isCreate && contentId"
+        v-if="!isCreate && contentId && can('content.view')"
         :to="{ name: 'content.versions', params: { id: contentId } }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Versions
       </RouterLink>
       <RouterLink
-        v-if="!isCreate && contentId"
+        v-if="!isCreate && contentId && canAny('content.review', 'content.approve', 'content.publish')"
         :to="{ name: 'content.review', params: { id: contentId } }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Workflow
       </RouterLink>
       <button
-        v-if="!isCreate && ['draft', 'rejected'].includes(form.statusSlug)"
+        v-if="!isCreate && ['draft', 'rejected'].includes(form.statusSlug) && can('content.submit')"
         type="button"
         class="rounded-[12px] border border-amber-300 bg-amber-50 px-5 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-100 disabled:opacity-60"
         :disabled="contentStore.saving"
@@ -88,7 +88,7 @@
         Submit for review
       </button>
       <button
-        v-else-if="!isCreate && form.statusSlug === 'published'"
+        v-else-if="!isCreate && form.statusSlug === 'published' && can('content.publish')"
         type="button"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="contentStore.saving"
@@ -97,6 +97,7 @@
         Unpublish
       </button>
       <button
+        v-if="canSaveDraft"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="contentStore.saving"
@@ -500,6 +501,7 @@ import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import FeaturedImageField from '@/modules/content/components/FeaturedImageField.vue';
 import SeoPreviewPanel from '@/modules/content/components/SeoPreviewPanel.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useContentStore } from '@/modules/content/stores/content';
 
 const props = defineProps({
@@ -509,10 +511,14 @@ const props = defineProps({
 const route = useRoute();
 const router = useRouter();
 const contentStore = useContentStore();
+const { can, canAny } = usePermissions();
 
 const isCreate = computed(() => props.mode === 'create' || route.name === 'content.create');
 const contentId = computed(() => (isCreate.value ? createdId.value : route.params.id));
 const createdId = ref(null);
+const canSaveDraft = computed(() =>
+  isCreate.value ? can('content.create') : can('content.update'),
+);
 
 const contentTypeOptions = computed(() =>
   (contentStore.types || []).map((type) => ({

@@ -24,7 +24,7 @@
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          v-if="usersStore.currentUser"
+          v-if="usersStore.currentUser && can('users.update')"
           :to="{ name: 'users.edit', params: { id: usersStore.currentUser.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
@@ -32,7 +32,7 @@
           Edit
         </RouterLink>
         <button
-          v-if="usersStore.currentUser"
+          v-if="usersStore.currentUser && can('users.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
@@ -57,6 +57,7 @@
               Roles & access
             </h3>
             <RouterLink
+              v-if="can('users.update') || can('users.assign-roles')"
               :to="{ name: 'users.edit', params: { id: usersStore.currentUser.uuid } }"
               class="text-sm font-medium text-brand-700 hover:text-brand-800"
             >
@@ -186,6 +187,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { TrashIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
@@ -196,6 +198,7 @@ import { useUsersStore } from '@/modules/users/stores/users';
 const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
+const { can } = usePermissions();
 const toast = useToast();
 const showDelete = ref(false);
 

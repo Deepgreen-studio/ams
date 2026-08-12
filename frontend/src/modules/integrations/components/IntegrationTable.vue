@@ -83,7 +83,12 @@
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -119,7 +124,7 @@
             <td class="hidden px-5 py-4 lg:table-cell">
               <StatusBadge :status="item.health_status" kind="health" />
             </td>
-            <td class="px-5 py-4">
+            <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
                   type="button"
@@ -151,6 +156,7 @@
         @click.stop
       >
         <button
+          v-if="can('integrations.view')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -160,6 +166,7 @@
           View
         </button>
         <button
+          v-if="can('integrations.update')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -169,6 +176,7 @@
           Edit
         </button>
         <button
+          v-if="can('integrations.delete')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
@@ -192,6 +200,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/integrations/components/StatusBadge.vue';
 
 const props = defineProps({
@@ -203,6 +212,10 @@ const props = defineProps({
 
 const emit = defineEmits(['sort', 'delete']);
 const router = useRouter();
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('integrations.view', 'integrations.update', 'integrations.delete'),
+);
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
@@ -226,7 +239,12 @@ function toggleMenu(id, event) {
 
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 160;
-  const menuHeight = 132;
+  const itemCount = [
+    can('integrations.view'),
+    can('integrations.update'),
+    can('integrations.delete'),
+  ].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;

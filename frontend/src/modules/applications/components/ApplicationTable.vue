@@ -83,7 +83,12 @@
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -126,7 +131,7 @@
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ item.current_version || '—' }}
             </td>
-            <td class="px-5 py-4">
+            <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
                   type="button"
@@ -158,6 +163,7 @@
         @click.stop
       >
         <RouterLink
+          v-if="can('applications.view')"
           :to="{ name: 'applications.show', params: { id: activeApplication.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -167,6 +173,7 @@
           View
         </RouterLink>
         <RouterLink
+          v-if="can('applications.update')"
           :to="{ name: 'applications.edit', params: { id: activeApplication.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -176,6 +183,7 @@
           Edit
         </RouterLink>
         <button
+          v-if="can('applications.delete')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
@@ -199,6 +207,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/applications/components/StatusBadge.vue';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
@@ -210,6 +219,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['sort', 'delete']);
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('applications.view', 'applications.update', 'applications.delete'),
+);
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
@@ -242,7 +256,12 @@ function toggleMenu(id, event) {
 
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 160;
-  const menuHeight = 132;
+  const itemCount = [
+    can('applications.view'),
+    can('applications.update'),
+    can('applications.delete'),
+  ].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;

@@ -150,6 +150,11 @@ class RoleRepository extends BaseRepository
         return $role->refresh();
     }
 
+    public function forceDeleteRole(Role $role): bool
+    {
+        return (bool) $role->forceDelete();
+    }
+
     /**
      * @return array<string, mixed>
      */

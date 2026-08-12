@@ -29,7 +29,7 @@ final class PermissionModule
             ],
             'roles' => [
                 'label' => 'Roles',
-                'actions' => array_merge($crud, ['restore', 'assign']),
+                'actions' => array_merge($crud, ['restore', 'force-delete', 'assign']),
             ],
             'companies' => [
                 'label' => 'Companies',

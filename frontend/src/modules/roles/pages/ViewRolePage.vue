@@ -2,14 +2,14 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="rolesStore.currentRole"
+        v-if="rolesStore.currentRole && canAny('roles.assign', 'roles.update')"
         :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Assign permissions
       </RouterLink>
       <RouterLink
-        v-if="rolesStore.currentRole"
+        v-if="rolesStore.currentRole && can('roles.update')"
         :to="{ name: 'roles.edit', params: { id: rolesStore.currentRole.uuid } }"
         class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -17,7 +17,7 @@
         Edit
       </RouterLink>
       <button
-        v-if="rolesStore.currentRole && !rolesStore.currentRole.is_system"
+        v-if="rolesStore.currentRole && !rolesStore.currentRole.is_system && can('roles.delete')"
         type="button"
         class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
         @click="showDelete = true"
@@ -75,6 +75,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h3 class="text-base font-semibold text-slate-900">Permissions</h3>
             <RouterLink
+              v-if="canAny('roles.assign', 'roles.update')"
               :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
               class="text-sm font-medium text-brand-600 hover:text-brand-700"
             >
@@ -177,6 +178,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';
@@ -185,6 +187,7 @@ import { useRolesStore } from '@/modules/roles/stores/roles';
 const route = useRoute();
 const router = useRouter();
 const rolesStore = useRolesStore();
+const { can, canAny } = usePermissions();
 const toast = useToast();
 const showDelete = ref(false);
 const showAllPermissions = ref(false);

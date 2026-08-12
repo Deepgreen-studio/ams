@@ -42,6 +42,15 @@ class RolePolicy
         return $user->can(RolePermission::RESTORE) || $user->can(RolePermission::DELETE);
     }
 
+    public function forceDelete(User $user, Role $role): bool
+    {
+        if ($role->is_system) {
+            return false;
+        }
+
+        return $user->can(RolePermission::FORCE_DELETE);
+    }
+
     public function assignPermissions(User $user, Role $role): bool
     {
         return $user->can(RolePermission::ASSIGN) || $user->can(RolePermission::UPDATE);

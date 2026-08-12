@@ -9,9 +9,9 @@
     </div>
 
     <EmptyState
-      v-else-if="!users.length"
-      title="No users found"
-      description="Try adjusting your search or create a new user."
+      v-else-if="!roles.length"
+      title="Trash is empty"
+      description="Soft-deleted roles will appear here."
       class="px-8 py-6"
     >
       <template #action>
@@ -27,50 +27,24 @@
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'full_name')"
+                @click="$emit('sort', 'display_name')"
               >
-                Name
+                Role
                 <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'full_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{ sortBy === 'display_name' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'email')"
-              >
-                Email
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'email' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              Phone
-            </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'status')"
-              >
-                Status
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Permissions</th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'created_at')"
+                @click="$emit('sort', 'deleted_at')"
               >
-                Created
+                Deleted
                 <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{ sortBy === 'deleted_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -84,42 +58,26 @@
         </thead>
         <tbody>
           <tr
-            v-for="user in users"
-            :key="user.uuid"
+            v-for="role in roles"
+            :key="role.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
           >
             <td class="px-5 py-4">
-              <div class="flex items-center gap-3">
-                <UserAvatar
-                  :src="getUserAvatarUrl(user)"
-                  :name="user.full_name || user.name || 'User'"
-                  :first-name="user.first_name || ''"
-                  :last-name="user.last_name || ''"
-                  size="sm"
-                  class="!rounded-[12px]"
-                />
-                <div class="min-w-0">
-                  <p class="truncate font-semibold text-slate-900">{{ user.full_name }}</p>
-                </div>
-              </div>
+              <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
             </td>
-            <td class="px-5 py-4 text-slate-600">{{ user.email }}</td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">{{ user.phone || '—' }}</td>
-            <td class="px-5 py-4">
-              <StatusBadge :status="user.status" />
-            </td>
-            <td class="hidden px-5 py-4 lg:table-cell">
-              <p class="font-medium text-slate-800">{{ formatDate(user.created_at) }}</p>
+            <td class="px-5 py-4 text-slate-600">{{ role.permissions_count ?? 0 }}</td>
+            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+              {{ formatDate(role.deleted_at) }}
             </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
                   type="button"
                   class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
-                  :aria-expanded="openMenuId === user.uuid"
+                  :aria-expanded="openMenuId === role.uuid"
                   aria-haspopup="menu"
                   aria-label="Open actions"
-                  @click.stop="toggleMenu(user.uuid, $event)"
+                  @click.stop="toggleMenu(role.uuid, $event)"
                 >
                   <EllipsisVerticalIcon class="h-5 w-5" />
                 </button>
@@ -136,15 +94,15 @@
 
     <Teleport to="body">
       <div
-        v-if="openMenuId && activeUser"
+        v-if="openMenuId && activeRole"
         class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
       >
         <RouterLink
-          v-if="can('users.view')"
-          :to="{ name: 'users.show', params: { id: activeUser.uuid } }"
+          v-if="can('roles.view')"
+          :to="{ name: 'roles.show', params: { id: activeRole.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
           @click="closeMenu"
@@ -152,25 +110,25 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </RouterLink>
-        <RouterLink
-          v-if="can('users.update') && !isTrashed(activeUser)"
-          :to="{ name: 'users.edit', params: { id: activeUser.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </RouterLink>
         <button
-          v-if="can('users.delete') && !isTrashed(activeUser)"
+          v-if="can('roles.restore')"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onRestore(activeRole)"
+        >
+          <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+          Restore
+        </button>
+        <button
+          v-if="can('roles.force-delete') && !activeRole.is_system"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
-          @click="onDelete(activeUser)"
+          @click="onForceDelete(activeRole)"
         >
           <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
+          Force delete
         </button>
       </div>
     </Teleport>
@@ -180,50 +138,36 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { EllipsisVerticalIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
+import {
+  ArrowUturnLeftIcon,
+  EllipsisVerticalIcon,
+  EyeIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
-import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { formatDate } from '@/utils/formatters';
-import { getUserAvatarUrl } from '@/utils/avatar';
-import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
 const props = defineProps({
-  users: {
-    type: Array,
-    default: () => [],
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  sortBy: {
-    type: String,
-    default: 'created_at',
-  },
-  sortDir: {
-    type: String,
-    default: 'desc',
-  },
+  roles: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  sortBy: { type: String, default: 'deleted_at' },
+  sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'restore', 'force-delete']);
 
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('users.view', 'users.update', 'users.delete'),
+  canAny('roles.view', 'roles.restore', 'roles.force-delete'),
 );
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
 
-const activeUser = computed(
-  () => props.users.find((user) => user.uuid === openMenuId.value) || null,
+const activeRole = computed(
+  () => props.roles.find((role) => role.uuid === openMenuId.value) || null,
 );
-
-function isTrashed(user) {
-  return Boolean(user?.deleted_at);
-}
 
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {
@@ -231,12 +175,13 @@ function toggleMenu(id, event) {
     return;
   }
 
+  const role = props.roles.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
+  const menuWidth = 176;
   const itemCount = [
-    can('users.view'),
-    can('users.update'),
-    can('users.delete'),
+    can('roles.view'),
+    can('roles.restore'),
+    can('roles.force-delete') && role && !role.is_system,
   ].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
@@ -256,9 +201,14 @@ function closeMenu() {
   openMenuId.value = null;
 }
 
-function onDelete(user) {
+function onRestore(role) {
   closeMenu();
-  emit('delete', user);
+  emit('restore', role);
+}
+
+function onForceDelete(role) {
+  closeMenu();
+  emit('force-delete', role);
 }
 
 function onDocumentClick() {

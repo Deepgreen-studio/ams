@@ -2,6 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('applications.create')"
         :to="{ name: 'applications.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -66,6 +67,7 @@
           Reset
         </button>
         <RouterLink
+          v-if="can('applications.create')"
           :to="{ name: 'applications.create' }"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -105,6 +107,7 @@ import {
   NoSymbolIcon,
   Squares2X2Icon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ApplicationTable from '@/modules/applications/components/ApplicationTable.vue';
@@ -112,6 +115,7 @@ import SearchFilters from '@/modules/applications/components/SearchFilters.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 
 const applicationsStore = useApplicationsStore();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [

@@ -2,6 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('content.create')"
         :to="{ name: 'content.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -104,11 +105,13 @@ import {
   PencilSquareIcon,
   StarIcon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import { useContentStore } from '@/modules/content/stores/content';
 
 const contentStore = useContentStore();
+const { can } = usePermissions();
 
 const statCards = computed(() => [
   {

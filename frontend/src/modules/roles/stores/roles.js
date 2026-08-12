@@ -141,6 +141,22 @@ export const useRolesStore = defineStore('roles', () => {
     }
   }
 
+  async function forceDeleteRole(id) {
+    saving.value = true;
+    clearMessages();
+
+    try {
+      const { data } = await roleService.forceDelete(id);
+      successMessage.value = data.message || 'Role permanently deleted.';
+      return data;
+    } catch (err) {
+      applyError(err, 'Unable to permanently delete role');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   async function syncPermissions(id, permissions) {
     saving.value = true;
     clearMessages();
@@ -196,6 +212,7 @@ export const useRolesStore = defineStore('roles', () => {
     updateRole,
     deleteRole,
     restoreRole,
+    forceDeleteRole,
     syncPermissions,
     assignUserRoles,
     resetFilters,

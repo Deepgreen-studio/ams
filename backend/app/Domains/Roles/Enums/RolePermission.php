@@ -18,6 +18,8 @@ final class RolePermission
 
     public const RESTORE = 'roles.restore';
 
+    public const FORCE_DELETE = 'roles.force-delete';
+
     public const ASSIGN = 'roles.assign';
 
     public const ASSIGN_USERS = 'users.assign-roles';
@@ -33,6 +35,7 @@ final class RolePermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::FORCE_DELETE,
             self::ASSIGN,
             self::ASSIGN_USERS,
         ];

@@ -39,7 +39,12 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Users
             </th>
-            <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -55,7 +60,7 @@
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ role.users_count ?? 0 }}
             </td>
-            <td class="px-5 py-4">
+            <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
                   type="button"
@@ -87,6 +92,7 @@
         @click.stop
       >
         <RouterLink
+          v-if="can('roles.view')"
           :to="{ name: 'roles.show', params: { id: activeRole.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -96,6 +102,7 @@
           View
         </RouterLink>
         <RouterLink
+          v-if="can('roles.update') && !isTrashed(activeRole)"
           :to="{ name: 'roles.edit', params: { id: activeRole.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -105,6 +112,7 @@
           Edit
         </RouterLink>
         <RouterLink
+          v-if="canAny('roles.assign', 'roles.update') && !isTrashed(activeRole)"
           :to="{ name: 'roles.permissions', params: { id: activeRole.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -114,7 +122,7 @@
           Permissions
         </RouterLink>
         <button
-          v-if="!activeRole.is_system"
+          v-if="can('roles.delete') && !activeRole.is_system && !isTrashed(activeRole)"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
@@ -139,6 +147,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 
 const props = defineProps({
   roles: {
@@ -161,12 +170,21 @@ const props = defineProps({
 
 const emit = defineEmits(['sort', 'delete']);
 
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('roles.view', 'roles.update', 'roles.assign', 'roles.delete'),
+);
+
 const openMenuId = ref(null);
 const menuStyle = ref({});
 
 const activeRole = computed(
   () => props.roles.find((role) => role.uuid === openMenuId.value) || null,
 );
+
+function isTrashed(role) {
+  return Boolean(role?.deleted_at);
+}
 
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {
@@ -177,8 +195,13 @@ function toggleMenu(id, event) {
   const role = props.roles.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 176;
-  const itemCount = role && !role.is_system ? 4 : 3;
-  const menuHeight = 8 + itemCount * 36;
+  const itemCount = [
+    can('roles.view'),
+    can('roles.update'),
+    canAny('roles.assign', 'roles.update'),
+    can('roles.delete') && role && !role.is_system,
+  ].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;

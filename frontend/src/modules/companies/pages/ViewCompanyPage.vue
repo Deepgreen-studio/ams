@@ -9,7 +9,7 @@
         Profile
       </RouterLink>
       <RouterLink
-        v-if="company"
+        v-if="company && can('companies.update')"
         :to="{ name: 'companies.edit', params: { id: company.uuid } }"
         class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -17,7 +17,7 @@
         Edit
       </RouterLink>
       <button
-        v-if="company && company.deleted_at"
+        v-if="company && company.deleted_at && can('companies.restore')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="companiesStore.saving"
@@ -26,7 +26,7 @@
         Restore
       </button>
       <button
-        v-else-if="company"
+        v-else-if="company && can('companies.delete')"
         type="button"
         class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
         @click="showDelete = true"
@@ -144,6 +144,7 @@ import {
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { formatDate } from '@/utils/formatters';
+import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CompanyCard from '@/modules/companies/components/CompanyCard.vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
@@ -152,6 +153,7 @@ import { useCompaniesStore } from '@/modules/companies/stores/companies';
 const route = useRoute();
 const router = useRouter();
 const companiesStore = useCompaniesStore();
+const { can } = usePermissions();
 const showDelete = ref(false);
 
 const company = computed(() => companiesStore.currentCompany);

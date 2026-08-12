@@ -21,7 +21,7 @@ class IndexRoleRequest extends FormRequest
             'search' => ['nullable', 'string', 'max:255'],
             'is_system' => ['nullable'],
             'guard_name' => ['nullable', 'string', 'max:50'],
-            'sort_by' => ['nullable', Rule::in(['id', 'name', 'display_name', 'created_at', 'updated_at', 'is_system'])],
+            'sort_by' => ['nullable', Rule::in(['id', 'name', 'display_name', 'created_at', 'updated_at', 'deleted_at', 'is_system'])],
             'sort_dir' => ['nullable', Rule::in(['asc', 'desc'])],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'page' => ['nullable', 'integer', 'min:1'],

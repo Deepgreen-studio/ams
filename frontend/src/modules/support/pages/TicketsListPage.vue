@@ -27,6 +27,7 @@
           Dashboard
         </RouterLink>
         <RouterLink
+          v-if="can('support.create')"
           :to="{ name: 'support.tickets.create' }"
           class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
@@ -74,6 +75,7 @@
       >
         <template #empty-action>
           <RouterLink
+            v-if="can('support.create')"
             :to="{ name: 'support.tickets.create' }"
             class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           >
@@ -105,6 +107,7 @@
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
@@ -113,6 +116,7 @@ import TicketTable from '@/modules/support/components/TicketTable.vue';
 import { useSupportTicketsStore } from '@/modules/support/stores/supportTickets';
 
 const store = useSupportTicketsStore();
+const { can } = usePermissions();
 const route = useRoute();
 const pendingArchive = ref(null);
 

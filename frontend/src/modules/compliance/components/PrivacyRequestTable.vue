@@ -19,7 +19,12 @@
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Identity</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Due</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
+            <th
+              v-if="hasAnyAction"
+              class="px-4 py-3 text-right font-semibold text-slate-600"
+            >
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
@@ -40,21 +45,24 @@
               {{ item.identity_verification_status_label || item.identity_verification_status }}
             </td>
             <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">{{ item.due_date || '—' }}</td>
-            <td class="px-4 py-3">
+            <td v-if="hasAnyAction" class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <RouterLink
+                  v-if="can('compliance.view')"
                   :to="{ name: 'compliance.privacy.show', params: { id: item.uuid } }"
                   class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
                 >
                   View
                 </RouterLink>
                 <RouterLink
+                  v-if="can('compliance.update')"
                   :to="{ name: 'compliance.privacy.verify', params: { id: item.uuid } }"
                   class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                 >
                   Verify
                 </RouterLink>
                 <button
+                  v-if="can('compliance.delete')"
                   type="button"
                   class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
                   @click="$emit('delete', item)"
@@ -71,8 +79,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
 
 defineProps({
@@ -81,4 +91,9 @@ defineProps({
 });
 
 defineEmits(['delete']);
+
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('compliance.view', 'compliance.update', 'compliance.delete'),
+);
 </script>

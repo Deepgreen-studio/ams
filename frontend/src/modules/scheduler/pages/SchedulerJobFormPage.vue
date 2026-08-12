@@ -15,32 +15,32 @@
     </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'scheduler.jobs' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
+        :to="{ name: 'scheduler.jobs' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back
+      </RouterLink>
     </Teleport>
 
     <SchedulerSubnav />
 
     <form class="max-w-3xl space-y-6" novalidate @submit.prevent="submit">
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm md:col-span-2">
-            <span class="mb-1 block font-medium text-slate-700">Name</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Name</span>
             <input
               v-model="form.name"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
             <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Job type</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Job type</span>
             <select
               v-model="form.job_type"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('job_type')"
             >
               <option v-for="item in store.catalog.job_types" :key="item.value" :value="item.value">{{ item.label }}</option>
@@ -48,10 +48,10 @@
             <p v-if="fieldErrors.job_type" class="mt-1 text-xs text-rose-600">{{ fieldErrors.job_type[0] }}</p>
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Handler</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Handler</span>
             <select
               v-model="form.handler_key"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('handler_key')"
               @change="onHandlerChange"
             >
@@ -60,10 +60,10 @@
             <p v-if="fieldErrors.handler_key" class="mt-1 text-xs text-rose-600">{{ fieldErrors.handler_key[0] }}</p>
           </label>
           <label v-if="needsCron" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Cron expression</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Cron expression</span>
             <input
               v-model="form.schedule_cron"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 font-mono text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('schedule_cron')"
               placeholder="0 6 * * *"
             />
@@ -72,22 +72,22 @@
             </p>
           </label>
           <label v-if="form.job_type === 'one_time'" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Run at</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Run at</span>
             <input
               v-model="form.run_at"
               type="datetime-local"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('run_at')"
             />
             <p v-if="fieldErrors.run_at" class="mt-1 text-xs text-rose-600">{{ fieldErrors.run_at[0] }}</p>
           </label>
           <label v-if="form.job_type === 'delayed'" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Delay (minutes)</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Delay (minutes)</span>
             <input
               v-model.number="form.delay_minutes"
               type="number"
               min="1"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('delay_minutes')"
             />
             <p v-if="fieldErrors.delay_minutes" class="mt-1 text-xs text-rose-600">
@@ -95,19 +95,26 @@
             </p>
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Queue</span>
-            <input v-model="form.queue_name" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Queue</span>
+            <input
+              v-model="form.queue_name"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm md:col-span-2">
-            <span class="mb-1 block font-medium text-slate-700">Description</span>
-            <textarea v-model="form.description" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Description</span>
+            <textarea
+              v-model="form.description"
+              rows="2"
+              class="w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input v-model="form.is_enabled" type="checkbox" class="rounded border-slate-300" />
+            <input v-model="form.is_enabled" type="checkbox" class="rounded border-zinc-300" />
             Enabled
           </label>
           <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input v-model="form.without_overlapping" type="checkbox" class="rounded border-slate-300" />
+            <input v-model="form.without_overlapping" type="checkbox" class="rounded border-zinc-300" />
             Without overlapping
           </label>
         </div>
@@ -115,7 +122,7 @@
 
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="store.saving"
       >
         {{ store.saving ? 'Saving...' : isEdit ? 'Update job' : 'Create job' }}

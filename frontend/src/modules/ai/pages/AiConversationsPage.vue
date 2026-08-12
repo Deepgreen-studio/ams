@@ -1,40 +1,21 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Conversation History"
-      description="Chat assistant history and interactive knowledge conversations."
-    >
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="startNewChat"
-        >
-          New chat
-        </button>
-        <RouterLink
-          :to="{ name: 'ai.settings' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          AI settings
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="startNewChat"
-        >
-          New chat
-        </button>
-        <RouterLink
-          :to="{ name: 'ai.settings' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          AI settings
-        </RouterLink>
+        type="button"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        @click="startNewChat"
+      >
+        New chat
+      </button>
+      <RouterLink
+        :to="{ name: 'ai.settings' }"
+        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        AI settings
+      </RouterLink>
     </Teleport>
+
     <AiSubnav />
 
     <div
@@ -47,124 +28,140 @@
       paste an API key, mark it as <strong>Default</strong>, then Test — or pick it below.
     </div>
 
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800"
-    >
-      <p class="font-medium text-rose-900">Chat request failed</p>
-      <p class="mt-1 whitespace-pre-wrap break-words">{{ store.error }}</p>
-      <p v-if="isQuotaError" class="mt-2 text-xs text-rose-700">
-        Tip: wait ~1 minute, change the provider model in AI Settings (try
-        <code class="rounded bg-rose-100 px-1">gemini-flash-latest</code>),
-        or enable billing in Google AI Studio.
-      </p>
-    </div>
-
     <div class="grid gap-4 lg:grid-cols-5">
-      <div class="rounded-xl border border-slate-200 bg-white lg:col-span-2">
-        <div class="border-b border-slate-200 px-4 py-3">
-          <input
-            v-model="search"
-            type="search"
-            placeholder="Search conversations…"
-            class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            @keyup.enter="loadList"
-          />
+      <section class="flex max-h-[40rem] flex-col overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100 lg:col-span-2">
+        <div class="shrink-0 border-b border-zinc-100 px-5 py-4">
+          <div class="relative">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              v-model="search"
+              type="search"
+              placeholder="Search conversations…"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              @keyup.enter="loadList"
+            />
+          </div>
         </div>
-        <ul class="max-h-[32rem] divide-y divide-slate-100 overflow-y-auto">
-          <li v-if="!store.conversations.length" class="px-4 py-8 text-center text-sm text-slate-500">No conversations.</li>
+        <ul class="scrollbar-light min-h-0 flex-1 divide-y divide-zinc-100 overflow-y-auto">
+          <li v-if="store.loading && !store.conversations.length" class="space-y-3 px-5 py-5">
+            <div v-for="n in 4" :key="n" class="h-12 animate-pulse rounded-[12px] bg-zinc-100" />
+          </li>
+          <li
+            v-else-if="!store.conversations.length"
+            class="px-5 py-10 text-center text-sm text-slate-500"
+          >
+            No conversations.
+          </li>
           <li
             v-for="item in store.conversations"
             :key="item.uuid"
-            class="cursor-pointer px-4 py-3 hover:bg-slate-50"
+            class="cursor-pointer px-5 py-3.5 transition hover:bg-zinc-50"
             :class="selectedUuid === item.uuid ? 'bg-brand-50' : ''"
             @click="openConversation(item.uuid)"
           >
-            <p class="text-sm font-medium text-slate-900">{{ item.title || 'Untitled' }}</p>
-            <p class="text-xs text-slate-500">
-              {{ item.feature_label || item.feature }} · {{ item.status }}
+            <div class="flex items-start justify-between gap-2">
+              <p class="min-w-0 truncate text-sm font-medium text-slate-900">
+                {{ item.title || 'Untitled' }}
+              </p>
+              <span
+                class="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium capitalize"
+                :class="conversationStatusClass(item.status)"
+              >
+                <span
+                  class="h-1.5 w-1.5 rounded-full"
+                  :class="conversationStatusDotClass(item.status)"
+                />
+                {{ item.status }}
+              </span>
+            </div>
+            <p class="mt-0.5 truncate text-xs text-slate-500">
+              {{ item.feature_label || item.feature }}
               <span v-if="item.provider?.name"> · {{ item.provider.name }}</span>
             </p>
           </li>
         </ul>
-      </div>
+      </section>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-5 lg:col-span-3">
-        <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
+      <section class="flex max-h-[40rem] flex-col rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 lg:col-span-3">
+        <div class="mb-4 flex shrink-0 flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 class="text-sm font-semibold text-slate-900">
+            <h2 class="text-base font-semibold text-slate-900">
               {{ store.currentConversation?.title || 'New chat' }}
             </h2>
-            <p class="text-xs text-slate-500">
+            <p class="mt-0.5 text-xs text-slate-500">
               Active provider:
               <span class="font-medium text-slate-700">{{ activeProviderLabel }}</span>
             </p>
           </div>
           <div class="min-w-[12rem]">
-            <label class="mb-1 block text-[11px] font-medium uppercase tracking-wide text-slate-500">Provider</label>
-            <select
+            <label class="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-slate-500">
+              Provider
+            </label>
+            <SelectBox
               v-model="selectedProviderId"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              :options="providerOptions"
+              placeholder="Default provider"
               :disabled="!!selectedUuid"
-            >
-              <option value="">Default provider</option>
-              <option
-                v-for="provider in enabledProviders"
-                :key="provider.uuid"
-                :value="provider.uuid"
-              >
-                {{ provider.name }} ({{ provider.driver_label || provider.driver }})
-              </option>
-            </select>
-            <p v-if="selectedUuid" class="mt-1 text-[11px] text-slate-500">
+            />
+            <p v-if="selectedUuid" class="mt-1.5 text-[11px] text-slate-500">
               Provider is locked for an existing conversation. Start a new chat to switch.
             </p>
           </div>
         </div>
 
-        <div class="mb-4 max-h-80 space-y-3 overflow-y-auto rounded-lg border border-slate-100 bg-slate-50 p-4">
-          <div v-if="!(store.currentConversation?.messages || []).length" class="py-8 text-center text-sm text-slate-500">
+        <div class="scrollbar-light mb-4 min-h-0 flex-1 space-y-3 overflow-y-auto rounded-[12px] border border-zinc-100 bg-zinc-50 p-4">
+          <div
+            v-if="!(store.currentConversation?.messages || []).length"
+            class="py-10 text-center text-sm text-slate-500"
+          >
             Start a conversation below.
           </div>
           <div
             v-for="messageItem in store.currentConversation?.messages || []"
             :key="messageItem.uuid"
-            class="rounded-lg px-3 py-2 text-sm"
-            :class="messageItem.role === 'user' ? 'bg-white text-slate-800' : 'bg-brand-50 text-slate-800'"
+            class="rounded-[12px] px-3.5 py-2.5 text-sm"
+            :class="messageItem.role === 'user' ? 'bg-white text-slate-800 ring-1 ring-zinc-100' : 'bg-brand-50 text-slate-800'"
           >
-            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ messageItem.role }}</p>
+            <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              {{ messageItem.role }}
+            </p>
             <p class="whitespace-pre-wrap">{{ messageItem.content }}</p>
           </div>
         </div>
 
-        <form class="flex gap-2" @submit.prevent="send">
+        <form class="flex shrink-0 gap-2" @submit.prevent="send">
           <input
             v-model="message"
             required
-            class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            class="h-10 flex-1 rounded-[12px] border border-zinc-200 px-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
             placeholder="Ask the AI assistant…"
           />
           <button
             type="submit"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
             :disabled="store.saving"
           >
             {{ store.saving ? 'Sending…' : 'Send' }}
           </button>
         </form>
-      </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import AiSubnav from '@/modules/ai/components/AiSubnav.vue';
 import { useAiStore } from '@/modules/ai/stores/ai';
 
 const store = useAiStore();
+const toast = useToast();
 const search = ref('');
 const message = ref('');
 const selectedUuid = ref(null);
@@ -173,6 +170,14 @@ const selectedProviderId = ref('');
 const enabledProviders = computed(() =>
   (store.providers || []).filter((provider) => provider.is_enabled)
 );
+
+const providerOptions = computed(() => [
+  { value: '', label: 'Default provider' },
+  ...enabledProviders.value.map((provider) => ({
+    value: provider.uuid,
+    label: `${provider.name} (${provider.driver_label || provider.driver})`,
+  })),
+]);
 
 const defaultProvider = computed(() =>
   enabledProviders.value.find((provider) => provider.is_default) || enabledProviders.value[0] || null
@@ -205,10 +210,36 @@ const isQuotaError = computed(() => {
   return text.includes('quota') || text.includes('rate limit') || text.includes('429') || text.includes('resource_exhausted');
 });
 
+watch(
+  () => store.error,
+  (err) => {
+    if (!err) return;
+    const tip = isQuotaError.value
+      ? ' Tip: wait ~1 minute, try gemini-flash-latest, or enable billing in Google AI Studio.'
+      : '';
+    toast.error(`${err}${tip}`, 'Chat request failed');
+    store.error = null;
+  },
+);
+
+function conversationStatusClass(status) {
+  if (status === 'active') return 'bg-emerald-50 text-emerald-700';
+  if (status === 'archived') return 'bg-zinc-100 text-slate-600';
+  return 'bg-zinc-100 text-slate-600';
+}
+
+function conversationStatusDotClass(status) {
+  if (status === 'active') return 'bg-emerald-500';
+  return 'bg-slate-400';
+}
+
 function startNewChat() {
   selectedUuid.value = null;
   store.currentConversation = null;
   message.value = '';
+  if (defaultProvider.value) {
+    selectedProviderId.value = defaultProvider.value.uuid;
+  }
 }
 
 async function loadList() {
@@ -229,13 +260,18 @@ async function send() {
   if (!selectedUuid.value && selectedProviderId.value) {
     payload.provider_id = selectedProviderId.value;
   }
-  const result = await store.sendChat(payload);
-  selectedUuid.value = result.conversation.uuid;
-  message.value = '';
-  await loadList();
+  try {
+    const result = await store.sendChat(payload);
+    selectedUuid.value = result.conversation.uuid;
+    message.value = '';
+    await loadList();
+  } catch {
+    // toast via watcher
+  }
 }
 
 onMounted(async () => {
+  store.error = null;
   await Promise.all([
     loadList(),
     store.fetchProviders({ per_page: 100 }),

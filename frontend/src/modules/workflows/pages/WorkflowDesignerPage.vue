@@ -214,33 +214,41 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Next step keys (comma)</span>
-            <input
-              v-model="nextKeysInput"
-              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @change="applyNextKeys"
+            <span class="mb-1.5 block font-medium text-slate-700">Next step keys</span>
+            <SelectBox
+              v-model="nextStepKeys"
+              multiple
+              wrapper-class="w-full"
+              placeholder="Select next steps"
+              :options="nextStepKeyOptions"
             />
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">On approve →</span>
-            <input
-              v-model="selectedStep.on_approve_step_key"
-              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            <SelectBox
+              v-model="onApproveStepKey"
+              wrapper-class="w-full"
+              placeholder="Select next step"
+              :options="transitionStepOptions"
             />
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">On reject →</span>
-            <input
-              v-model="selectedStep.on_reject_step_key"
-              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            <SelectBox
+              v-model="onRejectStepKey"
+              wrapper-class="w-full"
+              placeholder="Select next step"
+              :options="transitionStepOptions"
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Approver roles (comma)</span>
-            <input
-              v-model="approverRolesInput"
-              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @change="applyApproverRoles"
+            <span class="mb-1.5 block font-medium text-slate-700">Approver roles</span>
+            <SelectBox
+              v-model="approverRoles"
+              multiple
+              wrapper-class="w-full"
+              placeholder="Select approver roles"
+              :options="roleOptions"
             />
           </label>
           <label class="block text-sm">
@@ -254,9 +262,11 @@
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Escalate to role</span>
-            <input
-              v-model="selectedStep.config.escalate_to_role"
-              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            <SelectBox
+              v-model="escalateRole"
+              wrapper-class="w-full"
+              placeholder="No escalation"
+              :options="escalateRoleOptions"
             />
           </label>
           <label class="block text-sm">
@@ -304,9 +314,11 @@ import {
 import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { useRolesStore } from '@/modules/roles/stores/roles';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
+const rolesStore = useRolesStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
@@ -335,16 +347,80 @@ const stepTypeOptions = computed(() =>
   store.catalog.step_types.map((item) => ({ value: item.value, label: item.label })),
 );
 
+const roleOptions = computed(() =>
+  (rolesStore.roles || []).map((role) => ({
+    value: role.name,
+    label: role.display_name || role.name,
+  })),
+);
+
+const escalateRoleOptions = computed(() => [
+  { value: '', label: 'No escalation' },
+  ...roleOptions.value,
+]);
+
 const selectedStep = computed(() => form.steps[selectedIndex.value] || null);
 
-const nextKeysInput = computed({
-  get: () => (selectedStep.value?.next_step_keys || []).join(', '),
-  set: () => {},
+const transitionStepOptions = computed(() => {
+  const currentKey = selectedStep.value?.step_key;
+  const steps = form.steps
+    .filter((step) => step.step_key && step.step_key !== currentKey)
+    .map((step) => ({
+      value: step.step_key,
+      label: `${step.name || step.step_key} (${step.step_key})`,
+    }));
+
+  return [{ value: '', label: 'None' }, ...steps];
 });
 
-const approverRolesInput = computed({
-  get: () => (selectedStep.value?.config?.approver_roles || []).join(', '),
-  set: () => {},
+const nextStepKeyOptions = computed(() =>
+  transitionStepOptions.value.filter((option) => option.value !== ''),
+);
+
+const onApproveStepKey = computed({
+  get: () => selectedStep.value?.on_approve_step_key ?? '',
+  set: (value) => {
+    if (!selectedStep.value) return;
+    selectedStep.value.on_approve_step_key = value || '';
+  },
+});
+
+const onRejectStepKey = computed({
+  get: () => selectedStep.value?.on_reject_step_key ?? '',
+  set: (value) => {
+    if (!selectedStep.value) return;
+    selectedStep.value.on_reject_step_key = value || '';
+  },
+});
+
+const nextStepKeys = computed({
+  get: () => selectedStep.value?.next_step_keys || [],
+  set: (value) => {
+    if (!selectedStep.value) return;
+    selectedStep.value.next_step_keys = Array.isArray(value) ? value : [];
+  },
+});
+
+const approverRoles = computed({
+  get: () => selectedStep.value?.config?.approver_roles || [],
+  set: (value) => {
+    if (!selectedStep.value) return;
+    if (!selectedStep.value.config) {
+      selectedStep.value.config = {};
+    }
+    selectedStep.value.config.approver_roles = Array.isArray(value) ? value : [];
+  },
+});
+
+const escalateRole = computed({
+  get: () => selectedStep.value?.config?.escalate_to_role || '',
+  set: (value) => {
+    if (!selectedStep.value) return;
+    if (!selectedStep.value.config) {
+      selectedStep.value.config = {};
+    }
+    selectedStep.value.config.escalate_to_role = value || '';
+  },
 });
 
 watch(
@@ -451,22 +527,6 @@ function onCanvasDrop(event) {
   form.steps[dragIndex.value].position_y = Math.round(y);
   selectedIndex.value = dragIndex.value;
   dragIndex.value = null;
-}
-
-function applyNextKeys(event) {
-  if (!selectedStep.value) return;
-  selectedStep.value.next_step_keys = String(event.target.value || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function applyApproverRoles(event) {
-  if (!selectedStep.value) return;
-  selectedStep.value.config.approver_roles = String(event.target.value || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
 }
 
 function hydrate(workflow) {
@@ -576,6 +636,11 @@ function onDocumentClick() {
 onMounted(async () => {
   document.addEventListener('click', onDocumentClick);
   await store.fetchCatalog();
+  try {
+    await rolesStore.fetchRoles({ per_page: 100, sort_by: 'name', sort_dir: 'asc', page: 1 });
+  } catch {
+    // Roles list is optional for designer usability; keep page usable if forbidden.
+  }
   if (isEdit.value) {
     const workflow = await store.fetchWorkflow(route.params.id);
     hydrate(workflow);

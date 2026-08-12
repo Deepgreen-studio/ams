@@ -38,12 +38,58 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => Boolean(user.value));
   const isEmailVerified = computed(() => Boolean(user.value?.email_verified));
+  const permissions = computed(() => {
+    const list = user.value?.permissions;
+    return Array.isArray(list) ? list : [];
+  });
+  const roles = computed(() => {
+    const list = user.value?.roles;
+    return Array.isArray(list) ? list : [];
+  });
+  const isSuperAdmin = computed(() => roles.value.includes('super-admin'));
   const isPortalCustomer = computed(() => {
     if (!user.value) return false;
     if (user.value.is_portal_customer) return true;
-    const roles = user.value.roles || [];
-    return Boolean(user.value.customer_id) && roles.includes('customer');
+    return Boolean(user.value.customer_id) && roles.value.includes('customer');
   });
+
+  function hasPermission(permission) {
+    if (!permission) {
+      return true;
+    }
+
+    if (isSuperAdmin.value) {
+      return true;
+    }
+
+    return permissions.value.includes(permission);
+  }
+
+  function hasAnyPermission(...required) {
+    const names = required.flat().filter(Boolean);
+    if (!names.length) {
+      return true;
+    }
+
+    if (isSuperAdmin.value) {
+      return true;
+    }
+
+    return names.some((name) => permissions.value.includes(name));
+  }
+
+  function hasAllPermissions(...required) {
+    const names = required.flat().filter(Boolean);
+    if (!names.length) {
+      return true;
+    }
+
+    if (isSuperAdmin.value) {
+      return true;
+    }
+
+    return names.every((name) => permissions.value.includes(name));
+  }
 
   if (token.value) {
     setAuthToken(token.value);
@@ -168,7 +214,13 @@ export const useAuthStore = defineStore('auth', () => {
     rememberMe,
     isAuthenticated,
     isEmailVerified,
+    permissions,
+    roles,
+    isSuperAdmin,
     isPortalCustomer,
+    hasPermission,
+    hasAnyPermission,
+    hasAllPermissions,
     initialize,
     login,
     logout,

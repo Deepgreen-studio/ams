@@ -99,7 +99,11 @@
         </nav>
 
         <!-- Help -->
-        <div class="shrink-0 p-4" :class="collapsed ? 'flex justify-center' : ''">
+        <div
+            v-if="can('support.view')"
+            class="shrink-0 p-4"
+            :class="collapsed ? 'flex justify-center' : ''"
+        >
             <RouterLink
                 :to="{ name: 'support.dashboard' }"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand-500 text-white transition hover:bg-brand-600"
@@ -140,35 +144,94 @@ import {
     UserGroupIcon,
     UsersIcon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import { useAppStore } from '@/stores/app';
 
 const appStore = useAppStore();
 const route = useRoute();
+const { can } = usePermissions();
 
 const collapsed = computed(() => appStore.sidebarCollapsed);
 
-const navigationSections = [
+const navigationCatalog = [
     {
         title: 'Overview',
         items: [
-            { name: 'dashboard', label: 'Dashboard', to: { name: 'dashboard' }, icon: HomeIcon, match: ['dashboard'], exact: true },
-            { name: 'profile', label: 'My Profile', to: { name: 'profile' }, icon: UserCircleIcon, match: ['profile', 'change-password'] },
+            {
+                name: 'dashboard',
+                label: 'Dashboard',
+                to: { name: 'dashboard' },
+                icon: HomeIcon,
+                match: ['dashboard'],
+                exact: true,
+                permission: 'dashboard.view',
+            },
+            {
+                name: 'profile',
+                label: 'My Profile',
+                to: { name: 'profile' },
+                icon: UserCircleIcon,
+                match: ['profile', 'change-password'],
+                permission: null,
+            },
         ],
     },
     {
         title: 'User & Access',
         items: [
-            { name: 'users.index', label: 'Users', to: { name: 'users.index' }, icon: UsersIcon, match: ['users.'] },
-            { name: 'roles.index', label: 'Roles & Permissions', to: { name: 'roles.index' }, icon: ShieldCheckIcon, match: ['roles.'] },
-            { name: 'companies.index', label: 'Companies', to: { name: 'companies.index' }, icon: BuildingOffice2Icon, match: ['companies.'] },
+            {
+                name: 'users.index',
+                label: 'Users',
+                to: { name: 'users.index' },
+                icon: UsersIcon,
+                match: ['users.'],
+                permission: 'users.view',
+            },
+            {
+                name: 'roles.index',
+                label: 'Roles & Permissions',
+                to: { name: 'roles.index' },
+                icon: ShieldCheckIcon,
+                match: ['roles.'],
+                permission: 'roles.view',
+            },
+            {
+                name: 'companies.index',
+                label: 'Companies',
+                to: { name: 'companies.index' },
+                icon: BuildingOffice2Icon,
+                match: ['companies.'],
+                permission: 'companies.view',
+            },
         ],
     },
     {
         title: 'Business',
         items: [
-            { name: 'customers.index', label: 'Customers', to: { name: 'customers.index' }, icon: UserGroupIcon, match: ['customers.'] },
-            { name: 'applications.index', label: 'Applications', to: { name: 'applications.index' }, icon: DevicePhoneMobileIcon, match: ['applications.'] },
-            { name: 'integrations.index', label: 'Integrations', to: { name: 'integrations.index' }, icon: PuzzlePieceIcon, match: ['integrations.'] },
+            {
+                name: 'customers.index',
+                label: 'Customers',
+                to: { name: 'customers.index' },
+                icon: UserGroupIcon,
+                match: ['customers.'],
+                permission: 'customers.view',
+            },
+            {
+                name: 'applications.index',
+                label: 'Applications',
+                to: { name: 'applications.index' },
+                icon: DevicePhoneMobileIcon,
+                match: ['applications.'],
+                permission: 'applications.view',
+            },
+            {
+                name: 'integrations.index',
+                label: 'Integrations',
+                to: { name: 'integrations.index' },
+                icon: PuzzlePieceIcon,
+                match: ['integrations.'],
+                permission: 'integrations.view',
+            },
             {
                 name: 'content.dashboard',
                 label: 'Content',
@@ -176,40 +239,155 @@ const navigationSections = [
                 icon: DocumentTextIcon,
                 match: ['content.'],
                 exclude: ['content.workflow'],
+                permission: 'content.view',
             },
         ],
     },
     {
         title: 'Automation & Communication',
         items: [
-            { name: 'notifications.dashboard', label: 'Notifications', to: { name: 'notifications.dashboard' }, icon: BellAlertIcon, match: ['notifications.'] },
-            { name: 'automation.dashboard', label: 'Automation', to: { name: 'automation.dashboard' }, icon: BoltIcon, match: ['automation.'] },
-            { name: 'workflows.dashboard', label: 'Workflows', to: { name: 'workflows.dashboard' }, icon: Squares2X2Icon, match: ['workflows.'] },
-            { name: 'scheduler.dashboard', label: 'Scheduler', to: { name: 'scheduler.dashboard' }, icon: ClockIcon, match: ['scheduler.'] },
-            { name: 'ai.dashboard', label: 'AI Assistant', to: { name: 'ai.dashboard' }, icon: SparklesIcon, match: ['ai.'] },
-            { name: 'webhooks.index', label: 'Webhooks', to: { name: 'webhooks.index' }, icon: PuzzlePieceIcon, match: ['webhooks.'] },
-            { name: 'content.workflow', label: 'Content Approvals', to: { name: 'content.workflow' }, icon: DocumentTextIcon, match: ['content.workflow'] },
-            { name: 'queue.dashboard', label: 'Queue', to: { name: 'queue.dashboard' }, icon: QueueListIcon, match: ['queue.'] },
-            { name: 'sync.dashboard', label: 'Sync', to: { name: 'sync.dashboard' }, icon: BoltIcon, match: ['sync.', 'mappings.'] },
+            {
+                name: 'notifications.dashboard',
+                label: 'Notifications',
+                to: { name: 'notifications.dashboard' },
+                icon: BellAlertIcon,
+                match: ['notifications.'],
+                permission: 'notifications.view',
+            },
+            {
+                name: 'automation.dashboard',
+                label: 'Automation',
+                to: { name: 'automation.dashboard' },
+                icon: BoltIcon,
+                match: ['automation.'],
+                permission: 'automation.view',
+            },
+            {
+                name: 'workflows.dashboard',
+                label: 'Workflows',
+                to: { name: 'workflows.dashboard' },
+                icon: Squares2X2Icon,
+                match: ['workflows.'],
+                permission: 'workflows.view',
+            },
+            {
+                name: 'scheduler.dashboard',
+                label: 'Scheduler',
+                to: { name: 'scheduler.dashboard' },
+                icon: ClockIcon,
+                match: ['scheduler.'],
+                permission: 'scheduler.view',
+            },
+            {
+                name: 'ai.dashboard',
+                label: 'AI Assistant',
+                to: { name: 'ai.dashboard' },
+                icon: SparklesIcon,
+                match: ['ai.'],
+                permission: 'ai.view',
+            },
+            {
+                name: 'webhooks.index',
+                label: 'Webhooks',
+                to: { name: 'webhooks.index' },
+                icon: PuzzlePieceIcon,
+                match: ['webhooks.'],
+                permission: 'integrations.view',
+            },
+            {
+                name: 'content.workflow',
+                label: 'Content Approvals',
+                to: { name: 'content.workflow' },
+                icon: DocumentTextIcon,
+                match: ['content.workflow'],
+                permission: ['content.review', 'content.approve'],
+            },
+            {
+                name: 'queue.dashboard',
+                label: 'Queue',
+                to: { name: 'queue.dashboard' },
+                icon: QueueListIcon,
+                match: ['queue.'],
+                permission: 'queue.view',
+            },
+            {
+                name: 'sync.dashboard',
+                label: 'Sync',
+                to: { name: 'sync.dashboard' },
+                icon: BoltIcon,
+                match: ['sync.', 'mappings.'],
+                permission: 'integrations.view',
+            },
         ],
     },
     {
         title: 'Support & Governance',
         items: [
-            { name: 'support.dashboard', label: 'Support', to: { name: 'support.dashboard' }, icon: LifebuoyIcon, match: ['support.'] },
-            { name: 'compliance.dashboard', label: 'Compliance', to: { name: 'compliance.dashboard' }, icon: ScaleIcon, match: ['compliance.'] },
-            { name: 'analytics.dashboard', label: 'Analytics', to: { name: 'analytics.dashboard' }, icon: ChartBarIcon, match: ['analytics.'] },
-            { name: 'audit.activity', label: 'Audit Logs', to: { name: 'audit.activity' }, icon: ClipboardDocumentListIcon, match: ['audit.'] },
+            {
+                name: 'support.dashboard',
+                label: 'Support',
+                to: { name: 'support.dashboard' },
+                icon: LifebuoyIcon,
+                match: ['support.'],
+                permission: 'support.view',
+            },
+            {
+                name: 'compliance.dashboard',
+                label: 'Compliance',
+                to: { name: 'compliance.dashboard' },
+                icon: ScaleIcon,
+                match: ['compliance.'],
+                permission: 'compliance.view',
+            },
+            {
+                name: 'analytics.dashboard',
+                label: 'Analytics',
+                to: { name: 'analytics.dashboard' },
+                icon: ChartBarIcon,
+                match: ['analytics.'],
+                permission: 'analytics.view',
+            },
+            {
+                name: 'audit.activity',
+                label: 'Audit Logs',
+                to: { name: 'audit.activity' },
+                icon: ClipboardDocumentListIcon,
+                match: ['audit.'],
+                permission: 'audit.view',
+            },
         ],
     },
     {
         title: 'System',
         items: [
-            { name: 'settings.general', label: 'Settings', to: { name: 'settings.general' }, icon: Cog6ToothIcon, match: ['settings.'] },
-            { name: 'monitoring.dashboard', label: 'Monitoring', to: { name: 'monitoring.dashboard' }, icon: PresentationChartLineIcon, match: ['monitoring.'] },
+            {
+                name: 'settings.general',
+                label: 'Settings',
+                to: { name: 'settings.general' },
+                icon: Cog6ToothIcon,
+                match: ['settings.'],
+                permission: 'settings.view',
+            },
+            {
+                name: 'monitoring.dashboard',
+                label: 'Monitoring',
+                to: { name: 'monitoring.dashboard' },
+                icon: PresentationChartLineIcon,
+                match: ['monitoring.'],
+                permission: 'monitoring.view',
+            },
         ],
     },
 ];
+
+const navigationSections = computed(() =>
+    navigationCatalog
+        .map((section) => ({
+            ...section,
+            items: section.items.filter((item) => can(item.permission)),
+        }))
+        .filter((section) => section.items.length > 0)
+);
 
 function closeMobile() {
     if (window.matchMedia('(max-width: 1023px)').matches) {

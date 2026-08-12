@@ -1,5 +1,5 @@
 <template>
-  <div class="relative" :class="wrapperClass" @click.stop>
+  <div ref="rootRef" class="relative" :class="wrapperClass">
     <button
       type="button"
       class="inline-flex w-full items-center justify-between gap-2 border bg-white text-left shadow-none outline-none transition focus:outline-none focus:ring-0"
@@ -15,7 +15,7 @@
       :disabled="disabled"
       :aria-expanded="open"
       aria-haspopup="listbox"
-      @click="toggle"
+      @click.stop="toggle"
     >
       <span
         class="min-w-0 flex-1 truncate"
@@ -34,9 +34,12 @@
       class="absolute left-0 z-[80] min-w-full overflow-hidden rounded-xl bg-white py-1 shadow-lg ring-1 ring-slate-200"
       :class="[
         dropUp ? 'bottom-full mb-1.5' : 'top-full mt-1.5',
-        size === 'lg' ? 'max-h-64 overflow-y-auto' : '',
+        'max-h-64 overflow-y-auto',
       ]"
       role="listbox"
+      :aria-multiselectable="multiple || undefined"
+      @click.stop
+      @pointerdown.stop
     >
       <p
         v-if="!options.length"
@@ -48,18 +51,29 @@
         v-for="option in options"
         :key="String(option.value)"
         type="button"
-        class="flex w-full items-center px-3.5 text-left text-sm transition"
+        class="flex w-full items-center gap-2.5 px-3.5 text-left text-sm transition"
         :class="[
           sizeClasses.option,
-          option.value === modelValue
+          isSelected(option.value)
             ? 'bg-brand-50 font-medium text-brand-700'
             : 'text-slate-700 hover:bg-slate-50',
         ]"
         role="option"
-        :aria-selected="option.value === modelValue"
-        @click="select(option.value)"
+        :aria-selected="isSelected(option.value)"
+        @mousedown.prevent="select(option.value)"
       >
-        {{ option.label }}
+        <span
+          v-if="multiple"
+          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border"
+          :class="
+            isSelected(option.value)
+              ? 'border-brand-600 bg-brand-600 text-white'
+              : 'border-zinc-300 bg-white text-transparent'
+          "
+        >
+          <CheckIcon class="h-3 w-3" />
+        </span>
+        <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
       </button>
     </div>
   </div>
@@ -67,11 +81,11 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { ChevronDownIcon } from '@heroicons/vue/24/outline';
+import { CheckIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   modelValue: {
-    type: [String, Number],
+    type: [String, Number, Array, null],
     default: '',
   },
   options: {
@@ -103,11 +117,16 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  multiple: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['update:modelValue', 'change']);
 
 const open = ref(false);
+const rootRef = ref(null);
 
 const sizeClasses = computed(() => {
   if (props.size === 'sm') {
@@ -133,13 +152,48 @@ const sizeClasses = computed(() => {
   };
 });
 
+const selectedValues = computed(() => {
+  if (!props.multiple) {
+    return [];
+  }
+  return Array.isArray(props.modelValue) ? props.modelValue : [];
+});
+
+const normalizedValue = computed(() => {
+  if (props.multiple) {
+    return selectedValues.value;
+  }
+  return props.modelValue ?? '';
+});
+
 const selectedOption = computed(() =>
-  props.options.find((option) => option.value === props.modelValue)
+  props.options.find((option) => option.value === normalizedValue.value),
 );
 
-const hasSelection = computed(() => Boolean(selectedOption.value));
+const hasSelection = computed(() => {
+  if (props.multiple) {
+    return selectedValues.value.length > 0;
+  }
+  if (normalizedValue.value === '' || normalizedValue.value === null || normalizedValue.value === undefined) {
+    return Boolean(props.options.find((option) => option.value === ''));
+  }
+  return Boolean(selectedOption.value);
+});
 
 const selectedLabel = computed(() => {
+  if (props.multiple) {
+    if (!selectedValues.value.length) {
+      return '';
+    }
+    const labels = props.options
+      .filter((option) => selectedValues.value.includes(option.value))
+      .map((option) => option.label);
+    if (labels.length <= 2) {
+      return labels.join(', ');
+    }
+    return `${labels.length} selected`;
+  }
+
   if (selectedOption.value) {
     return selectedOption.value.label;
   }
@@ -149,6 +203,13 @@ const selectedLabel = computed(() => {
   return props.options[0]?.label || '';
 });
 
+function isSelected(value) {
+  if (props.multiple) {
+    return selectedValues.value.includes(value);
+  }
+  return normalizedValue.value === value;
+}
+
 function toggle() {
   if (props.disabled) {
     return;
@@ -157,20 +218,38 @@ function toggle() {
 }
 
 function select(value) {
+  if (props.multiple) {
+    const current = [...selectedValues.value];
+    const index = current.indexOf(value);
+    if (index >= 0) {
+      current.splice(index, 1);
+    } else {
+      current.push(value);
+    }
+    emit('update:modelValue', current);
+    emit('change', current);
+    return;
+  }
+
   emit('update:modelValue', value);
   emit('change', value);
   open.value = false;
 }
 
-function onDocumentClick() {
-  open.value = false;
+function onDocumentPointerDown(event) {
+  if (!open.value || !rootRef.value) {
+    return;
+  }
+  if (!rootRef.value.contains(event.target)) {
+    open.value = false;
+  }
 }
 
 onMounted(() => {
-  document.addEventListener('click', onDocumentClick);
+  document.addEventListener('pointerdown', onDocumentPointerDown);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick);
+  document.removeEventListener('pointerdown', onDocumentPointerDown);
 });
 </script>

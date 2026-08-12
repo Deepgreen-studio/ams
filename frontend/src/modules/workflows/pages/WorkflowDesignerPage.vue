@@ -1,75 +1,86 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="isEdit ? 'Edit Workflow' : 'Create Workflow'"
-      description="Drag stages on the canvas. Configure approvers, timeouts, and transitions."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'workflows.designer' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'workflows.designer' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
+        :to="{ name: 'workflows.designer' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back
+      </RouterLink>
     </Teleport>
 
     <WorkflowsSubnav />
 
-    <form class="space-y-6" novalidate @submit.prevent="submit">
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
+    <form class="space-y-4" novalidate @submit.prevent="submit">
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">Workflow details</h2>
+          <p class="mt-0.5 text-sm text-slate-500">
+            Name the definition and choose how it should behave.
+          </p>
+        </div>
+
         <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Name</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Name</span>
             <input
               v-model="form.name"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              type="text"
+              placeholder="Workflow name"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
-            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
+            <p v-if="fieldErrors.name" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
+
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Type</span>
-            <select
+            <span class="mb-1.5 block font-medium text-slate-700">Type</span>
+            <SelectBox
               v-model="form.type"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
-              :class="fieldClass('type')"
-            >
-              <option v-for="item in store.catalog.types" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
-            <p v-if="fieldErrors.type" class="mt-1 text-xs text-rose-600">{{ fieldErrors.type[0] }}</p>
+              wrapper-class="w-full"
+              :options="typeOptions"
+              :error="Boolean(fieldErrors.type)"
+            />
+            <p v-if="fieldErrors.type" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.type[0] }}</p>
           </label>
+
           <label class="block text-sm md:col-span-2">
-            <span class="mb-1 block font-medium text-slate-700">Description</span>
-            <textarea v-model="form.description" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Description</span>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              placeholder="Optional description"
+              class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
-          <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input v-model="form.is_enabled" type="checkbox" class="rounded border-slate-300" />
+
+          <label
+            class="inline-flex items-center gap-2.5 rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+          >
+            <input
+              v-model="form.is_enabled"
+              type="checkbox"
+              class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+            />
             Enabled
           </label>
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <h2 class="text-sm font-semibold text-slate-900">Visual stage canvas</h2>
-            <p class="text-xs text-slate-500">Drag cards to position stages. Select a stage to edit details.</p>
+            <h2 class="text-base font-semibold text-slate-900">Visual stage canvas</h2>
+            <p class="mt-0.5 text-sm text-slate-500">
+              Drag cards to position stages. Select a stage to edit details.
+            </p>
           </div>
           <div class="flex flex-wrap gap-2">
             <button
               v-for="stepType in store.catalog.step_types"
               :key="stepType.value"
               type="button"
-              class="rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+              class="inline-flex h-9 items-center rounded-[12px] border border-zinc-200 bg-white px-3 text-xs font-medium text-slate-700 transition hover:bg-zinc-50"
               @click="addStep(stepType.value)"
             >
               + {{ stepType.label }}
@@ -79,76 +90,183 @@
 
         <div
           ref="canvasRef"
-          class="relative h-[420px] overflow-auto rounded-xl border border-dashed border-slate-300 bg-slate-50"
-          :class="fieldErrors.steps ? 'border-rose-300' : ''"
+          class="relative h-[420px] overflow-auto rounded-[12px] border border-dashed border-zinc-200 bg-zinc-50/60"
+          :class="fieldErrors.steps ? 'border-rose-300 bg-rose-50/30' : ''"
           @dragover.prevent
           @drop.prevent="onCanvasDrop"
         >
           <div
+            v-if="!form.steps.length"
+            class="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center text-sm text-slate-500"
+          >
+            Add stages with the buttons above to start designing this workflow.
+          </div>
+
+          <div
             v-for="(step, index) in form.steps"
             :key="step._id"
-            class="absolute w-44 cursor-grab rounded-lg border bg-white p-3 active:cursor-grabbing"
-            :class="selectedIndex === index ? 'border-brand-500 ring-2 ring-brand-200' : 'border-slate-200'"
+            class="absolute w-48 cursor-grab rounded-[12px] bg-white p-3.5 shadow-sm ring-1 transition active:cursor-grabbing"
+            :class="
+              selectedIndex === index
+                ? 'ring-2 ring-brand-500 ring-offset-1'
+                : 'ring-zinc-100 hover:ring-zinc-200'
+            "
             :style="{ left: `${step.position_x}px`, top: `${step.position_y}px` }"
             draggable="true"
             @dragstart="onDragStart($event, index)"
             @click="selectedIndex = index"
           >
-            <p class="truncate text-xs font-semibold uppercase tracking-wide text-slate-500">{{ step.step_type }}</p>
-            <p class="mt-1 truncate text-sm font-medium text-slate-900">{{ step.name }}</p>
-            <p class="mt-1 truncate text-[11px] text-slate-400">{{ step.step_key }}</p>
+            <div class="mb-2 flex items-start justify-between gap-2">
+              <span
+                class="inline-flex max-w-[8.5rem] truncate rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                :class="stepTypeBadgeClass(step.step_type)"
+              >
+                {{ step.step_type }}
+              </span>
+
+              <div class="relative shrink-0" @click.stop>
+                <button
+                  type="button"
+                  class="inline-flex h-7 w-7 items-center justify-center rounded-[10px] text-slate-400 transition hover:bg-zinc-100 hover:text-slate-700"
+                  :aria-expanded="openMenuId === step._id"
+                  aria-haspopup="menu"
+                  aria-label="Stage actions"
+                  @click="toggleMenu(step._id)"
+                >
+                  <EllipsisVerticalIcon class="h-4 w-4" />
+                </button>
+
+                <div
+                  v-if="openMenuId === step._id"
+                  class="absolute right-0 top-8 z-30 w-36 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+                  role="menu"
+                >
+                  <button
+                    type="button"
+                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+                    role="menuitem"
+                    @click="selectStep(index)"
+                  >
+                    <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+                    role="menuitem"
+                    @click="removeStep(index)"
+                  >
+                    <TrashIcon class="h-4 w-4 text-red-500" />
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <p class="truncate text-sm font-semibold text-slate-900">{{ step.name }}</p>
+            <p class="mt-1 truncate text-xs text-slate-500">{{ step.step_key }}</p>
           </div>
         </div>
         <p v-if="fieldErrors.steps" class="mt-2 text-xs text-rose-600">{{ fieldErrors.steps[0] }}</p>
       </section>
 
-      <section v-if="selectedStep" class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-sm font-semibold text-slate-900">Stage settings</h2>
-          <button type="button" class="text-sm text-rose-600 hover:underline" @click="removeSelected">Remove stage</button>
+      <section
+        v-if="selectedStep"
+        class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8"
+      >
+        <div class="mb-5 flex items-center justify-between gap-3">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">Stage settings</h2>
+            <p class="mt-0.5 text-sm text-slate-500">
+              Configure transitions, approvers, and timeouts for the selected stage.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="rounded-[12px] border border-rose-200 px-3.5 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50"
+            @click="removeSelected"
+          >
+            Remove stage
+          </button>
         </div>
-        <div class="grid gap-3 md:grid-cols-2">
+
+        <div class="grid gap-4 md:grid-cols-2">
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Name</span>
-            <input v-model="selectedStep.name" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Name</span>
+            <input
+              v-model="selectedStep.name"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Step key</span>
-            <input v-model="selectedStep.step_key" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Step key</span>
+            <input
+              v-model="selectedStep.step_key"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 font-mono text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Type</span>
-            <select v-model="selectedStep.step_type" class="w-full rounded-lg border border-slate-300 px-3 py-2">
-              <option v-for="item in store.catalog.step_types" :key="item.value" :value="item.value">{{ item.label }}</option>
-            </select>
+            <span class="mb-1.5 block font-medium text-slate-700">Type</span>
+            <SelectBox
+              v-model="selectedStep.step_type"
+              wrapper-class="w-full"
+              :options="stepTypeOptions"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Next step keys (comma)</span>
-            <input v-model="nextKeysInput" class="w-full rounded-lg border border-slate-300 px-3 py-2" @change="applyNextKeys" />
+            <span class="mb-1.5 block font-medium text-slate-700">Next step keys (comma)</span>
+            <input
+              v-model="nextKeysInput"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+              @change="applyNextKeys"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">On approve →</span>
-            <input v-model="selectedStep.on_approve_step_key" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">On approve →</span>
+            <input
+              v-model="selectedStep.on_approve_step_key"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">On reject →</span>
-            <input v-model="selectedStep.on_reject_step_key" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">On reject →</span>
+            <input
+              v-model="selectedStep.on_reject_step_key"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Approver roles (comma)</span>
-            <input v-model="approverRolesInput" class="w-full rounded-lg border border-slate-300 px-3 py-2" @change="applyApproverRoles" />
+            <span class="mb-1.5 block font-medium text-slate-700">Approver roles (comma)</span>
+            <input
+              v-model="approverRolesInput"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+              @change="applyApproverRoles"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Timeout (minutes)</span>
-            <input v-model.number="selectedStep.config.timeout_minutes" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Timeout (minutes)</span>
+            <input
+              v-model.number="selectedStep.config.timeout_minutes"
+              type="number"
+              min="1"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Escalate to role</span>
-            <input v-model="selectedStep.config.escalate_to_role" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Escalate to role</span>
+            <input
+              v-model="selectedStep.config.escalate_to_role"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Approvals required</span>
-            <input v-model.number="selectedStep.config.approvals_required" type="number" min="1" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Approvals required</span>
+            <input
+              v-model.number="selectedStep.config.approvals_required"
+              type="number"
+              min="1"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
         </div>
       </section>
@@ -156,15 +274,15 @@
       <div class="flex flex-wrap gap-3">
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
         >
-          {{ store.saving ? 'Saving...' : isEdit ? 'Update workflow' : 'Create workflow' }}
+          {{ store.saving ? 'Saving…' : isEdit ? 'Update workflow' : 'Create workflow' }}
         </button>
         <button
           v-if="isEdit"
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
           :disabled="store.saving"
           @click="publish"
         >
@@ -176,11 +294,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  EllipsisVerticalIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
@@ -190,6 +313,7 @@ const toast = useToast();
 const canvasRef = ref(null);
 const selectedIndex = ref(0);
 const dragIndex = ref(null);
+const openMenuId = ref(null);
 const fieldErrors = ref({});
 let uid = 0;
 
@@ -202,6 +326,14 @@ const form = reactive({
   is_enabled: true,
   steps: [],
 });
+
+const typeOptions = computed(() =>
+  store.catalog.types.map((item) => ({ value: item.value, label: item.label })),
+);
+
+const stepTypeOptions = computed(() =>
+  store.catalog.step_types.map((item) => ({ value: item.value, label: item.label })),
+);
 
 const selectedStep = computed(() => form.steps[selectedIndex.value] || null);
 
@@ -218,23 +350,35 @@ const approverRolesInput = computed({
 watch(
   () => store.error,
   (message) => {
-    if (message) {
-      toast.error(message, 'Validation Failed');
-    }
-  }
+    if (!message) return;
+    toast.error(message, 'Validation Failed');
+    store.error = null;
+  },
 );
 
 watch(
   () => store.successMessage,
   (message) => {
-    if (message) {
-      toast.success(message);
-    }
-  }
+    if (!message) return;
+    toast.success(message);
+    store.successMessage = null;
+  },
 );
 
 function fieldClass(field) {
   return fieldErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+}
+
+function stepTypeBadgeClass(stepType) {
+  const map = {
+    start: 'bg-emerald-50 text-emerald-700',
+    approval: 'bg-brand-50 text-brand-700',
+    task: 'bg-sky-50 text-sky-700',
+    condition: 'bg-amber-50 text-amber-700',
+    parallel_gateway: 'bg-violet-50 text-violet-700',
+    end: 'bg-zinc-100 text-slate-700',
+  };
+  return map[stepType] || 'bg-zinc-100 text-slate-600';
 }
 
 function makeStep(stepType, overrides = {}) {
@@ -265,17 +409,37 @@ function makeStep(stepType, overrides = {}) {
 function addStep(stepType) {
   form.steps.push(makeStep(stepType));
   selectedIndex.value = form.steps.length - 1;
+  closeMenu();
+}
+
+function selectStep(index) {
+  selectedIndex.value = index;
+  closeMenu();
+}
+
+function removeStep(index) {
+  closeMenu();
+  form.steps.splice(index, 1);
+  selectedIndex.value = Math.max(0, Math.min(selectedIndex.value, form.steps.length - 1));
 }
 
 function removeSelected() {
   if (selectedIndex.value < 0) return;
-  form.steps.splice(selectedIndex.value, 1);
-  selectedIndex.value = Math.max(0, selectedIndex.value - 1);
+  removeStep(selectedIndex.value);
+}
+
+function toggleMenu(id) {
+  openMenuId.value = openMenuId.value === id ? null : id;
+}
+
+function closeMenu() {
+  openMenuId.value = null;
 }
 
 function onDragStart(event, index) {
   dragIndex.value = index;
   event.dataTransfer.effectAllowed = 'move';
+  closeMenu();
 }
 
 function onCanvasDrop(event) {
@@ -405,14 +569,25 @@ async function publish() {
   }
 }
 
+function onDocumentClick() {
+  closeMenu();
+}
+
 onMounted(async () => {
+  document.addEventListener('click', onDocumentClick);
   await store.fetchCatalog();
   if (isEdit.value) {
     const workflow = await store.fetchWorkflow(route.params.id);
     hydrate(workflow);
   } else {
     form.steps = [
-      makeStep('start', { name: 'Start', step_key: 'start', position_x: 40, position_y: 140, next_step_keys: ['manager_approval'] }),
+      makeStep('start', {
+        name: 'Start',
+        step_key: 'start',
+        position_x: 40,
+        position_y: 140,
+        next_step_keys: ['manager_approval'],
+      }),
       makeStep('approval', {
         name: 'Manager Approval',
         step_key: 'manager_approval',
@@ -420,10 +595,19 @@ onMounted(async () => {
         position_y: 140,
         on_approve_step_key: 'end',
         on_reject_step_key: 'end',
-        config: { approver_roles: ['manager', 'super-admin'], timeout_minutes: 1440, escalate_to_role: 'super-admin', approvals_required: 1 },
+        config: {
+          approver_roles: ['manager', 'super-admin'],
+          timeout_minutes: 1440,
+          escalate_to_role: 'super-admin',
+          approvals_required: 1,
+        },
       }),
       makeStep('end', { name: 'End', step_key: 'end', position_x: 520, position_y: 140 }),
     ];
   }
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onDocumentClick);
 });
 </script>

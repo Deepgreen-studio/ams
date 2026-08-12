@@ -5,10 +5,14 @@
     <div class="grid gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Content type</label>
-        <select v-model="form.content_type_id" class="input" required>
-          <option value="" disabled>Select type</option>
-          <option v-for="type in types" :key="type.uuid" :value="type.uuid">{{ type.name }}</option>
-        </select>
+        <SelectBox
+          v-model="form.content_type_id"
+          size="lg"
+          placeholder="Select type"
+          wrapper-class="w-full"
+          :options="contentTypeOptions"
+          :error="Boolean(errors.content_type_id)"
+        />
         <p v-if="errors.content_type_id" class="mt-1 text-xs text-rose-600">{{ errors.content_type_id[0] }}</p>
       </div>
       <div>
@@ -83,7 +87,8 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, reactive, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -98,6 +103,12 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 
+const contentTypeOptions = computed(() =>
+  (props.types || []).map((type) => ({
+    value: type.uuid,
+    label: type.name,
+  }))
+);
 const form = reactive({
   content_type_id: '',
   categories: [],

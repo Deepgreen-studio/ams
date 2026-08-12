@@ -1,131 +1,149 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="isEdit ? 'Edit Automation Rule' : 'Create Automation Rule'"
-      description="Visual rule builder for triggers, conditions, and actions."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'automation.rules' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back to rules
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'automation.rules' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back to rules
-        </RouterLink>
+        :to="{ name: 'automation.rules' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back to rules
+      </RouterLink>
     </Teleport>
 
     <AutomationSubnav />
 
-    <form class="space-y-6" novalidate @submit.prevent="submit">
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
-        <h2 class="mb-4 text-sm font-semibold text-slate-900">1. Trigger</h2>
+    <form class="space-y-4" novalidate @submit.prevent="submit">
+      <!-- 1. Trigger -->
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">1. Trigger</h2>
+          <p class="mt-0.5 text-sm text-slate-500">Define when this automation should start.</p>
+        </div>
+
         <div class="grid gap-4 md:grid-cols-2">
-          <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Name</span>
+          <label class="block text-sm md:col-span-1">
+            <span class="mb-1.5 block font-medium text-slate-700">Name</span>
             <input
               v-model="form.name"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              type="text"
+              placeholder="Rule name"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
-            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
+            <p v-if="fieldErrors.name" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
+
           <label class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Trigger type</span>
-            <select
+            <span class="mb-1.5 block font-medium text-slate-700">Trigger type</span>
+            <SelectBox
               v-model="form.trigger_type"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
-              :class="fieldClass('trigger_type')"
-            >
-              <option v-for="item in store.catalog.trigger_types" :key="item.value" :value="item.value">
-                {{ item.label }}
-              </option>
-            </select>
-            <p v-if="fieldErrors.trigger_type" class="mt-1 text-xs text-rose-600">
+              wrapper-class="w-full"
+              :options="triggerTypeOptions"
+              :error="Boolean(fieldErrors.trigger_type)"
+            />
+            <p v-if="fieldErrors.trigger_type" class="mt-1.5 text-xs text-rose-600">
               {{ fieldErrors.trigger_type[0] }}
             </p>
           </label>
+
           <label v-if="form.trigger_type !== 'schedule'" class="block text-sm md:col-span-2">
-            <span class="mb-1 block font-medium text-slate-700">Event</span>
-            <select
+            <span class="mb-1.5 block font-medium text-slate-700">Event</span>
+            <SelectBox
               v-model="form.event_key"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
-              :class="fieldClass('event_key')"
-            >
-              <option value="">Select event</option>
-              <option v-for="item in store.catalog.events" :key="item.value" :value="item.value">
-                {{ item.label }}
-              </option>
-            </select>
-            <p v-if="fieldErrors.event_key" class="mt-1 text-xs text-rose-600">
+              wrapper-class="w-full"
+              placeholder="Select event"
+              :options="eventOptions"
+              :error="Boolean(fieldErrors.event_key)"
+            />
+            <p v-if="fieldErrors.event_key" class="mt-1.5 text-xs text-rose-600">
               {{ fieldErrors.event_key[0] }}
             </p>
           </label>
+
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Cron expression</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Cron expression</span>
             <input
               v-model="form.schedule_cron"
               placeholder="0 8 * * *"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('schedule_cron')"
             />
-            <p v-if="fieldErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
+            <p v-if="fieldErrors.schedule_cron" class="mt-1.5 text-xs text-rose-600">
               {{ fieldErrors.schedule_cron[0] }}
             </p>
           </label>
+
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Timezone</span>
-            <input v-model="form.schedule_timezone" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Timezone</span>
+            <input
+              v-model="form.schedule_timezone"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
+
           <label v-if="form.trigger_type === 'time'" class="block text-sm">
-            <span class="mb-1 block font-medium text-slate-700">Delay (minutes)</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Delay (minutes)</span>
             <input
               v-model.number="form.delay_minutes"
               type="number"
               min="1"
-              class="w-full rounded-lg border border-slate-300 px-3 py-2"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('delay_minutes')"
             />
-            <p v-if="fieldErrors.delay_minutes" class="mt-1 text-xs text-rose-600">
+            <p v-if="fieldErrors.delay_minutes" class="mt-1.5 text-xs text-rose-600">
               {{ fieldErrors.delay_minutes[0] }}
             </p>
           </label>
+
           <label class="block text-sm md:col-span-2">
-            <span class="mb-1 block font-medium text-slate-700">Description</span>
-            <textarea v-model="form.description" rows="2" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+            <span class="mb-1.5 block font-medium text-slate-700">Description</span>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              placeholder="Optional description"
+              class="w-full rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
           </label>
-          <label class="flex items-center gap-2 text-sm text-slate-700">
-            <input v-model="form.is_enabled" type="checkbox" class="rounded border-slate-300" />
+
+          <label
+            class="inline-flex items-center gap-2.5 rounded-[12px] border border-zinc-200 px-3.5 py-2.5 text-sm text-slate-700"
+          >
+            <input
+              v-model="form.is_enabled"
+              type="checkbox"
+              class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+            />
             Enabled
           </label>
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="mb-4 flex items-center justify-between">
+      <!-- 2. Conditions -->
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 class="text-sm font-semibold text-slate-900">2. Conditions</h2>
-            <p class="text-xs text-slate-500">Optional filters evaluated before actions run.</p>
+            <h2 class="text-base font-semibold text-slate-900">2. Conditions</h2>
+            <p class="mt-0.5 text-sm text-slate-500">Optional filters evaluated before actions run.</p>
           </div>
-          <div class="flex items-center gap-2">
-            <select v-model="form.condition_logic" class="rounded-lg border border-slate-300 px-2 py-1.5 text-sm">
-              <option value="and">Match ALL (AND)</option>
-              <option value="or">Match ANY (OR)</option>
-            </select>
-            <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50" @click="addCondition">
+          <div class="flex flex-wrap items-center gap-2">
+            <SelectBox
+              v-model="form.condition_logic"
+              wrapper-class="min-w-[10.5rem]"
+              :options="logicOptions"
+            />
+            <button
+              type="button"
+              class="h-10 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="addCondition()"
+            >
               Add condition
             </button>
           </div>
         </div>
 
-        <div v-if="!form.conditions.length" class="rounded-lg border border-dashed border-slate-200 px-4 py-6 text-center text-sm text-slate-500">
+        <div
+          v-if="!form.conditions.length"
+          class="rounded-[12px] border border-dashed border-zinc-200 bg-zinc-50/50 px-4 py-10 text-center text-sm text-slate-500"
+        >
           No conditions — rule always runs when triggered.
         </div>
 
@@ -133,24 +151,40 @@
           <div
             v-for="(condition, index) in form.conditions"
             :key="index"
-            class="grid gap-2 rounded-lg border border-slate-100 bg-slate-50 p-3 md:grid-cols-[1fr_1fr_1fr_auto]"
+            class="grid gap-3 rounded-[12px] bg-zinc-50 p-4 ring-1 ring-zinc-100 md:grid-cols-[1fr_1fr_1fr_auto]"
           >
-            <input v-model="condition.field" placeholder="Field (e.g. priority)" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-            <select v-model="condition.operator" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <option v-for="op in store.catalog.operators" :key="op.value" :value="op.value">{{ op.label }}</option>
-            </select>
-            <input v-model="condition.value" placeholder="Value" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-            <button type="button" class="text-sm text-rose-600 hover:underline" @click="removeCondition(index)">Remove</button>
+            <input
+              v-model="condition.field"
+              placeholder="Field (e.g. priority)"
+              class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
+            <SelectBox
+              v-model="condition.operator"
+              wrapper-class="w-full"
+              :options="operatorOptions"
+            />
+            <input
+              v-model="condition.value"
+              placeholder="Value"
+              class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
+            <button
+              type="button"
+              class="h-10 px-2 text-sm font-medium text-rose-600 hover:underline md:justify-self-end"
+              @click="removeCondition(index)"
+            >
+              Remove
+            </button>
           </div>
         </div>
 
-        <div v-if="selectedEventFields.length" class="mt-3 text-xs text-slate-500">
-          Suggested fields:
+        <div v-if="selectedEventFields.length" class="mt-4 flex flex-wrap items-center gap-2">
+          <span class="text-xs font-medium text-slate-500">Suggested fields:</span>
           <button
             v-for="field in selectedEventFields"
             :key="field"
             type="button"
-            class="ml-1 rounded bg-white px-1.5 py-0.5 ring-1 ring-slate-200 hover:bg-slate-50"
+            class="rounded-full bg-white px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-zinc-200 hover:bg-zinc-50 hover:text-brand-700"
             @click="addCondition(field)"
           >
             {{ field }}
@@ -158,82 +192,118 @@
         </div>
       </section>
 
-      <section class="rounded-xl border border-slate-200 bg-white p-5">
-        <div class="mb-4 flex items-center justify-between">
+      <!-- 3. Actions -->
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
+        <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h2 class="text-sm font-semibold text-slate-900">3. Actions</h2>
-            <p class="text-xs text-slate-500">Executed in order when conditions pass.</p>
+            <h2 class="text-base font-semibold text-slate-900">3. Actions</h2>
+            <p class="mt-0.5 text-sm text-slate-500">Executed in order when conditions pass.</p>
           </div>
-          <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium hover:bg-slate-50" @click="addAction">
+          <button
+            type="button"
+            class="h-10 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+            @click="addAction"
+          >
             Add action
           </button>
         </div>
 
         <p v-if="fieldErrors.actions" class="mb-3 text-xs text-rose-600">{{ fieldErrors.actions[0] }}</p>
 
-        <div class="space-y-3">
+        <div
+          v-if="!form.actions.length"
+          class="rounded-[12px] border border-dashed border-zinc-200 bg-zinc-50/50 px-4 py-10 text-center text-sm text-slate-500"
+        >
+          No actions yet. Add at least one action to continue.
+        </div>
+
+        <div v-else class="space-y-3">
           <div
             v-for="(action, index) in form.actions"
             :key="index"
-            class="rounded-lg border border-slate-100 bg-slate-50 p-3"
+            class="rounded-[12px] bg-zinc-50 p-4 ring-1 ring-zinc-100"
           >
-            <div class="mb-2 flex flex-wrap items-center gap-2">
-              <select v-model="action.action_type" class="rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                <option v-for="item in store.catalog.actions" :key="item.value" :value="item.value">
-                  {{ item.label }}{{ item.implemented ? '' : ' (future)' }}
-                </option>
-              </select>
-              <label class="flex items-center gap-1 text-xs text-slate-600">
-                <input v-model="action.is_enabled" type="checkbox" class="rounded border-slate-300" />
+            <div class="mb-3 flex flex-wrap items-center gap-2">
+              <SelectBox
+                v-model="action.action_type"
+                wrapper-class="min-w-[12rem] flex-1"
+                :options="actionTypeOptions"
+              />
+              <label
+                class="inline-flex h-10 items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-700"
+              >
+                <input
+                  v-model="action.is_enabled"
+                  type="checkbox"
+                  class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+                />
                 Enabled
               </label>
-              <button type="button" class="ml-auto text-sm text-rose-600 hover:underline" @click="removeAction(index)">
+              <button
+                type="button"
+                class="ml-auto h-10 px-2 text-sm font-medium text-rose-600 hover:underline"
+                @click="removeAction(index)"
+              >
                 Remove
               </button>
             </div>
-            <div class="grid gap-2 md:grid-cols-2">
-              <input v-model="action.config.title" placeholder="Title / subject" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-              <input v-model="action.config.message" placeholder="Message / body" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <div class="grid gap-3 md:grid-cols-2">
+              <input
+                v-model="action.config.title"
+                placeholder="Title / subject"
+                class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              />
+              <input
+                v-model="action.config.message"
+                placeholder="Message / body"
+                class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              />
               <input
                 v-if="action.action_type === 'assign_role'"
                 v-model="action.config.role"
                 placeholder="Role name (e.g. customer)"
-                class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               />
               <input
                 v-if="action.action_type === 'assign_agent'"
                 v-model="action.config.assignee_uuid"
                 placeholder="Assignee user UUID (optional)"
-                class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               />
               <input
                 v-if="action.action_type === 'generate_api_key'"
                 v-model="action.config.token_name"
                 placeholder="Token name"
-                class="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               />
             </div>
           </div>
         </div>
       </section>
 
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap items-center gap-3 rounded-[12px] bg-white px-6 py-4 ring-1 ring-zinc-100 sm:px-8">
         <button
           type="submit"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="store.saving"
         >
-          {{ store.saving ? 'Saving...' : isEdit ? 'Update rule' : 'Create rule' }}
+          {{ store.saving ? 'Saving…' : isEdit ? 'Update rule' : 'Create rule' }}
         </button>
         <button
           v-if="isEdit"
           type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-60"
           :disabled="store.saving"
           @click="runTest"
         >
           Test run
         </button>
+        <RouterLink
+          :to="{ name: 'automation.rules' }"
+          class="rounded-[12px] px-5 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-800"
+        >
+          Cancel
+        </RouterLink>
       </div>
     </form>
   </div>
@@ -242,8 +312,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
 import { useToast } from '@/composables/useToast';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.vue';
 import { useAutomationStore } from '@/modules/automation/stores/automation';
 
@@ -276,6 +346,40 @@ const form = reactive({
   ],
 });
 
+const logicOptions = [
+  { value: 'and', label: 'Match ALL (AND)' },
+  { value: 'or', label: 'Match ANY (OR)' },
+];
+
+const triggerTypeOptions = computed(() =>
+  (store.catalog.trigger_types || []).map((item) => ({
+    value: item.value,
+    label: item.label,
+  })),
+);
+
+const eventOptions = computed(() => [
+  { value: '', label: 'Select event' },
+  ...(store.catalog.events || []).map((item) => ({
+    value: item.value,
+    label: item.label,
+  })),
+]);
+
+const operatorOptions = computed(() =>
+  (store.catalog.operators || []).map((item) => ({
+    value: item.value,
+    label: item.label,
+  })),
+);
+
+const actionTypeOptions = computed(() =>
+  (store.catalog.actions || []).map((item) => ({
+    value: item.value,
+    label: `${item.label}${item.implemented ? '' : ' (future)'}`,
+  })),
+);
+
 const selectedEventFields = computed(() => {
   const event = store.catalog.events.find((item) => item.value === form.event_key);
   return event?.sample_fields || [];
@@ -287,7 +391,7 @@ watch(
     if (message) {
       toast.error(message, 'Validation Failed');
     }
-  }
+  },
 );
 
 watch(
@@ -296,11 +400,13 @@ watch(
     if (message) {
       toast.success(message);
     }
-  }
+  },
 );
 
 function fieldClass(field) {
-  return fieldErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+  return fieldErrors.value?.[field]
+    ? 'border-rose-400 focus:border-rose-500'
+    : '';
 }
 
 function addCondition(field = '') {

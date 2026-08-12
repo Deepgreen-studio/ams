@@ -142,21 +142,14 @@
             <div class="grid gap-5 sm:grid-cols-2">
               <div>
                 <label class="field-label">Content type</label>
-                <select
+                <SelectBox
                   v-model="form.content_type_id"
-                  class="input"
-                  required
+                  size="lg"
+                  placeholder="Select type"
+                  wrapper-class="w-full"
+                  :options="contentTypeOptions"
                   :disabled="!isCreate"
-                >
-                  <option value="" disabled>Select type</option>
-                  <option
-                    v-for="type in contentStore.types"
-                    :key="type.uuid"
-                    :value="type.uuid"
-                  >
-                    {{ type.name }}
-                  </option>
-                </select>
+                />
               </div>
               <div>
                 <label class="field-label">Slug</label>
@@ -506,6 +499,7 @@ import ContentItemSubnav from '@/modules/content/components/ContentItemSubnav.vu
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';
 import FeaturedImageField from '@/modules/content/components/FeaturedImageField.vue';
 import SeoPreviewPanel from '@/modules/content/components/SeoPreviewPanel.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useContentStore } from '@/modules/content/stores/content';
 
 const props = defineProps({
@@ -519,6 +513,13 @@ const contentStore = useContentStore();
 const isCreate = computed(() => props.mode === 'create' || route.name === 'content.create');
 const contentId = computed(() => (isCreate.value ? createdId.value : route.params.id));
 const createdId = ref(null);
+
+const contentTypeOptions = computed(() =>
+  (contentStore.types || []).map((type) => ({
+    value: type.uuid,
+    label: type.name,
+  }))
+);
 const showLivePreview = ref(true);
 const showPreviewPanel = ref(true);
 const seoOpen = ref(false);

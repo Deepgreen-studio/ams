@@ -7,9 +7,9 @@
     <WebhookSubnav />
     <div
       v-if="store.loading && !store.currentWebhook"
-      class="h-64 animate-pulse rounded-xl bg-slate-100"
+      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
+    <div v-else class="overflow-hidden rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100">
       <WebhookForm
         :initial="store.currentWebhook || {}"
         hide-company

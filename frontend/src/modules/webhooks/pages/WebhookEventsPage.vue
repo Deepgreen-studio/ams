@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Webhook Events"
-      description="Catalog of system and module events available for webhook subscriptions."
-    /> -->
     <WebhookSubnav />
 
     <div
@@ -13,44 +9,141 @@
       {{ store.error }}
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div v-if="store.loading" class="space-y-3 p-6">
-        <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
+    <WebhookEventsTable
+      :events="store.events"
+      :loading="store.loading"
+      @view="openView"
+    >
+      <template #toolbar>
+        <EventSearchFilters v-model="filters" @submit="onFilter" @reset="onReset" />
+      </template>
+
+      <template #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="onReset"
+        >
+          Reset
+        </button>
+      </template>
+
+      <template #footer>
+        <Pagination
+          :meta="store.eventsMeta"
+          :loading="store.loading"
+          @change="onPage"
+          @per-page="onPerPage"
+        />
+      </template>
+    </WebhookEventsTable>
+
+    <DetailModal
+      :open="Boolean(selected)"
+      :title="selected?.label || 'Event detail'"
+      :subtitle="selected?.name || ''"
+      @close="selected = null"
+    >
+      <div v-if="selected" class="space-y-4">
+        <dl class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Module</dt>
+            <dd class="mt-1.5 capitalize text-sm text-slate-800">
+              {{ String(selected.source_module || '—').replaceAll('_', ' ') }}
+            </dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Status</dt>
+            <dd class="mt-1.5">
+              <StatusBadge :status="selected.status" />
+            </dd>
+          </div>
+          <div class="sm:col-span-2">
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Description</dt>
+            <dd class="mt-1.5 text-sm text-slate-700">{{ selected.description || '—' }}</dd>
+          </div>
+        </dl>
+
+        <div v-if="selected.payload_schema">
+          <p class="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+            Payload schema
+          </p>
+          <pre
+            class="max-h-[50vh] overflow-auto rounded-[12px] bg-slate-900 p-4 text-xs text-slate-100"
+          >{{ formatSchema(selected.payload_schema) }}</pre>
+        </div>
       </div>
-      <div v-else-if="!store.events.length" class="px-6 py-12 text-center text-sm text-slate-500">
-        No webhook events found.
-      </div>
-      <table v-else class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Event</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Module</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Description</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in store.events" :key="item.uuid" class="hover:bg-slate-50/80">
-            <td class="px-4 py-3">
-              <p class="font-medium text-slate-900">{{ item.label }}</p>
-              <p class="font-mono text-xs text-slate-500">{{ item.name }}</p>
-            </td>
-            <td class="px-4 py-3 capitalize text-slate-700">{{ item.source_module }}</td>
-            <td class="px-4 py-3 capitalize text-slate-700">{{ item.status }}</td>
-            <td class="px-4 py-3 text-slate-600">{{ item.description || '—' }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    </DetailModal>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { onMounted, reactive, ref } from 'vue';
+import Pagination from '@/modules/users/components/Pagination.vue';
+import DetailModal from '@/modules/webhooks/components/DetailModal.vue';
+import EventSearchFilters from '@/modules/webhooks/components/EventSearchFilters.vue';
+import StatusBadge from '@/modules/webhooks/components/StatusBadge.vue';
+import WebhookEventsTable from '@/modules/webhooks/components/WebhookEventsTable.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 
 const store = useWebhooksStore();
-onMounted(() => store.fetchEvents({ per_page: 100 }));
+const selected = ref(null);
+const filters = reactive({
+  search: '',
+  source_module: '',
+  status: '',
+  page: 1,
+  per_page: 20,
+});
+
+onMounted(() => load());
+
+function load() {
+  const params = Object.fromEntries(
+    Object.entries(filters).filter(([, v]) => v !== '' && v != null),
+  );
+  store.fetchEvents(params);
+}
+
+function openView(event) {
+  selected.value = event;
+}
+
+function onFilter(next) {
+  Object.assign(filters, next, { page: 1 });
+  selected.value = null;
+  load();
+}
+
+function onReset() {
+  filters.search = '';
+  filters.source_module = '';
+  filters.status = '';
+  filters.page = 1;
+  selected.value = null;
+  load();
+}
+
+function onPage(page) {
+  filters.page = page;
+  selected.value = null;
+  load();
+}
+
+function onPerPage(perPage) {
+  filters.per_page = perPage;
+  filters.page = 1;
+  selected.value = null;
+  load();
+}
+
+function formatSchema(schema) {
+  if (typeof schema === 'string') return schema;
+  try {
+    return JSON.stringify(schema, null, 2);
+  } catch {
+    return String(schema);
+  }
+}
 </script>

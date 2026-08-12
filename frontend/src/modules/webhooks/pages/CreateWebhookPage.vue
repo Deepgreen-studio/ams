@@ -5,7 +5,7 @@
       description="Register an incoming or outgoing webhook endpoint."
     /> -->
     <WebhookSubnav />
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="overflow-hidden rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100">
       <WebhookForm
         :loading="store.saving"
         :errors="store.fieldErrors"

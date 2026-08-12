@@ -17,123 +17,181 @@
 
     <NotificationsSubnav />
 
-    <div class="mb-4 flex flex-wrap gap-2 rounded-[12px] bg-white p-4 ring-1 ring-zinc-100">
-      <input
-        v-model="filters.search"
-        type="search"
-        placeholder="Search templates…"
-        class="min-w-[12rem] flex-1 rounded-[12px] border border-zinc-200 px-3 py-2 text-sm text-slate-700"
-        @keyup.enter="reload"
-      />
-      <select
-        v-model="filters.channel"
-        class="rounded-[12px] border border-zinc-200 px-3 py-2 text-sm text-slate-700"
-        @change="reload"
-      >
-        <option value="">All channels</option>
-        <option v-for="channel in store.templateChannels" :key="channel.value" :value="channel.value">
-          {{ channel.label }}
-        </option>
-      </select>
-      <select
-        v-model="filters.locale"
-        class="rounded-[12px] border border-zinc-200 px-3 py-2 text-sm text-slate-700"
-        @change="reload"
-      >
-        <option value="">All locales</option>
-        <option v-for="locale in store.templateLocales" :key="locale.value" :value="locale.value">
-          {{ locale.label }}
-        </option>
-      </select>
-      <select
-        v-model="filters.workflow_status"
-        class="rounded-[12px] border border-zinc-200 px-3 py-2 text-sm text-slate-700"
-        @change="reload"
-      >
-        <option value="">All statuses</option>
-        <option v-for="status in store.templateWorkflowStatuses" :key="status.value" :value="status.value">
-          {{ status.label }}
-        </option>
-      </select>
-      <button
-        type="button"
-        class="rounded-[12px] border border-zinc-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-        @click="reload"
-      >
-        Filter
-      </button>
+    <div
+      v-if="store.error"
+      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+    >
+      {{ store.error }}
     </div>
 
-    <div v-if="store.loading" class="h-40 animate-pulse rounded-[12px] bg-zinc-100" />
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
+        <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div class="relative min-w-0 flex-1 lg:max-w-sm">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              v-model="filters.search"
+              type="search"
+              placeholder="Search templates…"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              @keyup.enter="applyFilters"
+            />
+          </div>
 
-    <div v-else class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
-      <table class="min-w-full divide-y divide-zinc-100 text-sm">
-        <thead class="bg-zinc-50 text-left text-xs uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-5 py-3.5">Template</th>
-            <th class="px-5 py-3.5">Channel</th>
-            <th class="px-5 py-3.5">Locale</th>
-            <th class="px-5 py-3.5">Workflow</th>
-            <th class="px-5 py-3.5">Version</th>
-            <th class="px-5 py-3.5 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-zinc-100">
-          <tr v-if="!store.templates.length">
-            <td colspan="6" class="px-5 py-12 text-center text-slate-500">No templates found.</td>
-          </tr>
-          <tr v-for="item in store.templates" :key="item.uuid" class="hover:bg-zinc-50/80">
-            <td class="px-5 py-4">
-              <p class="font-medium text-slate-900">{{ item.name }}</p>
-              <p class="text-xs text-slate-500">{{ item.event_label }} · {{ item.subject || 'No subject' }}</p>
-            </td>
-            <td class="px-5 py-4 text-slate-600">{{ item.channel_label }}</td>
-            <td class="px-5 py-4 uppercase text-slate-600">{{ item.locale }}</td>
-            <td class="px-5 py-4">
-              <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-slate-700">
-                {{ item.workflow_status_label }}
-              </span>
-            </td>
-            <td class="px-5 py-4 text-slate-600">v{{ item.current_version }}</td>
-            <td class="space-x-3 px-5 py-4 text-right">
-              <RouterLink
-                :to="{ name: 'notifications.templates.edit', params: { id: item.uuid } }"
-                class="font-medium text-brand-700 hover:underline"
-              >
-                Edit
-              </RouterLink>
-              <RouterLink
-                :to="{ name: 'notifications.templates.preview', params: { id: item.uuid } }"
-                class="text-slate-600 hover:underline"
-              >
-                Preview
-              </RouterLink>
-              <RouterLink
-                :to="{ name: 'notifications.templates.versions', params: { id: item.uuid } }"
-                class="text-slate-600 hover:underline"
-              >
-                Versions
-              </RouterLink>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <SelectBox
+              v-model="filters.channel"
+              wrapper-class="min-w-[9.5rem]"
+              :options="channelOptions"
+              @change="applyFilters"
+            />
+            <SelectBox
+              v-model="filters.locale"
+              wrapper-class="min-w-[9.5rem]"
+              :options="localeOptions"
+              @change="applyFilters"
+            />
+            <SelectBox
+              v-model="filters.workflow_status"
+              wrapper-class="min-w-[9.5rem]"
+              :options="statusOptions"
+              @change="applyFilters"
+            />
+            <button
+              type="button"
+              class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+              @click="applyFilters"
+            >
+              Apply
+            </button>
+            <button
+              type="button"
+              class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="resetFilters"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
 
-    <div class="mt-4">
-      <Pagination :meta="store.templateMeta" @change="onPageChange" />
+      <div v-if="store.loading" class="space-y-3 px-6 py-6 sm:px-8">
+        <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
+      </div>
+
+      <EmptyState
+        v-else-if="!store.templates.length"
+        title="No templates found"
+        description="Try adjusting your filters or create a new notification template."
+        class="px-6 py-10 sm:px-8"
+      >
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+            @click="resetFilters"
+          >
+            Reset
+          </button>
+          <RouterLink
+            :to="{ name: 'notifications.templates.create' }"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          >
+            New template
+          </RouterLink>
+        </template>
+      </EmptyState>
+
+      <div v-else class="overflow-x-auto px-3">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="border-b border-zinc-100">
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Template</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Channel</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Locale</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Workflow</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Version</th>
+              <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="item in store.templates"
+              :key="item.uuid"
+              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            >
+              <td class="px-5 py-4">
+                <p class="font-medium text-slate-900">{{ item.name }}</p>
+                <p class="mt-0.5 text-xs text-slate-500">
+                  {{ item.event_label }} · {{ item.subject || 'No subject' }}
+                </p>
+              </td>
+              <td class="px-5 py-4">
+                <span class="inline-flex rounded-[8px] bg-zinc-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+                  {{ item.channel_label }}
+                </span>
+              </td>
+              <td class="px-5 py-4 uppercase text-slate-600">{{ item.locale }}</td>
+              <td class="px-5 py-4">
+                <span
+                  class="inline-flex rounded-full px-2.5 py-1 text-xs font-medium"
+                  :class="workflowClass(item.workflow_status)"
+                >
+                  {{ item.workflow_status_label }}
+                </span>
+              </td>
+              <td class="px-5 py-4 text-slate-600">v{{ item.current_version }}</td>
+              <td class="px-5 py-4 text-right">
+                <div class="inline-flex items-center gap-3">
+                  <RouterLink
+                    :to="{ name: 'notifications.templates.edit', params: { id: item.uuid } }"
+                    class="font-medium text-brand-700 hover:underline"
+                  >
+                    Edit
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'notifications.templates.preview', params: { id: item.uuid } }"
+                    class="text-slate-600 hover:underline"
+                  >
+                    Preview
+                  </RouterLink>
+                  <RouterLink
+                    :to="{ name: 'notifications.templates.versions', params: { id: item.uuid } }"
+                    class="text-slate-600 hover:underline"
+                  >
+                    Versions
+                  </RouterLink>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        v-if="store.templateMeta?.total"
+        class="border-t border-zinc-100 px-6 py-4 sm:px-8"
+      >
+        <Pagination :meta="store.templateMeta" @change="onPageChange" />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import NotificationsSubnav from '@/modules/notifications/components/NotificationsSubnav.vue';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 
 const store = useNotificationsStore();
+
 const filters = reactive({
   search: '',
   channel: '',
@@ -142,6 +200,30 @@ const filters = reactive({
   page: 1,
   per_page: 20,
 });
+
+const channelOptions = computed(() => [
+  { value: '', label: 'All channels' },
+  ...(store.templateChannels || []).map((channel) => ({
+    value: channel.value,
+    label: channel.label,
+  })),
+]);
+
+const localeOptions = computed(() => [
+  { value: '', label: 'All locales' },
+  ...(store.templateLocales || []).map((locale) => ({
+    value: locale.value,
+    label: locale.label,
+  })),
+]);
+
+const statusOptions = computed(() => [
+  { value: '', label: 'All statuses' },
+  ...(store.templateWorkflowStatuses || []).map((status) => ({
+    value: status.value,
+    label: status.label,
+  })),
+]);
 
 onMounted(reload);
 
@@ -156,8 +238,30 @@ async function reload() {
   });
 }
 
+function applyFilters() {
+  filters.page = 1;
+  reload();
+}
+
+function resetFilters() {
+  filters.search = '';
+  filters.channel = '';
+  filters.locale = '';
+  filters.workflow_status = '';
+  filters.page = 1;
+  reload();
+}
+
 function onPageChange(page) {
   filters.page = page;
   reload();
+}
+
+function workflowClass(status) {
+  if (status === 'published') return 'bg-emerald-50 text-emerald-700';
+  if (status === 'pending_review' || status === 'in_review') return 'bg-amber-50 text-amber-700';
+  if (status === 'draft') return 'bg-zinc-100 text-slate-600';
+  if (status === 'rejected' || status === 'archived') return 'bg-rose-50 text-rose-700';
+  return 'bg-zinc-100 text-slate-600';
 }
 </script>

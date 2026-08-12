@@ -63,54 +63,10 @@
                   :aria-expanded="openMenuId === role.uuid"
                   aria-haspopup="menu"
                   aria-label="Open actions"
-                  @click.stop="toggleMenu(role.uuid)"
+                  @click.stop="toggleMenu(role.uuid, $event)"
                 >
                   <EllipsisVerticalIcon class="h-5 w-5" />
                 </button>
-
-                <div
-                  v-if="openMenuId === role.uuid"
-                  class="absolute right-0 top-10 z-20 w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
-                  role="menu"
-                >
-                  <RouterLink
-                    :to="{ name: 'roles.show', params: { id: role.uuid } }"
-                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-                    role="menuitem"
-                    @click="closeMenu"
-                  >
-                    <EyeIcon class="h-4 w-4 text-slate-400" />
-                    View
-                  </RouterLink>
-                  <RouterLink
-                    :to="{ name: 'roles.edit', params: { id: role.uuid } }"
-                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-                    role="menuitem"
-                    @click="closeMenu"
-                  >
-                    <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-                    Edit
-                  </RouterLink>
-                  <RouterLink
-                    :to="{ name: 'roles.permissions', params: { id: role.uuid } }"
-                    class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-                    role="menuitem"
-                    @click="closeMenu"
-                  >
-                    <KeyIcon class="h-4 w-4 text-slate-400" />
-                    Permissions
-                  </RouterLink>
-                  <button
-                    v-if="!role.is_system"
-                    type="button"
-                    class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-                    role="menuitem"
-                    @click="onDelete(role)"
-                  >
-                    <TrashIcon class="h-4 w-4 text-red-500" />
-                    Delete
-                  </button>
-                </div>
               </div>
             </td>
           </tr>
@@ -121,11 +77,59 @@
     <div v-if="$slots.footer" class="border-t border-zinc-100 px-8 py-5">
       <slot name="footer" />
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="openMenuId && activeRole"
+        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        role="menu"
+        :style="menuStyle"
+        @click.stop
+      >
+        <RouterLink
+          :to="{ name: 'roles.show', params: { id: activeRole.uuid } }"
+          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          <EyeIcon class="h-4 w-4 text-slate-400" />
+          View
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'roles.edit', params: { id: activeRole.uuid } }"
+          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+          Edit
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'roles.permissions', params: { id: activeRole.uuid } }"
+          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="closeMenu"
+        >
+          <KeyIcon class="h-4 w-4 text-slate-400" />
+          Permissions
+        </RouterLink>
+        <button
+          v-if="!activeRole.is_system"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+          role="menuitem"
+          @click="onDelete(activeRole)"
+        >
+          <TrashIcon class="h-4 w-4 text-red-500" />
+          Delete
+        </button>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
   EllipsisVerticalIcon,
@@ -136,7 +140,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 
-defineProps({
+const props = defineProps({
   roles: {
     type: Array,
     default: () => [],
@@ -158,9 +162,34 @@ defineProps({
 const emit = defineEmits(['sort', 'delete']);
 
 const openMenuId = ref(null);
+const menuStyle = ref({});
 
-function toggleMenu(id) {
-  openMenuId.value = openMenuId.value === id ? null : id;
+const activeRole = computed(
+  () => props.roles.find((role) => role.uuid === openMenuId.value) || null,
+);
+
+function toggleMenu(id, event) {
+  if (openMenuId.value === id) {
+    closeMenu();
+    return;
+  }
+
+  const role = props.roles.find((item) => item.uuid === id);
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuWidth = 176;
+  const itemCount = role && !role.is_system ? 4 : 3;
+  const menuHeight = 8 + itemCount * 36;
+  const gap = 8;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < menuHeight + gap;
+  const top = openUp ? rect.top - menuHeight - gap : rect.bottom + gap;
+  const left = Math.min(Math.max(8, rect.right - menuWidth), window.innerWidth - menuWidth - 8);
+
+  menuStyle.value = {
+    top: `${Math.max(8, top)}px`,
+    left: `${left}px`,
+  };
+  openMenuId.value = id;
 }
 
 function closeMenu() {
@@ -176,11 +205,19 @@ function onDocumentClick() {
   closeMenu();
 }
 
+function onScrollOrResize() {
+  closeMenu();
+}
+
 onMounted(() => {
   document.addEventListener('click', onDocumentClick);
+  window.addEventListener('scroll', onScrollOrResize, true);
+  window.addEventListener('resize', onScrollOrResize);
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick);
+  window.removeEventListener('scroll', onScrollOrResize, true);
+  window.removeEventListener('resize', onScrollOrResize);
 });
 </script>

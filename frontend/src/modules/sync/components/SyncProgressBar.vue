@@ -4,7 +4,7 @@
       <span class="capitalize">{{ statusLabel }}</span>
       <span>{{ percent }}%</span>
     </div>
-    <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+    <div class="h-1.5 overflow-hidden rounded-full bg-zinc-100">
       <div
         class="h-full rounded-full transition-all duration-300"
         :class="barClass"

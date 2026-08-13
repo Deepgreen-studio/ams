@@ -47,34 +47,42 @@
       >
         No options available
       </p>
-      <button
-        v-for="option in options"
-        :key="String(option.value)"
-        type="button"
-        class="flex w-full items-center gap-2.5 px-3.5 text-left text-sm transition"
-        :class="[
-          sizeClasses.option,
-          isSelected(option.value)
-            ? 'bg-brand-50 font-medium text-brand-700'
-            : 'text-slate-700 hover:bg-slate-50',
-        ]"
-        role="option"
-        :aria-selected="isSelected(option.value)"
-        @mousedown.prevent="select(option.value)"
-      >
-        <span
-          v-if="multiple"
-          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border"
-          :class="
-            isSelected(option.value)
-              ? 'border-brand-600 bg-brand-600 text-white'
-              : 'border-zinc-300 bg-white text-transparent'
-          "
+      <template v-for="(group, groupIndex) in optionGroups" :key="group.label || groupIndex">
+        <p
+          v-if="group.label"
+          class="px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400 first:pt-1.5"
         >
-          <CheckIcon class="h-3 w-3" />
-        </span>
-        <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
-      </button>
+          {{ group.label }}
+        </p>
+        <button
+          v-for="option in group.options"
+          :key="String(option.value)"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3.5 text-left text-sm transition"
+          :class="[
+            sizeClasses.option,
+            isSelected(option.value)
+              ? 'bg-brand-50 font-medium text-brand-700'
+              : 'text-slate-700 hover:bg-slate-50',
+          ]"
+          role="option"
+          :aria-selected="isSelected(option.value)"
+          @mousedown.prevent="select(option.value)"
+        >
+          <span
+            v-if="multiple"
+            class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded border"
+            :class="
+              isSelected(option.value)
+                ? 'border-brand-600 bg-brand-600 text-white'
+                : 'border-zinc-300 bg-white text-transparent'
+            "
+          >
+            <CheckIcon class="h-3 w-3" />
+          </span>
+          <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -150,6 +158,22 @@ const sizeClasses = computed(() => {
     icon: 'h-4 w-4',
     option: 'py-2.5',
   };
+});
+
+const optionGroups = computed(() => {
+  const groups = [];
+
+  props.options.forEach((option) => {
+    const label = option.group || '';
+    const last = groups[groups.length - 1];
+    if (!last || last.label !== label) {
+      groups.push({ label, options: [option] });
+      return;
+    }
+    last.options.push(option);
+  });
+
+  return groups;
 });
 
 const selectedValues = computed(() => {

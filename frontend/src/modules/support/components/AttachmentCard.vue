@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-lg border border-slate-200 bg-slate-50 p-3">
+  <div class="rounded-[12px] bg-zinc-50 p-3 ring-1 ring-zinc-100">
     <div class="mb-2 flex items-center justify-between gap-2">
       <div>
         <p class="text-sm font-medium text-slate-900">{{ attachment.original_filename }}</p>
@@ -12,24 +12,24 @@
         <button
           v-if="attachment.is_previewable"
           type="button"
-          class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
+          class="rounded-[12px] px-2.5 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
           @click="loadPreview"
         >
           Preview
         </button>
         <button
           type="button"
-          class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-white"
+          class="rounded-[12px] px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-white"
           @click="download"
         >
           Download
         </button>
       </div>
     </div>
-    <div v-if="previewUrl && attachment.is_image" class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <div v-if="previewUrl && attachment.is_image" class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
       <img :src="previewUrl" :alt="attachment.original_filename" class="max-h-72 w-full object-contain" />
     </div>
-    <div v-else-if="previewUrl && attachment.is_video" class="overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <div v-else-if="previewUrl && attachment.is_video" class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
       <video :src="previewUrl" controls class="max-h-72 w-full" />
     </div>
     <p v-if="error" class="mt-2 text-xs text-rose-600">{{ error }}</p>

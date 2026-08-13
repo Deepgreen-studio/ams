@@ -1,69 +1,66 @@
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+    <p v-if="error" class="rounded-[12px] bg-rose-50 px-4 py-3 text-sm text-rose-700">
       {{ error }}
-    </div>
+    </p>
 
     <div>
-      <label class="mb-1 block text-sm font-medium text-slate-700">Assignment type</label>
-      <select v-model="form.type" class="input" required>
-        <option v-for="option in assignmentTypeOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Assignment type</label>
+      <SelectBox v-model="form.type" :options="assignmentTypeOptions" />
     </div>
 
     <div v-if="form.type === 'department'">
-      <label class="mb-1 block text-sm font-medium text-slate-700">Department</label>
-      <select v-model="form.department_id" class="input" required>
-        <option value="" disabled>Select department</option>
-        <option v-for="department in departments" :key="department.uuid" :value="department.uuid">
-          {{ department.name }}
-        </option>
-      </select>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Department</label>
+      <SelectBox
+        v-model="form.department_id"
+        placeholder="Select department"
+        :options="departmentOptions"
+      />
     </div>
 
     <div v-if="form.type === 'team'">
-      <label class="mb-1 block text-sm font-medium text-slate-700">Team</label>
-      <select v-model="form.team_id" class="input" required>
-        <option value="" disabled>Select team</option>
-        <option v-for="team in teams" :key="team.uuid" :value="team.uuid">
-          {{ team.name }}
-        </option>
-      </select>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Team</label>
+      <SelectBox v-model="form.team_id" placeholder="Select team" :options="teamOptions" />
     </div>
 
     <div v-if="form.type === 'agent' || form.type === 'manual'">
-      <label class="mb-1 block text-sm font-medium text-slate-700">Agent</label>
-      <select v-model="form.assigned_to" class="input" required>
-        <option value="" disabled>Select agent</option>
-        <option v-for="agent in agents" :key="agent.uuid" :value="agent.uuid">
-          {{ agent.full_name }} ({{ agent.email }})
-        </option>
-      </select>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Agent</label>
+      <SelectBox
+        v-model="form.assigned_to"
+        placeholder="Select agent"
+        :options="agentOptions"
+      />
     </div>
 
-    <div v-if="form.type === 'auto'" class="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-600">
+    <div
+      v-if="form.type === 'auto'"
+      class="rounded-[12px] bg-zinc-50 px-3 py-2 text-sm text-slate-600"
+    >
       Auto assignment uses round-robin across support agents and managers.
     </div>
 
     <div>
-      <label class="mb-1 block text-sm font-medium text-slate-700">Comments</label>
-      <textarea v-model="form.comments" rows="3" class="input" placeholder="Optional assignment note" />
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Comments</label>
+      <textarea
+        v-model="form.comments"
+        rows="3"
+        class="w-full rounded-[12px] border border-zinc-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
+        placeholder="Optional assignment note"
+      />
     </div>
 
     <div class="flex justify-end gap-2">
       <button
         v-if="showCancel"
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="$emit('cancel')"
       >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Assigning...' : submitLabel }}
@@ -73,8 +70,9 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { companyService } from '@/modules/companies/services/companyService';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { assignmentTypeOptions } from '@/modules/support/utils/ticketOptions';
 
 const props = defineProps({
@@ -99,13 +97,26 @@ const form = reactive({
   comments: '',
 });
 
+const departmentOptions = computed(() =>
+  departments.value.map((department) => ({ value: department.uuid, label: department.name })),
+);
+const teamOptions = computed(() =>
+  teams.value.map((team) => ({ value: team.uuid, label: team.name })),
+);
+const agentOptions = computed(() =>
+  props.agents.map((agent) => ({
+    value: agent.uuid,
+    label: `${agent.full_name} (${agent.email})`,
+  })),
+);
+
 watch(
   () => props.companyId,
   async (companyId) => {
     if (companyId) {
       await loadOrg(companyId);
     }
-  }
+  },
 );
 
 onMounted(async () => {
@@ -145,18 +156,3 @@ function onSubmit() {
   emit('submit', payload);
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

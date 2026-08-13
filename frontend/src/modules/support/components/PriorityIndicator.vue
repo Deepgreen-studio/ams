@@ -1,6 +1,6 @@
 <template>
   <span
-    class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+    class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset"
     :class="classes"
   >
     <span class="h-1.5 w-1.5 rounded-full" :class="dotClass" />

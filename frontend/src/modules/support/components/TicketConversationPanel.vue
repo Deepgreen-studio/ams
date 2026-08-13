@@ -1,11 +1,11 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white">
-    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
+  <div class="rounded-[12px] bg-white ring-1 ring-zinc-100">
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-6 py-5">
       <div>
-        <h3 class="text-sm font-semibold text-slate-900">Conversation</h3>
+        <h3 class="text-base font-semibold text-slate-900">Conversation</h3>
         <p class="mt-0.5 text-xs text-slate-500">
           {{ messages.length }} message{{ messages.length === 1 ? '' : 's' }}
-          <span v-if="unreadCount > 0" class="ml-2 rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">
+          <span v-if="unreadCount > 0" class="ml-2 rounded-full bg-amber-50 px-2.5 py-1 font-medium text-amber-800">
             {{ unreadCount }} unread
           </span>
         </p>
@@ -13,7 +13,7 @@
       <button
         v-if="unreadCount > 0"
         type="button"
-        class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        class="rounded-[12px] border border-zinc-200 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="markingRead"
         @click="markAllRead"
       >
@@ -21,20 +21,21 @@
       </button>
     </div>
 
-    <div v-if="loading" class="space-y-3 p-5">
-      <div class="h-20 animate-pulse rounded-lg bg-slate-100" />
-      <div class="h-20 animate-pulse rounded-lg bg-slate-100" />
+    <div v-if="loading" class="space-y-3 px-6 py-5">
+      <div class="h-20 animate-pulse rounded-[12px] bg-zinc-100" />
+      <div class="h-20 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div v-else-if="messages.length === 0" class="px-5 py-10 text-center text-sm text-slate-500">
-      No messages yet. Post the first reply below.
+    <div v-else-if="messages.length === 0" class="px-6 py-10 text-center">
+      <p class="text-sm font-medium text-slate-900">No messages yet</p>
+      <p class="mt-1 text-xs text-slate-500">Post the first reply below.</p>
     </div>
 
-    <div v-else class="max-h-[36rem] space-y-4 overflow-y-auto px-5 py-4">
+    <div v-else class="max-h-[36rem] space-y-4 overflow-y-auto px-6 py-5">
       <article
         v-for="message in messages"
         :key="message.uuid"
-        class="rounded-xl border p-4"
+        class="rounded-[12px] p-4 ring-1"
         :class="messageTone(message)"
       >
         <div class="mb-2 flex flex-wrap items-start justify-between gap-2">
@@ -80,17 +81,17 @@
       </article>
     </div>
 
-    <div class="border-t border-slate-200 px-5 py-4">
+    <div class="border-t border-zinc-100 px-6 py-5">
       <h4 class="mb-3 text-sm font-semibold text-slate-900">Reply</h4>
 
       <div class="mb-3 flex flex-wrap gap-2">
         <label
           v-for="option in visibilityOptions"
           :key="option.value"
-          class="inline-flex cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium"
+          class="inline-flex cursor-pointer items-center gap-2 rounded-[12px] px-3 py-2 text-xs font-medium ring-1"
           :class="visibility === option.value
-            ? 'border-brand-300 bg-brand-50 text-brand-800'
-            : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'"
+            ? 'bg-brand-50 text-brand-800 ring-brand-200'
+            : 'bg-white text-slate-600 ring-zinc-200 hover:bg-zinc-50'"
         >
           <input v-model="visibility" type="radio" class="sr-only" :value="option.value" />
           {{ option.label }}
@@ -98,27 +99,16 @@
       </div>
 
       <div class="mb-3 flex flex-wrap items-center gap-2">
-        <label class="text-xs font-medium text-slate-600">Canned response</label>
-        <select
+        <SelectBox
           v-model="selectedCannedId"
-          class="min-w-[16rem] flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          wrapper-class="min-w-[16rem] flex-1"
+          placeholder="Insert a canned response…"
+          :options="cannedSelectOptions"
           :disabled="cannedLoading || saving"
-        >
-          <option value="">Insert a template…</option>
-          <optgroup v-if="personalCanned.length" label="Personal">
-            <option v-for="item in personalCanned" :key="item.uuid" :value="item.uuid">
-              {{ item.title }}{{ item.shortcut ? ` (/${item.shortcut})` : '' }}
-            </option>
-          </optgroup>
-          <optgroup v-if="sharedCanned.length" label="Shared">
-            <option v-for="item in sharedCanned" :key="item.uuid" :value="item.uuid">
-              {{ item.title }}{{ item.shortcut ? ` (/${item.shortcut})` : '' }}
-            </option>
-          </optgroup>
-        </select>
+        />
         <button
           type="button"
-          class="rounded-lg border border-slate-300 px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          class="h-10 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
           :disabled="!selectedCannedId || applyingCanned || saving"
           @click="applyCanned"
         >
@@ -129,12 +119,12 @@
       <TicketReplyEditor v-model="body" :editable="!saving" />
 
       <div class="mt-3">
-        <label class="mb-1 block text-xs font-medium text-slate-600">Attachments</label>
+        <label class="mb-1.5 block text-xs font-medium text-slate-600">Attachments</label>
         <input
           ref="fileInput"
           type="file"
           multiple
-          class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+          class="block w-full text-sm text-slate-600 file:mr-3 file:rounded-[12px] file:border-0 file:bg-zinc-100 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-slate-700 hover:file:bg-zinc-200"
           accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.zip,.mp4,.webm,.mov"
           @change="onFilesSelected"
         />
@@ -142,10 +132,10 @@
           <li
             v-for="(file, index) in pendingFiles"
             :key="`${file.name}-${index}`"
-            class="flex items-center justify-between rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-700"
+            class="flex items-center justify-between rounded-[12px] bg-zinc-50 px-3 py-1.5 text-xs text-slate-700"
           >
             <span class="truncate">{{ file.name }} ({{ formatSize(file.size) }})</span>
-            <button type="button" class="ml-2 text-rose-600 hover:underline" @click="removeFile(index)">
+            <button type="button" class="ml-2 font-medium text-rose-600 hover:underline" @click="removeFile(index)">
               Remove
             </button>
           </li>
@@ -157,7 +147,7 @@
       <div class="mt-4 flex justify-end">
         <button
           type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="saving || !canSubmit"
           @click="submit"
         >
@@ -173,6 +163,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import DOMPurify from 'dompurify';
 import AttachmentCard from '@/modules/support/components/AttachmentCard.vue';
 import TicketReplyEditor from '@/modules/support/components/TicketReplyEditor.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useCannedResponsesStore } from '@/modules/support/stores/cannedResponses';
 import { useSupportTicketsStore } from '@/modules/support/stores/supportTickets';
 
@@ -209,6 +200,23 @@ const personalCanned = computed(() =>
 const sharedCanned = computed(() =>
   (cannedStore.items || []).filter((item) => item.visibility === 'shared' && item.is_active)
 );
+
+const cannedSelectOptions = computed(() => [
+  ...personalCanned.value.map((item) => ({
+    value: item.uuid,
+    label: cannedLabel(item),
+    group: 'Personal',
+  })),
+  ...sharedCanned.value.map((item) => ({
+    value: item.uuid,
+    label: cannedLabel(item),
+    group: 'Shared',
+  })),
+]);
+
+function cannedLabel(item) {
+  return `${item.title}${item.shortcut ? ` (/${item.shortcut})` : ''}`;
+}
 
 const canSubmit = computed(() => {
   const plain = body.value.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
@@ -288,12 +296,12 @@ function formatSize(bytes) {
 
 function messageTone(message) {
   if (message.visibility === 'internal') {
-    return 'border-amber-200 bg-amber-50/60';
+    return 'bg-amber-50/60 ring-amber-100';
   }
   if (message.visibility === 'private') {
-    return 'border-violet-200 bg-violet-50/40';
+    return 'bg-violet-50/40 ring-violet-100';
   }
-  return 'border-slate-200 bg-white';
+  return 'bg-zinc-50/60 ring-zinc-100';
 }
 
 function visibilityBadge(visibilityValue) {

@@ -1,11 +1,17 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create sync config"
-      description="Define how AMS imports or exports data for an integration."
-    /> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+        :to="{ name: 'sync.configs' }"
+        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back
+      </RouterLink>
+    </Teleport>
+
     <SyncSubnav />
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+
+    <div class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
       <SyncConfigForm
         :loading="store.saving"
         :errors="store.fieldErrors"
@@ -20,8 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { RouterLink, useRouter } from 'vue-router';
 import SyncConfigForm from '@/modules/sync/components/SyncConfigForm.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';

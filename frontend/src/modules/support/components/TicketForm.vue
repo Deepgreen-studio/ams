@@ -2,134 +2,115 @@
   <form class="space-y-4" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
+          placeholder="Select company"
+          :options="companySelectOptions"
           :disabled="Boolean(initial.uuid)"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+          :error="Boolean(displayErrors.company_id)"
+        />
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Customer</label>
-        <select v-model="form.customer_id" class="input" :disabled="!form.company_id">
-          <option value="">Optional</option>
-          <option v-for="customer in filteredCustomers" :key="customer.uuid" :value="customer.uuid">
-            {{ customer.display_name || customer.email }}
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Customer</label>
+        <SelectBox
+          v-model="form.customer_id"
+          placeholder="Optional"
+          :options="customerSelectOptions"
+          :disabled="!form.company_id"
+          :error="Boolean(displayErrors.customer_id)"
+        />
         <p v-if="displayErrors.customer_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.customer_id[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Application</label>
-        <select v-model="form.application_id" class="input" :disabled="!form.company_id">
-          <option value="">Optional</option>
-          <option
-            v-for="application in filteredApplications"
-            :key="application.uuid"
-            :value="application.uuid"
-          >
-            {{ application.name }}
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Application</label>
+        <SelectBox
+          v-model="form.application_id"
+          placeholder="Optional"
+          :options="applicationSelectOptions"
+          :disabled="!form.company_id"
+          :error="Boolean(displayErrors.application_id)"
+        />
         <p v-if="displayErrors.application_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.application_id[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Category</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Category</label>
+        <SelectBox
           v-model="form.category"
-          class="input"
-          :class="fieldClass('category')"
-        >
-          <option v-for="option in categoryOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+          placeholder="Select category"
+          :options="categoryOptions"
+          :error="Boolean(displayErrors.category)"
+        />
         <p v-if="displayErrors.category" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.category[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Priority</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Priority</label>
+        <SelectBox
           v-model="form.priority"
-          class="input"
-          :class="fieldClass('priority')"
-        >
-          <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+          placeholder="Select priority"
+          :options="priorityOptions"
+          :error="Boolean(displayErrors.priority)"
+        />
         <p v-if="displayErrors.priority" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.priority[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Source</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Source</label>
+        <SelectBox
           v-model="form.source"
-          class="input"
-          :class="fieldClass('source')"
-        >
-          <option v-for="option in sourceOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+          placeholder="Select source"
+          :options="sourceOptions"
+          :error="Boolean(displayErrors.source)"
+        />
         <p v-if="displayErrors.source" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.source[0] }}
         </p>
       </div>
 
       <div v-if="initial.uuid">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox
           v-model="form.status"
-          class="input"
-          :class="fieldClass('status')"
-        >
-          <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+          placeholder="Select status"
+          :options="statusOptions"
+          :error="Boolean(displayErrors.status)"
+        />
         <p v-if="displayErrors.status" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.status[0] }}
         </p>
       </div>
 
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Assign to</label>
-        <select v-model="form.assigned_to" class="input">
-          <option value="">Unassigned</option>
-          <option v-for="user in users" :key="user.uuid" :value="user.uuid">
-            {{ user.full_name }} ({{ user.email }})
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign to</label>
+        <SelectBox
+          v-model="form.assigned_to"
+          placeholder="Unassigned"
+          :options="assigneeSelectOptions"
+        />
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Subject</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject</label>
         <input
           v-model="form.subject"
           type="text"
-          class="input"
           maxlength="255"
+          class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
           :class="fieldClass('subject')"
         />
         <p v-if="displayErrors.subject" class="mt-1 text-xs text-rose-600">
@@ -138,11 +119,11 @@
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
         <textarea
           v-model="form.description"
           rows="6"
-          class="input"
+          class="w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
           :class="fieldClass('description')"
         />
         <p v-if="displayErrors.description" class="mt-1 text-xs text-rose-600">
@@ -170,7 +151,7 @@
     <div class="flex justify-end gap-2">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -178,7 +159,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -199,6 +180,7 @@ import {
   sourceOptions,
   statusOptions,
 } from '@/modules/support/utils/ticketOptions';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { userService } from '@/modules/users/services/userService';
 
 const props = defineProps({
@@ -252,6 +234,37 @@ const filteredApplications = computed(() => {
 
   return applications.value.filter((item) => item.company?.uuid === form.company_id || !item.company);
 });
+
+const companySelectOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const customerSelectOptions = computed(() => [
+  { value: '', label: 'Optional' },
+  ...filteredCustomers.value.map((customer) => ({
+    value: customer.uuid,
+    label: customer.display_name || customer.email,
+  })),
+]);
+
+const applicationSelectOptions = computed(() => [
+  { value: '', label: 'Optional' },
+  ...filteredApplications.value.map((application) => ({
+    value: application.uuid,
+    label: application.name,
+  })),
+]);
+
+const assigneeSelectOptions = computed(() => [
+  { value: '', label: 'Unassigned' },
+  ...users.value.map((user) => ({
+    value: user.uuid,
+    label: `${user.full_name} (${user.email})`,
+  })),
+]);
 
 watch(
   () => props.initial,
@@ -414,17 +427,3 @@ function onSubmit() {
 }
 </script>
 
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

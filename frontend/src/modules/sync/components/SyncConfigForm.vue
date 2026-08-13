@@ -1,155 +1,177 @@
 <template>
-  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
-    <div class="grid gap-4 md:grid-cols-2">
+  <form class="space-y-8" novalidate @submit.prevent="onSubmit">
+    <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
+          size="lg"
+          placeholder="Select company"
+          :options="companyOptions"
+          :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+        />
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Integration</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Integration</label>
+        <SelectBox
           v-model="form.integration_id"
-          class="input"
-          :class="fieldClass('integration_id')"
+          size="lg"
+          :placeholder="form.company_id || hideCompany ? 'Select integration' : 'Select company first'"
+          :options="integrationOptions"
           :disabled="!form.company_id && !hideCompany"
-        >
-          <option value="" disabled>Select integration</option>
-          <option v-for="item in integrations" :key="item.uuid" :value="item.uuid">
-            {{ item.name }}
-          </option>
-        </select>
+          :error="Boolean(displayErrors.integration_id)"
+        />
         <p v-if="displayErrors.integration_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.integration_id[0] }}
         </p>
       </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
         <input
           v-model="form.name"
           type="text"
-          class="input"
+          placeholder="Contacts import"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
         <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.name[0] }}
         </p>
       </div>
+
+      <div class="flex items-end">
+        <label
+          class="flex w-full items-center justify-between gap-4 rounded-xl border border-slate-200 bg-zinc-50 px-4 py-3"
+        >
+          <span>
+            <span class="block text-sm font-medium text-slate-900">Enabled</span>
+            <span class="mt-0.5 block text-xs text-slate-500">Disabled configs cannot be run.</span>
+          </span>
+          <input
+            v-model="form.is_enabled"
+            type="checkbox"
+            class="h-4 w-4 rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+          />
+        </label>
+      </div>
+
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Direction</label>
-        <select v-model="form.direction" class="input">
-          <option value="import">Import</option>
-          <option value="export">Export</option>
-          <option value="bidirectional">Bidirectional</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Direction</label>
+        <SelectBox v-model="form.direction" size="lg" :options="directionOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Default mode</label>
-        <select v-model="form.default_mode" class="input">
-          <option value="full">Full</option>
-          <option value="incremental">Incremental</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Default mode</label>
+        <SelectBox v-model="form.default_mode" size="lg" :options="modeOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Trigger</label>
-        <select v-model="form.trigger_type" class="input">
-          <option value="manual">Manual</option>
-          <option value="automatic">Automatic</option>
-          <option value="scheduled">Scheduled</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Trigger</label>
+        <SelectBox v-model="form.trigger_type" size="lg" :options="triggerOptions" />
       </div>
-      <div v-if="form.trigger_type === 'scheduled'">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Cron expression</label>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Conflict strategy</label>
+        <SelectBox v-model="form.conflict_strategy" size="lg" :options="conflictOptions" />
+      </div>
+      <div v-if="form.trigger_type === 'scheduled'" class="md:col-span-2">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cron expression</label>
         <input
           v-model="form.schedule_cron"
           type="text"
-          class="input"
-          :class="fieldClass('schedule_cron')"
           placeholder="*/15 * * * *"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 font-mono text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('schedule_cron')"
         />
         <p v-if="displayErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.schedule_cron[0] }}
         </p>
+        <p v-else class="mt-1 text-xs text-slate-400">Standard five-field cron, for example every 15 minutes.</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Conflict strategy</label>
-        <select v-model="form.conflict_strategy" class="input">
-          <option value="overwrite">Overwrite</option>
-          <option value="skip">Skip</option>
-          <option value="merge">Merge</option>
-          <option value="fail">Fail</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Source path</label>
+        <input
+          v-model="form.source_path"
+          type="text"
+          placeholder="/api/records"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 font-mono text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Source path</label>
-        <input v-model="form.source_path" type="text" class="input" placeholder="/api/records" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Target path</label>
+        <input
+          v-model="form.target_path"
+          type="text"
+          placeholder="/api/export"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 font-mono text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Target path</label>
-        <input v-model="form.target_path" type="text" class="input" placeholder="/api/export" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Entity type</label>
+        <input
+          v-model="form.entity_type"
+          type="text"
+          placeholder="contacts"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Entity type</label>
-        <input v-model="form.entity_type" type="text" class="input" placeholder="contacts" />
-      </div>
-      <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Batch size</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Batch size</label>
         <input
           v-model.number="form.batch_size"
           type="number"
           min="1"
           max="500"
-          class="input"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('batch_size')"
         />
         <p v-if="displayErrors.batch_size" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.batch_size[0] }}
         </p>
+        <p v-else class="mt-1 text-xs text-slate-400">Records processed per batch (1–500).</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Cursor field</label>
-        <input v-model="form.cursor_field" type="text" class="input" placeholder="updated_at" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cursor field</label>
+        <input
+          v-model="form.cursor_field"
+          type="text"
+          placeholder="updated_at"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
+        <p class="mt-1 text-xs text-slate-400">Used for incremental syncs to resume from the last record.</p>
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-        <textarea v-model="form.description" rows="3" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+        <textarea
+          v-model="form.description"
+          rows="3"
+          placeholder="Short summary of this synchronization"
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+        />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Sample records JSON (local testing)</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Sample records JSON</label>
         <textarea
           v-model="sampleRecordsText"
-          rows="4"
-          class="input font-mono text-xs"
-          :class="fieldClass('options')"
+          rows="6"
           placeholder='[{"id":"1","name":"Ada"}]'
+          class="w-full rounded-xl border border-slate-200 bg-zinc-50 px-3.5 py-3 font-mono text-xs text-slate-800 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-0"
+          :class="fieldClass('options')"
         />
         <p v-if="displayErrors.options" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.options[0] }}
         </p>
-      </div>
-      <div class="md:col-span-2">
-        <label class="flex items-center gap-2 text-sm text-slate-700">
-          <input v-model="form.is_enabled" type="checkbox" class="rounded border-slate-300" />
-          Enabled
-        </label>
+        <p v-else class="mt-1 text-xs text-slate-400">Must be a valid JSON array of records.</p>
       </div>
     </div>
-    <div class="flex justify-end gap-2">
+
+    <div class="flex items-center justify-end gap-2 border-t border-zinc-100 pt-6">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -157,7 +179,7 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-xl bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-600/20 transition hover:bg-brand-700 disabled:opacity-60"
         :disabled="loading"
       >
         {{ loading ? 'Saving...' : submitLabel }}
@@ -169,6 +191,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useToast } from '@/composables/useToast';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
 
@@ -189,18 +212,60 @@ const sampleRecordsText = ref('');
 const localErrors = ref({});
 const form = reactive(createForm(props.initial));
 
+const directionOptions = [
+  { value: 'import', label: 'Import' },
+  { value: 'export', label: 'Export' },
+  { value: 'bidirectional', label: 'Bidirectional' },
+];
+
+const modeOptions = [
+  { value: 'full', label: 'Full' },
+  { value: 'incremental', label: 'Incremental' },
+];
+
+const triggerOptions = [
+  { value: 'manual', label: 'Manual' },
+  { value: 'automatic', label: 'Automatic' },
+  { value: 'scheduled', label: 'Scheduled' },
+];
+
+const conflictOptions = [
+  { value: 'overwrite', label: 'Overwrite' },
+  { value: 'skip', label: 'Skip' },
+  { value: 'merge', label: 'Merge' },
+  { value: 'fail', label: 'Fail' },
+];
+
+const companyOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const integrationOptions = computed(() =>
+  integrations.value.map((item) => ({
+    value: item.uuid,
+    label: item.name,
+  })),
+);
+
 const displayErrors = computed(() => ({
   ...localErrors.value,
   ...props.errors,
 }));
 
-watch(() => props.initial, (value) => {
-  Object.assign(form, createForm(value));
-  const sample = value?.options?.sample_records;
-  sampleRecordsText.value = sample ? JSON.stringify(sample, null, 2) : '';
-  localErrors.value = {};
-  if (form.company_id) loadIntegrations();
-}, { deep: true, immediate: true });
+watch(
+  () => props.initial,
+  (value) => {
+    Object.assign(form, createForm(value));
+    const sample = value?.options?.sample_records;
+    sampleRecordsText.value = sample ? JSON.stringify(sample, null, 2) : '';
+    localErrors.value = {};
+    if (form.company_id) loadIntegrations();
+  },
+  { deep: true, immediate: true },
+);
 
 watch(
   () => props.error,
@@ -208,7 +273,7 @@ watch(
     if (message) {
       toast.error(message, 'Validation Failed');
     }
-  }
+  },
 );
 
 watch(
@@ -216,7 +281,7 @@ watch(
   () => {
     localErrors.value = {};
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(async () => {
@@ -335,19 +400,3 @@ function onSubmit() {
   });
 }
 </script>
-
-<style scoped>
-.input {
-  width: 100%;
-  border-radius: 0.5rem;
-  border: 1px solid #cbd5e1;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  outline: none;
-  background: white;
-}
-.input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
-}
-</style>

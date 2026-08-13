@@ -1130,6 +1130,12 @@ const router = createRouter({
           meta: { title: 'Support Ticket Details', requiresAuth: true },
         },
         {
+          path: 'support/tickets/:id/edit',
+          name: 'support.tickets.edit',
+          component: () => import('@/modules/support/pages/EditTicketPage.vue'),
+          meta: { title: 'Edit Support Ticket', requiresAuth: true },
+        },
+        {
           path: 'customers/create',
           name: 'customers.create',
           component: () => import('@/modules/customers/pages/CreateCustomerPage.vue'),

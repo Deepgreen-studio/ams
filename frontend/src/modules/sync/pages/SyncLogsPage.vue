@@ -1,135 +1,153 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Sync Logs"
-      description="Record-level sync actions, skips, conflicts, and failures."
-    /> -->
     <SyncSubnav />
 
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ store.error }}
-    </div>
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
+        <form
+          class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+          @submit.prevent="applyFilters"
+        >
+          <div class="relative min-w-0 flex-1 lg:max-w-sm">
+            <MagnifyingGlassIcon
+              class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
+            <input
+              v-model="filters.search"
+              type="search"
+              placeholder="Search message or record key…"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            />
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <SelectBox
+              v-model="filters.level"
+              wrapper-class="min-w-[8.5rem]"
+              :options="levelOptions"
+              @change="applyFilters"
+            />
+            <SelectBox
+              v-model="filters.action"
+              wrapper-class="min-w-[9.5rem]"
+              :options="actionOptions"
+              @change="applyFilters"
+            />
+            <input
+              v-model="filters.sync_run"
+              type="text"
+              placeholder="Run UUID"
+              class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white px-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0 md:w-48"
+            />
+            <button
+              type="submit"
+              class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+            >
+              Apply
+            </button>
+            <button
+              type="button"
+              class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="resetFilters"
+            >
+              Reset
+            </button>
+          </div>
+        </form>
+      </div>
 
-    <form
-      class="mb-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 md:flex-row md:items-end"
-      @submit.prevent="load"
-    >
-      <div class="flex-1">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Search</label
-        >
-        <input
-          v-model="filters.search"
-          type="search"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-          placeholder="Message, record key..."
-        />
+      <div v-if="store.loading" class="space-y-3 px-6 py-6 sm:px-8">
+        <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
       </div>
-      <div class="w-full md:w-40">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Level</label
-        >
-        <select
-          v-model="filters.level"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-        >
-          <option value="">All</option>
-          <option value="info">Info</option>
-          <option value="warning">Warning</option>
-          <option value="error">Error</option>
-        </select>
-      </div>
-      <div class="w-full md:w-40">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Action</label
-        >
-        <select
-          v-model="filters.action"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-        >
-          <option value="">All</option>
-          <option value="imported">Imported</option>
-          <option value="updated">Updated</option>
-          <option value="exported">Exported</option>
-          <option value="skipped">Skipped</option>
-          <option value="failed">Failed</option>
-          <option value="conflict">Conflict</option>
-        </select>
-      </div>
-      <div class="w-full md:w-56">
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
-          >Run UUID</label
-        >
-        <input
-          v-model="filters.sync_run"
-          type="text"
-          class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm"
-        />
-      </div>
-      <button
-        type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+
+      <EmptyState
+        v-else-if="!store.logs.length"
+        title="No sync logs found"
+        description="Record-level sync actions, skips, conflicts, and failures will appear here."
+        class="px-6 py-10 sm:px-8"
       >
-        Filter
-      </button>
-    </form>
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+            @click="resetFilters"
+          >
+            Reset filters
+          </button>
+        </template>
+      </EmptyState>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div v-if="store.loading" class="space-y-3 p-6">
-        <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
+      <div v-else class="overflow-x-auto px-3">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="border-b border-zinc-100">
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">When</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Level</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Action</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Record</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Message</th>
+              <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="item in store.logs"
+              :key="item.uuid"
+              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            >
+              <td class="whitespace-nowrap px-5 py-4 text-slate-500">
+                {{ formatDate(item.created_at) }}
+              </td>
+              <td class="px-5 py-4">
+                <span
+                  class="rounded-full px-2.5 py-1 text-xs font-medium capitalize"
+                  :class="levelClass(item.level)"
+                >
+                  {{ item.level }}
+                </span>
+              </td>
+              <td class="px-5 py-4 capitalize text-slate-600">{{ item.action || '—' }}</td>
+              <td class="px-5 py-4 font-mono text-xs text-slate-600">
+                {{ item.record_key || '—' }}
+              </td>
+              <td class="max-w-xs px-5 py-4">
+                <p class="line-clamp-2 text-slate-700">{{ item.message }}</p>
+              </td>
+              <td class="px-5 py-4 text-right">
+                <button
+                  type="button"
+                  class="rounded-[12px] px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50"
+                  @click="selected = item"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <div v-else-if="!store.logs.length" class="px-6 py-12 text-center text-sm text-slate-500">
-        No sync logs found.
+
+      <div v-if="store.logsMeta?.total" class="border-t border-zinc-100 px-6 py-4 sm:px-8">
+        <Pagination
+          :meta="store.logsMeta"
+          :loading="store.loading"
+          @change="onPage"
+          @per-page="onPerPage"
+        />
       </div>
-      <table v-else class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">When</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Level</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Action</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Record</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Message</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in store.logs" :key="item.uuid" class="hover:bg-slate-50/80">
-            <td class="px-4 py-3 text-slate-600">{{ formatDate(item.created_at) }}</td>
-            <td class="px-4 py-3 capitalize" :class="levelClass(item.level)">{{ item.level }}</td>
-            <td class="px-4 py-3 capitalize text-slate-700">{{ item.action || '—' }}</td>
-            <td class="px-4 py-3 font-mono text-xs text-slate-700">{{ item.record_key || '—' }}</td>
-            <td class="px-4 py-3 text-slate-700">{{ item.message }}</td>
-            <td class="px-4 py-3 text-right">
-              <button
-                type="button"
-                class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
-                @click="selected = item"
-              >
-                View
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
 
-    <Pagination :meta="store.logsMeta" :loading="store.loading" @change="onPage" />
-
-    <div v-if="selected" class="mt-4 rounded-xl border border-slate-200 bg-white p-6">
-      <div class="mb-3 flex items-center justify-between">
-        <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Log detail</h3>
+    <div v-if="selected" class="mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <h3 class="text-base font-semibold text-slate-900">Log detail</h3>
         <button
           type="button"
-          class="text-xs text-slate-500 hover:text-slate-800"
+          class="rounded-[12px] px-3 py-1.5 text-xs font-medium text-slate-500 hover:bg-zinc-100 hover:text-slate-800"
           @click="selected = null"
         >
           Close
         </button>
       </div>
-      <pre class="max-h-96 overflow-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{{
+      <pre class="max-h-96 overflow-auto rounded-[12px] bg-slate-900 p-4 text-xs text-slate-100">{{
         JSON.stringify(selected, null, 2)
       }}</pre>
     </div>
@@ -137,15 +155,19 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';
 
 const route = useRoute();
 const store = useSyncStore();
+const toast = useToast();
 const selected = ref(null);
 const filters = reactive({
   search: '',
@@ -156,15 +178,64 @@ const filters = reactive({
   per_page: 10,
 });
 
-onMounted(() => load());
+const levelOptions = [
+  { value: '', label: 'All levels' },
+  { value: 'info', label: 'Info' },
+  { value: 'warning', label: 'Warning' },
+  { value: 'error', label: 'Error' },
+];
+
+const actionOptions = [
+  { value: '', label: 'All actions' },
+  { value: 'imported', label: 'Imported' },
+  { value: 'updated', label: 'Updated' },
+  { value: 'exported', label: 'Exported' },
+  { value: 'skipped', label: 'Skipped' },
+  { value: 'failed', label: 'Failed' },
+  { value: 'conflict', label: 'Conflict' },
+];
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
+
+onMounted(() => {
+  store.error = null;
+  load();
+});
 
 function load() {
   selected.value = null;
   store.fetchLogs({ ...filters });
 }
 
+function applyFilters() {
+  filters.page = 1;
+  load();
+}
+
+function resetFilters() {
+  filters.search = '';
+  filters.level = '';
+  filters.action = '';
+  filters.sync_run = '';
+  filters.page = 1;
+  load();
+}
+
 function onPage(page) {
   filters.page = page;
+  load();
+}
+
+function onPerPage(perPage) {
+  filters.per_page = perPage;
+  filters.page = 1;
   load();
 }
 
@@ -173,8 +244,8 @@ function formatDate(value) {
 }
 
 function levelClass(level) {
-  if (level === 'error') return 'text-rose-700';
-  if (level === 'warning') return 'text-amber-700';
-  return 'text-slate-700';
+  if (level === 'error') return 'bg-rose-50 text-rose-700';
+  if (level === 'warning') return 'bg-amber-50 text-amber-700';
+  return 'bg-sky-50 text-sky-700';
 }
 </script>

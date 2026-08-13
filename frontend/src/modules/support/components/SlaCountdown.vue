@@ -1,9 +1,13 @@
 <template>
-  <div class="rounded-lg border border-slate-200 bg-white px-3 py-2">
+  <div
+    class="rounded-[12px] px-3 py-2.5 ring-1"
+    :class="shellClass"
+  >
     <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-500">{{ label }}</p>
     <p class="mt-1 font-mono text-sm font-semibold" :class="tone">
       {{ display }}
     </p>
+    <p v-if="hint" class="mt-0.5 text-[11px] font-medium" :class="tone">{{ hint }}</p>
   </div>
 </template>
 
@@ -34,7 +38,7 @@ watch(
   () => [props.dueAt, props.remainingSeconds, props.completedAt],
   () => {
     now.value = Date.now();
-  }
+  },
 );
 
 const secondsLeft = computed(() => {
@@ -68,5 +72,21 @@ const tone = computed(() => {
   if (secondsLeft.value < 0) return 'text-rose-600';
   if (secondsLeft.value < 3600) return 'text-amber-700';
   return 'text-slate-900';
+});
+
+const hint = computed(() => {
+  if (props.completedAt) return 'Met';
+  if (secondsLeft.value === null) return '';
+  if (secondsLeft.value < 0) return 'Breached';
+  if (secondsLeft.value < 3600) return 'At risk';
+  return '';
+});
+
+const shellClass = computed(() => {
+  if (props.completedAt) return 'bg-emerald-50/70 ring-emerald-100';
+  if (secondsLeft.value === null) return 'bg-zinc-50/80 ring-zinc-100';
+  if (secondsLeft.value < 0) return 'bg-rose-50/80 ring-rose-100';
+  if (secondsLeft.value < 3600) return 'bg-amber-50/80 ring-amber-100';
+  return 'bg-zinc-50/80 ring-zinc-100';
 });
 </script>

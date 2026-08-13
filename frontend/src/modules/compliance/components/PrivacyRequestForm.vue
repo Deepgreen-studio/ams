@@ -1,98 +1,143 @@
 <template>
-  <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ error }}
-    </div>
-
+  <form class="space-y-5" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select v-model="form.company_id" class="input" required>
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
-        <p v-if="errors.company_id" class="mt-1 text-xs text-rose-600">{{ errors.company_id[0] }}</p>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
+          v-model="form.company_id"
+          size="lg"
+          placeholder="Select company"
+          :options="companySelectOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('company_id'))"
+        />
+        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('company_id') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Request type</label>
-        <select v-model="form.request_type" class="input" required>
-          <option v-for="option in typeOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-        <p v-if="errors.request_type" class="mt-1 text-xs text-rose-600">{{ errors.request_type[0] }}</p>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Request type</label>
+        <SelectBox
+          v-model="form.request_type"
+          size="lg"
+          :options="typeOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('request_type'))"
+        />
+        <p v-if="fieldError('request_type')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('request_type') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Requester name</label>
-        <input v-model="form.requester_name" type="text" class="input" required maxlength="255" />
-        <p v-if="errors.requester_name" class="mt-1 text-xs text-rose-600">{{ errors.requester_name[0] }}</p>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester name</label>
+        <input
+          v-model="form.requester_name"
+          type="text"
+          class="input"
+          required
+          maxlength="255"
+          placeholder="Full name"
+          :disabled="loading"
+        />
+        <p v-if="fieldError('requester_name')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('requester_name') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Requester email</label>
-        <input v-model="form.requester_email" type="email" class="input" required />
-        <p v-if="errors.requester_email" class="mt-1 text-xs text-rose-600">{{ errors.requester_email[0] }}</p>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester email</label>
+        <input
+          v-model="form.requester_email"
+          type="email"
+          class="input"
+          required
+          maxlength="255"
+          placeholder="name@example.com"
+          :disabled="loading"
+        />
+        <p v-if="fieldError('requester_email')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('requester_email') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Requester phone</label>
-        <input v-model="form.requester_phone" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester phone</label>
+        <input
+          v-model="form.requester_phone"
+          type="text"
+          class="input"
+          maxlength="50"
+          placeholder="Optional"
+          :disabled="loading"
+        />
+        <p v-if="fieldError('requester_phone')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('requester_phone') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Due date</label>
-        <input v-model="form.due_date" type="date" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due date</label>
+        <input
+          v-model="form.due_date"
+          type="date"
+          class="input"
+          :disabled="loading"
+        />
+        <p v-if="fieldError('due_date')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('due_date') }}
+        </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Assign officer</label>
-        <select v-model="form.assigned_to" class="input">
-          <option value="">Unassigned</option>
-          <option v-for="user in users" :key="user.uuid" :value="user.uuid">
-            {{ user.full_name }} ({{ user.email }})
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign officer</label>
+        <SelectBox
+          v-model="form.assigned_to"
+          size="lg"
+          placeholder="Unassigned"
+          :options="officerSelectOptions"
+          :disabled="loading"
+        />
       </div>
-
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-        <textarea v-model="form.description" rows="5" class="input" />
-        <p v-if="errors.description" class="mt-1 text-xs text-rose-600">{{ errors.description[0] }}</p>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+        <textarea
+          v-model="form.description"
+          rows="5"
+          class="input"
+          placeholder="Optional context for the DSAR intake."
+          :disabled="loading"
+        />
+        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('description') }}
+        </p>
       </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-5">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="inline-flex h-11 items-center rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        :disabled="loading"
         @click="$emit('cancel')"
       >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        :disabled="loading"
+        class="inline-flex h-11 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading || !canSubmit"
       >
-        {{ loading ? 'Saving...' : submitLabel }}
+        {{ loading ? 'Saving…' : submitLabel }}
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { userService } from '@/modules/users/services/userService';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
-defineProps({
+const props = defineProps({
   loading: { type: Boolean, default: false },
-  errors: { type: Object, default: () => ({}) },
-  error: { type: String, default: '' },
+  fieldErrors: { type: Object, default: () => ({}) },
   submitLabel: { type: String, default: 'Create request' },
 });
 
@@ -123,6 +168,30 @@ const form = reactive({
   description: '',
 });
 
+const companySelectOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const officerSelectOptions = computed(() => [
+  { value: '', label: 'Unassigned' },
+  ...users.value.map((user) => ({
+    value: user.uuid,
+    label: user.email ? `${user.full_name} (${user.email})` : user.full_name,
+  })),
+]);
+
+const canSubmit = computed(() =>
+  Boolean(form.company_id && form.request_type && form.requester_name && form.requester_email),
+);
+
+function fieldError(key) {
+  const value = props.fieldErrors?.[key];
+  return Array.isArray(value) ? value[0] : value || '';
+}
+
 onMounted(async () => {
   try {
     const [{ data: companyData }, { data: userData }] = await Promise.all([
@@ -138,6 +207,10 @@ onMounted(async () => {
 });
 
 function onSubmit() {
+  if (!canSubmit.value || props.loading) {
+    return;
+  }
+
   emit('submit', {
     company_id: form.company_id,
     request_type: form.request_type,

@@ -118,6 +118,9 @@ class ConsentController
 
         return ApiResponse::success([
             'consents' => (new UserConsentCollection($consents))->resolve(),
+            'statistics' => $this->consentService->statistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 

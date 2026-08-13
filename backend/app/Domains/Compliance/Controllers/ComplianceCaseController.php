@@ -60,6 +60,9 @@ class ComplianceCaseController
 
         return ApiResponse::success([
             'cases' => (new ComplianceCaseCollection($cases))->resolve(),
+            'statistics' => $this->complianceCaseService->statistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 

@@ -55,6 +55,9 @@ class PolicyDocumentController
 
         return ApiResponse::success([
             'policies' => (new PolicyDocumentCollection($policies))->resolve(),
+            'statistics' => $this->policyDocumentService->statistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 
@@ -210,6 +213,9 @@ class PolicyDocumentController
 
         return ApiResponse::success([
             'approvals' => (new PolicyApprovalCollection($approvals))->resolve(),
+            'statistics' => $this->policyDocumentService->approvalStatistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 

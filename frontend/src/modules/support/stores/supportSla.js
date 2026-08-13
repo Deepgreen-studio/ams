@@ -5,9 +5,11 @@ import { supportSlaService } from '@/modules/support/services/supportSlaService'
 export const useSupportSlaStore = defineStore('supportSla', () => {
   const dashboard = ref(null);
   const timers = ref([]);
+  const timerMeta = ref(null);
   const statistics = ref(null);
   const escalations = ref([]);
   const escalationMeta = ref(null);
+  const escalationQuery = ref({});
   const violations = ref([]);
   const violationSummary = ref(null);
   const violationMeta = ref(null);
@@ -36,7 +38,8 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
       const { data } = await supportSlaService.dashboard(params);
       dashboard.value = data.data ?? null;
       statistics.value = data.data?.statistics ?? null;
-      timers.value = data.data?.timers ?? [];
+      timers.value = data.data?.timers?.items ?? [];
+      timerMeta.value = data.data?.timers?.meta ?? null;
       return dashboard.value;
     } catch (err) {
       applyError(err, 'Unable to load SLA dashboard');
@@ -48,7 +51,8 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
 
   async function fetchEscalations(params = {}) {
     loading.value = true;
-    clearMessages();
+    error.value = null;
+    escalationQuery.value = { ...params };
     try {
       const { data } = await supportSlaService.escalations(params);
       escalations.value = data.data?.escalations?.items ?? [];
@@ -64,11 +68,11 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
 
   async function acknowledgeEscalation(id, payload = {}) {
     saving.value = true;
-    clearMessages();
+    error.value = null;
     try {
       const { data } = await supportSlaService.acknowledgeEscalation(id, payload);
       successMessage.value = data.message || 'Escalation acknowledged.';
-      await fetchEscalations();
+      await fetchEscalations(escalationQuery.value);
       return data.data?.escalation;
     } catch (err) {
       applyError(err, 'Unable to acknowledge escalation');
@@ -80,11 +84,11 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
 
   async function resolveEscalation(id, payload = {}) {
     saving.value = true;
-    clearMessages();
+    error.value = null;
     try {
       const { data } = await supportSlaService.resolveEscalation(id, payload);
       successMessage.value = data.message || 'Escalation resolved.';
-      await fetchEscalations();
+      await fetchEscalations(escalationQuery.value);
       return data.data?.escalation;
     } catch (err) {
       applyError(err, 'Unable to resolve escalation');
@@ -149,13 +153,13 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
     }
   }
 
-  async function evaluateNow() {
+  async function evaluateNow(params = {}) {
     saving.value = true;
     clearMessages();
     try {
       const { data } = await supportSlaService.evaluate();
       successMessage.value = data.message || 'Evaluation completed.';
-      await fetchDashboard();
+      await fetchDashboard(params);
       return data.data?.evaluated ?? 0;
     } catch (err) {
       applyError(err, 'Unable to evaluate SLA');
@@ -168,6 +172,7 @@ export const useSupportSlaStore = defineStore('supportSla', () => {
   return {
     dashboard,
     timers,
+    timerMeta,
     statistics,
     escalations,
     escalationMeta,

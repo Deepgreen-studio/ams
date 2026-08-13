@@ -49,6 +49,14 @@ class ConsentService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function statistics(?string $companyIdentifier = null): array
+    {
+        return $this->userConsentRepository->statistics($this->resolveCompanyId($companyIdentifier));
+    }
+
+    /**
      * @param  array<string, mixed>  $filters
      */
     public function listTypes(array $filters = []): LengthAwarePaginator|Collection

@@ -17,7 +17,7 @@ const props = defineProps({
 
 const tone = computed(() => {
   const map = {
-    reported: 'bg-slate-100 text-slate-700',
+    reported: 'bg-sky-50 text-sky-700',
     assessing: 'bg-amber-50 text-amber-700',
     contained: 'bg-sky-50 text-sky-700',
     recovering: 'bg-indigo-50 text-indigo-700',

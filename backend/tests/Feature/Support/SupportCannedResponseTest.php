@@ -94,6 +94,11 @@ class SupportCannedResponseTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.responses.meta.total', 1)
             ->assertJsonPath('data.responses.items.0.uuid', $uuid);
+
+        $this->getJson('/api/v1/support/canned-responses?per_page=1&page=1')
+            ->assertOk()
+            ->assertJsonPath('data.responses.meta.per_page', 1)
+            ->assertJsonPath('data.responses.meta.current_page', 1);
     }
 
     public function test_personal_responses_are_private_to_owner(): void

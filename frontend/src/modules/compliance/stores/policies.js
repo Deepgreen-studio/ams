@@ -2,6 +2,17 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { policyDocumentService } from '@/modules/compliance/services/policyDocumentService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  policy_type: '',
+  company: '',
+  sort_by: 'updated_at',
+  sort_dir: 'desc',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -35,18 +46,14 @@ export const usePolicyStore = defineStore('policies', () => {
   const statistics = ref(null);
   const recent = ref([]);
   const approvalQueuePreview = ref([]);
+  const approvalStatistics = ref(null);
   const cmsLink = ref({ linked: false, content: null, versions: [] });
-  const filters = ref({
-    search: '',
-    status: '',
-    policy_type: '',
-    company: '',
-    sort_by: 'updated_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  });
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
+
+  function resetFilters() {
+    filters.value = defaultFilters();
+  }
 
   async function fetchDashboard(company = '') {
     state.loading.value = true;
@@ -75,6 +82,7 @@ export const usePolicyStore = defineStore('policies', () => {
       const { data } = await policyDocumentService.list(params);
       policies.value = data.data?.policies?.items ?? [];
       meta.value = data.data?.policies?.meta ?? null;
+      statistics.value = data.data?.statistics ?? statistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load policies');
       throw err;
@@ -219,6 +227,7 @@ export const usePolicyStore = defineStore('policies', () => {
       const { data } = await policyDocumentService.approvalQueue(params);
       approvals.value = data.data?.approvals?.items ?? [];
       approvalsMeta.value = data.data?.approvals?.meta ?? null;
+      approvalStatistics.value = data.data?.statistics ?? approvalStatistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load approval queue');
       throw err;
@@ -286,9 +295,11 @@ export const usePolicyStore = defineStore('policies', () => {
     statistics,
     recent,
     approvalQueuePreview,
+    approvalStatistics,
     cmsLink,
     filters,
     ...state,
+    resetFilters,
     fetchDashboard,
     fetchPolicies,
     fetchPolicy,

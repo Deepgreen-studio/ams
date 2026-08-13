@@ -29,7 +29,7 @@ class SupportCannedResponseRepository
      */
     public function paginateForUser(User $user, array $filters = []): LengthAwarePaginator
     {
-        $perPage = min(max((int) ($filters['per_page'] ?? 15), 1), 100);
+        $perPage = max(1, min((int) ($filters['per_page'] ?? 10), 100));
         $sortBy = in_array($filters['sort_by'] ?? null, ['title', 'usage_count', 'sort_order', 'created_at', 'updated_at'], true)
             ? (string) $filters['sort_by']
             : 'sort_order';
@@ -62,7 +62,12 @@ class SupportCannedResponseRepository
         return $query
             ->orderBy($sortBy, $sortDir)
             ->orderBy('title')
-            ->paginate($perPage);
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                max(1, (int) ($filters['page'] ?? 1)),
+            );
     }
 
     /**

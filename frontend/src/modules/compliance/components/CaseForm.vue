@@ -1,120 +1,118 @@
 <template>
-  <form class="space-y-4" novalidate @submit.prevent="onSubmit">
+  <form class="space-y-5" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
           v-model="form.company_id"
-          class="input"
-          :class="fieldClass('company_id')"
-          :disabled="Boolean(initial.uuid)"
-        >
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
+          size="lg"
+          placeholder="Select company"
+          :options="companySelectOptions"
+          :disabled="loading || Boolean(initial.uuid)"
+          :error="Boolean(fieldError('company_id'))"
+        />
+        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('company_id') }}
         </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Case type</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Case type</label>
+        <SelectBox
           v-model="form.case_type"
-          class="input"
-          :class="fieldClass('case_type')"
-        >
-          <option v-for="option in typeOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-        <p v-if="displayErrors.case_type" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.case_type[0] }}
+          size="lg"
+          :options="typeOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('case_type'))"
+        />
+        <p v-if="fieldError('case_type')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('case_type') }}
         </p>
       </div>
-
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Title</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
         <input
           v-model="form.title"
           type="text"
           class="input"
           maxlength="255"
-          :class="fieldClass('title')"
+          placeholder="Case title"
+          :disabled="loading"
         />
-        <p v-if="displayErrors.title" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.title[0] }}
+        <p v-if="fieldError('title')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('title') }}
         </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Priority</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Priority</label>
+        <SelectBox
           v-model="form.priority"
-          class="input"
-          :class="fieldClass('priority')"
-        >
-          <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-        <p v-if="displayErrors.priority" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.priority[0] }}
+          size="lg"
+          :options="priorityOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('priority'))"
+        />
+        <p v-if="fieldError('priority')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('priority') }}
         </p>
       </div>
-
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox
           v-model="form.status"
+          size="lg"
+          :options="statusOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('status'))"
+        />
+        <p v-if="fieldError('status')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('status') }}
+        </p>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign to</label>
+        <SelectBox
+          v-model="form.assigned_to"
+          size="lg"
+          placeholder="Unassigned"
+          :options="assigneeSelectOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('assigned_to'))"
+        />
+        <p v-if="fieldError('assigned_to')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('assigned_to') }}
+        </p>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due date</label>
+        <input
+          v-model="form.due_date"
+          type="date"
           class="input"
-          :class="fieldClass('status')"
-        >
-          <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-        <p v-if="displayErrors.status" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.status[0] }}
+          :disabled="loading"
+        />
+        <p v-if="fieldError('due_date')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('due_date') }}
         </p>
       </div>
-
-      <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Assign to</label>
-        <select v-model="form.assigned_to" class="input">
-          <option value="">Unassigned</option>
-          <option v-for="user in users" :key="user.uuid" :value="user.uuid">
-            {{ user.full_name }} ({{ user.email }})
-          </option>
-        </select>
-        <p v-if="displayErrors.assigned_to" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.assigned_to[0] }}
-        </p>
-      </div>
-
-      <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Due date</label>
-        <input v-model="form.due_date" type="date" class="input" />
-        <p v-if="displayErrors.due_date" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.due_date[0] }}
-        </p>
-      </div>
-
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Description</label>
-        <textarea v-model="form.description" rows="6" class="input" />
-        <p v-if="displayErrors.description" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.description[0] }}
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
+        <textarea
+          v-model="form.description"
+          rows="6"
+          class="input"
+          placeholder="Optional context for investigators."
+          :disabled="loading"
+        />
+        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('description') }}
         </p>
       </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-5">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="inline-flex h-11 items-center rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         :disabled="loading"
         @click="$emit('cancel')"
       >
@@ -122,10 +120,10 @@
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        :disabled="loading"
+        class="inline-flex h-11 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading || !canSubmit"
       >
-        {{ loading ? 'Saving...' : submitLabel }}
+        {{ loading ? 'Saving…' : submitLabel }}
       </button>
     </div>
   </form>
@@ -133,54 +131,24 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
+import { priorityOptions, statusOptions, typeOptions } from '@/modules/compliance/utils/caseOptions';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { userService } from '@/modules/users/services/userService';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
   loading: { type: Boolean, default: false },
-  errors: { type: Object, default: () => ({}) },
-  error: { type: String, default: '' },
+  fieldErrors: { type: Object, default: () => ({}) },
   submitLabel: { type: String, default: 'Save case' },
   hideCompany: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['submit', 'cancel']);
-const toast = useToast();
 
 const companies = ref([]);
 const users = ref([]);
 const localErrors = ref({});
-
-const typeOptions = [
-  { value: 'gdpr', label: 'GDPR' },
-  { value: 'uk_gdpr', label: 'UK GDPR' },
-  { value: 'privacy_request', label: 'Privacy Request' },
-  { value: 'compliance_case', label: 'Compliance Case' },
-  { value: 'risk_register', label: 'Risk Register' },
-  { value: 'audit_compliance', label: 'Audit Compliance' },
-  { value: 'iso_27001', label: 'ISO 27001' },
-  { value: 'soc2', label: 'SOC 2' },
-  { value: 'other', label: 'Other' },
-];
-
-const priorityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
-
-const statusOptions = [
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'under_review', label: 'Under Review' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
 
 const form = reactive({
   company_id: '',
@@ -193,10 +161,32 @@ const form = reactive({
   due_date: '',
 });
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
+const companySelectOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const assigneeSelectOptions = computed(() => [
+  { value: '', label: 'Unassigned' },
+  ...users.value.map((user) => ({
+    value: user.uuid,
+    label: user.email ? `${user.full_name} (${user.email})` : user.full_name,
+  })),
+]);
+
+const canSubmit = computed(() => {
+  const hasCompany = props.hideCompany || Boolean(props.initial.uuid) || Boolean(form.company_id);
+  return Boolean(hasCompany && form.case_type && form.title && form.priority && form.status);
+});
+
+function fieldError(key) {
+  const local = localErrors.value?.[key];
+  const remote = props.fieldErrors?.[key];
+  const value = local || remote;
+  return Array.isArray(value) ? value[0] : value || '';
+}
 
 function syncFromInitial() {
   form.company_id = props.initial.company?.uuid || props.initial.company_id || '';
@@ -213,20 +203,11 @@ function syncFromInitial() {
 watch(() => props.initial, syncFromInitial, { immediate: true, deep: true });
 
 watch(
-  () => props.error,
-  (message) => {
-    if (message) {
-      toast.error(message, 'Validation Failed');
-    }
-  }
-);
-
-watch(
-  () => props.errors,
+  () => props.fieldErrors,
   () => {
     localErrors.value = {};
   },
-  { deep: true }
+  { deep: true },
 );
 
 onMounted(async () => {
@@ -243,40 +224,8 @@ onMounted(async () => {
   }
 });
 
-function fieldClass(field) {
-  return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
-}
-
-function validate() {
-  const next = {};
-
-  if (!props.hideCompany && !props.initial.uuid && !String(form.company_id || '').trim()) {
-    next.company_id = ['Please select a company.'];
-  }
-
-  if (!String(form.case_type || '').trim()) {
-    next.case_type = ['The case type field is required.'];
-  }
-
-  if (!String(form.title || '').trim()) {
-    next.title = ['The title field is required.'];
-  }
-
-  if (!String(form.priority || '').trim()) {
-    next.priority = ['The priority field is required.'];
-  }
-
-  if (!String(form.status || '').trim()) {
-    next.status = ['The status field is required.'];
-  }
-
-  localErrors.value = next;
-  return Object.keys(next).length === 0;
-}
-
 function onSubmit() {
-  if (!validate()) {
-    toast.error('Please fix the highlighted fields.', 'Validation Failed');
+  if (!canSubmit.value || props.loading) {
     return;
   }
 

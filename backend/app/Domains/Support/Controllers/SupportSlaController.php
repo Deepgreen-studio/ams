@@ -32,11 +32,20 @@ class SupportSlaController
     public function dashboard(Request $request): JsonResponse
     {
         $data = $this->slaService->dashboard($request->query());
+        $paginator = $data['timers'];
 
         return ApiResponse::success([
             'statistics' => $data['statistics'],
             'by_status' => $data['by_status'],
-            'timers' => SupportSlaTimerResource::collection($data['timers'])->resolve(),
+            'timers' => [
+                'items' => SupportSlaTimerResource::collection($paginator->items())->resolve(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                ],
+            ],
         ]);
     }
 

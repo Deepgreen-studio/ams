@@ -21,7 +21,7 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
     status: '',
     category: '',
     tag: '',
-    per_page: 12,
+    per_page: 10,
     page: 1,
   });
 
@@ -31,7 +31,11 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
   }
 
   function applyError(err, fallback = 'Unexpected error') {
-    error.value = err?.response?.data?.message || err?.message || fallback;
+    const payload = err?.response?.data ?? err;
+    const firstFieldError = payload?.errors
+      ? Object.values(payload.errors).flat().find(Boolean)
+      : null;
+    error.value = firstFieldError || payload?.message || err?.message || fallback;
   }
 
   function cleanParams(source) {
@@ -95,7 +99,9 @@ export const useKnowledgeBaseStore = defineStore('knowledgeBase', () => {
     try {
       const { data } = await knowledgeBaseService.createArticle(payload);
       successMessage.value = data.message || 'Article created.';
-      currentArticle.value = data.data?.article ?? null;
+      currentArticle.value = data.data?.article?.uuid
+        ? data.data.article
+        : data.data?.article?.data ?? data.data?.article ?? null;
       return currentArticle.value;
     } catch (err) {
       applyError(err, 'Unable to create article');

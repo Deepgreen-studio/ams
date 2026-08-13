@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import AuthenticationLayout from '@/layouts/AuthenticationLayout.vue';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
+import KnowledgeArticleViewPage from '@/modules/support/pages/KnowledgeArticleViewPage.vue';
 import { resolveRoutePermission } from '@/utils/routePermissions';
 
 const router = createRouter({
@@ -646,7 +647,7 @@ const router = createRouter({
         {
           path: 'support/knowledge/articles/:id',
           name: 'support.knowledge.show',
-          component: () => import('@/modules/support/pages/KnowledgeArticleViewPage.vue'),
+          component: KnowledgeArticleViewPage,
           meta: { title: 'Knowledge Article', requiresAuth: true },
         },
         {

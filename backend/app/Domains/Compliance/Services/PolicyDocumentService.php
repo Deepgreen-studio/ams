@@ -74,6 +74,22 @@ class PolicyDocumentService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function statistics(?string $companyIdentifier = null): array
+    {
+        return $this->policyDocumentRepository->statistics($this->resolveCompanyId($companyIdentifier));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function approvalStatistics(?string $companyIdentifier = null): array
+    {
+        return $this->policyApprovalRepository->statistics($this->resolveCompanyId($companyIdentifier));
+    }
+
+    /**
      * @param  array<string, mixed>  $filters
      */
     public function list(array $filters = []): LengthAwarePaginator

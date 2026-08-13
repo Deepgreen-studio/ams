@@ -68,6 +68,11 @@ class KnowledgeBaseTest extends TestCase
         $this->getJson('/api/v1/support/knowledge/articles?search=password&type=faq')
             ->assertOk()
             ->assertJsonPath('data.articles.meta.total', 1);
+
+        $this->getJson('/api/v1/support/knowledge/articles?per_page=1&page=1')
+            ->assertOk()
+            ->assertJsonPath('data.articles.meta.per_page', 1)
+            ->assertJsonPath('data.articles.meta.current_page', 1);
     }
 
     public function test_article_can_link_to_cms_content(): void

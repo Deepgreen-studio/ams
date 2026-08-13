@@ -1,14 +1,15 @@
 <template>
-  <div class="rounded-xl border border-slate-200 bg-white p-4">
-    <div class="mb-3 flex items-center justify-between gap-2">
-      <h3 class="text-sm font-semibold text-slate-900">{{ title }}</h3>
+  <div :class="framed ? 'rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 sm:p-6' : 'h-full'">
+    <div v-if="framed || title || hint" class="mb-4 flex items-center justify-between gap-2">
+      <h3 v-if="title" class="text-base font-semibold text-slate-900">{{ title }}</h3>
       <p v-if="hint" class="text-xs text-slate-500">{{ hint }}</p>
     </div>
     <div
       v-if="!items.length"
-      class="flex h-40 items-center justify-center text-sm text-slate-500"
+      class="flex h-40 flex-col items-center justify-center rounded-[12px] bg-zinc-50 text-center"
     >
-      No chart data
+      <p class="text-sm font-medium text-slate-700">No chart data</p>
+      <p class="mt-1 text-xs text-slate-500">Apply a date range with recorded activity.</p>
     </div>
     <div v-else class="space-y-3">
       <div v-for="item in items" :key="item.label" class="space-y-1">
@@ -16,7 +17,7 @@
           <span class="capitalize">{{ item.label }}</span>
           <span class="font-medium text-slate-900">{{ item.value }}</span>
         </div>
-        <div class="h-2 overflow-hidden rounded-full bg-slate-100">
+        <div class="h-2 overflow-hidden rounded-full bg-zinc-100">
           <div
             class="h-full rounded-full bg-brand-600 transition-all"
             :style="{ width: `${barWidth(item.value)}%` }"
@@ -34,12 +35,13 @@ const props = defineProps({
   title: { type: String, default: 'Distribution' },
   hint: { type: String, default: '' },
   data: { type: Object, default: () => ({}) },
+  framed: { type: Boolean, default: true },
 });
 
 const items = computed(() =>
   Object.entries(props.data || {})
     .map(([label, value]) => ({ label: String(label).replaceAll('_', ' '), value: Number(value) || 0 }))
-    .sort((a, b) => b.value - a.value)
+    .sort((a, b) => b.value - a.value),
 );
 
 const maxValue = computed(() => Math.max(1, ...items.value.map((item) => item.value)));

@@ -90,7 +90,7 @@ export const useEnterpriseAnalyticsStore = defineStore('enterpriseAnalytics', ()
     clearMessages();
     try {
       const { data } = await analyticsService.dashboards(
-        params({ kind: 'dashboard', ...overrides })
+        params({ kind: 'dashboard', is_template: false, ...overrides })
       );
       const payload = data.data?.dashboards || {};
       dashboards.value = payload.items || [];

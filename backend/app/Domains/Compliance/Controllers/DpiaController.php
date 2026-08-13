@@ -80,6 +80,9 @@ class DpiaController
 
         return ApiResponse::success([
             'assessments' => (new DpiaAssessmentCollection($assessments))->resolve(),
+            'dpia_statistics' => $this->dpiaService->assessmentStatistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 

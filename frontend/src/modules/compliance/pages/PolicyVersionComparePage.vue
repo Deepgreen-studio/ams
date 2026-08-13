@@ -1,75 +1,64 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Compare policy versions"
-      description="Field-level difference viewer for two immutable policy snapshots."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'compliance.policies.versions', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Version timeline
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'compliance.policies.versions', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Version timeline
-        </RouterLink>
+        :to="{ name: 'compliance.policies.versions', params: { id: route.params.id } }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <ClockIcon class="h-4 w-4" />
+        Version timeline
+      </RouterLink>
     </Teleport>
 
     <ComplianceSubnav />
 
-    <div class="mb-4 grid gap-4 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-3">
-      <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">From</label>
-        <select v-model="fromVersion" class="input">
-          <option value="" disabled>Select version</option>
-          <option v-for="item in store.versions" :key="item.uuid" :value="String(item.version)">
-            v{{ item.version }} ({{ item.status }})
-          </option>
-        </select>
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8">
+        <h2 class="text-base font-semibold text-slate-900">Compare versions</h2>
+        <p class="mt-0.5 text-xs text-slate-500">
+          Field-level difference viewer for two immutable policy snapshots.
+        </p>
       </div>
-      <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">To</label>
-        <select v-model="toVersion" class="input">
-          <option value="" disabled>Select version</option>
-          <option
-            v-for="item in store.versions"
-            :key="`to-${item.uuid}`"
-            :value="String(item.version)"
+      <form class="grid gap-4 px-6 py-5 sm:grid-cols-3 sm:px-8" @submit.prevent="runCompare">
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">From</label>
+          <SelectBox
+            v-model="fromVersion"
+            size="lg"
+            placeholder="Select version"
+            :options="fromOptions"
+            :disabled="store.loading"
+          />
+        </div>
+        <div>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">To</label>
+          <SelectBox
+            v-model="toVersion"
+            size="lg"
+            placeholder="Select version"
+            :options="toOptions"
+            :disabled="store.loading"
+          />
+        </div>
+        <div class="flex items-end">
+          <button
+            type="submit"
+            class="inline-flex h-11 w-full items-center justify-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            :disabled="!canCompare || store.loading"
           >
-            v{{ item.version }} ({{ item.status }})
-          </option>
-        </select>
-      </div>
-      <div class="flex items-end">
-        <button
-          type="button"
-          class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="!fromVersion || !toVersion || fromVersion === toVersion || store.loading"
-          @click="runCompare"
-        >
-          Compare
-        </button>
-      </div>
+            Compare
+          </button>
+        </div>
+      </form>
     </div>
+
+    <div v-if="store.loading && !store.comparison" class="mt-4 h-64 animate-pulse rounded-[12px] bg-zinc-100" />
 
     <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      v-else-if="store.comparison"
+      class="mt-4 overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
     >
-      {{ store.error }}
-    </div>
-
-    <div v-if="store.loading" class="h-40 animate-pulse rounded-xl bg-slate-100" />
-
-    <div v-else-if="store.comparison" class="space-y-4">
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8">
         <p class="text-sm text-slate-600">
           Comparing
           <span class="font-semibold text-slate-900">v{{ store.comparison.from?.version }}</span>
@@ -79,31 +68,31 @@
           {{ (store.comparison.comparison?.changed_fields || []).length }} changed field(s)
         </p>
       </div>
-
-      <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-          <thead class="bg-slate-50">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Field</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">From</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">To</th>
+      <div class="scrollbar-light overflow-x-auto px-3">
+        <table class="min-w-full text-sm">
+          <thead>
+            <tr class="border-b border-zinc-100">
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Field</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">From</th>
+              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">To</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
+          <tbody>
             <tr
               v-for="(diff, field) in store.comparison.comparison?.changes || {}"
               :key="field"
+              class="border-b border-zinc-50 last:border-0"
             >
-              <td class="px-4 py-3 align-top font-medium text-slate-800">{{ field }}</td>
-              <td class="px-4 py-3 align-top whitespace-pre-wrap text-slate-600">
+              <td class="px-5 py-4 align-top font-medium text-slate-800">{{ field }}</td>
+              <td class="px-5 py-4 align-top whitespace-pre-wrap text-slate-600">
                 {{ displayValue(diff.from) }}
               </td>
-              <td class="px-4 py-3 align-top whitespace-pre-wrap text-slate-600">
+              <td class="px-5 py-4 align-top whitespace-pre-wrap text-slate-600">
                 {{ displayValue(diff.to) }}
               </td>
             </tr>
             <tr v-if="!Object.keys(store.comparison.comparison?.changes || {}).length">
-              <td colspan="3" class="px-4 py-6 text-center text-slate-500">
+              <td colspan="3" class="px-5 py-10 text-center text-sm text-slate-500">
                 No field-level differences.
               </td>
             </tr>
@@ -115,27 +104,68 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { ClockIcon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { usePolicyStore } from '@/modules/compliance/stores/policies';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const route = useRoute();
 const store = usePolicyStore();
+const toast = useToast();
 const fromVersion = ref('');
 const toVersion = ref('');
 
+const versionOptions = computed(() =>
+  store.versions.map((item) => ({
+    value: String(item.version),
+    label: `v${item.version} (${item.status_label || item.status})`,
+  })),
+);
+
+const fromOptions = computed(() => versionOptions.value);
+const toOptions = computed(() => versionOptions.value);
+
+const canCompare = computed(
+  () => Boolean(fromVersion.value && toVersion.value && fromVersion.value !== toVersion.value),
+);
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
+
 onMounted(async () => {
-  await store.fetchVersions(route.params.id);
-  if (store.versions.length >= 2) {
-    fromVersion.value = String(store.versions[1].version);
-    toVersion.value = String(store.versions[0].version);
+  store.successMessage = null;
+  store.error = null;
+  try {
+    await store.fetchVersions(route.params.id);
+    if (store.versions.length >= 2) {
+      fromVersion.value = String(store.versions[1].version);
+      toVersion.value = String(store.versions[0].version);
+    } else if (store.versions.length === 1) {
+      toVersion.value = String(store.versions[0].version);
+    }
+  } catch {
+    // Toast is shown from store.error.
   }
 });
 
 async function runCompare() {
-  await store.compareVersions(route.params.id, fromVersion.value, toVersion.value);
+  if (!canCompare.value) {
+    return;
+  }
+  try {
+    await store.compareVersions(route.params.id, fromVersion.value, toVersion.value);
+  } catch {
+    // Toast is shown from store.error.
+  }
 }
 
 function displayValue(value) {

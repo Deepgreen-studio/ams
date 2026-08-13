@@ -1,71 +1,61 @@
 <template>
   <div class="space-y-4">
     <div>
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Name</label>
-      <input v-model="form.name" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Name</label>
+      <input v-model="form.name" class="input" />
     </div>
     <div>
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Description</label>
-      <textarea v-model="form.description" rows="3" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+      <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Description</label>
+      <textarea v-model="form.description" rows="3" class="input" />
     </div>
     <div class="grid gap-3 sm:grid-cols-2">
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Visibility</label>
-        <select v-model="form.visibility" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-          <option value="personal">Personal</option>
-          <option value="company">Company</option>
-          <option value="role">Role-based</option>
-          <option value="shared">Shared</option>
-          <option value="template">Template</option>
-        </select>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Visibility</label>
+        <SelectBox v-model="form.visibility" :options="visibilityOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Status</label>
-        <select v-model="form.status" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-          <option value="archived">Archived</option>
-        </select>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Status</label>
+        <SelectBox v-model="form.status" :options="statusOptions" />
       </div>
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
-        <select v-model="form.category" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-          <option v-for="category in categories" :key="category.value" :value="category.value">
-            {{ category.label }}
-          </option>
-        </select>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
+        <SelectBox v-model="form.category" :options="categories" />
       </div>
       <div>
-        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Auto refresh (sec)</label>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Auto refresh (sec)</label>
         <input
           v-model.number="form.settings.auto_refresh_seconds"
           type="number"
           min="30"
-          class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+          class="input"
         />
       </div>
     </div>
     <div class="flex flex-wrap gap-4">
       <label class="flex items-center gap-2 text-sm text-slate-700">
-        <input v-model="form.is_default" type="checkbox" class="rounded border-slate-300" />
+        <input v-model="form.is_default" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
         Default dashboard
       </label>
       <label class="flex items-center gap-2 text-sm text-slate-700">
-        <input v-model="form.is_template" type="checkbox" class="rounded border-slate-300" />
+        <input v-model="form.is_template" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
         Save as template
       </label>
       <label class="flex items-center gap-2 text-sm text-slate-700">
-        <input v-model="form.settings.show_filters" type="checkbox" class="rounded border-slate-300" />
+        <input v-model="form.settings.show_filters" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
         Show filters
       </label>
     </div>
     <div class="flex justify-end gap-2">
-      <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="emit('cancel')">
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        @click="emit('cancel')"
+      >
         Cancel
       </button>
       <button
         type="button"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
         :disabled="saving"
         @click="emit('save', { ...form, settings: { ...form.settings } })"
       >
@@ -77,6 +67,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
   dashboard: { type: Object, required: true },
@@ -85,6 +76,20 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['save', 'cancel']);
+
+const visibilityOptions = [
+  { value: 'personal', label: 'Personal' },
+  { value: 'company', label: 'Company' },
+  { value: 'role', label: 'Role-based' },
+  { value: 'shared', label: 'Shared' },
+  { value: 'template', label: 'Template' },
+];
+
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+  { value: 'archived', label: 'Archived' },
+];
 
 const form = reactive({
   name: '',

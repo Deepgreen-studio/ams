@@ -1,88 +1,113 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Audit reports"
-      description="Compliance module activity log results — events, volume trends, and recent audit trail."
-    /> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+        :to="{ name: 'compliance.analytics.dashboard' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <Squares2X2Icon class="h-4 w-4" />
+        Overview
+      </RouterLink>
+    </Teleport>
+
     <ComplianceSubnav />
 
     <AnalyticsFilterBar
-      v-model="store.filters"
+      :model-value="store.filters"
       :exporting="store.exporting"
       @apply="onApply"
-      @export="(format) => store.exportReport(format, 'audit')"
+      @reset="onReset"
+      @export="onExport"
     />
 
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ store.error }}
-    </div>
-    <div
-      v-if="store.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ store.successMessage }}
+    <div v-if="store.loading && !hasData" class="mb-4 grid gap-4 sm:grid-cols-2">
+      <div v-for="n in 2" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div v-if="store.loading && !store.audit" class="h-48 animate-pulse rounded-xl bg-slate-100" />
+    <div
+      v-else-if="store.error && !hasData"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Unable to load audit report</p>
+      <p class="mt-1 text-xs text-slate-500">Refresh to try loading the activity log again.</p>
+      <button
+        type="button"
+        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="reload"
+      >
+        Retry
+      </button>
+    </div>
 
-    <template v-else-if="store.audit">
-      <div class="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Audit events</p>
-          <p class="mt-1 text-2xl font-semibold text-slate-900">
-            {{ store.audit.summary?.total ?? 0 }}
-          </p>
-        </div>
-        <div class="rounded-xl border border-slate-200 bg-white px-4 py-3 sm:col-span-2">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Period</p>
-          <p class="mt-1 text-lg font-semibold text-slate-900">
-            {{ store.audit.period?.from }} → {{ store.audit.period?.to }}
-          </p>
+    <template v-else-if="hasData">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div
+          v-for="card in cards"
+          :key="card.label"
+          class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
+          :class="card.span"
+        >
+          <div class="min-w-0">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+            <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+            <p v-if="card.hint" class="mt-1 text-xs text-slate-400">{{ card.hint }}</p>
+          </div>
+          <div
+            class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+            :class="card.iconBg"
+          >
+            <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+          </div>
         </div>
       </div>
 
       <div class="mb-4 grid gap-4 lg:grid-cols-2">
         <SimpleLineChart
           title="Audit event volume"
+          hint="Daily activity log entries"
           :labels="store.audit.trends?.labels || []"
           :series="[{ key: 'events', label: 'Events', values: store.audit.trends?.events || [] }]"
         />
         <SimpleBarChart title="By event" :data="store.audit.by_event || {}" />
       </div>
 
-      <div class="rounded-xl border border-slate-200 bg-white p-5">
-        <h3 class="mb-3 text-sm font-semibold text-slate-900">Recent audit results</h3>
-        <EmptyState
-          v-if="!(store.audit.recent || []).length"
-          title="No audit events"
-          description="Compliance activity appears here after module actions."
-        />
-        <ul v-else class="divide-y divide-slate-100 text-sm">
-          <li v-for="item in store.audit.recent" :key="item.id" class="py-3">
-            <div class="flex flex-wrap items-start justify-between gap-2">
-              <div>
-                <p class="font-medium text-slate-900">{{ item.description }}</p>
-                <p class="text-xs text-slate-500">
-                  {{ item.event || 'event' }}
-                  <span v-if="item.causer?.full_name"> · {{ item.causer.full_name }}</span>
-                </p>
-              </div>
-              <span class="text-xs text-slate-400">{{ formatDate(item.created_at) }}</span>
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+        <div class="mb-4">
+          <h2 class="text-base font-semibold text-slate-900">Recent audit results</h2>
+          <p class="mt-0.5 text-xs text-slate-500">Latest compliance module activity</p>
+        </div>
+        <div v-if="!(store.audit.recent || []).length" class="py-10 text-center">
+          <p class="text-sm font-medium text-slate-900">No audit events</p>
+          <p class="mt-1 text-xs text-slate-500">
+            Compliance activity appears here after module actions.
+          </p>
+        </div>
+        <ul v-else class="divide-y divide-zinc-100">
+          <li
+            v-for="item in store.audit.recent"
+            :key="item.id"
+            class="flex flex-wrap items-start justify-between gap-3 py-3.5 first:pt-0 last:pb-0"
+          >
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-slate-900">{{ item.description }}</p>
+              <p class="mt-0.5 text-xs text-slate-500">
+                {{ item.event || 'event' }}
+                <span v-if="item.causer?.full_name"> · {{ item.causer.full_name }}</span>
+              </p>
             </div>
+            <span class="shrink-0 text-xs text-slate-400">{{ formatDate(item.created_at) }}</span>
           </li>
         </ul>
-      </div>
+      </section>
     </template>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import EmptyState from '@/components/ui/EmptyState.vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { computed, onMounted } from 'vue';
+import { RouterLink } from 'vue-router';
+import { CalendarDaysIcon, ClipboardDocumentListIcon, Squares2X2Icon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
@@ -90,16 +115,78 @@ import SimpleBarChart from '@/modules/compliance/components/SimpleBarChart.vue';
 import { useComplianceAnalyticsStore } from '@/modules/compliance/stores/complianceAnalytics';
 
 const store = useComplianceAnalyticsStore();
+const toast = useToast();
+
+const hasData = computed(() => Boolean(store.audit));
+
+const cards = computed(() => {
+  const total = store.audit?.summary?.total ?? 0;
+  const from = store.audit?.period?.from || '—';
+  const to = store.audit?.period?.to || '—';
+
+  return [
+    {
+      label: 'Audit events',
+      value: total,
+      hint: total ? 'Logged in this period' : 'No activity in range',
+      icon: ClipboardDocumentListIcon,
+      iconBg: total ? 'bg-violet-50' : 'bg-zinc-100',
+      iconColor: total ? 'text-violet-500' : 'text-slate-500',
+    },
+    {
+      label: 'Period',
+      value: `${from} → ${to}`,
+      hint: 'Applied report window',
+      icon: CalendarDaysIcon,
+      iconBg: 'bg-sky-50',
+      iconColor: 'text-sky-500',
+      span: 'sm:col-span-2',
+    },
+  ];
+});
 
 function formatDate(value) {
   if (!value) return '—';
   return new Date(value).toLocaleString();
 }
 
-function onApply(next) {
-  store.filters = { ...store.filters, ...next };
-  store.fetchAudit();
+async function reload() {
+  try {
+    await store.fetchAudit();
+  } catch {
+    toast.error(store.error || 'Unable to load audit report');
+    store.error = null;
+  }
 }
 
-onMounted(() => store.fetchAudit());
+function onApply(next) {
+  store.filters = { ...store.filters, ...next };
+  reload();
+}
+
+function onReset() {
+  store.resetFilters();
+  reload();
+}
+
+async function onExport(format) {
+  try {
+    const result = await store.exportReport(format, 'audit');
+    if (result === 'pdf-ready') {
+      toast.info(store.successMessage || 'PDF export is architecture-ready.');
+    } else {
+      toast.success(store.successMessage || 'Export downloaded.');
+    }
+    store.successMessage = null;
+  } catch {
+    toast.error(store.error || 'Unable to export analytics');
+    store.error = null;
+  }
+}
+
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+  reload();
+});
 </script>

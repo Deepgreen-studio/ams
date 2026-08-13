@@ -73,7 +73,9 @@ class DataBreachManagementTest extends TestCase
 
         $this->getJson('/api/v1/compliance/breaches?search=Unauthorized')
             ->assertOk()
-            ->assertJsonPath('data.breaches.meta.total', 1);
+            ->assertJsonPath('data.breaches.meta.total', 1)
+            ->assertJsonPath('data.statistics.total', 1)
+            ->assertJsonPath('data.statistics.reported', 1);
 
         $this->getJson('/api/v1/compliance/breaches/'.$uuid.'/timeline')
             ->assertOk()
@@ -122,6 +124,11 @@ class DataBreachManagementTest extends TestCase
 
         $this->assertNotNull($breach->fresh()->regulator_notified_at);
         $this->assertSame('ICO-123', $breach->fresh()->regulator_reference);
+
+        $this->getJson('/api/v1/compliance/breaches/notifications')
+            ->assertOk()
+            ->assertJsonPath('data.statistics.total', 1)
+            ->assertJsonPath('data.statistics.sent', 1);
 
         $this->postJson('/api/v1/compliance/breaches/'.$breach->uuid.'/recover', [
             'recovery_summary' => 'Systems restored from clean backups',
@@ -189,7 +196,14 @@ class DataBreachManagementTest extends TestCase
 
         $this->getJson('/api/v1/compliance/breaches/notifications')
             ->assertOk()
-            ->assertJsonPath('success', true);
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.statistics.total', 0)
+            ->assertJsonStructure([
+                'data' => [
+                    'statistics' => ['total', 'sent', 'pending', 'failed', 'acknowledged'],
+                    'notifications',
+                ],
+            ]);
     }
 
     public function test_affected_users_can_be_updated(): void

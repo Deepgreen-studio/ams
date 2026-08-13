@@ -76,8 +76,15 @@ class KnowledgeArticleRepository
         ], true) ? $requestedSort : 'updated_at';
         $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
 
+        $perPage = max(1, min((int) ($filters['per_page'] ?? 10), 100));
+
         return $query->orderBy($sortBy, $sortDir)
-            ->paginate((int) ($filters['per_page'] ?? 15));
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                max(1, (int) ($filters['page'] ?? 1)),
+            );
     }
 
     /**

@@ -18,6 +18,7 @@ class SupportSlaTimerResource extends JsonResource
             'uuid' => $this->uuid,
             'ticket_number' => $this->ticket_number,
             'subject' => $this->subject,
+            'source' => $this->source?->value ?? $this->source,
             'priority' => $this->priority?->value ?? $this->priority,
             'status' => $this->status?->value ?? $this->status,
             'sla_status' => $this->sla_status?->value ?? $this->sla_status,

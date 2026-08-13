@@ -1,7 +1,7 @@
 <template>
-  <div class="rounded-[12px] bg-white p-5 sm:p-6 ring-1 ring-zinc-100">
-    <div class="mb-4 flex items-center justify-between gap-2">
-      <h3 class="text-base font-semibold text-slate-900">{{ title }}</h3>
+  <div :class="framed ? 'rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 sm:p-6' : 'h-full'">
+    <div v-if="framed || title || hint" class="mb-4 flex items-center justify-between gap-2">
+      <h3 v-if="title" class="text-base font-semibold text-slate-900">{{ title }}</h3>
       <p v-if="hint" class="text-xs text-slate-500">{{ hint }}</p>
     </div>
     <div
@@ -11,7 +11,7 @@
       <p class="text-sm font-medium text-slate-700">No chart data</p>
       <p class="mt-1 text-xs text-slate-500">Refresh the snapshot to populate trends.</p>
     </div>
-    <svg v-else :viewBox="`0 0 ${width} ${height}`" class="h-44 w-full" role="img">
+    <svg v-else :viewBox="`0 0 ${width} ${height}`" class="h-44 w-full" :class="{ 'h-full max-h-44': !framed }" role="img">
       <line
         v-for="(tick, index) in yTicks"
         :key="`grid-${index}`"
@@ -68,6 +68,7 @@ const props = defineProps({
   hint: { type: String, default: '' },
   labels: { type: Array, default: () => [] },
   series: { type: Array, default: () => [] },
+  framed: { type: Boolean, default: true },
 });
 
 const width = 640;

@@ -2,7 +2,11 @@ import { defineStore } from 'pinia';
 import { cannedResponseService } from '@/modules/support/services/cannedResponseService';
 
 function extractError(error, fallback = 'Request failed') {
-  return error?.response?.data?.message || error?.message || fallback;
+  const payload = error?.response?.data ?? error;
+  const firstFieldError = payload?.errors
+    ? Object.values(payload.errors).flat().find(Boolean)
+    : null;
+  return firstFieldError || payload?.message || error?.message || fallback;
 }
 
 export const useCannedResponsesStore = defineStore('supportCannedResponses', {

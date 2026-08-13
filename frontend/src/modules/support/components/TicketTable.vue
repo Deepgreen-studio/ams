@@ -13,7 +13,7 @@
         <slot name="empty-action" />
       </template>
     </EmptyState>
-    <div v-else class="overflow-x-auto px-3">
+    <div v-else class="scrollbar-light overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -44,14 +44,22 @@
             class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
           >
             <td class="px-5 py-4">
-              <RouterLink
-                v-if="can('support.view')"
-                :to="{ name: 'support.tickets.show', params: { id: ticket.uuid } }"
-                class="font-medium text-slate-900 hover:text-brand-700"
-              >
-                {{ ticket.subject }}
-              </RouterLink>
-              <p v-else class="font-medium text-slate-900">{{ ticket.subject }}</p>
+              <div class="flex flex-wrap items-center gap-2">
+                <RouterLink
+                  v-if="can('support.view')"
+                  :to="{ name: 'support.tickets.show', params: { id: ticket.uuid } }"
+                  class="font-medium text-slate-900 hover:text-brand-700"
+                >
+                  {{ ticket.subject }}
+                </RouterLink>
+                <p v-else class="font-medium text-slate-900">{{ ticket.subject }}</p>
+                <span
+                  v-if="ticket.source === 'sms'"
+                  class="inline-flex items-center rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-medium text-sky-700 ring-1 ring-sky-100"
+                >
+                  SMS
+                </span>
+              </div>
               <p class="mt-0.5 text-xs text-slate-500">{{ ticket.ticket_number }}</p>
             </td>
             <td class="hidden px-5 py-4 md:table-cell">

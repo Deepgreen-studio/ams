@@ -2,6 +2,19 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { consentService } from '@/modules/compliance/services/consentService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  channel: '',
+  source: '',
+  granted: '',
+  company: '',
+  sort_by: 'created_at',
+  sort_dir: 'desc',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -35,19 +48,12 @@ export const useConsentStore = defineStore('consents', () => {
   const recent = ref([]);
   const preferences = ref([]);
   const preferenceSubject = ref(null);
-  const filters = ref({
-    search: '',
-    status: '',
-    channel: '',
-    source: '',
-    granted: '',
-    company: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  });
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
+
+  function resetFilters() {
+    filters.value = defaultFilters();
+  }
 
   async function fetchDashboard(company = '') {
     state.loading.value = true;
@@ -90,6 +96,7 @@ export const useConsentStore = defineStore('consents', () => {
       const { data } = await consentService.list(params);
       consents.value = data.data?.consents?.items ?? [];
       meta.value = data.data?.consents?.meta ?? null;
+      statistics.value = data.data?.statistics ?? statistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load consents');
       throw err;
@@ -218,6 +225,7 @@ export const useConsentStore = defineStore('consents', () => {
     preferenceSubject,
     filters,
     ...state,
+    resetFilters,
     fetchDashboard,
     fetchTypes,
     fetchConsents,

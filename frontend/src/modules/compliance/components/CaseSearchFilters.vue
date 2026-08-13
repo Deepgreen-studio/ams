@@ -1,73 +1,54 @@
 <template>
   <form
-    class="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 lg:flex-row lg:flex-wrap lg:items-end"
+    class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
     @submit.prevent="onSubmit"
   >
-    <div class="min-w-[12rem] flex-1">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Search</label>
+    <div class="relative min-w-0 flex-1 lg:max-w-sm">
+      <MagnifyingGlassIcon
+        class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      />
       <input
         v-model="local.search"
         type="search"
-        placeholder="Title, case number..."
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+        placeholder="Search case #, title…"
+        class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
       />
     </div>
-    <div class="w-full lg:w-40">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Status</label>
-      <select
+    <div class="flex flex-wrap items-center gap-2">
+      <SelectBox
         v-model="local.status"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
-    <div class="w-full lg:w-44">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Type</label>
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="statusSelectOptions"
+      />
+      <SelectBox
         v-model="local.case_type"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option v-for="option in typeOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Priority</label>
-      <select
+        wrapper-class="min-w-[10.5rem]"
+        :options="typeSelectOptions"
+      />
+      <SelectBox
         v-model="local.priority"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">All</option>
-        <option v-for="option in priorityOptions" :key="option.value" :value="option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
-    <div class="w-full lg:w-36">
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Overdue</label>
-      <select
+        wrapper-class="min-w-[9.5rem]"
+        :options="prioritySelectOptions"
+      />
+      <SelectBox
         v-model="local.overdue"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500"
-      >
-        <option value="">Any</option>
-        <option value="1">Overdue only</option>
-      </select>
-    </div>
-    <div class="flex gap-2">
+        wrapper-class="min-w-[9rem]"
+        :options="overdueOptions"
+      />
+      <SelectBox
+        v-model="local.company"
+        wrapper-class="min-w-[10.5rem]"
+        :options="companySelectOptions"
+      />
       <button
         type="submit"
-        class="h-12 rounded-[12px] bg-brand-600 px-4 text-sm font-medium text-white hover:bg-brand-700"
+        class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Filter
+        Apply
       </button>
       <button
         type="button"
-        class="h-12 rounded-[12px] border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="onReset"
       >
         Reset
@@ -77,51 +58,43 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { companyService } from '@/modules/companies/services/companyService';
+import { priorityOptions, statusOptions, typeOptions } from '@/modules/compliance/utils/caseOptions';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
   modelValue: { type: Object, default: () => ({}) },
 });
 
-const emit = defineEmits(['submit', 'reset']);
+const emit = defineEmits(['submit', 'reset', 'update:modelValue']);
 
-const statusOptions = [
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'under_review', label: 'Under Review' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'cancelled', label: 'Cancelled' },
-];
-
-const typeOptions = [
-  { value: 'gdpr', label: 'GDPR' },
-  { value: 'uk_gdpr', label: 'UK GDPR' },
-  { value: 'privacy_request', label: 'Privacy Request' },
-  { value: 'compliance_case', label: 'Compliance Case' },
-  { value: 'risk_register', label: 'Risk Register' },
-  { value: 'audit_compliance', label: 'Audit Compliance' },
-  { value: 'iso_27001', label: 'ISO 27001' },
-  { value: 'soc2', label: 'SOC 2' },
-  { value: 'other', label: 'Other' },
-];
-
-const priorityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
-
+const companies = ref([]);
 const local = reactive({
   search: '',
   status: '',
   case_type: '',
   priority: '',
   overdue: '',
-  page: 1,
+  company: '',
 });
+
+const statusSelectOptions = [{ value: '', label: 'All statuses' }, ...statusOptions];
+const typeSelectOptions = [{ value: '', label: 'All types' }, ...typeOptions];
+const prioritySelectOptions = [{ value: '', label: 'All priorities' }, ...priorityOptions];
+const overdueOptions = [
+  { value: '', label: 'Any due date' },
+  { value: '1', label: 'Overdue only' },
+];
+
+const companySelectOptions = computed(() => [
+  { value: '', label: 'All companies' },
+  ...companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+]);
 
 watch(
   () => props.modelValue,
@@ -132,14 +105,25 @@ watch(
       case_type: value.case_type || '',
       priority: value.priority || '',
       overdue: value.overdue || '',
-      page: 1,
+      company: value.company || '',
     });
   },
-  { immediate: true, deep: true }
+  { immediate: true, deep: true },
 );
 
+onMounted(async () => {
+  try {
+    const { data } = await companyService.list({ per_page: 100 });
+    companies.value = data.data?.companies?.items ?? [];
+  } catch {
+    companies.value = [];
+  }
+});
+
 function onSubmit() {
-  emit('submit', { ...local, page: 1 });
+  const payload = { ...local, page: 1 };
+  emit('update:modelValue', payload);
+  emit('submit', payload);
 }
 
 function onReset() {
@@ -149,7 +133,7 @@ function onReset() {
     case_type: '',
     priority: '',
     overdue: '',
-    page: 1,
+    company: '',
   });
   emit('reset');
 }

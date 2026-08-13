@@ -1,87 +1,125 @@
 <template>
-  <form class="space-y-4" @submit.prevent="onSubmit">
-    <div v-if="error" class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ error }}
-    </div>
-
+  <form class="space-y-5" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Company</label>
-        <select v-model="form.company_id" class="input" required>
-          <option value="" disabled>Select company</option>
-          <option v-for="company in companies" :key="company.uuid" :value="company.uuid">
-            {{ company.company_name }}
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SelectBox
+          v-model="form.company_id"
+          size="lg"
+          placeholder="Select company"
+          :options="companySelectOptions"
+          :disabled="loading"
+          :error="Boolean(fieldError('company_id'))"
+        />
+        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('company_id') }}
+        </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Consent type</label>
-        <select v-model="form.consent_type_id" class="input" required>
-          <option value="" disabled>Select type</option>
-          <option v-for="type in types" :key="type.uuid" :value="type.uuid">
-            {{ type.name }}
-          </option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Consent type</label>
+        <SelectBox
+          v-model="form.consent_type_id"
+          size="lg"
+          placeholder="Select type"
+          :options="typeSelectOptions"
+          :disabled="loading || !types.length"
+          :error="Boolean(fieldError('consent_type_id'))"
+        />
+        <p v-if="selectedTypeHint" class="mt-1.5 text-xs text-slate-500">{{ selectedTypeHint }}</p>
+        <p v-else-if="fieldError('consent_type_id')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('consent_type_id') }}
+        </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Subject name</label>
-        <input v-model="form.subject_name" type="text" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject name</label>
+        <input
+          v-model="form.subject_name"
+          type="text"
+          class="input"
+          maxlength="255"
+          placeholder="Optional display name"
+          :disabled="loading"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Subject email</label>
-        <input v-model="form.subject_email" type="email" class="input" required />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject email</label>
+        <input
+          v-model="form.subject_email"
+          type="email"
+          class="input"
+          maxlength="255"
+          placeholder="name@example.com"
+          required
+          :disabled="loading"
+        />
+        <p v-if="fieldError('subject_email')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('subject_email') }}
+        </p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Source</label>
-        <select v-model="form.source" class="input">
-          <option value="admin">Admin</option>
-          <option value="preference_center">Preference Center</option>
-          <option value="web">Web</option>
-          <option value="mobile">Mobile</option>
-          <option value="cookie_banner">Cookie Banner</option>
-          <option value="api">API</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Source</label>
+        <SelectBox
+          v-model="form.source"
+          size="lg"
+          :options="sourceSelectOptions"
+          :disabled="loading"
+        />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Decision</label>
-        <select v-model="form.granted" class="input">
-          <option :value="true">Grant</option>
-          <option :value="false">Withdraw / Deny</option>
-        </select>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Decision</label>
+        <SelectBox
+          v-model="form.granted"
+          size="lg"
+          :options="decisionOptions"
+          :disabled="loading"
+        />
+        <p class="mt-1.5 text-xs text-slate-500">
+          {{ form.granted ? 'Records an opt-in for this channel.' : 'Records a withdrawal or denial.' }}
+        </p>
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Notes</label>
-        <textarea v-model="form.notes" rows="3" class="input" />
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Notes</label>
+        <textarea
+          v-model="form.notes"
+          rows="5"
+          class="input"
+          maxlength="5000"
+          placeholder="Optional context for the audit trail."
+          :disabled="loading"
+        />
       </div>
     </div>
 
-    <div class="flex justify-end gap-2">
+    <div class="flex flex-wrap justify-end gap-2 border-t border-zinc-100 pt-5">
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+        class="inline-flex h-11 items-center rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        :disabled="loading"
         @click="$emit('cancel')"
       >
         Cancel
       </button>
       <button
         type="submit"
-        class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        :disabled="loading"
+        class="inline-flex h-11 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="loading || !canSubmit"
       >
-        {{ loading ? 'Saving...' : 'Record consent' }}
+        {{ loading ? 'Saving…' : form.granted ? 'Record consent' : 'Record withdrawal' }}
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { consentService } from '@/modules/compliance/services/consentService';
+import { consentSourceOptions } from '@/modules/compliance/utils/consentOptions';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
-defineProps({
+const props = defineProps({
   loading: { type: Boolean, default: false },
-  error: { type: String, default: '' },
+  fieldErrors: { type: Object, default: () => ({}) },
 });
 
 const emit = defineEmits(['submit', 'cancel']);
@@ -99,6 +137,50 @@ const form = reactive({
   notes: '',
 });
 
+const companySelectOptions = computed(() =>
+  companies.value.map((company) => ({
+    value: company.uuid,
+    label: company.company_name,
+  })),
+);
+
+const typeSelectOptions = computed(() =>
+  types.value.map((type) => ({
+    value: type.uuid,
+    label: type.name,
+  })),
+);
+
+const sourceSelectOptions = computed(() => consentSourceOptions);
+
+const decisionOptions = [
+  { value: true, label: 'Grant' },
+  { value: false, label: 'Withdraw / Deny' },
+];
+
+const selectedType = computed(
+  () => types.value.find((type) => type.uuid === form.consent_type_id) || null,
+);
+
+const selectedTypeHint = computed(() => {
+  const type = selectedType.value;
+  if (!type) {
+    return '';
+  }
+
+  return [
+    type.channel_label || type.channel,
+    type.current_version ? `Version ${type.current_version}` : null,
+    type.is_required ? 'Required' : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+});
+
+const canSubmit = computed(
+  () => Boolean(form.company_id && form.consent_type_id && form.subject_email),
+);
+
 onMounted(async () => {
   try {
     const [{ data: companyData }, { data: typeData }] = await Promise.all([
@@ -115,7 +197,16 @@ onMounted(async () => {
   }
 });
 
+function fieldError(key) {
+  const value = props.fieldErrors?.[key];
+  return Array.isArray(value) ? value[0] : value || '';
+}
+
 function onSubmit() {
+  if (!canSubmit.value || props.loading) {
+    return;
+  }
+
   emit('submit', {
     company_id: form.company_id,
     consent_type_id: form.consent_type_id,

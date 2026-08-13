@@ -44,6 +44,21 @@ class ComplianceCaseService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function statistics(?string $companyIdentifier = null): array
+    {
+        $companyId = null;
+
+        if (! blank($companyIdentifier)) {
+            $company = $this->companyRepository->findByIdentifierOrFail($companyIdentifier);
+            $companyId = $company->id;
+        }
+
+        return $this->complianceCaseRepository->statistics($companyId);
+    }
+
+    /**
      * @param  array<string, mixed>  $filters
      */
     public function list(array $filters = []): LengthAwarePaginator

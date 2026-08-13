@@ -51,6 +51,8 @@ class SupportSlaService
             $byStatus[$status->value] = (clone $ticketQuery)->where('sla_status', $status->value)->count();
         }
 
+        $perPage = max(1, min((int) ($filters['per_page'] ?? 10), 100));
+
         $timers = (clone $ticketQuery)
             ->with(['company:id,uuid,company_name', 'assignee:id,uuid,full_name', 'slaPolicy:id,uuid,name'])
             ->whereIn('sla_status', [
@@ -62,8 +64,12 @@ class SupportSlaService
             ->whereNull('resolved_at')
             ->orderByRaw("CASE sla_status WHEN 'breached' THEN 1 WHEN 'at_risk' THEN 2 WHEN 'paused' THEN 3 ELSE 4 END")
             ->orderBy('first_response_due_at')
-            ->limit(20)
-            ->get();
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                max(1, (int) ($filters['page'] ?? 1)),
+            );
 
         return [
             'statistics' => [
@@ -120,9 +126,16 @@ class SupportSlaService
             }
         }
 
+        $perPage = max(1, min((int) ($filters['per_page'] ?? 10), 100));
+
         $items = $query->orderByDesc('response_breached_at')
             ->orderByDesc('resolution_breached_at')
-            ->paginate((int) ($filters['per_page'] ?? 15));
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                max(1, (int) ($filters['page'] ?? 1)),
+            );
 
         return [
             'items' => $items,

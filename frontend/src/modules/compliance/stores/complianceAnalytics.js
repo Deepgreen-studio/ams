@@ -40,6 +40,10 @@ export const useComplianceAnalyticsStore = defineStore('complianceAnalytics', ()
   const audit = ref(null);
   const state = useAsyncState();
 
+  function resetFilters() {
+    filters.value = defaultRange();
+  }
+
   function params(overrides = {}) {
     return Object.fromEntries(
       Object.entries({ ...filters.value, ...overrides }).filter(([, v]) => v !== '' && v != null)
@@ -140,12 +144,13 @@ export const useComplianceAnalyticsStore = defineStore('complianceAnalytics', ()
       link.click();
       window.URL.revokeObjectURL(url);
       state.successMessage.value = `${format.toUpperCase()} export downloaded.`;
+      return 'downloaded';
     } catch (err) {
       if (format === 'pdf') {
-        state.error.value =
+        state.successMessage.value =
           err?.message ||
           'PDF export is architecture-ready. Use CSV or Excel, or print this page.';
-        return;
+        return 'pdf-ready';
       }
       state.applyError(err, 'Unable to export analytics');
       throw err;
@@ -162,6 +167,7 @@ export const useComplianceAnalyticsStore = defineStore('complianceAnalytics', ()
     consent,
     audit,
     ...state,
+    resetFilters,
     fetchDashboard,
     fetchRisks,
     fetchGdpr,

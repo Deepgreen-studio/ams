@@ -1,48 +1,69 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="GDPR reports"
-      description="Privacy request volume, resolution time, breaches, DPIA status, and related cases."
-    /> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+        :to="{ name: 'compliance.analytics.dashboard' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <Squares2X2Icon class="h-4 w-4" />
+        Overview
+      </RouterLink>
+    </Teleport>
+
     <ComplianceSubnav />
 
     <AnalyticsFilterBar
-      v-model="store.filters"
+      :model-value="store.filters"
       :exporting="store.exporting"
       @apply="onApply"
-      @export="(format) => store.exportReport(format, 'gdpr')"
+      @reset="onReset"
+      @export="onExport"
     />
 
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ store.error }}
-    </div>
-    <div
-      v-if="store.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ store.successMessage }}
+    <div v-if="store.loading && !hasData" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div v-for="n in 4" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div v-if="store.loading && !store.gdpr" class="h-48 animate-pulse rounded-xl bg-slate-100" />
+    <div
+      v-else-if="store.error && !hasData"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Unable to load GDPR report</p>
+      <p class="mt-1 text-xs text-slate-500">Refresh to try loading privacy and DPIA metrics again.</p>
+      <button
+        type="button"
+        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="reload"
+      >
+        Retry
+      </button>
+    </div>
 
-    <template v-else-if="store.gdpr">
-      <div class="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <template v-else-if="hasData">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <div
           v-for="card in cards"
           :key="card.label"
-          class="rounded-xl border border-slate-200 bg-white px-4 py-3"
+          class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
         >
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-          <p class="mt-1 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+          <div class="min-w-0">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+            <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+            <p v-if="card.hint" class="mt-1 text-xs text-slate-400">{{ card.hint }}</p>
+          </div>
+          <div
+            class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+            :class="card.iconBg"
+          >
+            <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+          </div>
         </div>
       </div>
 
       <div class="mb-4">
         <SimpleLineChart
           title="GDPR activity trends"
+          hint="Privacy, breaches, and DPIA volume"
           :labels="store.gdpr.trends?.labels || []"
           :series="trendSeries"
         />
@@ -62,7 +83,15 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { RouterLink } from 'vue-router';
+import {
+  ClockIcon,
+  DocumentMagnifyingGlassIcon,
+  IdentificationIcon,
+  ShieldExclamationIcon,
+  Squares2X2Icon,
+} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsFilterBar from '@/modules/compliance/components/AnalyticsFilterBar.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
@@ -70,16 +99,53 @@ import SimpleBarChart from '@/modules/compliance/components/SimpleBarChart.vue';
 import { useComplianceAnalyticsStore } from '@/modules/compliance/stores/complianceAnalytics';
 
 const store = useComplianceAnalyticsStore();
+const toast = useToast();
 
-const cards = computed(() => [
-  { label: 'Privacy requests', value: store.gdpr?.privacy_requests?.total ?? 0 },
-  {
-    label: 'Avg resolution (h)',
-    value: store.gdpr?.privacy_requests?.average_resolution_hours ?? 0,
-  },
-  { label: 'Data breaches', value: store.gdpr?.data_breaches?.total ?? 0 },
-  { label: 'DPIAs', value: store.gdpr?.dpia?.total ?? 0 },
-]);
+const hasData = computed(() => Boolean(store.gdpr));
+
+const cards = computed(() => {
+  const privacy = store.gdpr?.privacy_requests || {};
+  const breaches = store.gdpr?.data_breaches || {};
+  const dpia = store.gdpr?.dpia || {};
+  const privacyTotal = privacy.total ?? 0;
+  const breachTotal = breaches.total ?? 0;
+  const dpiaTotal = dpia.total ?? 0;
+
+  return [
+    {
+      label: 'Privacy requests',
+      value: privacyTotal,
+      hint: 'DSARs in the selected period',
+      icon: IdentificationIcon,
+      iconBg: privacyTotal ? 'bg-amber-50' : 'bg-zinc-100',
+      iconColor: privacyTotal ? 'text-amber-500' : 'text-slate-500',
+    },
+    {
+      label: 'Avg resolution',
+      value: `${privacy.average_resolution_hours ?? 0}h`,
+      hint: 'Completed request cycle time',
+      icon: ClockIcon,
+      iconBg: 'bg-sky-50',
+      iconColor: 'text-sky-500',
+    },
+    {
+      label: 'Data breaches',
+      value: breachTotal,
+      hint: 'Incidents in this period',
+      icon: ShieldExclamationIcon,
+      iconBg: breachTotal ? 'bg-rose-50' : 'bg-zinc-100',
+      iconColor: breachTotal ? 'text-rose-500' : 'text-slate-500',
+    },
+    {
+      label: 'DPIAs',
+      value: dpiaTotal,
+      hint: 'Assessments in this period',
+      icon: DocumentMagnifyingGlassIcon,
+      iconBg: dpiaTotal ? 'bg-brand-50' : 'bg-zinc-100',
+      iconColor: dpiaTotal ? 'text-brand-500' : 'text-slate-500',
+    },
+  ];
+});
 
 const trendSeries = computed(() => [
   { key: 'privacy', label: 'Privacy', values: store.gdpr?.trends?.privacy_requests || [] },
@@ -87,10 +153,43 @@ const trendSeries = computed(() => [
   { key: 'dpia', label: 'DPIA', values: store.gdpr?.trends?.dpia || [] },
 ]);
 
-function onApply(next) {
-  store.filters = { ...store.filters, ...next };
-  store.fetchGdpr();
+async function reload() {
+  try {
+    await store.fetchGdpr();
+  } catch {
+    toast.error(store.error || 'Unable to load GDPR report');
+    store.error = null;
+  }
 }
 
-onMounted(() => store.fetchGdpr());
+function onApply(next) {
+  store.filters = { ...store.filters, ...next };
+  reload();
+}
+
+function onReset() {
+  store.resetFilters();
+  reload();
+}
+
+async function onExport(format) {
+  try {
+    const result = await store.exportReport(format, 'gdpr');
+    if (result === 'pdf-ready') {
+      toast.info(store.successMessage || 'PDF export is architecture-ready.');
+    } else {
+      toast.success(store.successMessage || 'Export downloaded.');
+    }
+    store.successMessage = null;
+  } catch {
+    toast.error(store.error || 'Unable to export analytics');
+    store.error = null;
+  }
+}
+
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+  reload();
+});
 </script>

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Compliance\Repositories;
 
+use App\Domains\Compliance\Enums\BreachNotificationStatus;
 use App\Domains\Compliance\Models\BreachNotification;
 use App\Domains\Compliance\Models\DataBreach;
 use App\Shared\Repositories\BaseRepository;
@@ -122,5 +123,53 @@ class BreachNotificationRepository extends BaseRepository
         return $query->orderByDesc('created_at')
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function statistics(?int $companyId = null): array
+    {
+        $base = $this->model->newQuery();
+
+        if ($companyId !== null) {
+            $base->whereHas('dataBreach', function (Builder $builder) use ($companyId): void {
+                $builder->where('company_id', $companyId);
+            });
+        }
+
+        $byStatus = $base->clone()
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status')
+            ->all();
+
+        $byType = $base->clone()
+            ->selectRaw('notification_type, COUNT(*) as aggregate')
+            ->groupBy('notification_type')
+            ->pluck('aggregate', 'notification_type')
+            ->all();
+
+        $byChannel = $base->clone()
+            ->selectRaw('channel, COUNT(*) as aggregate')
+            ->groupBy('channel')
+            ->pluck('aggregate', 'channel')
+            ->all();
+
+        $draft = (int) (($byStatus[BreachNotificationStatus::Draft->value] ?? 0));
+        $queued = (int) (($byStatus[BreachNotificationStatus::Queued->value] ?? 0));
+
+        return [
+            'total' => (clone $base)->count(),
+            'draft' => $draft,
+            'queued' => $queued,
+            'sent' => (clone $base)->where('status', BreachNotificationStatus::Sent->value)->count(),
+            'failed' => (clone $base)->where('status', BreachNotificationStatus::Failed->value)->count(),
+            'acknowledged' => (clone $base)->where('status', BreachNotificationStatus::Acknowledged->value)->count(),
+            'pending' => $draft + $queued,
+            'by_status' => array_map('intval', $byStatus),
+            'by_type' => array_map('intval', $byType),
+            'by_channel' => array_map('intval', $byChannel),
+        ];
     }
 }

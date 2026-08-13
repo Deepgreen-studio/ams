@@ -59,6 +59,14 @@ class DataBreachService
     /**
      * @return array<string, mixed>
      */
+    public function statistics(?string $companyIdentifier = null): array
+    {
+        return $this->dataBreachRepository->statistics($this->resolveCompanyId($companyIdentifier));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function riskMatrix(?string $companyIdentifier = null): array
     {
         return $this->dataBreachRepository->riskMatrix($this->resolveCompanyId($companyIdentifier));
@@ -104,6 +112,16 @@ class DataBreachService
         }
 
         return $this->breachNotificationRepository->paginateFiltered($filters);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function notificationStatistics(?string $companyIdentifier = null): array
+    {
+        $companyId = $this->resolveCompanyId($companyIdentifier);
+
+        return $this->breachNotificationRepository->statistics($companyId);
     }
 
     public function find(string $identifier, bool $withTrashed = false): DataBreach

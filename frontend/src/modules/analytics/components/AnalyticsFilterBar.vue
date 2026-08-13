@@ -1,43 +1,56 @@
 <template>
-  <div class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
-    <div>
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">From</label>
-      <input v-model="local.from" type="date" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-    </div>
-    <div>
-      <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">To</label>
-      <input v-model="local.to" type="date" class="rounded-lg border border-slate-300 px-3 py-2 text-sm" />
-    </div>
-    <button
-      type="button"
-      class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-      @click="emit('apply', { ...local })"
-    >
-      Apply
-    </button>
-    <div class="ml-auto flex flex-wrap gap-2">
+  <div
+    class="mb-4 flex flex-col gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 sm:px-8 lg:flex-row lg:items-end lg:justify-between"
+  >
+    <form class="flex flex-wrap items-end gap-3" @submit.prevent="onApply">
+      <div>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">From</label>
+        <input v-model="local.from" type="date" class="input min-w-[10.5rem]" />
+      </div>
+      <div>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">To</label>
+        <input v-model="local.to" type="date" class="input min-w-[10.5rem]" />
+      </div>
+      <button
+        type="submit"
+        class="inline-flex h-12 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        Apply
+      </button>
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        class="inline-flex h-12 items-center rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        @click="onReset"
+      >
+        Reset
+      </button>
+    </form>
+    <div class="flex flex-wrap gap-2">
+      <button
+        type="button"
+        class="inline-flex h-12 items-center gap-2 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="exporting"
         @click="emit('export', 'csv')"
       >
+        <ArrowDownTrayIcon class="h-4 w-4" />
         Export CSV
       </button>
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        class="inline-flex h-12 items-center gap-2 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="exporting"
         @click="emit('export', 'excel')"
       >
+        <ArrowDownTrayIcon class="h-4 w-4" />
         Export Excel
       </button>
       <button
         type="button"
-        class="rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+        class="inline-flex h-12 items-center gap-2 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="exporting"
         @click="emit('export', 'pdf')"
       >
+        <DocumentArrowDownIcon class="h-4 w-4" />
         PDF Ready
       </button>
     </div>
@@ -46,13 +59,14 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import { ArrowDownTrayIcon, DocumentArrowDownIcon } from '@heroicons/vue/24/outline';
 
 const props = defineProps({
   modelValue: { type: Object, required: true },
   exporting: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['apply', 'export', 'update:modelValue']);
+const emit = defineEmits(['apply', 'export', 'reset', 'update:modelValue']);
 
 const local = reactive({
   from: props.modelValue.from || '',
@@ -67,6 +81,24 @@ watch(
     local.to = value.to || '';
     local.company = value.company || '';
   },
-  { deep: true }
+  { deep: true },
 );
+
+function onApply() {
+  const payload = { ...local };
+  emit('update:modelValue', payload);
+  emit('apply', payload);
+}
+
+function onReset() {
+  const to = new Date();
+  const from = new Date();
+  from.setDate(to.getDate() - 29);
+  local.from = from.toISOString().slice(0, 10);
+  local.to = to.toISOString().slice(0, 10);
+  local.company = '';
+  const payload = { ...local };
+  emit('update:modelValue', payload);
+  emit('reset', payload);
+}
 </script>

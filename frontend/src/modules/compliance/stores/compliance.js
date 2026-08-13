@@ -2,6 +2,20 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { complianceCaseService } from '@/modules/compliance/services/complianceCaseService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  case_type: '',
+  priority: '',
+  company: '',
+  overdue: '',
+  trashed: '',
+  sort_by: 'created_at',
+  sort_dir: 'desc',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -30,20 +44,12 @@ export const useComplianceStore = defineStore('compliance', () => {
   const statistics = ref(null);
   const recentActive = ref([]);
   const elevated = ref([]);
-  const filters = ref({
-    search: '',
-    status: '',
-    case_type: '',
-    priority: '',
-    company: '',
-    overdue: '',
-    trashed: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  });
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
+
+  function resetFilters() {
+    filters.value = defaultFilters();
+  }
 
   async function fetchDashboard(company = '') {
     state.loading.value = true;
@@ -73,6 +79,7 @@ export const useComplianceStore = defineStore('compliance', () => {
       const { data } = await complianceCaseService.list(params);
       cases.value = data.data?.cases?.items ?? [];
       meta.value = data.data?.cases?.meta ?? null;
+      statistics.value = data.data?.statistics ?? statistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load compliance cases');
       throw err;
@@ -167,6 +174,7 @@ export const useComplianceStore = defineStore('compliance', () => {
     elevated,
     filters,
     ...state,
+    resetFilters,
     fetchDashboard,
     fetchCases,
     fetchCase,

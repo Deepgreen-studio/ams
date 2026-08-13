@@ -1,91 +1,207 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Notification center"
-      description="Regulator, customer, internal, and affected-user breach notices."
-    /> -->
+    <Teleport defer to="#page-header-actions">
+      <RouterLink
+        :to="{ name: 'compliance.breaches.dashboard' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <Squares2X2Icon class="h-4 w-4" />
+        Dashboard
+      </RouterLink>
+      <RouterLink
+        v-if="can('compliance.create')"
+        :to="{ name: 'compliance.breaches.create' }"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        <PlusIcon class="h-4 w-4" />
+        Report incident
+      </RouterLink>
+    </Teleport>
+
     <ComplianceSubnav />
 
     <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+      v-if="store.loading && !store.notificationStatistics"
+      class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
     >
-      {{ store.error }}
+      <div v-for="n in 5" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div v-if="store.loading" class="space-y-3 p-6">
-        <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
-      </div>
-      <EmptyState
-        v-else-if="!store.notifications.length"
-        title="No notifications"
-        description="Breach notifications will appear here once drafted or sent."
-      />
-      <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-slate-200 text-sm">
-          <thead class="bg-slate-50">
-            <tr>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Breach</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Type</th>
-              <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 md:table-cell">Recipient</th>
-              <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
-              <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Sent</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="item in store.notifications" :key="item.uuid" class="hover:bg-slate-50/80">
-              <td class="px-4 py-3">
-                <RouterLink
-                  v-if="item.data_breach?.uuid"
-                  :to="{ name: 'compliance.breaches.show', params: { id: item.data_breach.uuid } }"
-                  class="font-medium text-brand-700 hover:underline"
-                >
-                  {{ item.data_breach.breach_number }}
-                </RouterLink>
-                <span v-else>—</span>
-              </td>
-              <td class="px-4 py-3 text-slate-600">
-                {{ item.notification_type_label || item.notification_type }}
-              </td>
-              <td class="hidden px-4 py-3 text-slate-600 md:table-cell">{{ item.recipient }}</td>
-              <td class="px-4 py-3 text-slate-900">{{ item.status_label || item.status }}</td>
-              <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">
-                {{ formatDate(item.sent_at) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div v-else class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div
+        v-for="card in cards"
+        :key="card.label"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
+      >
+        <div class="min-w-0">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+          <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+          <p v-if="card.hint" class="mt-1 text-xs text-slate-400">{{ card.hint }}</p>
+        </div>
+        <div
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+          :class="card.iconBg"
+        >
+          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+        </div>
       </div>
     </div>
 
-    <div class="mt-4">
-      <Pagination
-        :meta="store.notificationsMeta"
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
+        <BreachNotificationSearchFilters
+          :model-value="store.notificationFilters"
+          @submit="onFilter"
+          @reset="onReset"
+        />
+      </div>
+
+      <BreachNotificationTable
+        :notifications="store.notifications"
         :loading="store.loading"
-        @change="(page) => store.fetchNotifications({ page })"
-      />
+        :framed="false"
+      >
+        <template #empty-action>
+          <button
+            type="button"
+            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+            @click="onReset"
+          >
+            Reset filters
+          </button>
+          <RouterLink
+            :to="{ name: 'compliance.breaches.index' }"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          >
+            All incidents
+          </RouterLink>
+        </template>
+      </BreachNotificationTable>
+
+      <div v-if="store.notificationsMeta?.total" class="border-t border-zinc-100 px-6 py-4 sm:px-8">
+        <Pagination
+          :meta="store.notificationsMeta"
+          :loading="store.loading"
+          @change="onPageChange"
+          @per-page="onPerPage"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { RouterLink } from 'vue-router';
-import EmptyState from '@/components/ui/EmptyState.vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { computed, onMounted, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  EnvelopeIcon,
+  ExclamationTriangleIcon,
+  PaperAirplaneIcon,
+  PlusIcon,
+  Squares2X2Icon,
+} from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
+import { useToast } from '@/composables/useToast';
+import BreachNotificationSearchFilters from '@/modules/compliance/components/BreachNotificationSearchFilters.vue';
+import BreachNotificationTable from '@/modules/compliance/components/BreachNotificationTable.vue';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import { useDataBreachStore } from '@/modules/compliance/stores/breaches';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
+const route = useRoute();
 const store = useDataBreachStore();
+const { can } = usePermissions();
+const toast = useToast();
 
-onMounted(() => {
-  store.fetchNotifications({ per_page: 20, page: 1 });
+const cards = computed(() => {
+  const stats = store.notificationStatistics || {};
+  const sent = stats.sent ?? 0;
+  const pending = stats.pending ?? 0;
+  const failed = stats.failed ?? 0;
+  const acknowledged = stats.acknowledged ?? 0;
+
+  return [
+    {
+      label: 'Total',
+      value: stats.total ?? store.notificationsMeta?.total ?? 0,
+      hint: 'All drafted and sent notices',
+      icon: EnvelopeIcon,
+      iconBg: 'bg-brand-50',
+      iconColor: 'text-brand-500',
+    },
+    {
+      label: 'Sent',
+      value: sent,
+      hint: sent ? 'Delivered to recipients' : 'No notices sent yet',
+      icon: PaperAirplaneIcon,
+      iconBg: sent ? 'bg-emerald-50' : 'bg-zinc-100',
+      iconColor: sent ? 'text-emerald-500' : 'text-slate-500',
+    },
+    {
+      label: 'Pending',
+      value: pending,
+      hint: pending ? 'Draft or queued for send' : 'Nothing waiting to send',
+      icon: ClockIcon,
+      iconBg: pending ? 'bg-amber-50' : 'bg-zinc-100',
+      iconColor: pending ? 'text-amber-500' : 'text-slate-500',
+    },
+    {
+      label: 'Failed',
+      value: failed,
+      hint: failed ? 'Needs a retry or new draft' : 'No delivery failures',
+      icon: ExclamationTriangleIcon,
+      iconBg: failed ? 'bg-rose-50' : 'bg-emerald-50',
+      iconColor: failed ? 'text-rose-500' : 'text-emerald-500',
+    },
+    {
+      label: 'Acknowledged',
+      value: acknowledged,
+      hint: acknowledged ? 'Recipients confirmed receipt' : 'No acknowledgements yet',
+      icon: CheckCircleIcon,
+      iconBg: acknowledged ? 'bg-sky-50' : 'bg-zinc-100',
+      iconColor: acknowledged ? 'text-sky-500' : 'text-slate-500',
+    },
+  ];
 });
 
-function formatDate(value) {
-  if (!value) return '—';
-  return new Date(value).toLocaleString();
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
+
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+
+  const queryFilters = {};
+  ['status', 'notification_type', 'channel', 'search', 'company'].forEach((key) => {
+    if (route.query[key]) {
+      queryFilters[key] = String(route.query[key]);
+    }
+  });
+  store.fetchNotifications(queryFilters).catch(() => {});
+});
+
+function onFilter(filters) {
+  store.fetchNotifications(filters).catch(() => {});
+}
+
+function onReset() {
+  store.resetNotificationFilters();
+  store.fetchNotifications().catch(() => {});
+}
+
+function onPageChange(page) {
+  store.fetchNotifications({ page }).catch(() => {});
+}
+
+function onPerPage(perPage) {
+  store.fetchNotifications({ per_page: perPage, page: 1 }).catch(() => {});
 }
 </script>

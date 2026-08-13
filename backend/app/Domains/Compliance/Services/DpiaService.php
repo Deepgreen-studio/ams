@@ -56,6 +56,14 @@ class DpiaService
     /**
      * @return array<string, mixed>
      */
+    public function assessmentStatistics(?string $companyIdentifier = null): array
+    {
+        return $this->dpiaAssessmentRepository->statistics($this->resolveCompanyId($companyIdentifier));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     public function riskMatrix(?string $companyIdentifier = null): array
     {
         return $this->riskRegisterRepository->riskMatrix($this->resolveCompanyId($companyIdentifier));

@@ -1,113 +1,130 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="store.current?.title || 'Policy details'"
-      :description="store.current?.policy_number || 'Policy governance and approval workflow'"
-    >
-      <template #actions>
-        <RouterLink
-          v-if="store.current"
-          :to="{ name: 'compliance.policies.versions', params: { id: store.current.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Version timeline
-        </RouterLink>
-        <RouterLink
-          v-if="store.current"
-          :to="{ name: 'compliance.policies.compare', params: { id: store.current.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Compare versions
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          v-if="store.current"
-          :to="{ name: 'compliance.policies.versions', params: { id: store.current.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Version timeline
-        </RouterLink>
-        <RouterLink
-          v-if="store.current"
-          :to="{ name: 'compliance.policies.compare', params: { id: store.current.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Compare versions
-        </RouterLink>
+        v-if="policy"
+        :to="{ name: 'compliance.policies.versions', params: { id: policy.uuid } }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <ClockIcon class="h-4 w-4" />
+        Version timeline
+      </RouterLink>
+      <RouterLink
+        v-if="policy"
+        :to="{ name: 'compliance.policies.compare', params: { id: policy.uuid } }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <ArrowsRightLeftIcon class="h-4 w-4" />
+        Compare versions
+      </RouterLink>
     </Teleport>
 
     <ComplianceSubnav />
 
-    <div
-      v-if="store.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ store.successMessage }}
-    </div>
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ store.error }}
+    <div v-if="store.loading && !policy" class="grid gap-4 lg:grid-cols-3">
+      <div class="h-80 animate-pulse rounded-[12px] bg-zinc-100 lg:col-span-2" />
+      <div class="h-80 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <template v-if="store.current">
-      <div class="mb-4 flex flex-wrap gap-2">
-        <PolicyStatusBadge :status="store.current.status" :label="store.current.status_label" />
-        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-          {{ store.current.policy_type_label }}
-        </span>
-        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-          v{{ store.current.current_version }}
-        </span>
+    <div
+      v-else-if="!policy"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Unable to load this policy</p>
+      <p class="mt-1 text-xs text-slate-500">It may have been removed, or the request failed.</p>
+      <div class="mt-6 flex flex-wrap items-center justify-center gap-2">
+        <button
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          @click="reload"
+        >
+          Retry
+        </button>
+        <RouterLink
+          :to="{ name: 'compliance.policies.index' }"
+          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        >
+          Back to policies
+        </RouterLink>
       </div>
+    </div>
 
-      <div class="mb-4 grid gap-4 lg:grid-cols-3">
+    <div v-else class="space-y-4">
+      <section class="rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+        <div class="flex flex-wrap items-center gap-2">
+          <PolicyStatusBadge :status="policy.status" :label="policy.status_label" />
+          <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+            {{ policy.policy_type_label || policy.policy_type }}
+          </span>
+          <span class="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-medium text-slate-600">
+            v{{ policy.current_version ?? '—' }}
+          </span>
+        </div>
+        <h1 class="mt-3 text-lg font-semibold text-slate-900">{{ policy.title }}</h1>
+        <p class="mt-1 text-xs text-slate-500">
+          {{ policy.policy_number }}
+          <span v-if="policy.company?.company_name"> · {{ policy.company.company_name }}</span>
+        </p>
+      </section>
+
+      <div class="grid items-start gap-4 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
-          <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <h2 class="mb-3 text-sm font-semibold text-slate-900">Document</h2>
-            <p class="mb-4 text-sm text-slate-600">{{ store.current.description || 'No description' }}</p>
-            <div class="prose prose-sm max-w-none whitespace-pre-wrap text-slate-800">
-              {{ store.current.body || 'Empty body' }}
+          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+            <h2 class="text-base font-semibold text-slate-900">Document</h2>
+            <p class="mt-2 whitespace-pre-wrap text-sm text-slate-600">
+              {{ policy.description || 'No description provided.' }}
+            </p>
+            <div class="mt-5 whitespace-pre-wrap border-t border-zinc-100 pt-5 text-sm text-slate-800">
+              {{ policy.body || 'Empty body' }}
             </div>
-          </div>
+          </section>
 
-          <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <h2 class="mb-3 text-sm font-semibold text-slate-900">Edit (creates new version)</h2>
-            <PolicyForm
-              :initial="store.current"
-              :loading="store.saving"
-              :error="store.error || ''"
-              @submit="onUpdate"
-              @cancel="() => {}"
-            />
-          </div>
+          <section
+            v-if="can('compliance.update')"
+            class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+          >
+            <div class="border-b border-zinc-100 px-6 py-5">
+              <h2 class="text-base font-semibold text-slate-900">Edit (creates new version)</h2>
+              <p class="mt-0.5 text-xs text-slate-500">
+                Saving appends an immutable snapshot. It does not overwrite previous versions.
+              </p>
+            </div>
+            <div class="px-6 py-6">
+              <PolicyForm
+                :initial="policy"
+                :loading="store.saving"
+                :field-errors="store.fieldErrors"
+                @submit="onUpdate"
+                @cancel="() => {}"
+              />
+            </div>
+          </section>
         </div>
 
         <div class="space-y-4">
-          <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
-            <h2 class="text-sm font-semibold text-slate-900">Workflow</h2>
+          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+            <h2 class="text-base font-semibold text-slate-900">Workflow</h2>
+            <p class="mt-0.5 text-xs text-slate-500">Submit, approve, and publish this document</p>
+
             <button
-              v-if="store.current.status === 'draft'"
+              v-if="policy.status === 'draft' && can('compliance.update')"
               type="button"
-              class="w-full rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              class="mt-4 inline-flex h-11 w-full items-center justify-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="store.saving"
-              @click="onSubmit"
+              @click="onSubmitForReview"
             >
               Submit for review
             </button>
             <button
-              v-if="store.current.status === 'approved'"
+              v-if="policy.status === 'approved' && can('compliance.update')"
               type="button"
-              class="w-full rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-60"
+              class="mt-4 inline-flex h-11 w-full items-center justify-center rounded-[12px] bg-sky-600 px-5 text-sm font-medium text-white hover:bg-sky-700 disabled:opacity-60"
               :disabled="store.saving"
               @click="onPublish"
             >
               Publish
             </button>
-            <p v-if="store.current.status === 'review'" class="text-sm text-slate-600">
+            <p v-if="policy.status === 'review'" class="mt-4 text-sm text-slate-600">
               Awaiting approval. Reviewers use the
               <RouterLink
                 :to="{ name: 'compliance.policies.approvals' }"
@@ -116,28 +133,34 @@
                 approval queue
               </RouterLink>.
             </p>
-            <dl class="space-y-2 text-sm">
+
+            <dl class="mt-5 space-y-3 border-t border-zinc-100 pt-5">
               <div>
-                <dt class="text-slate-500">Company</dt>
-                <dd class="font-medium text-slate-900">
-                  {{ store.current.company?.company_name || '—' }}
+                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Company</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ policy.company?.company_name || '—' }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Review due</dt>
+                <dd
+                  class="mt-1 text-sm"
+                  :class="isReviewOverdue ? 'font-medium text-rose-600' : 'text-slate-900'"
+                >
+                  {{ policy.review_due_at || '—' }}
                 </dd>
               </div>
               <div>
-                <dt class="text-slate-500">Review due</dt>
-                <dd class="font-medium text-slate-900">{{ store.current.review_due_at || '—' }}</dd>
-              </div>
-              <div>
-                <dt class="text-slate-500">Published at</dt>
-                <dd class="font-medium text-slate-900">{{ store.current.published_at || '—' }}</dd>
+                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Published at</dt>
+                <dd class="mt-1 text-sm text-slate-900">{{ policy.published_at || '—' }}</dd>
               </div>
             </dl>
-          </div>
+          </section>
 
-          <div class="rounded-xl border border-slate-200 bg-white p-5 space-y-3">
-            <h2 class="text-sm font-semibold text-slate-900">CMS Version History</h2>
+          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+            <h2 class="text-base font-semibold text-slate-900">CMS version history</h2>
+            <p class="mt-0.5 text-xs text-slate-500">Link this policy to a content item</p>
+
             <template v-if="store.cmsLink.linked && store.cmsLink.content">
-              <p class="text-sm text-slate-600">
+              <p class="mt-4 text-sm text-slate-600">
                 Linked to
                 <RouterLink
                   :to="{ name: 'content.versions', params: { id: store.cmsLink.content.uuid } }"
@@ -147,78 +170,80 @@
                 </RouterLink>
                 (CMS v{{ store.cmsLink.content.version }})
               </p>
-              <ul class="divide-y divide-slate-100 text-sm">
+              <ul class="mt-3 divide-y divide-zinc-100 text-sm">
                 <li
                   v-for="item in store.cmsLink.versions.slice(0, 5)"
                   :key="item.uuid"
-                  class="flex justify-between py-2"
+                  class="flex justify-between py-2.5 first:pt-0"
                 >
-                  <span>CMS v{{ item.version }}</span>
+                  <span class="text-slate-900">CMS v{{ item.version }}</span>
                   <span class="text-slate-500">{{ item.status }}</span>
                 </li>
               </ul>
               <RouterLink
                 :to="{ name: 'content.versions', params: { id: store.cmsLink.content.uuid } }"
-                class="text-xs font-medium text-brand-700 hover:underline"
+                class="mt-2 inline-block text-xs font-medium text-brand-700 hover:underline"
               >
                 Open CMS timeline
               </RouterLink>
             </template>
             <template v-else>
-              <p class="text-sm text-slate-600">
+              <p class="mt-4 text-sm text-slate-600">
                 Link this policy to a CMS content item to share version history.
               </p>
-              <div class="flex gap-2">
+              <div v-if="can('compliance.update')" class="mt-3 flex gap-2">
                 <input
                   v-model="cmsContentId"
                   type="text"
                   class="input flex-1"
                   placeholder="CMS content UUID"
+                  :disabled="store.saving"
                 />
                 <button
                   type="button"
-                  class="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
-                  :disabled="store.saving || !cmsContentId"
+                  class="inline-flex h-11 items-center rounded-[12px] bg-brand-600 px-4 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+                  :disabled="store.saving || !cmsContentId.trim()"
                   @click="onLinkCms"
                 >
                   Link
                 </button>
               </div>
             </template>
-          </div>
+          </section>
 
-          <div class="rounded-xl border border-slate-200 bg-white p-5">
-            <h2 class="mb-3 text-sm font-semibold text-slate-900">Recent approvals</h2>
-            <EmptyState
-              v-if="!(store.current.approvals || []).length"
-              title="No approvals yet"
-              description="Submit for review to open the approval workflow."
-            />
-            <ul v-else class="divide-y divide-slate-100 text-sm">
+          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+            <h2 class="text-base font-semibold text-slate-900">Recent approvals</h2>
+            <p class="mt-0.5 text-xs text-slate-500">Decisions recorded against this document</p>
+            <div v-if="!(policy.approvals || []).length" class="py-8 text-center">
+              <p class="text-sm font-medium text-slate-900">No approvals yet</p>
+              <p class="mt-1 text-xs text-slate-500">Submit for review to open the approval workflow.</p>
+            </div>
+            <ul v-else class="mt-4 divide-y divide-zinc-100">
               <li
-                v-for="item in store.current.approvals"
+                v-for="item in policy.approvals"
                 :key="item.uuid"
-                class="flex items-center justify-between py-2"
+                class="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
               >
-                <div>
-                  <p class="font-medium text-slate-900">{{ item.status_label }}</p>
-                  <p class="text-xs text-slate-500">{{ item.comments || 'No comments' }}</p>
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-slate-900">{{ item.status_label }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">{{ item.comments || 'No comments' }}</p>
                 </div>
                 <PolicyStatusBadge :status="item.status" :label="item.status_label" />
               </li>
             </ul>
-          </div>
+          </section>
         </div>
       </div>
-    </template>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import EmptyState from '@/components/ui/EmptyState.vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { ArrowsRightLeftIcon, ClockIcon } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
+import { useToast } from '@/composables/useToast';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
 import PolicyForm from '@/modules/compliance/components/PolicyForm.vue';
 import PolicyStatusBadge from '@/modules/compliance/components/PolicyStatusBadge.vue';
@@ -226,27 +251,89 @@ import { usePolicyStore } from '@/modules/compliance/stores/policies';
 
 const route = useRoute();
 const store = usePolicyStore();
+const toast = useToast();
+const { can } = usePermissions();
 const cmsContentId = ref('');
 
-onMounted(async () => {
-  await store.fetchPolicy(route.params.id);
-  await store.fetchCmsVersions(route.params.id);
+const policy = computed(() => store.current);
+
+const isReviewOverdue = computed(() => {
+  const due = policy.value?.review_due_at;
+  if (!due) return false;
+  return new Date(due) < new Date();
+});
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (!message) return;
+    toast.success(message);
+    store.successMessage = null;
+  },
+);
+
+async function reload() {
+  try {
+    await store.fetchPolicy(route.params.id);
+    await store.fetchCmsVersions(route.params.id).catch(() => {});
+  } catch {
+    // Toast is shown from store.error.
+  }
+}
+
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+  reload();
 });
 
 async function onUpdate(payload) {
-  await store.updatePolicy(route.params.id, payload);
+  try {
+    await store.updatePolicy(route.params.id, payload);
+    toast.success(store.successMessage || 'Policy updated as a new version.');
+    store.successMessage = null;
+  } catch {
+    // Toast is shown from store.error.
+  }
 }
 
-async function onSubmit() {
-  await store.submitPolicy(route.params.id, { comments: 'Submitted from policy details' });
+async function onSubmitForReview() {
+  try {
+    await store.submitPolicy(route.params.id, { comments: 'Submitted from policy details' });
+    toast.success(store.successMessage || 'Policy submitted for review.');
+    store.successMessage = null;
+  } catch {
+    // Toast is shown from store.error.
+  }
 }
 
 async function onPublish() {
-  await store.publishPolicy(route.params.id);
+  try {
+    await store.publishPolicy(route.params.id);
+    toast.success(store.successMessage || 'Policy published successfully.');
+    store.successMessage = null;
+  } catch {
+    // Toast is shown from store.error.
+  }
 }
 
 async function onLinkCms() {
-  await store.linkCms(route.params.id, cmsContentId.value.trim());
-  cmsContentId.value = '';
+  try {
+    await store.linkCms(route.params.id, cmsContentId.value.trim());
+    toast.success(store.successMessage || 'CMS content linked successfully.');
+    store.successMessage = null;
+    cmsContentId.value = '';
+  } catch {
+    // Toast is shown from store.error.
+  }
 }
 </script>

@@ -83,6 +83,9 @@ class DataBreachController
 
         return ApiResponse::success([
             'notifications' => (new BreachNotificationCollection($notifications))->resolve(),
+            'statistics' => $this->dataBreachService->notificationStatistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 
@@ -110,6 +113,9 @@ class DataBreachController
 
         return ApiResponse::success([
             'breaches' => (new DataBreachCollection($breaches))->resolve(),
+            'statistics' => $this->dataBreachService->statistics(
+                $request->query('company') ?? $request->query('company_id')
+            ),
         ]);
     }
 

@@ -1,184 +1,204 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Policy documents"
-      description="Search privacy, terms, cookie, security, and internal governance documents."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'compliance.policies.dashboard' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Dashboard
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'compliance.policies.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          New policy
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'compliance.policies.dashboard' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Dashboard
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'compliance.policies.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          New policy
-        </RouterLink>
+        :to="{ name: 'compliance.policies.dashboard' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <Squares2X2Icon class="h-4 w-4" />
+        Dashboard
+      </RouterLink>
+      <RouterLink
+        v-if="can('compliance.create')"
+        :to="{ name: 'compliance.policies.create' }"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+      >
+        <PlusIcon class="h-4 w-4" />
+        New policy
+      </RouterLink>
     </Teleport>
 
     <ComplianceSubnav />
 
-    <div
-      v-if="store.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ store.error }}
+    <div v-if="store.loading && !store.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div v-for="n in 5" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <form
-      class="mb-4 grid gap-3 rounded-xl border border-slate-200 bg-white p-4 md:grid-cols-4"
-      @submit.prevent="onFilter"
-    >
-      <input
-        v-model="local.search"
-        type="search"
-        class="input md:col-span-2"
-        placeholder="Search title or policy number"
-      />
-      <select v-model="local.status" class="input">
-        <option value="">All statuses</option>
-        <option value="draft">Draft</option>
-        <option value="review">Review</option>
-        <option value="approved">Approved</option>
-        <option value="published">Published</option>
-        <option value="archived">Archived</option>
-      </select>
-      <select v-model="local.policy_type" class="input">
-        <option value="">All types</option>
-        <option value="privacy_policy">Privacy Policy</option>
-        <option value="terms">Terms & Conditions</option>
-        <option value="cookie_policy">Cookie Policy</option>
-        <option value="security_policy">Security Policy</option>
-        <option value="internal_policy">Internal Policy</option>
-        <option value="employee_handbook">Employee Handbook</option>
-        <option value="compliance_document">Compliance Document</option>
-      </select>
-      <div class="flex gap-2 md:col-span-4">
-        <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white">
-          Filter
-        </button>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700"
-          @click="onReset"
-        >
-          Reset
-        </button>
-      </div>
-    </form>
-
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      <div v-if="store.loading" class="space-y-3 p-6">
-        <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
-      </div>
-      <EmptyState
-        v-else-if="!store.policies.length"
-        title="No policies found"
-        description="Create a policy document to start governance."
+    <div v-else class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div
+        v-for="card in cards"
+        :key="card.label"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
       >
-        <template #action>
+        <div class="min-w-0">
+          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
+          <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
+          <p v-if="card.hint" class="mt-1 text-xs text-slate-400">{{ card.hint }}</p>
+        </div>
+        <div
+          class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+          :class="card.iconBg"
+        >
+          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
+        </div>
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
+        <PolicySearchFilters
+          :model-value="store.filters"
+          @submit="onFilter"
+          @reset="onReset"
+        />
+      </div>
+
+      <PolicyTable
+        :policies="store.policies"
+        :loading="store.loading"
+        :framed="false"
+      >
+        <template #empty-action>
+          <button
+            type="button"
+            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+            @click="onReset"
+          >
+            Reset filters
+          </button>
           <RouterLink
+            v-if="can('compliance.create')"
             :to="{ name: 'compliance.policies.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
           >
             New policy
           </RouterLink>
         </template>
-      </EmptyState>
-      <table v-else class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Policy</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Type</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Version</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
-            <th class="px-4 py-3 text-right font-semibold text-slate-600">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in store.policies" :key="item.uuid">
-            <td class="px-4 py-3">
-              <p class="font-medium text-slate-900">{{ item.title }}</p>
-              <p class="text-xs text-slate-500">{{ item.policy_number }}</p>
-            </td>
-            <td class="px-4 py-3 text-slate-600">{{ item.policy_type_label }}</td>
-            <td class="px-4 py-3 text-slate-600">v{{ item.current_version }}</td>
-            <td class="px-4 py-3">
-              <PolicyStatusBadge :status="item.status" :label="item.status_label" />
-            </td>
-            <td class="px-4 py-3 text-right">
-              <RouterLink
-                :to="{ name: 'compliance.policies.show', params: { id: item.uuid } }"
-                class="font-medium text-brand-700 hover:underline"
-              >
-                Open
-              </RouterLink>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      </PolicyTable>
 
-    <div class="mt-4">
-      <Pagination
-        :meta="store.meta"
-        :loading="store.loading"
-        @change="(page) => store.fetchPolicies({ page })"
-      />
+      <div v-if="store.meta?.total" class="border-t border-zinc-100 px-6 py-4 sm:px-8">
+        <Pagination
+          :meta="store.meta"
+          :loading="store.loading"
+          @change="onPageChange"
+          @per-page="onPerPage"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive } from 'vue';
-import { RouterLink } from 'vue-router';
-import EmptyState from '@/components/ui/EmptyState.vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { computed, onMounted, watch } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  DocumentTextIcon,
+  ExclamationTriangleIcon,
+  PlusIcon,
+  Squares2X2Icon,
+} from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
+import { useToast } from '@/composables/useToast';
 import ComplianceSubnav from '@/modules/compliance/components/ComplianceSubnav.vue';
-import PolicyStatusBadge from '@/modules/compliance/components/PolicyStatusBadge.vue';
+import PolicySearchFilters from '@/modules/compliance/components/PolicySearchFilters.vue';
+import PolicyTable from '@/modules/compliance/components/PolicyTable.vue';
 import { usePolicyStore } from '@/modules/compliance/stores/policies';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
+const route = useRoute();
 const store = usePolicyStore();
-const local = reactive({
-  search: '',
-  status: '',
-  policy_type: '',
+const { can } = usePermissions();
+const toast = useToast();
+
+const cards = computed(() => {
+  const stats = store.statistics || {};
+  const review = stats.review ?? 0;
+  const published = stats.published ?? 0;
+  const overdue = stats.review_overdue ?? 0;
+  const draft = stats.draft ?? 0;
+
+  return [
+    {
+      label: 'Total',
+      value: stats.total ?? store.meta?.total ?? 0,
+      hint: 'All governed documents',
+      icon: DocumentTextIcon,
+      iconBg: 'bg-brand-50',
+      iconColor: 'text-brand-500',
+    },
+    {
+      label: 'Draft',
+      value: draft,
+      hint: draft ? 'Still being authored' : 'No drafts',
+      icon: DocumentTextIcon,
+      iconBg: 'bg-zinc-100',
+      iconColor: 'text-slate-500',
+    },
+    {
+      label: 'In review',
+      value: review,
+      hint: review ? 'Waiting for approval' : 'No reviews outstanding',
+      icon: ClockIcon,
+      iconBg: review ? 'bg-amber-50' : 'bg-zinc-100',
+      iconColor: review ? 'text-amber-500' : 'text-slate-500',
+    },
+    {
+      label: 'Published',
+      value: published,
+      hint: published ? 'Live governed documents' : 'Nothing published yet',
+      icon: CheckCircleIcon,
+      iconBg: published ? 'bg-sky-50' : 'bg-zinc-100',
+      iconColor: published ? 'text-sky-500' : 'text-slate-500',
+    },
+    {
+      label: 'Review overdue',
+      value: overdue,
+      hint: overdue ? 'Past scheduled review date' : 'All reviews on time',
+      icon: ExclamationTriangleIcon,
+      iconBg: overdue ? 'bg-rose-50' : 'bg-emerald-50',
+      iconColor: overdue ? 'text-rose-500' : 'text-emerald-500',
+    },
+  ];
 });
 
-onMounted(() => store.fetchPolicies());
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
 
-function onFilter() {
-  store.fetchPolicies({ ...local, page: 1 });
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+
+  const queryFilters = {};
+  ['status', 'policy_type', 'search', 'company'].forEach((key) => {
+    if (route.query[key]) {
+      queryFilters[key] = String(route.query[key]);
+    }
+  });
+  store.fetchPolicies(queryFilters).catch(() => {});
+});
+
+function onFilter(filters) {
+  store.fetchPolicies(filters).catch(() => {});
 }
 
 function onReset() {
-  local.search = '';
-  local.status = '';
-  local.policy_type = '';
-  store.fetchPolicies({
-    search: '',
-    status: '',
-    policy_type: '',
-    page: 1,
-  });
+  store.resetFilters();
+  store.fetchPolicies().catch(() => {});
+}
+
+function onPageChange(page) {
+  store.fetchPolicies({ page }).catch(() => {});
+}
+
+function onPerPage(perPage) {
+  store.fetchPolicies({ per_page: perPage, page: 1 }).catch(() => {});
 }
 </script>

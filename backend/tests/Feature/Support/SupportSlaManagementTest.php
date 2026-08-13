@@ -133,9 +133,24 @@ class SupportSlaManagementTest extends TestCase
         $this->assertSame(SupportSlaStatus::Breached, $ticket->sla_status);
         $this->assertNotNull($ticket->response_breached_at);
 
-        $this->getJson('/api/v1/support/sla/escalations')
+        $this->getJson('/api/v1/support/sla/escalations?per_page=1&page=1')
             ->assertOk()
-            ->assertJsonPath('success', true);
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.escalations.meta.per_page', 1)
+            ->assertJsonPath('data.escalations.meta.current_page', 1)
+            ->assertJsonStructure([
+                'data' => [
+                    'escalations' => [
+                        'items',
+                        'meta' => [
+                            'current_page',
+                            'last_page',
+                            'per_page',
+                            'total',
+                        ],
+                    ],
+                ],
+            ]);
 
         $this->assertDatabaseHas('support_sla_escalations', [
             'support_ticket_id' => $ticket->id,
@@ -167,13 +182,46 @@ class SupportSlaManagementTest extends TestCase
                         'breached',
                         'escalations',
                     ],
-                    'timers',
+                    'timers' => [
+                        'items',
+                        'meta' => [
+                            'current_page',
+                            'last_page',
+                            'per_page',
+                            'total',
+                        ],
+                    ],
                 ],
             ]);
 
-        $this->getJson('/api/v1/support/sla/violations')
+        $this->getJson('/api/v1/support/sla/dashboard?per_page=1&page=1')
             ->assertOk()
-            ->assertJsonPath('success', true);
+            ->assertJsonPath('data.timers.meta.per_page', 1)
+            ->assertJsonPath('data.timers.meta.current_page', 1);
+
+        $this->getJson('/api/v1/support/sla/violations?per_page=1&page=1')
+            ->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.violations.meta.per_page', 1)
+            ->assertJsonPath('data.violations.meta.current_page', 1)
+            ->assertJsonStructure([
+                'data' => [
+                    'summary' => [
+                        'total',
+                        'response',
+                        'resolution',
+                    ],
+                    'violations' => [
+                        'items',
+                        'meta' => [
+                            'current_page',
+                            'last_page',
+                            'per_page',
+                            'total',
+                        ],
+                    ],
+                ],
+            ]);
     }
 
     public function test_waiting_for_customer_pauses_sla(): void

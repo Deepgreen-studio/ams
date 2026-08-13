@@ -65,6 +65,11 @@ class PolicyDocumentManagementTest extends TestCase
         $this->assertStringStartsWith('POL-', $create->json('data.policy.policy_number'));
         $this->assertSame(1, PolicyVersion::query()->where('policy_id', $create->json('data.policy.id'))->count());
 
+        $this->getJson('/api/v1/compliance/policies')
+            ->assertOk()
+            ->assertJsonPath('data.statistics.total', 1)
+            ->assertJsonPath('data.statistics.draft', 1);
+
         $this->putJson('/api/v1/compliance/policies/'.$uuid, [
             'body' => 'Version two body',
             'change_summary' => 'Clarified retention language',
@@ -121,6 +126,10 @@ class PolicyDocumentManagementTest extends TestCase
         ])
             ->assertOk()
             ->assertJsonPath('data.policy.status', 'review');
+
+        $this->getJson('/api/v1/compliance/policies/approvals?status=pending')
+            ->assertOk()
+            ->assertJsonPath('data.statistics.pending', 1);
 
         $approval = PolicyApproval::query()->where('policy_id', $policy->id)->where('status', 'pending')->firstOrFail();
 

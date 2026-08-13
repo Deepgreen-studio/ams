@@ -28,7 +28,11 @@ class LoginHistoryRepository extends BaseRepository
                 $builder->where('ip_address', 'like', "%{$search}%")
                     ->orWhere('browser', 'like', "%{$search}%")
                     ->orWhere('device', 'like', "%{$search}%")
-                    ->orWhere('operating_system', 'like', "%{$search}%");
+                    ->orWhere('operating_system', 'like', "%{$search}%")
+                    ->orWhereHas('user', function (Builder $userQuery) use ($search): void {
+                        $userQuery->where('full_name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
             });
         }
 

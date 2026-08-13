@@ -2,6 +2,29 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { dataBreachService } from '@/modules/compliance/services/dataBreachService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  severity: '',
+  breach_type: '',
+  risk_level: '',
+  company: '',
+  sort_by: 'created_at',
+  sort_dir: 'desc',
+  per_page: 10,
+  page: 1,
+});
+
+const defaultNotificationFilters = () => ({
+  search: '',
+  status: '',
+  notification_type: '',
+  channel: '',
+  company: '',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -35,19 +58,18 @@ export const useDataBreachStore = defineStore('dataBreaches', () => {
   const reports = ref(null);
   const notifications = ref([]);
   const notificationsMeta = ref(null);
-  const filters = ref({
-    search: '',
-    status: '',
-    severity: '',
-    breach_type: '',
-    risk_level: '',
-    company: '',
-    sort_by: 'created_at',
-    sort_dir: 'desc',
-    per_page: 10,
-    page: 1,
-  });
+  const notificationStatistics = ref(null);
+  const notificationFilters = ref(defaultNotificationFilters());
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
+
+  function resetFilters() {
+    filters.value = defaultFilters();
+  }
+
+  function resetNotificationFilters() {
+    notificationFilters.value = defaultNotificationFilters();
+  }
 
   async function fetchDashboard(company = '') {
     state.loading.value = true;
@@ -101,13 +123,15 @@ export const useDataBreachStore = defineStore('dataBreaches', () => {
   async function fetchNotifications(overrides = {}) {
     state.loading.value = true;
     state.clearMessages();
+    notificationFilters.value = { ...notificationFilters.value, ...overrides };
     try {
       const params = Object.fromEntries(
-        Object.entries(overrides).filter(([, v]) => v !== '' && v != null)
+        Object.entries(notificationFilters.value).filter(([, v]) => v !== '' && v != null)
       );
       const { data } = await dataBreachService.notifications(params);
       notifications.value = data.data?.notifications?.items ?? [];
       notificationsMeta.value = data.data?.notifications?.meta ?? null;
+      notificationStatistics.value = data.data?.statistics ?? notificationStatistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load notification center');
       throw err;
@@ -127,6 +151,7 @@ export const useDataBreachStore = defineStore('dataBreaches', () => {
       const { data } = await dataBreachService.list(params);
       breaches.value = data.data?.breaches?.items ?? [];
       meta.value = data.data?.breaches?.meta ?? null;
+      statistics.value = data.data?.statistics ?? statistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load data breaches');
       throw err;
@@ -204,8 +229,12 @@ export const useDataBreachStore = defineStore('dataBreaches', () => {
     reports,
     notifications,
     notificationsMeta,
+    notificationStatistics,
+    notificationFilters,
     filters,
     ...state,
+    resetFilters,
+    resetNotificationFilters,
     fetchDashboard,
     fetchRiskMatrix,
     fetchReports,

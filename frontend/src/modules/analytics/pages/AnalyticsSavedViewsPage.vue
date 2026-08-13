@@ -1,26 +1,15 @@
 <template>
   <div>
-    <!-- <PageHeader title="Saved Views" description="Reusable filter presets for enterprise analytics dashboards.">
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="showCreate = true"
-        >
-          Save current filters
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="showCreate = true"
-        >
-          Save current filters
-        </button>
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="store.saving"
+        @click="showCreate = true"
+      >
+        <BookmarkIcon class="h-4 w-4" />
+        Save current filters
+      </button>
     </Teleport>
 
     <AnalyticsSubnav />
@@ -32,25 +21,38 @@
       @reset="onApply"
     />
 
-    <div v-if="store.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-      {{ store.successMessage }}
-    </div>
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
+    <div v-if="store.loading && !store.savedViews.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div v-for="n in 3" :key="n" class="h-48 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+    <EmptyState
+      v-else-if="!store.savedViews.length"
+      title="No saved views yet"
+      description="Save your current date and category filters to reuse them later."
+    >
+      <template #action>
+        <button
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          @click="showCreate = true"
+        >
+          Save current filters
+        </button>
+      </template>
+    </EmptyState>
+
+    <div v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       <div
         v-for="item in store.savedViews"
         :key="item.uuid"
-        class="rounded-xl border border-slate-200 bg-white p-4"
+        class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
       >
         <div class="flex items-start justify-between gap-3">
           <div>
             <h3 class="text-sm font-semibold text-slate-900">{{ item.name }}</h3>
             <p class="mt-1 text-xs text-slate-500 capitalize">{{ item.category }}</p>
           </div>
-          <span class="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium uppercase text-slate-600">
+          <span class="rounded-md bg-zinc-100 px-2 py-1 text-[11px] font-medium uppercase text-slate-600">
             saved view
           </span>
         </div>
@@ -68,29 +70,22 @@
             <dd class="capitalize">{{ item.filters?.category || 'all' }}</dd>
           </div>
         </dl>
-        <div class="mt-4 flex gap-3">
+        <div class="mt-4 flex gap-2">
           <RouterLink
             :to="{ name: 'analytics.dashboards.show', params: { uuid: item.uuid } }"
-            class="text-sm font-medium text-brand-700 hover:underline"
+            class="rounded-[12px] px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50"
           >
             Open
           </RouterLink>
           <button
             v-if="!item.is_system"
             type="button"
-            class="text-sm font-medium text-rose-600 hover:underline"
-            @click="onDelete(item)"
+            class="rounded-[12px] px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50"
+            @click="pendingDelete = item"
           >
             Delete
           </button>
         </div>
-      </div>
-
-      <div
-        v-if="!store.loading && !store.savedViews.length"
-        class="col-span-full rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-sm text-slate-500"
-      >
-        No saved views yet. Save your current date and category filters to reuse them later.
       </div>
     </div>
 
@@ -99,28 +94,31 @@
       class="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/40 p-4"
       @click.self="showCreate = false"
     >
-      <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
-        <h3 class="text-lg font-semibold text-slate-900">Save view</h3>
-        <form class="mt-4 space-y-3" @submit.prevent="onCreate">
+      <div class="w-full max-w-lg overflow-hidden rounded-[12px] bg-white shadow-xl ring-1 ring-zinc-100">
+        <div class="border-b border-zinc-100 px-6 py-5">
+          <h3 class="text-base font-semibold text-slate-900">Save view</h3>
+          <p class="mt-0.5 text-xs text-slate-500">Store the current date range and category as a reusable preset.</p>
+        </div>
+        <form class="space-y-4 px-6 py-5" @submit.prevent="onCreate">
           <div>
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Name</label>
-            <input v-model="form.name" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />
+            <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Name</label>
+            <input v-model="form.name" required class="input" />
           </div>
           <div>
-            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
-            <select v-model="form.category" class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm">
-              <option v-for="category in store.categories" :key="category.value" :value="category.value">
-                {{ category.label }}
-              </option>
-            </select>
+            <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
+            <SelectBox v-model="form.category" :options="categoryOptions" />
           </div>
-          <div class="flex justify-end gap-2 pt-2">
-            <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm" @click="showCreate = false">
+          <div class="flex justify-end gap-2 border-t border-zinc-100 pt-4">
+            <button
+              type="button"
+              class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              @click="showCreate = false"
+            >
               Cancel
             </button>
             <button
               type="submit"
-              class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+              class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="store.saving"
             >
               Save view
@@ -129,23 +127,63 @@
         </form>
       </div>
     </div>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingDelete)"
+      title="Delete saved view"
+      :message="`Delete saved view “${pendingDelete?.name}”? This cannot be undone.`"
+      confirm-label="Delete"
+      :loading="store.saving"
+      @cancel="pendingDelete = null"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { BookmarkIcon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const store = useEnterpriseAnalyticsStore();
+const toast = useToast();
 const showCreate = ref(false);
+const pendingDelete = ref(null);
 const form = reactive({
   name: '',
   category: 'operational',
 });
+
+const categoryOptions = computed(() =>
+  store.categories.length
+    ? store.categories
+    : [{ value: 'operational', label: 'Operational Analytics' }]
+);
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (!message) return;
+    toast.success(message);
+    store.successMessage = null;
+  },
+);
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
 
 function onApply(next) {
   store.filters = { ...store.filters, ...next };
@@ -168,12 +206,19 @@ async function onCreate() {
   await store.fetchSavedViews();
 }
 
-async function onDelete(item) {
-  if (!window.confirm(`Delete saved view "${item.name}"?`)) return;
-  await store.deleteDashboard(item.uuid);
+async function confirmDelete() {
+  if (!pendingDelete.value) return;
+  try {
+    await store.deleteDashboard(pendingDelete.value.uuid);
+    pendingDelete.value = null;
+  } catch {
+    pendingDelete.value = null;
+  }
 }
 
 onMounted(async () => {
+  store.successMessage = null;
+  store.error = null;
   if (!store.categories.length) {
     await store.fetchOverview();
   }

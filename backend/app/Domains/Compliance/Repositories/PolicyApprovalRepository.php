@@ -99,6 +99,28 @@ class PolicyApprovalRepository extends BaseRepository
             ->withQueryString();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    public function statistics(?int $companyId = null): array
+    {
+        $base = $this->model->newQuery();
+
+        if ($companyId !== null) {
+            $base->whereHas('policy', function (Builder $builder) use ($companyId): void {
+                $builder->where('company_id', $companyId);
+            });
+        }
+
+        return [
+            'total' => (clone $base)->count(),
+            'pending' => (clone $base)->where('status', PolicyApprovalStatus::Pending->value)->count(),
+            'approved' => (clone $base)->where('status', PolicyApprovalStatus::Approved->value)->count(),
+            'rejected' => (clone $base)->where('status', PolicyApprovalStatus::Rejected->value)->count(),
+            'cancelled' => (clone $base)->where('status', PolicyApprovalStatus::Cancelled->value)->count(),
+        ];
+    }
+
     public function cancelPendingForPolicy(int $policyId): void
     {
         $this->model->newQuery()

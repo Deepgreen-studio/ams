@@ -1,48 +1,93 @@
 <template>
   <div>
-    <!-- <PageHeader title="Risk Indicators" description="Composite risk score and severity indicators across security signals." /> -->
     <AnalyticsSubnav />
-    <SecurityAnalyticsSubnav />
 
-    <div class="mb-4 flex flex-wrap items-end gap-3 rounded-xl border border-slate-200 bg-white p-4">
-      <label class="text-sm text-slate-600">
-        From
-        <input v-model="filters.from" type="date" class="mt-1 block rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-      </label>
-      <label class="text-sm text-slate-600">
-        To
-        <input v-model="filters.to" type="date" class="mt-1 block rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-      </label>
-      <button type="button" class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white" @click="load">Apply</button>
+    <EnterpriseFilterBar v-model="filters" :show-category="false" @apply="onApply" @reset="onApply" />
+
+    <div v-if="store.loading && !data" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div v-for="n in 6" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
+    <div
+      v-else-if="store.error && !data"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Unable to load risk indicators</p>
+      <p class="mt-1 text-xs text-slate-500">Refresh to try loading the composite risk score again.</p>
+      <button
+        type="button"
+        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="load"
+      >
+        Retry
+      </button>
     </div>
 
-    <div v-if="store.loading && !data" class="h-40 animate-pulse rounded-xl bg-slate-100" />
     <template v-else-if="data">
-      <div class="mb-6 rounded-xl border border-slate-200 bg-white p-6">
-        <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Overall risk</p>
-        <div class="mt-2 flex items-end gap-4">
-          <p class="text-5xl font-semibold text-slate-900">{{ data.score ?? 0 }}</p>
-          <p class="mb-1 text-lg font-medium capitalize" :class="levelClass">{{ data.level }}</p>
+      <div
+        class="mb-4 flex items-start gap-3 rounded-[12px] px-4 py-3 text-sm"
+        :class="healthTone"
+      >
+        <component :is="healthIcon" class="mt-0.5 h-5 w-5 shrink-0" />
+        <p>{{ healthMessage }}</p>
+      </div>
+
+      <div class="mb-4 grid gap-4 sm:grid-cols-2">
+        <div class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+          <div class="min-w-0">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Overall risk</p>
+            <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ formatNumber(data.score ?? 0) }}</p>
+            <p class="mt-1 text-xs capitalize text-slate-400">{{ data.level || 'healthy' }} posture</p>
+          </div>
+          <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]" :class="scoreIconBg">
+            <ChartBarIcon class="h-5 w-5" :class="scoreIconColor" />
+          </div>
+        </div>
+        <div class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+          <div class="min-w-0">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Indicators</p>
+            <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">
+              {{ formatNumber((data.indicators || []).length) }}
+            </p>
+            <p class="mt-1 text-xs text-slate-400">Signals contributing to the score</p>
+          </div>
+          <div class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] bg-zinc-100">
+            <ShieldExclamationIcon class="h-5 w-5 text-slate-500" />
+          </div>
         </div>
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div
+        v-if="!(data.indicators || []).length"
+        class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+      >
+        <p class="text-sm font-medium text-slate-900">No risk indicators</p>
+        <p class="mt-1 text-xs text-slate-500">Security signals will appear here once activity is recorded.</p>
+      </div>
+      <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <div
-          v-for="item in data.indicators || []"
+          v-for="item in data.indicators"
           :key="item.key"
-          class="rounded-xl border border-slate-200 bg-white p-4"
+          class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 transition hover:ring-brand-200"
         >
-          <div class="flex items-start justify-between gap-2">
-            <p class="text-sm font-medium text-slate-800">{{ item.label }}</p>
-            <span class="rounded-full px-2 py-0.5 text-xs font-medium capitalize" :class="badgeClass(item.severity)">
-              {{ item.severity }}
-            </span>
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-2">
+              <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ item.label }}</p>
+              <span
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium capitalize ring-1 ring-inset"
+                :class="badgeClass(item.severity)"
+              >
+                {{ item.severity }}
+              </span>
+            </div>
+            <p class="mt-1 truncate text-2xl font-bold tracking-tight text-slate-900">{{ formatNumber(item.value) }}</p>
           </div>
-          <p class="mt-3 text-3xl font-semibold text-slate-900">{{ item.value }}</p>
+          <div
+            class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
+            :class="indicatorIconBg(item.severity)"
+          >
+            <ExclamationTriangleIcon class="h-5 w-5" :class="indicatorIconColor(item.severity)" />
+          </div>
         </div>
       </div>
     </template>
@@ -50,13 +95,20 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { computed, onMounted, reactive, watch } from 'vue';
+import {
+  ChartBarIcon,
+  ExclamationTriangleIcon,
+  ShieldCheckIcon,
+  ShieldExclamationIcon,
+} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
-import SecurityAnalyticsSubnav from '@/modules/analytics/components/SecurityAnalyticsSubnav.vue';
+import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
 import { useSecurityAnalyticsStore } from '@/modules/analytics/stores/securityAnalytics';
 
 const store = useSecurityAnalyticsStore();
+const toast = useToast();
 const data = computed(() => store.risk);
 
 const filters = reactive({
@@ -64,27 +116,109 @@ const filters = reactive({
   to: new Date().toISOString().slice(0, 10),
 });
 
-const levelClass = computed(() => {
-  const level = (data.value?.level || '').toLowerCase();
-  if (level === 'critical' || level === 'high') return 'text-rose-600';
-  if (level === 'medium' || level === 'elevated') return 'text-amber-600';
-  return 'text-emerald-600';
+const riskLevel = computed(() => (data.value?.level || '').toLowerCase());
+
+const healthMessage = computed(() => {
+  const level = data.value?.level || 'healthy';
+  const score = data.value?.score ?? 0;
+  if (riskLevel.value === 'critical' || riskLevel.value === 'high') {
+    return `Composite risk is ${level} (score ${score}). Review elevated indicators below.`;
+  }
+  if (riskLevel.value === 'medium' || riskLevel.value === 'elevated') {
+    return `Composite risk is ${level} (score ${score}). Monitor warning-level indicators.`;
+  }
+  return `Composite risk is ${level} (score ${score}).`;
 });
+
+const healthTone = computed(() => {
+  if (riskLevel.value === 'critical' || riskLevel.value === 'high') {
+    return 'bg-rose-50 text-rose-800 ring-1 ring-rose-100';
+  }
+  if (riskLevel.value === 'medium' || riskLevel.value === 'elevated') {
+    return 'bg-amber-50 text-amber-800 ring-1 ring-amber-100';
+  }
+  return 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100';
+});
+
+const healthIcon = computed(() => {
+  if (riskLevel.value === 'critical' || riskLevel.value === 'high') {
+    return ShieldExclamationIcon;
+  }
+  if (riskLevel.value === 'medium' || riskLevel.value === 'elevated') {
+    return ExclamationTriangleIcon;
+  }
+  return ShieldCheckIcon;
+});
+
+const scoreIconBg = computed(() => {
+  if (riskLevel.value === 'critical' || riskLevel.value === 'high') return 'bg-rose-50';
+  if (riskLevel.value === 'medium' || riskLevel.value === 'elevated') return 'bg-amber-50';
+  return 'bg-emerald-50';
+});
+
+const scoreIconColor = computed(() => {
+  if (riskLevel.value === 'critical' || riskLevel.value === 'high') return 'text-rose-500';
+  if (riskLevel.value === 'medium' || riskLevel.value === 'elevated') return 'text-amber-500';
+  return 'text-emerald-500';
+});
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message || !store.risk) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
 
 function badgeClass(severity) {
   const map = {
-    critical: 'bg-rose-100 text-rose-700',
-    high: 'bg-rose-50 text-rose-700',
-    warning: 'bg-amber-50 text-amber-700',
-    info: 'bg-sky-50 text-sky-700',
-    ok: 'bg-emerald-50 text-emerald-700',
+    critical: 'bg-rose-50 text-rose-700 ring-rose-100',
+    high: 'bg-rose-50 text-rose-700 ring-rose-100',
+    warning: 'bg-amber-50 text-amber-700 ring-amber-100',
+    info: 'bg-sky-50 text-sky-700 ring-sky-100',
+    ok: 'bg-emerald-50 text-emerald-700 ring-emerald-100',
   };
-  return map[severity] || 'bg-slate-100 text-slate-600';
+  return map[severity] || 'bg-zinc-50 text-slate-600 ring-zinc-200';
 }
 
-async function load() {
-  await store.fetchRisk({ ...filters });
+function indicatorIconBg(severity) {
+  const map = {
+    critical: 'bg-rose-50',
+    high: 'bg-rose-50',
+    warning: 'bg-amber-50',
+    info: 'bg-sky-50',
+    ok: 'bg-emerald-50',
+  };
+  return map[severity] || 'bg-zinc-100';
 }
 
-onMounted(load);
+function indicatorIconColor(severity) {
+  const map = {
+    critical: 'text-rose-500',
+    high: 'text-rose-500',
+    warning: 'text-amber-500',
+    info: 'text-sky-500',
+    ok: 'text-emerald-500',
+  };
+  return map[severity] || 'text-slate-500';
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat().format(Number(value || 0));
+}
+
+function onApply(next) {
+  Object.assign(filters, next);
+  load();
+}
+
+function load() {
+  store.fetchRisk({ ...filters }).catch(() => {});
+}
+
+onMounted(() => {
+  store.error = null;
+  load();
+});
 </script>

@@ -1,103 +1,89 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="store.currentDashboard?.name || 'Dashboard Designer'"
-      description="Drag widgets from the library, resize on the grid, then save layout, settings, and sharing."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'analytics.dashboards' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="activePanel = activePanel === 'settings' ? 'canvas' : 'settings'"
-        >
-          Settings
-        </button>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="activePanel = activePanel === 'sharing' ? 'canvas' : 'sharing'"
-        >
-          Sharing
-        </button>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving || !layoutDirty"
-          @click="persistLayout"
-        >
-          Save layout
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'analytics.dashboards' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="activePanel = activePanel === 'settings' ? 'canvas' : 'settings'"
-        >
-          Settings
-        </button>
-        <button
-          type="button"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          @click="activePanel = activePanel === 'sharing' ? 'canvas' : 'sharing'"
-        >
-          Sharing
-        </button>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving || !layoutDirty"
-          @click="persistLayout"
-        >
-          Save layout
-        </button>
+        :to="{ name: 'analytics.dashboards' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <ArrowLeftIcon class="h-4 w-4" />
+        Back
+      </RouterLink>
+      <RouterLink
+        v-if="dashboardUuid"
+        :to="{ name: 'analytics.dashboards.show', params: { uuid: dashboardUuid } }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <EyeIcon class="h-4 w-4" />
+        View
+      </RouterLink>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] border px-5 py-2.5 text-sm font-medium transition"
+        :class="
+          activePanel === 'settings'
+            ? 'border-brand-200 bg-brand-50 text-brand-700'
+            : 'border-zinc-200 bg-white text-slate-700 hover:bg-zinc-50'
+        "
+        @click="togglePanel('settings')"
+      >
+        <Cog6ToothIcon class="h-4 w-4" />
+        Settings
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] border px-5 py-2.5 text-sm font-medium transition"
+        :class="
+          activePanel === 'sharing'
+            ? 'border-brand-200 bg-brand-50 text-brand-700'
+            : 'border-zinc-200 bg-white text-slate-700 hover:bg-zinc-50'
+        "
+        @click="togglePanel('sharing')"
+      >
+        <ShareIcon class="h-4 w-4" />
+        Sharing
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="store.saving || !layoutDirty"
+        @click="persistLayout"
+      >
+        <CheckIcon class="h-4 w-4" />
+        Save layout
+      </button>
     </Teleport>
 
     <AnalyticsSubnav />
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
-    </div>
-    <div v-if="store.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-      {{ store.successMessage }}
-    </div>
-
-    <div v-if="activePanel === 'settings'" class="mb-4 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 class="mb-4 text-sm font-semibold text-slate-900">Dashboard settings</h2>
-      <DashboardSettingsPanel
-        v-if="store.currentDashboard"
-        :dashboard="store.currentDashboard"
-        :categories="store.categories"
-        :saving="store.saving"
-        @cancel="activePanel = 'canvas'"
-        @save="onSaveSettings"
-      />
+    <div
+      v-if="layoutDirty"
+      class="mb-4 flex items-start gap-3 rounded-[12px] bg-amber-50 px-4 py-3 text-sm text-amber-800 ring-1 ring-amber-100"
+    >
+      <ExclamationTriangleIcon class="mt-0.5 h-5 w-5 shrink-0" />
+      <p>Unsaved layout changes. Drag to move, use the corner to resize, then save.</p>
     </div>
 
-    <div v-else-if="activePanel === 'sharing'" class="mb-4 rounded-xl border border-slate-200 bg-white p-5">
-      <h2 class="mb-4 text-sm font-semibold text-slate-900">Dashboard sharing</h2>
-      <DashboardSharingPanel
-        :shares="store.shares"
-        :saving="store.saving"
-        @share="onShare"
-        @revoke="onRevoke"
-      />
+    <div v-if="store.loading && !layoutItems.length" class="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
+      <div class="h-[32rem] animate-pulse rounded-[12px] bg-zinc-100" />
+      <div class="h-[32rem] animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
-    <div class="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
+    <div
+      v-else-if="store.error && !layoutItems.length"
+      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+    >
+      <p class="text-sm font-medium text-slate-900">Unable to load designer</p>
+      <p class="mt-1 text-xs text-slate-500">Refresh to try loading this dashboard layout again.</p>
+      <button
+        type="button"
+        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        @click="load"
+      >
+        Retry
+      </button>
+    </div>
+
+    <div v-else class="grid gap-4 xl:grid-cols-[280px_minmax(0,1fr)]">
       <WidgetLibraryPanel :library="store.widgetLibrary" @add="addWidgetFromLibrary" />
 
       <div class="min-w-0">
@@ -105,12 +91,11 @@
           <p class="text-sm text-slate-600">
             {{ layoutItems.length }} widgets · 12-column grid · drag to move · corner to resize
           </p>
-          <span v-if="layoutDirty" class="text-xs font-medium text-amber-700">Unsaved layout changes</span>
         </div>
 
         <div
           ref="canvasRef"
-          class="relative min-h-[720px] rounded-xl border border-dashed border-slate-300 bg-slate-50 p-3"
+          class="relative min-h-[720px] rounded-[12px] bg-zinc-50 p-3 ring-1 ring-dashed ring-zinc-200"
           :style="canvasStyle"
           @dragover.prevent
           @drop.prevent="onCanvasDrop"
@@ -118,8 +103,8 @@
           <div
             v-for="item in layoutItems"
             :key="item.uuid"
-            class="absolute select-none"
-            :class="selectedUuid === item.uuid ? 'z-20' : 'z-10'"
+            class="absolute select-none rounded-[12px] transition"
+            :class="selectedUuid === item.uuid ? 'z-20 ring-2 ring-brand-500' : 'z-10 ring-0'"
             :style="itemStyle(item)"
             @mousedown="selectedUuid = item.uuid"
           >
@@ -131,52 +116,128 @@
                 <template #actions>
                   <button
                     type="button"
-                    class="rounded px-1.5 py-0.5 text-xs text-rose-600 hover:bg-rose-50"
-                    @click.stop="removeWidget(item)"
+                    class="inline-flex h-8 w-8 items-center justify-center rounded-[10px] text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                    aria-label="Remove widget"
+                    @pointerdown.stop
+                    @click.stop="pendingRemove = item"
                   >
-                    Remove
+                    <XMarkIcon class="h-4 w-4" />
                   </button>
                 </template>
               </AnalyticsWidgetCard>
-              <div
-                class="absolute bottom-1 right-1 h-4 w-4 cursor-se-resize rounded-sm border border-slate-300 bg-white"
+              <button
+                type="button"
+                class="absolute bottom-1.5 right-1.5 inline-flex h-5 w-5 cursor-se-resize items-end justify-end rounded-[6px] text-slate-300 hover:text-brand-600"
                 title="Resize"
+                aria-label="Resize widget"
                 @pointerdown.stop="onResizePointerDown($event, item)"
-              />
+              >
+                <span class="mb-0.5 mr-0.5 h-2.5 w-2.5 border-b-2 border-r-2 border-current" />
+              </button>
             </div>
           </div>
 
-          <div
+          <EmptyState
             v-if="!layoutItems.length && !store.loading"
-            class="flex h-64 items-center justify-center text-sm text-slate-500"
-          >
-            Drop widgets from the library to start designing.
-          </div>
+            title="Canvas is empty"
+            description="Drop widgets from the library to start designing this dashboard."
+            class="h-64 bg-transparent"
+          />
         </div>
       </div>
     </div>
+
+    <Teleport to="body">
+      <div v-if="activePanel !== 'canvas'" class="fixed inset-0 z-40">
+        <div class="absolute inset-0 bg-slate-900/40" @click="activePanel = 'canvas'" />
+        <aside class="absolute inset-y-0 right-0 flex w-full max-w-xl flex-col bg-white shadow-xl">
+          <div class="flex items-center justify-between border-b border-zinc-100 px-6 py-5">
+            <div>
+              <h2 class="text-base font-semibold text-slate-900">
+                {{ activePanel === 'settings' ? 'Dashboard settings' : 'Dashboard sharing' }}
+              </h2>
+              <p class="mt-0.5 text-xs text-slate-500">
+                {{
+                  activePanel === 'settings'
+                    ? 'Name, visibility, and refresh for this board.'
+                    : 'Grant view or edit access to a role, user, or company.'
+                }}
+              </p>
+            </div>
+            <button
+              type="button"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-[10px] text-slate-400 hover:bg-zinc-100 hover:text-slate-700"
+              aria-label="Close panel"
+              @click="activePanel = 'canvas'"
+            >
+              <XMarkIcon class="h-5 w-5" />
+            </button>
+          </div>
+          <div class="scrollbar-light flex-1 overflow-y-auto px-6 py-5">
+            <DashboardSettingsPanel
+              v-if="activePanel === 'settings' && store.currentDashboard"
+              :dashboard="store.currentDashboard"
+              :categories="store.categories"
+              :saving="store.saving"
+              @cancel="activePanel = 'canvas'"
+              @save="onSaveSettings"
+            />
+            <DashboardSharingPanel
+              v-else-if="activePanel === 'sharing'"
+              :shares="store.shares"
+              :saving="store.saving"
+              @share="onShare"
+              @revoke="onRevoke"
+            />
+          </div>
+        </aside>
+      </div>
+    </Teleport>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingRemove)"
+      title="Remove widget"
+      :message="`Remove widget “${pendingRemove?.name}”? This cannot be undone.`"
+      confirm-label="Remove"
+      :loading="store.saving"
+      @cancel="pendingRemove = null"
+      @confirm="confirmRemoveWidget"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import {
+  ArrowLeftIcon,
+  CheckIcon,
+  Cog6ToothIcon,
+  ExclamationTriangleIcon,
+  EyeIcon,
+  ShareIcon,
+  XMarkIcon,
+} from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import AnalyticsWidgetCard from '@/modules/analytics/components/AnalyticsWidgetCard.vue';
 import WidgetLibraryPanel from '@/modules/analytics/components/WidgetLibraryPanel.vue';
 import DashboardSettingsPanel from '@/modules/analytics/components/DashboardSettingsPanel.vue';
 import DashboardSharingPanel from '@/modules/analytics/components/DashboardSharingPanel.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 
 const store = useEnterpriseAnalyticsStore();
 const route = useRoute();
+const toast = useToast();
 const canvasRef = ref(null);
 const activePanel = ref('canvas');
 const selectedUuid = ref(null);
 const layoutItems = ref([]);
 const layoutDirty = ref(false);
 const savedSignature = ref('');
+const pendingRemove = ref(null);
 
 const COLUMNS = 12;
 const ROW_HEIGHT = 80;
@@ -190,6 +251,28 @@ const canvasStyle = computed(() => {
     height: `${Math.max(720, maxY * (ROW_HEIGHT + GAP) + 48)}px`,
   };
 });
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (!message) return;
+    toast.success(message);
+    store.successMessage = null;
+  },
+);
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
+
+function togglePanel(panel) {
+  activePanel.value = activePanel.value === panel ? 'canvas' : panel;
+}
 
 function itemStyle(item) {
   const colWidth = canvasColumnWidth();
@@ -364,11 +447,16 @@ async function persistLayout() {
   syncFromStore();
 }
 
-async function removeWidget(item) {
-  if (!window.confirm(`Remove widget "${item.name}"?`)) return;
-  await store.deleteWidget(item.uuid);
-  await store.loadDashboardData(dashboardUuid.value);
-  syncFromStore();
+async function confirmRemoveWidget() {
+  if (!pendingRemove.value) return;
+  try {
+    await store.deleteWidget(pendingRemove.value.uuid);
+    pendingRemove.value = null;
+    await store.loadDashboardData(dashboardUuid.value);
+    syncFromStore();
+  } catch {
+    pendingRemove.value = null;
+  }
 }
 
 async function onSaveSettings(payload) {
@@ -384,7 +472,11 @@ async function onRevoke(share) {
   await store.revokeShare(dashboardUuid.value, share.uuid);
 }
 
-onMounted(load);
+onMounted(() => {
+  store.successMessage = null;
+  store.error = null;
+  load();
+});
 watch(dashboardUuid, load);
 onUnmounted(() => {
   window.removeEventListener('pointermove', onPointerMove);

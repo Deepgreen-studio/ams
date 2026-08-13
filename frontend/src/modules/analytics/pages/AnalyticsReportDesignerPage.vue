@@ -1,139 +1,100 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="store.currentReport?.name || 'Report Designer'"
-      description="Configure columns, filters, sorting, grouping, preview, export, and scheduling."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'analytics.reports' }"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="onSave"
-        >
-          Save designer
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
-          :to="{ name: 'analytics.reports' }"
-          class="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-          :disabled="store.saving"
-          @click="onSave"
-        >
-          Save designer
-        </button>
+        :to="{ name: 'analytics.reports' }"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        <ArrowLeftIcon class="h-4 w-4" />
+        Back
+      </RouterLink>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="store.saving"
+        @click="onSave"
+      >
+        <CheckIcon class="h-4 w-4" />
+        Save designer
+      </button>
     </Teleport>
 
     <AnalyticsSubnav />
 
-    <div v-if="store.error" class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-      {{ store.error }}
-    </div>
-    <div v-if="store.successMessage" class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-      {{ store.successMessage }}
-    </div>
-
-    <div v-if="store.loading && !form.name" class="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-      Loading designer…
+    <div v-if="store.loading && !form.name" class="space-y-4">
+      <div class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
+      <div class="h-64 animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
     <div v-else class="grid gap-4 xl:grid-cols-12">
       <div class="space-y-4 xl:col-span-4">
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="text-sm font-semibold text-slate-900">Basics</h3>
           <div class="mt-3 space-y-3">
-            <label class="block text-sm text-slate-600">
-              Name
-              <input v-model="form.name" type="text" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-            </label>
-            <label class="block text-sm text-slate-600">
-              Type
-              <select v-model="form.report_type" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option v-for="t in store.reportTypes" :key="t.value" :value="t.value">{{ t.label }}</option>
-              </select>
-            </label>
-            <label class="block text-sm text-slate-600">
-              Visibility
-              <select v-model="form.visibility" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option value="personal">Personal</option>
-                <option value="company">Company</option>
-                <option value="shared">Shared</option>
-              </select>
-            </label>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Name</label>
+              <input v-model="form.name" type="text" class="input" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Type</label>
+              <SelectBox v-model="form.report_type" :options="reportTypeOptions" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Visibility</label>
+              <SelectBox v-model="form.visibility" :options="visibilityOptions" />
+            </div>
             <label class="flex items-center gap-2 text-sm text-slate-700">
-              <input v-model="form.is_saved" type="checkbox" class="rounded border-slate-300" />
+              <input
+                v-model="form.is_saved"
+                type="checkbox"
+                class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+              />
               Saved report
             </label>
           </div>
         </section>
 
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="text-sm font-semibold text-slate-900">Filters</h3>
           <div class="mt-3 grid grid-cols-2 gap-3">
-            <label class="block text-sm text-slate-600">
-              From
-              <input v-model="form.filters.from" type="date" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-            </label>
-            <label class="block text-sm text-slate-600">
-              To
-              <input v-model="form.filters.to" type="date" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" />
-            </label>
-            <label class="col-span-2 block text-sm text-slate-600">
-              Category
-              <input v-model="form.filters.category" type="text" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="business" />
-            </label>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">From</label>
+              <input v-model="form.filters.from" type="date" class="input" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">To</label>
+              <input v-model="form.filters.to" type="date" class="input" />
+            </div>
+            <div class="col-span-2">
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Category</label>
+              <input v-model="form.filters.category" type="text" class="input" placeholder="business" />
+            </div>
           </div>
         </section>
 
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="text-sm font-semibold text-slate-900">Sorting & grouping</h3>
           <div class="mt-3 space-y-3">
-            <label class="block text-sm text-slate-600">
-              Sort field
-              <select v-model="form.sorting.field" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option v-for="col in store.columnCatalog" :key="col.key" :value="col.key">{{ col.label }}</option>
-              </select>
-            </label>
-            <label class="block text-sm text-slate-600">
-              Direction
-              <select v-model="form.sorting.direction" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option value="desc">Descending</option>
-                <option value="asc">Ascending</option>
-              </select>
-            </label>
-            <label class="block text-sm text-slate-600">
-              Group by
-              <select v-model="groupField" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option value="">None</option>
-                <option v-for="col in store.columnCatalog" :key="`g-${col.key}`" :value="col.key">{{ col.label }}</option>
-              </select>
-            </label>
-            <label class="block text-sm text-slate-600">
-              Aggregate
-              <select v-model="form.grouping.aggregate" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option value="count">Count</option>
-                <option value="sum">Sum</option>
-                <option value="avg">Average</option>
-              </select>
-            </label>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Sort field</label>
+              <SelectBox v-model="form.sorting.field" :options="columnOptions" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Direction</label>
+              <SelectBox v-model="form.sorting.direction" :options="directionOptions" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Group by</label>
+              <SelectBox v-model="groupField" :options="groupFieldOptions" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Aggregate</label>
+              <SelectBox v-model="form.grouping.aggregate" :options="aggregateOptions" />
+            </div>
           </div>
         </section>
 
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="text-sm font-semibold text-slate-900">Columns</h3>
           <div class="mt-3 max-h-56 space-y-2 overflow-y-auto">
             <label
@@ -143,7 +104,7 @@
             >
               <input
                 type="checkbox"
-                class="rounded border-slate-300"
+                class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
                 :checked="selectedColumnKeys.includes(col.key)"
                 @change="toggleColumn(col)"
               />
@@ -152,26 +113,28 @@
           </div>
         </section>
 
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <h3 class="text-sm font-semibold text-slate-900">Schedule</h3>
           <div class="mt-3 space-y-3">
             <label class="flex items-center gap-2 text-sm text-slate-700">
-              <input v-model="schedule.enabled" type="checkbox" class="rounded border-slate-300" />
+              <input
+                v-model="schedule.enabled"
+                type="checkbox"
+                class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
+              />
               Enable scheduled generation
             </label>
-            <label class="block text-sm text-slate-600">
-              Cron
-              <input v-model="schedule.cron" type="text" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" placeholder="0 7 * * *" />
-            </label>
-            <label class="block text-sm text-slate-600">
-              Format
-              <select v-model="schedule.format" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm">
-                <option v-for="f in store.reportFormats" :key="f" :value="f">{{ f.toUpperCase() }}</option>
-              </select>
-            </label>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Cron</label>
+              <input v-model="schedule.cron" type="text" class="input" placeholder="0 7 * * *" />
+            </div>
+            <div>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Format</label>
+              <SelectBox v-model="schedule.format" :options="formatOptions" />
+            </div>
             <button
               type="button"
-              class="rounded-lg bg-slate-900 px-3 py-2 text-sm text-white disabled:opacity-60"
+              class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="store.saving"
               @click="onSchedule"
             >
@@ -182,18 +145,23 @@
       </div>
 
       <div class="space-y-4 xl:col-span-8">
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h3 class="text-sm font-semibold text-slate-900">Preview & export</h3>
             <div class="flex flex-wrap gap-2">
-              <button type="button" class="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700" :disabled="store.saving" @click="onPreview">
+              <button
+                type="button"
+                class="inline-flex items-center rounded-[12px] border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+                :disabled="store.saving"
+                @click="onPreview"
+              >
                 Preview
               </button>
               <button
                 v-for="fmt in ['csv', 'excel', 'pdf', 'print']"
                 :key="fmt"
                 type="button"
-                class="rounded-lg bg-brand-600 px-3 py-2 text-sm font-medium text-white disabled:opacity-60"
+                class="inline-flex items-center rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
                 :disabled="store.saving"
                 @click="onExport(fmt)"
               >
@@ -206,20 +174,36 @@
             <p class="mb-2 text-xs text-slate-500">
               {{ store.reportPreview.meta?.row_count ?? 0 }} rows · generated {{ store.reportPreview.meta?.generated_at }}
             </p>
-            <table class="min-w-full text-left text-sm">
-              <thead class="bg-slate-50 text-xs uppercase text-slate-500">
-                <tr>
-                  <th v-for="col in store.reportPreview.columns" :key="col.key" class="px-3 py-2">{{ col.label }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, idx) in store.reportPreview.rows.slice(0, 50)" :key="idx" class="border-t border-slate-100">
-                  <td v-for="col in store.reportPreview.columns" :key="col.key" class="px-3 py-2 text-slate-700">
-                    {{ row[col.key] }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="overflow-hidden rounded-[12px] ring-1 ring-zinc-100">
+              <table class="min-w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-zinc-100">
+                    <th
+                      v-for="col in store.reportPreview.columns"
+                      :key="col.key"
+                      class="px-5 py-3 text-sm font-semibold text-zinc-500"
+                    >
+                      {{ col.label }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(row, idx) in store.reportPreview.rows.slice(0, 50)"
+                    :key="idx"
+                    class="border-b border-zinc-50 last:border-0 hover:bg-zinc-50/80"
+                  >
+                    <td
+                      v-for="col in store.reportPreview.columns"
+                      :key="col.key"
+                      class="px-5 py-4 text-slate-700"
+                    >
+                      {{ row[col.key] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
             <div v-if="store.reportPreview.groups?.length" class="mt-4">
               <h4 class="mb-2 text-sm font-semibold text-slate-800">Groups</h4>
@@ -227,7 +211,7 @@
                 <div
                   v-for="group in store.reportPreview.groups"
                   :key="group.group_key"
-                  class="rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                  class="rounded-[12px] px-3 py-2 text-sm ring-1 ring-zinc-100"
                 >
                   <p class="font-medium text-slate-900">{{ group.group_key }}</p>
                   <p class="text-slate-500">count {{ group.count }} · agg {{ group.aggregate_value }}</p>
@@ -238,40 +222,50 @@
           <p v-else class="mt-4 text-sm text-slate-500">Run preview to inspect rows, groups, and chart payload.</p>
         </section>
 
-        <section class="rounded-xl border border-slate-200 bg-white p-4">
-          <h3 class="text-sm font-semibold text-slate-900">Run history</h3>
-          <table class="mt-3 min-w-full text-left text-sm">
-            <thead class="border-b border-slate-200 bg-slate-50 text-xs uppercase text-slate-500">
-              <tr>
-                <th class="px-3 py-2">Status</th>
-                <th class="px-3 py-2">Format</th>
-                <th class="px-3 py-2">Rows</th>
-                <th class="px-3 py-2">When</th>
-                <th class="px-3 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="!store.reportRuns.length">
-                <td colspan="5" class="px-3 py-6 text-center text-slate-500">No runs yet.</td>
-              </tr>
-              <tr v-for="run in store.reportRuns" :key="run.uuid" class="border-b border-slate-100">
-                <td class="px-3 py-2 capitalize">{{ run.status }}</td>
-                <td class="px-3 py-2 uppercase">{{ run.format }}</td>
-                <td class="px-3 py-2">{{ run.row_count }}</td>
-                <td class="px-3 py-2 text-slate-500">{{ run.completed_at || run.created_at }}</td>
-                <td class="px-3 py-2">
-                  <button
-                    v-if="run.status === 'completed'"
-                    type="button"
-                    class="text-sm font-medium text-brand-700 hover:underline"
-                    @click="onDownload(run)"
-                  >
-                    Download
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <section class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+          <div class="border-b border-zinc-100 px-5 py-4">
+            <h3 class="text-sm font-semibold text-slate-900">Run history</h3>
+          </div>
+          <EmptyState
+            v-if="!store.reportRuns.length"
+            title="No runs yet"
+            description="Preview or export this report to generate a run history."
+          />
+          <div v-else class="overflow-x-auto px-3">
+            <table class="min-w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-zinc-100">
+                  <th class="px-5 py-3 text-sm font-semibold text-zinc-500">Status</th>
+                  <th class="px-5 py-3 text-sm font-semibold text-zinc-500">Format</th>
+                  <th class="px-5 py-3 text-sm font-semibold text-zinc-500">Rows</th>
+                  <th class="px-5 py-3 text-sm font-semibold text-zinc-500">When</th>
+                  <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="run in store.reportRuns"
+                  :key="run.uuid"
+                  class="border-b border-zinc-50 last:border-0 hover:bg-zinc-50/80"
+                >
+                  <td class="px-5 py-4 capitalize text-slate-700">{{ run.status }}</td>
+                  <td class="px-5 py-4 uppercase text-slate-700">{{ run.format }}</td>
+                  <td class="px-5 py-4 text-slate-700">{{ run.row_count }}</td>
+                  <td class="px-5 py-4 text-slate-500">{{ run.completed_at || run.created_at }}</td>
+                  <td class="px-5 py-4 text-right">
+                    <button
+                      v-if="run.status === 'completed'"
+                      type="button"
+                      class="rounded-[12px] px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-brand-50"
+                      @click="onDownload(run)"
+                    >
+                      Download
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </div>
@@ -280,13 +274,17 @@
 
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
-import { useRoute } from 'vue-router';
-// import PageHeader from '@/components/ui/PageHeader.vue';
+import { RouterLink, useRoute } from 'vue-router';
+import { ArrowLeftIcon, CheckIcon } from '@heroicons/vue/24/outline';
+import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const route = useRoute();
 const store = useEnterpriseAnalyticsStore();
+const toast = useToast();
 
 const form = reactive({
   name: '',
@@ -310,6 +308,47 @@ const schedule = reactive({
   timezone: 'UTC',
 });
 
+const visibilityOptions = [
+  { value: 'personal', label: 'Personal' },
+  { value: 'company', label: 'Company' },
+  { value: 'shared', label: 'Shared' },
+];
+
+const directionOptions = [
+  { value: 'desc', label: 'Descending' },
+  { value: 'asc', label: 'Ascending' },
+];
+
+const aggregateOptions = [
+  { value: 'count', label: 'Count' },
+  { value: 'sum', label: 'Sum' },
+  { value: 'avg', label: 'Average' },
+];
+
+const reportTypeOptions = computed(() =>
+  store.reportTypes.length
+    ? store.reportTypes
+    : [
+        { value: 'tabular', label: 'Tabular' },
+        { value: 'chart', label: 'Chart' },
+        { value: 'grouped', label: 'Grouped' },
+        { value: 'scheduled', label: 'Scheduled' },
+      ]
+);
+
+const columnOptions = computed(() =>
+  (store.columnCatalog || []).map((col) => ({ value: col.key, label: col.label }))
+);
+
+const groupFieldOptions = computed(() => [{ value: '', label: 'None' }, ...columnOptions.value]);
+
+const formatOptions = computed(() =>
+  (store.reportFormats || ['csv', 'excel', 'pdf', 'print']).map((f) => ({
+    value: f,
+    label: String(f).toUpperCase(),
+  }))
+);
+
 const selectedColumnKeys = computed(() => (form.columns || []).map((c) => c.key));
 
 const groupField = computed({
@@ -318,6 +357,24 @@ const groupField = computed({
     form.grouping.fields = value ? [value] : [];
   },
 });
+
+watch(
+  () => store.successMessage,
+  (message) => {
+    if (!message) return;
+    toast.success(message);
+    store.successMessage = null;
+  },
+);
+
+watch(
+  () => store.error,
+  (message) => {
+    if (!message) return;
+    toast.error(message);
+    store.error = null;
+  },
+);
 
 function hydrate(report) {
   if (!report) return;
@@ -405,6 +462,8 @@ watch(
 );
 
 onMounted(async () => {
+  store.successMessage = null;
+  store.error = null;
   await store.fetchReport(route.params.uuid);
   await store.fetchReportRuns(route.params.uuid);
 });

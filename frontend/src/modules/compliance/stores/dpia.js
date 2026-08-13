@@ -2,6 +2,16 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { dpiaService } from '@/modules/compliance/services/dpiaService';
 
+const defaultFilters = () => ({
+  search: '',
+  status: '',
+  template_code: '',
+  overall_risk_level: '',
+  review_overdue: '',
+  per_page: 10,
+  page: 1,
+});
+
 function useAsyncState() {
   const loading = ref(false);
   const saving = ref(false);
@@ -37,14 +47,12 @@ export const useDpiaStore = defineStore('dpia', () => {
   const recentAssessments = ref([]);
   const pendingApproval = ref([]);
   const mitigationQueue = ref([]);
-  const filters = ref({
-    search: '',
-    status: '',
-    template_code: '',
-    per_page: 10,
-    page: 1,
-  });
+  const filters = ref(defaultFilters());
   const state = useAsyncState();
+
+  function resetFilters() {
+    filters.value = defaultFilters();
+  }
 
   async function fetchDashboard(company = '') {
     state.loading.value = true;
@@ -72,6 +80,7 @@ export const useDpiaStore = defineStore('dpia', () => {
 
   async function fetchRiskMatrix(company = '') {
     state.loading.value = true;
+    state.clearMessages();
     try {
       const { data } = await dpiaService.riskMatrix(company ? { company } : {});
       riskMatrix.value = data.data ?? null;
@@ -95,6 +104,7 @@ export const useDpiaStore = defineStore('dpia', () => {
       const { data } = await dpiaService.list(params);
       assessments.value = data.data?.assessments?.items ?? [];
       meta.value = data.data?.assessments?.meta ?? null;
+      dpiaStatistics.value = data.data?.dpia_statistics ?? dpiaStatistics.value;
     } catch (err) {
       state.applyError(err, 'Unable to load DPIA assessments');
       throw err;
@@ -230,6 +240,7 @@ export const useDpiaStore = defineStore('dpia', () => {
     mitigationQueue,
     filters,
     ...state,
+    resetFilters,
     fetchDashboard,
     fetchTemplates,
     fetchRiskMatrix,

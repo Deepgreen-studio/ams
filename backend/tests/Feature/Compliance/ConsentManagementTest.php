@@ -88,7 +88,9 @@ class ConsentManagementTest extends TestCase
 
         $this->getJson('/api/v1/compliance/consents?search=subject@example.com')
             ->assertOk()
-            ->assertJsonPath('data.consents.meta.total', 1);
+            ->assertJsonPath('data.consents.meta.total', 1)
+            ->assertJsonPath('data.statistics.granted', 1)
+            ->assertJsonPath('data.statistics.total', 1);
 
         $this->getJson('/api/v1/compliance/consents/'.$uuid.'/timeline')
             ->assertOk()

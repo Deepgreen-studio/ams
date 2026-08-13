@@ -64,8 +64,15 @@ class SupportSlaEscalationRepository
             $query->where('metric', $filters['metric']);
         }
 
+        $perPage = max(1, min((int) ($filters['per_page'] ?? 10), 100));
+
         return $query->orderByDesc('triggered_at')
-            ->paginate((int) ($filters['per_page'] ?? 15));
+            ->paginate(
+                $perPage,
+                ['*'],
+                'page',
+                max(1, (int) ($filters['page'] ?? 1)),
+            );
     }
 
     public function existsForTicketRule(int $ticketId, int $ruleId): bool

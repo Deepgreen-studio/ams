@@ -57,12 +57,9 @@
 
     <SupportSubnav />
 
-    <div v-if="store.loading && !ticket" class="space-y-4">
-      <div class="h-48 animate-pulse rounded-[12px] bg-zinc-100" />
-      <div class="grid gap-4 lg:grid-cols-3">
-        <div class="h-64 animate-pulse rounded-[12px] bg-zinc-100 lg:col-span-2" />
-        <div class="h-64 animate-pulse rounded-[12px] bg-zinc-100" />
-      </div>
+    <div v-if="store.loading && !ticket" class="grid gap-4 lg:grid-cols-3">
+      <div class="h-[32rem] animate-pulse rounded-[12px] bg-zinc-100 lg:col-span-2" />
+      <div class="h-[32rem] animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
     <div
@@ -88,10 +85,10 @@
       </div>
     </div>
 
-    <div v-else class="space-y-4">
-      <div class="grid gap-4 lg:grid-cols-3">
-        <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 lg:col-span-2">
-          <div class="mb-4 flex flex-wrap items-center gap-2">
+    <div v-else class="grid items-start gap-4 lg:grid-cols-3">
+      <div class="space-y-4 lg:col-span-2">
+        <section class="rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
+          <div class="flex flex-wrap items-center gap-2">
             <TicketStatusBadge :status="ticket.status" :label="ticket.status_label" />
             <PriorityIndicator :priority="ticket.priority" :label="ticket.priority_label" />
             <TicketCategoryBadge :category="ticket.category" :label="ticket.category_label" />
@@ -102,151 +99,110 @@
               {{ ticket.source_label || ticket.source }}
             </span>
           </div>
-          <h2 class="text-lg font-semibold text-slate-900">{{ ticket.subject }}</h2>
+          <h1 class="mt-3 text-lg font-semibold text-slate-900">{{ ticket.subject }}</h1>
           <p class="mt-1 text-xs text-slate-500">{{ ticket.ticket_number }}</p>
+        </section>
 
-          <div class="mt-4">
-            <TicketDescriptionPanel
-              :description="ticket.description || ''"
-              :source="ticket.source || ''"
-              :has-linked-customer="Boolean(ticket.customer?.display_name)"
-            />
+        <TicketConversationPanel
+          :ticket-id="ticket.uuid || String(route.params.id)"
+          :opening-body="openingBody"
+        />
+      </div>
+
+      <aside class="space-y-4">
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
+          <div class="mb-3 flex items-center justify-between gap-2">
+            <h2 class="text-sm font-semibold text-slate-900">SLA</h2>
+            <SlaStatusBadge :status="ticket.sla_status" :label="ticket.sla_status_label" />
           </div>
-
-          <div class="mt-6 rounded-[12px] bg-zinc-50 p-4">
-            <h3 class="mb-3 text-sm font-semibold text-slate-900">Change status</h3>
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <SelectBox
-                v-model="transitionStatus"
-                wrapper-class="min-w-0 flex-1"
-                placeholder="Select next status"
-                :options="transitionOptions"
-              />
-              <button
-                type="button"
-                class="h-10 shrink-0 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-                :disabled="store.saving || !transitionStatus"
-                @click="applyTransition"
-              >
-                Update status
-              </button>
-            </div>
-            <textarea
-              v-model="transitionComments"
-              rows="2"
-              class="mt-3 w-full rounded-[12px] border border-zinc-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
-              placeholder="Optional transition comment"
+          <p v-if="ticket.sla_policy?.name" class="mb-3 text-xs text-slate-500">
+            {{ ticket.sla_policy.name }}
+          </p>
+          <div class="grid grid-cols-2 gap-2">
+            <SlaCountdown
+              label="Response"
+              :due-at="ticket.first_response_due_at"
+              :completed-at="ticket.first_response_at"
+            />
+            <SlaCountdown
+              label="Resolution"
+              :due-at="ticket.resolution_due_at"
+              :completed-at="ticket.resolved_at"
             />
           </div>
         </section>
 
-        <div class="space-y-4">
-          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-            <div class="mb-3 flex items-center justify-between gap-2">
-              <div>
-                <h3 class="text-base font-semibold text-slate-900">SLA timers</h3>
-                <p class="mt-0.5 text-xs text-slate-500">
-                  {{ ticket.sla_policy?.name || 'No active policy' }}
-                  <span v-if="ticket.escalation_level_label">
-                    · Escalation: {{ ticket.escalation_level_label }}
-                  </span>
-                </p>
-              </div>
-              <SlaStatusBadge :status="ticket.sla_status" :label="ticket.sla_status_label" />
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
+          <h2 class="text-sm font-semibold text-slate-900">Details</h2>
+          <dl class="mt-3 divide-y divide-zinc-100 text-sm">
+            <div v-for="item in detailItems" :key="item.label" class="py-2.5 first:pt-0 last:pb-0">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ item.label }}</dt>
+              <dd class="mt-1 text-slate-900">
+                <span class="font-medium">{{ item.value }}</span>
+                <span v-if="item.hint" class="mt-0.5 block text-xs font-normal text-slate-500">
+                  {{ item.hint }}
+                </span>
+              </dd>
             </div>
-            <div class="grid gap-2 sm:grid-cols-2">
-              <SlaCountdown
-                label="Response"
-                :due-at="ticket.first_response_due_at"
-                :completed-at="ticket.first_response_at"
-              />
-              <SlaCountdown
-                label="Resolution"
-                :due-at="ticket.resolution_due_at"
-                :completed-at="ticket.resolved_at"
-              />
+          </dl>
+        </section>
+
+        <section
+          v-if="parsed.isIngested && parsed.ingestMeta.length"
+          class="rounded-[12px] bg-white ring-1 ring-zinc-100"
+        >
+          <button
+            type="button"
+            class="flex w-full items-center justify-between gap-3 px-5 py-3 text-left"
+            @click="ingestOpen = !ingestOpen"
+          >
+            <span class="text-sm font-semibold text-slate-900">Ingest</span>
+            <span class="text-xs font-medium text-brand-700">{{ ingestOpen ? 'Hide' : 'Show' }}</span>
+          </button>
+          <dl v-if="ingestOpen" class="space-y-2 border-t border-zinc-100 px-5 py-3">
+            <div v-for="item in parsed.ingestMeta" :key="item.key">
+              <dt class="text-[11px] uppercase tracking-wide text-slate-400">{{ item.label }}</dt>
+              <dd class="mt-0.5 break-all font-mono text-xs text-slate-700">{{ item.value }}</dd>
             </div>
-          </section>
+          </dl>
+        </section>
 
-          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-            <h3 class="text-base font-semibold text-slate-900">Details</h3>
-            <dl class="mt-4 divide-y divide-zinc-100 text-sm">
-              <div class="py-3 first:pt-0 last:pb-0">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Ticket number</dt>
-                <dd class="mt-1 font-medium text-slate-900">{{ ticket.ticket_number }}</dd>
-              </div>
-              <div class="py-3 first:pt-0 last:pb-0">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Company</dt>
-                <dd class="mt-1 text-slate-900">{{ ticket.company?.company_name || '—' }}</dd>
-              </div>
-              <div class="py-3 first:pt-0 last:pb-0">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Customer</dt>
-                <dd class="mt-1 text-slate-900">
-                  <template v-if="ticket.customer?.display_name">
-                    {{ ticket.customer.display_name }}
-                  </template>
-                  <template v-else-if="ingestContact.name || ingestContact.email || ingestContact.from">
-                    <span class="font-medium">{{ ingestContact.name || ingestContact.from || '—' }}</span>
-                    <span
-                      v-if="ingestContact.email"
-                      class="mt-0.5 block text-xs text-slate-500"
-                    >{{ ingestContact.email }}</span>
-                    <span
-                      v-if="ingestContact.from && ingestContact.name"
-                      class="mt-0.5 block text-xs text-slate-500"
-                    >{{ ingestContact.from }}</span>
-                  </template>
-                  <template v-else>—</template>
-                </dd>
-              </div>
-              <div class="py-3">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Application</dt>
-                <dd class="mt-1 text-slate-900">{{ ticket.application?.name || '—' }}</dd>
-              </div>
-              <div class="py-3">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Department / Team</dt>
-                <dd class="mt-1 text-slate-900">
-                  {{ ticket.department?.name || '—' }} / {{ ticket.team?.name || '—' }}
-                </dd>
-              </div>
-              <div class="py-3">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Assignment</dt>
-                <dd class="mt-1 text-slate-900">
-                  {{ ticket.assignment_type_label || 'Unassigned' }}
-                  <span v-if="ticket.assignee"> · {{ ticket.assignee.full_name }}</span>
-                </dd>
-              </div>
-              <div class="py-3">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Source</dt>
-                <dd class="mt-1 text-slate-900">{{ ticket.source_label || ticket.source }}</dd>
-              </div>
-              <div class="py-3">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Created</dt>
-                <dd class="mt-1 text-slate-900">{{ formatDate(ticket.created_at) }}</dd>
-              </div>
-              <div class="py-3 last:pb-0">
-                <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Closed</dt>
-                <dd class="mt-1 text-slate-900">{{ formatDate(ticket.closed_at) }}</dd>
-              </div>
-            </dl>
-          </section>
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
+          <h2 class="mb-3 text-sm font-semibold text-slate-900">Status</h2>
+          <SelectBox
+            v-model="transitionStatus"
+            placeholder="Next status"
+            :options="transitionOptions"
+          />
+          <textarea
+            v-model="transitionComments"
+            rows="2"
+            class="mt-3 w-full rounded-[12px] border border-zinc-200 bg-white px-3 py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
+            placeholder="Optional comment"
+          />
+          <button
+            type="button"
+            class="mt-3 h-10 w-full rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+            :disabled="store.saving || !transitionStatus"
+            @click="applyTransition"
+          >
+            Update status
+          </button>
+        </section>
 
-          <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
-            <h3 class="mb-4 text-base font-semibold text-slate-900">Assign ticket</h3>
-            <AssignmentPanel
-              :company-id="ticket.company?.uuid || ''"
-              :agents="store.agents"
-              :loading="store.saving"
-              submit-label="Apply assignment"
-              @submit="onAssign"
-            />
-          </section>
-        </div>
-      </div>
+        <section class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
+          <h2 class="mb-3 text-sm font-semibold text-slate-900">Assign</h2>
+          <AssignmentPanel
+            :company-id="ticket.company?.uuid || ''"
+            :agents="store.agents"
+            :loading="store.saving"
+            submit-label="Assign"
+            @submit="onAssign"
+          />
+        </section>
 
-      <TicketConversationPanel :ticket-id="ticket.uuid || String(route.params.id)" />
-
-      <TicketStatusTimeline :history="store.timeline" :loading="timelineLoading" />
+        <TicketStatusTimeline :history="store.timeline" :loading="timelineLoading" />
+      </aside>
     </div>
 
     <DeleteConfirmation
@@ -276,7 +232,6 @@ import SlaStatusBadge from '@/modules/support/components/SlaStatusBadge.vue';
 import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import TicketCategoryBadge from '@/modules/support/components/TicketCategoryBadge.vue';
 import TicketConversationPanel from '@/modules/support/components/TicketConversationPanel.vue';
-import TicketDescriptionPanel from '@/modules/support/components/TicketDescriptionPanel.vue';
 import TicketStatusBadge from '@/modules/support/components/TicketStatusBadge.vue';
 import TicketStatusTimeline from '@/modules/support/components/TicketStatusTimeline.vue';
 import { parseTicketDescription } from '@/modules/support/utils/parseTicketDescription';
@@ -291,12 +246,82 @@ const showArchive = ref(false);
 const timelineLoading = ref(false);
 const transitionStatus = ref('');
 const transitionComments = ref('');
+const ingestOpen = ref(false);
 
 const ticket = computed(() => store.currentTicket);
-const ingestContact = computed(
-  () => parseTicketDescription(ticket.value?.description).contact,
-);
+const parsed = computed(() => parseTicketDescription(ticket.value?.description));
+const ingestContact = computed(() => parsed.value.contact);
+const openingBody = computed(() => {
+  const body = parsed.value.body || '';
+  if (!body) {
+    return '';
+  }
+
+  const duplicated = (store.messages || []).some((message) => {
+    const text = String(message.body || '')
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return text && (text === body || text.includes(body.slice(0, 80)));
+  });
+
+  return duplicated ? '' : body;
+});
 const transitionOptions = computed(() => ticket.value?.allowed_transitions || []);
+
+const detailItems = computed(() => {
+  const current = ticket.value;
+  if (!current) {
+    return [];
+  }
+
+  const items = [];
+
+  if (current.company?.company_name) {
+    items.push({ label: 'Company', value: current.company.company_name });
+  }
+
+  if (current.customer?.display_name) {
+    items.push({
+      label: 'Customer',
+      value: current.customer.display_name,
+      hint: current.customer.email || '',
+    });
+  } else if (ingestContact.value.name || ingestContact.value.email || ingestContact.value.from) {
+    items.push({
+      label: 'Customer',
+      value: ingestContact.value.name || ingestContact.value.from,
+      hint:
+        ingestContact.value.email ||
+        (ingestContact.value.from &&
+        ingestContact.value.from !== ingestContact.value.name
+          ? ingestContact.value.from
+          : ''),
+    });
+  }
+
+  if (current.application?.name) {
+    items.push({ label: 'Application', value: current.application.name });
+  }
+
+  const org = [current.department?.name, current.team?.name].filter(Boolean).join(' / ');
+  if (org) {
+    items.push({ label: 'Team', value: org });
+  }
+
+  items.push({
+    label: 'Assignee',
+    value: current.assignee?.full_name || 'Unassigned',
+  });
+
+  items.push({ label: 'Created', value: formatDate(current.created_at) });
+
+  if (current.closed_at) {
+    items.push({ label: 'Closed', value: formatDate(current.closed_at) });
+  }
+
+  return items;
+});
 
 watch(
   () => store.successMessage,

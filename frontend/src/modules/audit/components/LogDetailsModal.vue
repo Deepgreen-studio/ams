@@ -147,6 +147,120 @@
           </p>
         </template>
 
+        <template v-else-if="isApiLog">
+          <div class="mb-5 flex flex-wrap items-center gap-2">
+            <StatusBadge v-if="item?.method" :status="item.method" />
+            <StatusBadge v-if="item?.response_code" :status="item.response_code" />
+          </div>
+          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Endpoint</dt>
+              <dd class="mt-1 break-all font-mono text-sm text-slate-900">{{ item?.endpoint || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">When</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ formatDate(item?.created_at) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Duration</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ item?.duration != null ? `${item.duration} ms` : '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Actor</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ item?.user?.full_name || item?.user?.email || 'System' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">IP address</dt>
+              <dd class="mt-1 font-mono text-sm text-slate-900">{{ item?.ip_address || '—' }}</dd>
+            </div>
+          </dl>
+        </template>
+
+        <template v-else-if="isErrorLog">
+          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Exception</dt>
+              <dd class="mt-1 break-all text-sm font-medium text-slate-900">{{ item?.exception || '—' }}</dd>
+            </div>
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Message</dt>
+              <dd class="mt-1 text-sm text-slate-700">{{ item?.message || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">When</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ formatDate(item?.created_at) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Location</dt>
+              <dd class="mt-1 break-all text-sm text-slate-900">
+                {{ item?.file ? `${item.file}${item.line ? `:${item.line}` : ''}` : '—' }}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Request</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ [item?.method, item?.url].filter(Boolean).join(' ') || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">IP address</dt>
+              <dd class="mt-1 font-mono text-sm text-slate-900">{{ item?.ip_address || '—' }}</dd>
+            </div>
+          </dl>
+          <div v-if="item?.stack_trace" class="mt-6">
+            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Stack trace</h4>
+            <pre class="overflow-x-auto rounded-[12px] bg-slate-950 p-4 text-xs leading-relaxed text-slate-100">{{ item.stack_trace }}</pre>
+          </div>
+        </template>
+
+        <template v-else-if="isSystemEvent">
+          <div class="mb-5">
+            <StatusBadge v-if="item?.level" :status="item.level" />
+          </div>
+          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Event</dt>
+              <dd class="mt-1 text-sm font-medium text-slate-900">{{ item?.event || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Module</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ formatLabel(item?.module) || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">When</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ formatDate(item?.created_at) }}</dd>
+            </div>
+          </dl>
+          <div v-if="hasEntries(item?.payload)" class="mt-6">
+            <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">Payload</h4>
+            <pre class="overflow-x-auto rounded-[12px] bg-slate-950 p-4 text-xs leading-relaxed text-slate-100">{{ prettyValue(item.payload) }}</pre>
+          </div>
+        </template>
+
+        <template v-else-if="isActivity">
+          <div class="mb-5 flex flex-wrap items-center gap-2">
+            <StatusBadge v-if="item?.action" :status="item.action" />
+            <span
+              v-if="item?.module"
+              class="inline-flex items-center rounded-md bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-700"
+            >
+              {{ formatLabel(item.module) }}
+            </span>
+          </div>
+          <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Description</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ item?.description || '—' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">Actor</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ item?.user?.full_name || item?.user?.email || 'System' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium uppercase tracking-wide text-slate-400">When</dt>
+              <dd class="mt-1 text-sm text-slate-900">{{ formatDate(item?.created_at) }}</dd>
+            </div>
+          </dl>
+        </template>
+
         <pre
           v-else
           class="overflow-x-auto rounded-[12px] bg-slate-950 p-4 text-xs leading-relaxed text-slate-100"
@@ -170,14 +284,17 @@ defineEmits(['close']);
 
 const pretty = computed(() => JSON.stringify(props.item || {}, null, 2));
 
-const heading = computed(() => {
-  if (props.subtitle) {
-    return formatLabel(props.subtitle);
-  }
-  return '';
-});
+const heading = computed(() => props.subtitle || '');
 
 const isLoginHistory = computed(() => Boolean(props.item?.login_at) && !isAuditDiff.value);
+
+const isApiLog = computed(() => Boolean(props.item?.endpoint && props.item?.method));
+
+const isErrorLog = computed(() => Boolean(props.item?.exception));
+
+const isSystemEvent = computed(() => Boolean(props.item?.event && props.item?.level));
+
+const isActivity = computed(() => Boolean(props.item?.description) && !isAuditDiff.value && !isLoginHistory.value);
 
 const isAuditDiff = computed(() => {
   const item = props.item;
@@ -259,5 +376,13 @@ function formatDuration(seconds) {
     return `${minutes}m ${remaining}s`;
   }
   return `${remaining}s`;
+}
+
+function hasEntries(value) {
+  return Boolean(value && typeof value === 'object' && Object.keys(value).length);
+}
+
+function prettyValue(value) {
+  return JSON.stringify(value || {}, null, 2);
 }
 </script>

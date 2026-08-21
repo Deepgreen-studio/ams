@@ -22,17 +22,22 @@
 
     <div
       v-else-if="store.error && !data"
-      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
     >
-      <p class="text-sm font-medium text-slate-900">Unable to load security dashboard</p>
-      <p class="mt-1 text-xs text-slate-500">Refresh to try loading failed logins, events, and risk posture again.</p>
-      <button
-        type="button"
-        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        @click="load"
+      <EmptyState
+        title="Unable to load security dashboard"
+        :description="store.error || 'Refresh to try loading failed logins, events, and risk posture again.'"
       >
-        Retry
-      </button>
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+            @click="load"
+          >
+            Retry
+          </button>
+        </template>
+      </EmptyState>
     </div>
 
     <template v-else-if="data">
@@ -163,6 +168,7 @@ import {
   ShieldExclamationIcon,
 } from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';

@@ -33,17 +33,22 @@
 
     <div
       v-else-if="store.error && !store.dashboard"
-      class="rounded-[12px] bg-white px-6 py-16 text-center ring-1 ring-zinc-100"
+      class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
     >
-      <p class="text-sm font-medium text-slate-900">Unable to load operational analytics</p>
-      <p class="mt-1 text-xs text-slate-500">Refresh to try loading delivery, automation, workflow, and AI metrics again.</p>
-      <button
-        type="button"
-        class="mt-6 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        @click="reload"
+      <EmptyState
+        title="Unable to load operational analytics"
+        :description="store.error || 'Refresh to try loading delivery, automation, workflow, and AI metrics again.'"
       >
-        Retry
-      </button>
+        <template #action>
+          <button
+            type="button"
+            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+            @click="reload"
+          >
+            Retry
+          </button>
+        </template>
+      </EmptyState>
     </div>
 
     <template v-else-if="store.dashboard">
@@ -120,6 +125,7 @@ import {
   SparklesIcon,
 } from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
 import SimpleBarChart from '@/modules/compliance/components/SimpleBarChart.vue';
 import AnalyticsFilterBar from '@/modules/analytics/components/AnalyticsFilterBar.vue';

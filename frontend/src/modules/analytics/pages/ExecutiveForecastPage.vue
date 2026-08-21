@@ -25,16 +25,14 @@
       @apply="onApply"
       @reset="onReset"
     >
-      <div>
-        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Horizon (days)</label>
-        <input
-          v-model.number="horizonDays"
-          type="number"
-          min="1"
-          max="90"
-          class="input w-28"
-        />
-      </div>
+      <input
+        v-model.number="horizonDays"
+        type="number"
+        min="1"
+        max="90"
+        title="Forecast horizon in days"
+        class="h-10 w-28 rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+      />
     </EnterpriseFilterBar>
 
     <div v-if="store.loading && !data" class="mb-4 grid gap-4 lg:grid-cols-2">

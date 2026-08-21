@@ -30,16 +30,28 @@ const label = computed(() => {
 const classes = computed(() => {
   const value = raw.value.toLowerCase();
 
-  if (['created', 'create', 'success', 'published', 'restored', '200', '201', 'info'].includes(value)) {
+  if (['get', 'head', 'options'].includes(value)) {
+    return 'bg-sky-50 text-sky-700 ring-sky-600/20';
+  }
+  if (['post'].includes(value)) {
+    return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
+  }
+  if (['put', 'patch'].includes(value)) {
+    return 'bg-amber-50 text-amber-800 ring-amber-600/20';
+  }
+  if (['delete'].includes(value)) {
+    return 'bg-rose-50 text-rose-700 ring-rose-600/20';
+  }
+  if (/^2\d\d$/.test(value) || ['created', 'create', 'success', 'published', 'restored', 'info'].includes(value)) {
     return 'bg-emerald-50 text-emerald-700 ring-emerald-600/20';
   }
   if (['updated', 'update', 'edited', 'assigned'].includes(value)) {
     return 'bg-sky-50 text-sky-700 ring-sky-600/20';
   }
-  if (['deleted', 'delete', 'destroyed', 'failed', 'error', 'unpublished', '500', 'danger'].includes(value)) {
+  if (/^5\d\d$/.test(value) || ['deleted', 'delete', 'destroyed', 'failed', 'error', 'unpublished', 'danger'].includes(value)) {
     return 'bg-rose-50 text-rose-700 ring-rose-600/20';
   }
-  if (['warning', 'exported', '4', '401', '403', '404', '422'].some((token) => value.startsWith(token))) {
+  if (/^4\d\d$/.test(value) || ['warning', 'exported'].includes(value)) {
     return 'bg-amber-50 text-amber-800 ring-amber-600/20';
   }
 

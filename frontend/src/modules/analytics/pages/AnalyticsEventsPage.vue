@@ -8,24 +8,26 @@
         <Squares2X2Icon class="h-4 w-4" />
         Overview
       </RouterLink>
-      <RouterLink
-        :to="{ name: 'analytics.saved-views' }"
-        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="exporting || !store.events.length"
+        @click="onExport"
       >
-        <BookmarkIcon class="h-4 w-4" />
-        Saved views
-      </RouterLink>
+        Export CSV
+      </button>
+      <button
+        type="button"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        :disabled="store.loading"
+        @click="reload"
+      >
+        <ArrowPathIcon class="h-4 w-4" :class="{ 'animate-spin': store.loading }" />
+        Refresh
+      </button>
     </Teleport>
 
     <AnalyticsSubnav />
-
-    <EnterpriseFilterBar
-      v-model="store.filters"
-      :categories="store.categories"
-      show-search
-      @apply="onApply"
-      @reset="onApply"
-    />
 
     <div v-if="store.loading && !store.eventsSummary" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div v-for="n in 4" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
@@ -52,16 +54,24 @@
     </div>
 
     <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
-      <div v-if="store.loading && !store.events.length" class="space-y-3 px-6 py-6 sm:px-8">
-        <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8 sm:py-6">
+        <EnterpriseFilterBar
+          v-model="store.filters"
+          embedded
+          show-search
+          :categories="store.categories"
+          @apply="onApply"
+          @reset="onApply"
+        />
       </div>
 
-      <EmptyState
-        v-else-if="!store.events.length"
-        title="No analytics events"
-        description="No analytics events were recorded in this period. Try a different date range or category."
+      <AnalyticsEventsTable
+        :events="store.events"
+        :loading="store.loading"
+        :framed="false"
+        @select="selected = $event"
       >
-        <template #action>
+        <template #empty-action>
           <button
             type="button"
             class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
@@ -70,37 +80,7 @@
             Reset filters
           </button>
         </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
-        <table class="min-w-full text-sm">
-          <thead>
-            <tr class="border-b border-zinc-100">
-              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Occurred</th>
-              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Category</th>
-              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Event</th>
-              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Source</th>
-              <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Subject</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="event in store.events"
-              :key="event.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
-            >
-              <td class="px-5 py-4 text-slate-600">{{ formatDate(event.occurred_at) }}</td>
-              <td class="px-5 py-4 capitalize text-slate-600">{{ event.category }}</td>
-              <td class="px-5 py-4 font-medium text-slate-900">{{ event.event_name }}</td>
-              <td class="px-5 py-4 text-slate-600">{{ event.event_source || '—' }}</td>
-              <td class="px-5 py-4 text-slate-600">
-                <span v-if="event.subject_type">{{ event.subject_type }}#{{ event.subject_id }}</span>
-                <span v-else>—</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      </AnalyticsEventsTable>
 
       <div v-if="store.eventsMeta?.total" class="border-t border-zinc-100 px-6 py-4 sm:px-8">
         <Pagination
@@ -111,34 +91,49 @@
         />
       </div>
     </div>
+
+    <EventDetailsDrawer
+      :open="Boolean(selected)"
+      :event="selected"
+      @close="selected = null"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
+  ArrowPathIcon,
   BoltIcon,
-  BookmarkIcon,
+  CodeBracketIcon,
+  Cog6ToothIcon,
+  DevicePhoneMobileIcon,
   FolderIcon,
   Squares2X2Icon,
   TagIcon,
+  UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
-import EmptyState from '@/components/ui/EmptyState.vue';
+import AnalyticsEventsTable from '@/modules/analytics/components/AnalyticsEventsTable.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import EnterpriseFilterBar from '@/modules/analytics/components/EnterpriseFilterBar.vue';
+import EventDetailsDrawer from '@/modules/analytics/components/EventDetailsDrawer.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
 const store = useEnterpriseAnalyticsStore();
 const toast = useToast();
+const selected = ref(null);
+const exporting = ref(false);
 
-const categoryIconStyles = [
-  { icon: FolderIcon, iconBg: 'bg-sky-50', iconColor: 'text-sky-500' },
-  { icon: TagIcon, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500' },
-  { icon: FolderIcon, iconBg: 'bg-amber-50', iconColor: 'text-amber-500' },
-];
+const categoryStyles = {
+  business: { icon: FolderIcon, iconBg: 'bg-sky-50', iconColor: 'text-sky-500' },
+  customer: { icon: UserGroupIcon, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500' },
+  application: { icon: DevicePhoneMobileIcon, iconBg: 'bg-amber-50', iconColor: 'text-amber-500' },
+  api: { icon: CodeBracketIcon, iconBg: 'bg-violet-50', iconColor: 'text-violet-500' },
+  operational: { icon: Cog6ToothIcon, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500' },
+};
 
 const topCategories = computed(() => {
   const byCategory = store.eventsSummary?.by_category || {};
@@ -160,13 +155,18 @@ const kpiCards = computed(() => {
     },
   ];
 
-  topCategories.value.forEach(([category, count], index) => {
-    const style = categoryIconStyles[index] || categoryIconStyles[0];
+  topCategories.value.forEach(([category, count]) => {
+    const style = categoryStyles[String(category).toLowerCase()] || {
+      icon: TagIcon,
+      iconBg: 'bg-zinc-100',
+      iconColor: 'text-slate-500',
+    };
     const value = Number(count || 0);
+    const share = total ? Math.round((value / total) * 100) : 0;
     cards.push({
-      label: category,
+      label: formatLabel(category),
       value: formatNumber(value),
-      hint: 'Top category',
+      hint: total ? `${share}% of events` : 'No events in this category',
       icon: style.icon,
       iconBg: value ? style.iconBg : 'bg-zinc-100',
       iconColor: value ? style.iconColor : 'text-slate-500',
@@ -198,15 +198,20 @@ function formatNumber(value) {
   return new Intl.NumberFormat().format(Number(value || 0));
 }
 
-function formatDate(value) {
-  if (!value) return '—';
-  return new Date(value).toLocaleString();
+function formatLabel(value) {
+  if (!value) {
+    return '';
+  }
+
+  return String(value)
+    .replace(/[_-]+/g, ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function onApply(next) {
   store.filters = { ...store.filters, ...next };
-  store.fetchEvents({ page: 1 });
-  store.fetchEventsSummary();
+  store.fetchEvents({ page: 1 }).catch(() => {});
+  store.fetchEventsSummary().catch(() => {});
 }
 
 function onPageChange(page) {
@@ -216,6 +221,41 @@ function onPageChange(page) {
 function onPerPage(perPage) {
   store.filters = { ...store.filters, per_page: perPage };
   store.fetchEvents({ per_page: perPage, page: 1 }).catch(() => {});
+}
+
+async function reload() {
+  await Promise.all([store.fetchEvents(), store.fetchEventsSummary()]).catch(() => {});
+}
+
+function csvValue(value) {
+  const text = value == null ? '' : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function onExport() {
+  exporting.value = true;
+  try {
+    const header = ['Occurred', 'Category', 'Event', 'Source', 'Subject', 'User', 'Company'];
+    const rows = store.events.map((event) => [
+      event.occurred_at || '',
+      event.category || '',
+      event.event_name || '',
+      event.event_source || '',
+      event.subject_type ? `${event.subject_type}#${event.subject_id || ''}` : '',
+      event.user?.full_name || event.user?.email || '',
+      event.company?.company_name || '',
+    ]);
+    const csv = [header, ...rows].map((row) => row.map(csvValue).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-events-${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  } finally {
+    exporting.value = false;
+  }
 }
 
 onMounted(async () => {

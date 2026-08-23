@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '';
+const usesRemoteApi = /^https?:\/\//i.test(apiBaseURL);
 
 const api = axios.create({
   baseURL: `${apiBaseURL}/api/v1`,
@@ -21,6 +22,12 @@ export function setAuthToken(token) {
 }
 
 export async function ensureCsrfCookie() {
+  // Remote SPA → API hosts cannot share XSRF cookies. Auth is Bearer-token
+  // based and Laravel already excludes api/* from CSRF validation.
+  if (usesRemoteApi) {
+    return;
+  }
+
   await axios.get(`${apiBaseURL}/sanctum/csrf-cookie`, {
     withCredentials: true,
     withXSRFToken: true,

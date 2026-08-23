@@ -1,16 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Feature Flag Manager" :description="configuration?.name || 'Toggle and edit feature flags for this configuration.'">
-      <template #actions>
-        <RouterLink
-          v-if="configuration"
-          :to="{ name: 'applications.configurations.edit', params: { id: route.params.id, configurationId: configuration.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          JSON editor
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           v-if="configuration"

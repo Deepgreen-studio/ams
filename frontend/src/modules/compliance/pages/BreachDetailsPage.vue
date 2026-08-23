@@ -1,25 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="store.current?.title || 'Breach details'"
-      :description="store.current?.breach_number || 'Incident workflow, timeline, and notifications'"
-    >
-      <template #actions>
-        <RouterLink
-          v-if="store.current"
-          :to="{ name: 'compliance.breaches.affected', params: { id: store.current.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Affected users
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'compliance.breaches.index' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           v-if="store.current"

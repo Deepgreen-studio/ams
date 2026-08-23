@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Consent audit view"
-      description="Audit trail of consent changes with IP, device, source, and actor metadata."
-    /> -->
     <ComplianceSubnav />
 
     <div

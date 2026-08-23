@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit environment"
-      description="Update URLs, status, and encrypted environment variables."
-    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
     <div
       v-if="environmentsStore.loading && !environmentsStore.selectedEnvironment"

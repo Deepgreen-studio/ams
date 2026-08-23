@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Breach reports"
-      description="Summary statistics and risk matrix snapshot for compliance reporting."
-    /> -->
     <ComplianceSubnav />
 
     <div

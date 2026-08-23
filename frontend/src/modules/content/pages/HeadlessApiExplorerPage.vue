@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="CMS API Explorer"
-      description="Try public and private headless CMS endpoints, manage delivery API keys, and inspect live JSON responses."
-    /> -->
     <ContentSubnav />
 
     <div class="mb-5 inline-flex rounded-[12px] bg-white p-1 ring-1 ring-zinc-100">

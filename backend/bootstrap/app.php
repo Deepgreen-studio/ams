@@ -41,6 +41,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [
             LogApiRequests::class,
         ]);
+
+        // Bearer-token API clients (local Vite → remote API) cannot share XSRF cookies.
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->report(function (Throwable $e) {

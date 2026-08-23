@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Edit license" description="Update license status, activations, and dates." /> -->
     <div v-if="store.loading && !license" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <div v-else-if="license" class="rounded-xl border border-slate-200 bg-white p-6">
       <LicenseForm

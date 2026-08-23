@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Create subscription" :description="`Add a plan for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <SubscriptionForm
         :loading="store.saving"

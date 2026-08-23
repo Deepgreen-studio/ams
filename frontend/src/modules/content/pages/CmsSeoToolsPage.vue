@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="SEO Tools"
-      description="Inspect sitemap and robots configuration, and validate social metadata for delivered CMS content."
-    /> -->
     <ContentSubnav />
 
     <div class="mb-5 grid gap-3 sm:grid-cols-2">

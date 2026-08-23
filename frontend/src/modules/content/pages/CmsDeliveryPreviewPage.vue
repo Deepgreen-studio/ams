@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="CMS Delivery Preview"
-      description="Preview published content delivery, SEO packages, and public search results exactly as headless consumers receive them."
-    /> -->
     <ContentSubnav />
 
     <div class="mb-5 border-b border-zinc-200">

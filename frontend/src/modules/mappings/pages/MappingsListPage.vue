@@ -1,18 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Data Mappings"
-      description="Enterprise field mapping profiles for external integrations."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'mappings.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create mapping
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           :to="{ name: 'mappings.create' }"

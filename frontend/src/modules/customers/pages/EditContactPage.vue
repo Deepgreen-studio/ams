@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Edit contact" description="Update contact details and classification." /> -->
     <div
       v-if="contactsStore.loading && !contactsStore.currentContact"
       class="h-64 animate-pulse rounded-xl bg-slate-100"

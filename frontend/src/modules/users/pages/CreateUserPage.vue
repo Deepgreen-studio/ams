@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Create user" description="Provision a new platform user account." /> -->
-
     <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <UserForm
         :loading="usersStore.saving"

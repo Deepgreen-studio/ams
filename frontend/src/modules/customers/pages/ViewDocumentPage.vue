@@ -1,56 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="document?.name || 'Document details'"
-      description="Preview, download, and version history."
-    >
-      <template #actions>
-        <template v-if="document">
-          <RouterLink
-            :to="{ name: 'customers.documents', params: { id: route.params.id } }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Back
-          </RouterLink>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            @click="
-              store.downloadDocument(document.uuid, document.original_filename || document.name)
-            "
-          >
-            Download
-          </button>
-          <RouterLink
-            v-if="!document.deleted_at"
-            :to="{
-              name: 'customers.documents.edit',
-              params: { id: route.params.id, documentId: document.uuid },
-            }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Edit
-          </RouterLink>
-          <button
-            v-if="document.deleted_at"
-            type="button"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-            :disabled="store.saving"
-            @click="restore"
-          >
-            Restore
-          </button>
-          <button
-            v-else
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showArchive = true"
-          >
-            Archive
-          </button>
-        </template>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <template v-if="document">
         <RouterLink

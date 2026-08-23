@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Assign application"
-      :description="`Link an application to ${customerName}.`"
-    /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <AssignmentForm
         :customer-id="route.params.id"

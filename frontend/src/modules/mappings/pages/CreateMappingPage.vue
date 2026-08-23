@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create mapping"
-      description="Build a reusable field mapping profile for an integration."
-    /> -->
     <MappingSubnav />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <MappingForm

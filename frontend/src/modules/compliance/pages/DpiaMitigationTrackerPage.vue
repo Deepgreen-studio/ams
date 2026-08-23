@@ -1,19 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Mitigation tracker"
-      description="Track open risks, mitigation plans, and action completion."
-    >
-      <template #actions>
-        <button
-          type="button"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          @click="showForm = !showForm"
-        >
-          {{ showForm ? 'Hide form' : 'Register risk' }}
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <button
           type="button"

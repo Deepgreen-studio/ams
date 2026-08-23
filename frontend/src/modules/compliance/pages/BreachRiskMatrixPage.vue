@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Risk matrix"
-      description="Likelihood × impact view of active breach assessments."
-    /> -->
     <ComplianceSubnav />
 
     <div

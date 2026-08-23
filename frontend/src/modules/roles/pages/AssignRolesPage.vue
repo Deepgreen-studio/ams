@@ -1,10 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Assign roles to user"
-      description="Sync one or more roles onto a platform user."
-    /> -->
-
     <div
       v-if="rolesStore.successMessage"
       class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"

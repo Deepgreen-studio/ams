@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit webhook"
-      description="Update webhook configuration and subscriptions."
-    /> -->
     <WebhookSubnav />
     <div
       v-if="store.loading && !store.currentWebhook"

@@ -1,27 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="current?.requester_name || 'Privacy request'"
-      description="Verification, approval, fulfilment, and timeline for this GDPR request."
-    >
-      <template #actions>
-        <template v-if="current">
-          <RouterLink
-            :to="{ name: 'compliance.privacy.verify', params: { id: current.uuid } }"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >
-            Verification
-          </RouterLink>
-          <button
-            type="button"
-            class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-            @click="showDelete = true"
-          >
-            Delete
-          </button>
-        </template>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <template v-if="current">
           <RouterLink
@@ -37,6 +15,7 @@
           >
             Delete
           </button>
+      </template>
     </Teleport>
 
     <ComplianceSubnav />

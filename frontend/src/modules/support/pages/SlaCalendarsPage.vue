@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Business Hours & Holidays" description="SLA calendars and holiday exceptions" /> -->
     <SupportSubnav />
 
     <div

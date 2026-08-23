@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit document"
-      description="Update document metadata (name, folder, status, expiry)."
-    /> -->
     <div v-if="store.loading && !document" class="h-48 animate-pulse rounded-xl bg-slate-100" />
     <form
       v-else-if="document"

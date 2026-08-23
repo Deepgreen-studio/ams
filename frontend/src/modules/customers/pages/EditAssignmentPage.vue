@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit assignment"
-      description="Update ownership, environment, status, and dates."
-    /> -->
     <div
       v-if="store.loading && !store.currentAssignment"
       class="h-64 animate-pulse rounded-xl bg-slate-100"

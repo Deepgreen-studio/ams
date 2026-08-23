@@ -7,10 +7,11 @@
 - [ ] `APP_ENV=production`
 - [ ] `APP_DEBUG=false`
 - [ ] Strong unique `APP_KEY`
-- [ ] Correct `APP_URL` and `FRONTEND_URL`
-- [ ] Explicit `CORS_ALLOWED_ORIGINS` (never `*` with credentials)
-- [ ] `SANCTUM_STATEFUL_DOMAINS` matches SPA host(s)
-- [ ] HTTPS only (cookies Secure/SameSite appropriately)
+- [ ] Correct `APP_URL` and `FRONTEND_URL` (SPA origin, e.g. `https://ams.eh.studio`)
+- [ ] Explicit `CORS_ALLOWED_ORIGINS` including the SPA origin (never `*` with credentials)
+- [ ] `SANCTUM_STATEFUL_DOMAINS` matches SPA host(s) (`ams.eh.studio,amsapi.eh.studio`)
+- [ ] HTTPS only (`SESSION_SECURE_COOKIE=true`, `SESSION_DOMAIN=.eh.studio` when using cookies)
+- [ ] After env changes: `php artisan config:clear` (or `config:cache` in production)
 
 ### Database & Cache
 

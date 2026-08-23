@@ -3,9 +3,33 @@ import vue from '@vitejs/plugin-vue';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
 
+const DEFAULT_PROXY_TARGET = 'https://amsapi.eh.studio';
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const proxyTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8080';
+  const proxyTarget = (env.VITE_PROXY_TARGET || DEFAULT_PROXY_TARGET).replace(/\/$/, '');
+
+  const proxyOptions = {
+    target: proxyTarget,
+    changeOrigin: true,
+    secure: true,
+    cookieDomainRewrite: '',
+    configure: (proxy) => {
+      proxy.on('proxyRes', (proxyRes) => {
+        const cookies = proxyRes.headers['set-cookie'];
+        if (!cookies) {
+          return;
+        }
+
+        proxyRes.headers['set-cookie'] = cookies.map((cookie) =>
+          cookie
+            .replace(/;\s*Secure/gi, '')
+            .replace(/;\s*SameSite=None/gi, '; SameSite=Lax')
+            .replace(/;\s*Domain=[^;]+/gi, ''),
+        );
+      });
+    },
+  };
 
   return {
     plugins: [vue(), tailwindcss()],
@@ -18,28 +42,11 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       host: true,
       proxy: {
-        '/api': {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
-        '/sanctum': {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
-        // Media library / public disk assets (thumbnails, open links)
-        '/storage': {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
-        // Public SEO discovery endpoints (crawler-facing web routes)
-        '/sitemap.xml': {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
-        '/robots.txt': {
-          target: proxyTarget,
-          changeOrigin: true,
-        },
+        '/api': proxyOptions,
+        '/sanctum': proxyOptions,
+        '/storage': proxyOptions,
+        '/sitemap.xml': proxyOptions,
+        '/robots.txt': proxyOptions,
       },
     },
   };

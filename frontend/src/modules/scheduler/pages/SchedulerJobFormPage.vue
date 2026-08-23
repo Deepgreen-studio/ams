@@ -1,18 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="isEdit ? 'Edit Scheduled Job' : 'Create Scheduled Job'"
-      description="Configure handler, schedule type, cron/delay, and queue options."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'scheduler.jobs' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Back
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'scheduler.jobs' }"

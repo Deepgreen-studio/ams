@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Edit mapping"
-      description="Update field mappings, transforms, and validation rules."
-    /> -->
     <MappingSubnav />
     <div
       v-if="store.loading && !store.currentMapping"

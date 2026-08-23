@@ -5,11 +5,14 @@ namespace Tests\Feature\Authentication;
 use App\Domains\Authentication\Notifications\PasswordResetNotification;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\URL;
+use ReflectionMethod;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
@@ -284,5 +287,18 @@ class AuthenticationTest extends TestCase
 
         $response->assertOk();
         $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_api_routes_are_excluded_from_csrf_for_token_clients(): void
+    {
+        $middleware = $this->app->make(ValidateCsrfToken::class);
+        $request = Request::create('/api/v1/auth/login', 'POST', [], [], [], [
+            'HTTP_ORIGIN' => 'http://localhost:5173',
+            'HTTP_REFERER' => 'http://localhost:5173/',
+        ]);
+
+        $inExceptArray = new ReflectionMethod(ValidateCsrfToken::class, 'inExceptArray');
+
+        $this->assertTrue($inExceptArray->invoke($middleware, $request));
     }
 }

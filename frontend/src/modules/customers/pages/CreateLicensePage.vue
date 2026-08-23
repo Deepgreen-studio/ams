@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Issue license" :description="`Create a license key for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <LicenseForm
         :default-subscription-id="route.query.subscription || ''"

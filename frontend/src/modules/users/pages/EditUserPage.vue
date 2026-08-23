@@ -1,7 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Edit user" description="Update account details and status." /> -->
-
     <div
       v-if="usersStore.loading && !usersStore.currentUser"
       class="rounded-[12px] bg-white p-6 sm:p-8"

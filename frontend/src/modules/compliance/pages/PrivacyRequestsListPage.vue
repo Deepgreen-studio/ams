@@ -1,24 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Privacy requests"
-      description="Search and manage GDPR access, export, deletion, and related rights requests."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'compliance.privacy.dashboard' }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Dashboard
-        </RouterLink>
-        <RouterLink
-          :to="{ name: 'compliance.privacy.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          New request
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           :to="{ name: 'compliance.privacy.dashboard' }"

@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Add environment"
-      description="Register a Development, Testing, Staging, Production, or Sandbox environment."
-    /> -->
     <ApplicationSubnav :application-id="route.params.id" />
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <EnvironmentForm

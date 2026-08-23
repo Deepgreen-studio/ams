@@ -1,5 +1,34 @@
 <?php
 
+$parseOrigins = static function (?string $value): array {
+    return array_values(array_unique(array_filter(array_map(
+        static function (string $origin): string {
+            $origin = trim($origin, " \n\r\t\v\0/");
+
+            if ($origin === '') {
+                return '';
+            }
+
+            $parts = parse_url($origin);
+
+            if (! is_array($parts) || empty($parts['scheme']) || empty($parts['host'])) {
+                return $origin;
+            }
+
+            $port = isset($parts['port']) ? ':' . $parts['port'] : '';
+
+            return $parts['scheme'] . '://' . $parts['host'] . $port;
+        },
+        explode(',', (string) $value)
+    ))));
+};
+
+$frontendOrigin = $parseOrigins((string) env('FRONTEND_URL', 'http://localhost:5173'));
+$configuredOrigins = $parseOrigins((string) env(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:5173,http://127.0.0.1:5173'
+));
+
 return [
 
     /*
@@ -7,8 +36,8 @@ return [
     | Cross-Origin Resource Sharing (CORS) Configuration
     |--------------------------------------------------------------------------
     |
-    | Configure cross-origin resource sharing for the AMS API and Sanctum
-    | CSRF cookie endpoint. Restrict allowed origins in production.
+    | Configure cross-origin resource sharing for the AMS API. FRONTEND_URL is
+    | always merged so a stale CORS_ALLOWED_ORIGINS list cannot block the SPA.
     |
     */
 
@@ -16,14 +45,18 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_values(array_filter(
-        array_map('trim', explode(',', (string) env(
-            'CORS_ALLOWED_ORIGINS',
-            'http://localhost:5173,http://127.0.0.1:5173'
-        )))
-    )),
+    'allowed_origins' => array_values(array_unique(array_merge(
+        $configuredOrigins,
+        $frontendOrigin
+    ))),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env(
+            'CORS_ALLOWED_ORIGIN_PATTERNS',
+            '#^https://([a-z0-9-]+\.)?eh\.studio$#'
+        ))
+    ))),
 
     'allowed_headers' => ['*'],
 

@@ -1,21 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="current?.subject_name || current?.subject_email || 'Consent details'"
-      description="Consent audit details, metadata, and timeline."
-    >
-      <template #actions>
-        <button
-          v-if="current?.granted"
-          type="button"
-          class="rounded-lg bg-rose-600 px-4 py-2 text-sm font-medium text-white hover:bg-rose-700"
-          :disabled="store.saving"
-          @click="onWithdraw"
-        >
-          Withdraw consent
-        </button>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <button
           v-if="current?.granted"

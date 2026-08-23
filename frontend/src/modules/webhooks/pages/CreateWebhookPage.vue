@@ -1,9 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      title="Create webhook"
-      description="Register an incoming or outgoing webhook endpoint."
-    /> -->
     <WebhookSubnav />
     <div class="overflow-hidden rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100">
       <WebhookForm

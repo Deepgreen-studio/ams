@@ -1,16 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader :title="mapping?.name || 'Mapping details'" :description="subtitle">
-      <template #actions>
-        <RouterLink
-          v-if="mapping"
-          :to="{ name: 'mappings.edit', params: { id: mapping.uuid } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Edit builder
-        </RouterLink>
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           v-if="mapping"

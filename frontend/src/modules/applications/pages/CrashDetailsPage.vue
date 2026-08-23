@@ -1,17 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader
-      :title="crash?.title || 'Crash details'"
-      description="Stack trace, crash logs, affected version and device."
-    >
-      <template #actions>
-        <RouterLink
-          :to="{ name: 'applications.monitoring.crashes', params: { id: route.params.id } }"
-          class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-          >Back</RouterLink
-        >
-      </template>
-    </PageHeader> -->
     <Teleport defer to="#page-header-actions">
       <RouterLink
           :to="{ name: 'applications.monitoring.crashes', params: { id: route.params.id } }"

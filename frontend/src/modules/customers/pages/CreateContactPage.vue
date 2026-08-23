@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <PageHeader title="Add contact" :description="`Create a contact for ${customerName}.`" /> -->
     <div class="rounded-xl border border-slate-200 bg-white p-6">
       <ContactForm
         :loading="contactsStore.saving"

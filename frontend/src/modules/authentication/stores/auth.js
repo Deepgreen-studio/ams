@@ -35,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false);
   const error = ref(null);
   const rememberMe = ref(localStorage.getItem(REMEMBER_KEY) === '1');
+  const sessionExpired = ref(false);
 
   const isAuthenticated = computed(() => Boolean(user.value));
   const isEmailVerified = computed(() => Boolean(user.value?.email_verified));
@@ -95,6 +96,16 @@ export const useAuthStore = defineStore('auth', () => {
     setAuthToken(token.value);
   }
 
+  function clearSession({ expired = false } = {}) {
+    user.value = null;
+    token.value = null;
+    persistToken(null, false);
+
+    if (expired) {
+      sessionExpired.value = true;
+    }
+  }
+
   async function initialize() {
     if (initialized.value) {
       return;
@@ -107,9 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { data } = await authService.me();
       user.value = data.data?.user ?? null;
     } catch {
-      user.value = null;
-      token.value = null;
-      persistToken(null, false);
+      clearSession();
     } finally {
       initialized.value = true;
       loading.value = false;
@@ -130,6 +139,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = data.data?.token ?? null;
       persistToken(token.value, remember);
       initialized.value = true;
+      sessionExpired.value = false;
       return data;
     } catch (err) {
       error.value = err.message || 'Unable to login';
@@ -146,9 +156,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.logout();
     } finally {
-      user.value = null;
-      token.value = null;
-      persistToken(null, false);
+      clearSession();
       loading.value = false;
     }
   }
@@ -158,9 +166,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await authService.logoutAll();
     } finally {
-      user.value = null;
-      token.value = null;
-      persistToken(null, false);
+      clearSession();
       loading.value = false;
     }
   }
@@ -212,6 +218,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading,
     error,
     rememberMe,
+    sessionExpired,
     isAuthenticated,
     isEmailVerified,
     permissions,
@@ -225,6 +232,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     logoutAll,
+    clearSession,
     refreshSession,
     changePassword,
   };

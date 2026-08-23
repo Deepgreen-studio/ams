@@ -7,13 +7,14 @@
       :autocomplete="autocomplete"
       :required="required"
       :disabled="disabled"
-      class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 pr-10 text-sm text-slate-900 shadow-none outline-none transition focus:border-brand-500 focus:outline-none focus:ring-0 disabled:bg-slate-50"
+      class="h-11 w-full rounded-xl bg-white px-3.5 pr-11 text-sm text-zinc-900 outline-none ring-1 ring-zinc-200 transition placeholder:text-zinc-400 focus:ring-brand-500 disabled:bg-zinc-50"
+      :placeholder="placeholder"
       :class="inputClass"
       @input="$emit('update:modelValue', $event.target.value)"
     />
     <button
       type="button"
-      class="absolute inset-y-0 right-0 px-3 text-slate-500 hover:text-slate-700"
+      class="absolute inset-y-0 right-0 px-3 text-zinc-400 hover:text-zinc-700"
       :aria-label="visible ? 'Hide password' : 'Show password'"
       @click="visible = !visible"
     >
@@ -34,6 +35,7 @@ defineProps({
   required: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
   inputClass: { type: [String, Object, Array], default: '' },
+  placeholder: { type: String, default: '' },
 });
 
 defineEmits(['update:modelValue']);

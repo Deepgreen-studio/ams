@@ -1,14 +1,19 @@
 <template>
   <div class="space-y-4 text-center">
-    <h2 class="text-lg font-semibold text-slate-900">Email verification</h2>
-    <p class="text-sm text-slate-500">{{ statusMessage }}</p>
-    <ErrorState v-if="errorMessage" title="Verification failed" :message="errorMessage" />
+    <p class="text-sm text-zinc-500">{{ statusMessage }}</p>
+    <div
+      v-if="errorMessage"
+      class="rounded-xl bg-red-50 px-3.5 py-2.5 text-left text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </div>
     <RouterLink
       v-if="done"
       :to="{ name: 'login' }"
-      class="inline-flex rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700"
+      class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold text-white hover:bg-brand-700"
     >
-      Continue to login
+      Continue to sign in
     </RouterLink>
   </div>
 </template>
@@ -16,7 +21,6 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import ErrorState from '@/components/ui/ErrorState.vue';
 import { authService } from '@/modules/authentication/services/authService';
 
 const route = useRoute();

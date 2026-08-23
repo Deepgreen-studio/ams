@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { expireClientSession, isPublicAuthRequest, isSessionAuthenticationFailure } from '@/services/sessionGuard';
 
 const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '';
 const usesRemoteApi = /^https?:\/\//i.test(apiBaseURL);
@@ -41,6 +42,13 @@ export async function ensureCsrfCookie() {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    if (
+      !isPublicAuthRequest(error.config) &&
+      isSessionAuthenticationFailure(error)
+    ) {
+      expireClientSession();
+    }
+
     const payload = error.response?.data ?? {
       success: false,
       message: 'Unexpected Error',

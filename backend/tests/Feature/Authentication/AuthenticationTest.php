@@ -116,6 +116,15 @@ class AuthenticationTest extends TestCase
             ->assertJsonPath('data.user.email', $user->email);
     }
 
+    public function test_unauthenticated_request_returns_session_contract(): void
+    {
+        $this->getJson('/api/v1/auth/me')
+            ->assertUnauthorized()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('message', 'Unauthorized')
+            ->assertJsonPath('code', 'UNAUTHENTICATED');
+    }
+
     public function test_user_can_logout(): void
     {
         $user = User::factory()->create([

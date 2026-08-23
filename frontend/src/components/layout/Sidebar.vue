@@ -20,16 +20,7 @@
             :class="collapsed ? 'justify-center px-2' : 'px-5'"
         >
             <div class="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden="true">
-                <svg viewBox="0 0 40 40" class="h-9 w-9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="20" cy="20" r="18" fill="#FF5C00" />
-                    <path
-                        d="M20 8.5L28.5 13.5V22.5L20 27.5L11.5 22.5V13.5L20 8.5Z"
-                        stroke="white"
-                        stroke-width="2"
-                        fill="none"
-                    />
-                    <circle cx="20" cy="18" r="3.5" fill="white" />
-                </svg>
+                <AmsMark class="h-9 w-9" />
             </div>
             <p v-if="!collapsed" class="truncate text-xl font-bold tracking-tight text-white">
                 {{ appStore.appName }}
@@ -128,6 +119,7 @@ import {
     ClipboardDocumentListIcon,
     ClockIcon,
     Cog6ToothIcon,
+    BookOpenIcon,
     DevicePhoneMobileIcon,
     DocumentTextIcon,
     HomeIcon,
@@ -144,6 +136,7 @@ import {
     UserGroupIcon,
     UsersIcon,
 } from '@heroicons/vue/24/outline';
+import AmsMark from '@/components/brand/AmsMark.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useAppStore } from '@/stores/app';
 
@@ -230,6 +223,15 @@ const navigationCatalog = [
                 to: { name: 'integrations.index' },
                 icon: PuzzlePieceIcon,
                 match: ['integrations.'],
+                exclude: ['integrations.docs'],
+                permission: 'integrations.view',
+            },
+            {
+                name: 'integrations.docs',
+                label: 'API Docs',
+                to: { name: 'integrations.docs' },
+                icon: BookOpenIcon,
+                match: ['integrations.docs'],
                 permission: 'integrations.view',
             },
             {

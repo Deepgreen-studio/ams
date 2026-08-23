@@ -2,6 +2,12 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        :to="{ name: 'integrations.docs' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        API Docs
+      </RouterLink>
+      <RouterLink
         v-if="can('integrations.create')"
         :to="{ name: 'integrations.create' }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -9,6 +15,8 @@
         Create integration
       </RouterLink>
     </Teleport>
+
+    <IntegrationsHubSubnav />
 
     <div
       v-if="integrationsStore.successMessage"
@@ -84,6 +92,7 @@ import { RouterLink } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
+import IntegrationsHubSubnav from '@/modules/integrations/components/IntegrationsHubSubnav.vue';
 import IntegrationTable from '@/modules/integrations/components/IntegrationTable.vue';
 import SearchFilters from '@/modules/integrations/components/SearchFilters.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';

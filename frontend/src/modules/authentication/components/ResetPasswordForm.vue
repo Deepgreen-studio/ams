@@ -1,46 +1,56 @@
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
-    <div class="text-center">
-      <h2 class="text-lg font-semibold text-slate-900">Reset password</h2>
-      <p class="mt-1 text-sm text-slate-500">Choose a new password for your account.</p>
-    </div>
-
     <div>
-      <label for="reset-email" class="mb-1 block text-sm font-medium text-slate-700">Email</label>
+      <label for="reset-email" class="mb-1.5 block text-sm font-medium text-zinc-700">Email</label>
       <input
         id="reset-email"
         v-model="form.email"
         type="email"
+        autocomplete="username"
         required
         :disabled="loading"
-        class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+        class="h-11 w-full rounded-xl bg-white px-3.5 text-sm text-zinc-900 outline-none ring-1 ring-zinc-200 transition placeholder:text-zinc-400 focus:ring-brand-500 disabled:bg-zinc-50"
       />
     </div>
 
     <div>
-      <label for="reset-password" class="mb-1 block text-sm font-medium text-slate-700">New password</label>
-      <PasswordInput id="reset-password" v-model="form.password" autocomplete="new-password" required :disabled="loading" />
+      <label for="reset-password" class="mb-1.5 block text-sm font-medium text-zinc-700">New password</label>
+      <PasswordInput
+        id="reset-password"
+        v-model="form.password"
+        autocomplete="new-password"
+        placeholder=""
+        required
+        :disabled="loading"
+      />
     </div>
 
     <div>
-      <label for="reset-password-confirmation" class="mb-1 block text-sm font-medium text-slate-700">Confirm password</label>
+      <label for="reset-password-confirmation" class="mb-1.5 block text-sm font-medium text-zinc-700">Confirm password</label>
       <PasswordInput
         id="reset-password-confirmation"
         v-model="form.password_confirmation"
         autocomplete="new-password"
+        placeholder=""
         required
         :disabled="loading"
       />
     </div>
 
-    <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+    <p v-if="successMessage" class="rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
       {{ successMessage }}
     </p>
-    <ErrorState v-if="errorMessage" title="Reset failed" :message="errorMessage" />
+    <div
+      v-if="errorMessage"
+      class="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm text-red-700"
+      role="alert"
+    >
+      {{ errorMessage }}
+    </div>
 
     <button
       type="submit"
-      class="inline-flex w-full items-center justify-center rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-700 disabled:opacity-60"
+      class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
       :disabled="loading"
     >
       {{ loading ? 'Updating...' : 'Reset password' }}
@@ -51,7 +61,6 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import ErrorState from '@/components/ui/ErrorState.vue';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import { authService } from '@/modules/authentication/services/authService';
 

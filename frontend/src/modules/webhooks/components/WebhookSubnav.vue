@@ -51,6 +51,12 @@ const items = [
     to: { name: 'webhooks.events' },
     match: ['webhooks.events'],
   },
+  {
+    name: 'integrations.docs',
+    label: 'API Docs',
+    to: { name: 'integrations.docs' },
+    match: ['integrations.docs'],
+  },
 ];
 
 function isActive(item) {

@@ -21,12 +21,17 @@ class ApiResponse
     public static function error(
         string $message = 'Unexpected Error',
         int $status = 500,
-        mixed $errors = null
+        mixed $errors = null,
+        ?string $code = null
     ): JsonResponse {
         $payload = [
             'success' => false,
             'message' => $message,
         ];
+
+        if ($code !== null) {
+            $payload['code'] = $code;
+        }
 
         if ($errors !== null) {
             $payload['errors'] = $errors;
@@ -49,7 +54,7 @@ class ApiResponse
 
     public static function unauthorized(string $message = 'Unauthorized'): JsonResponse
     {
-        return self::error($message, 401);
+        return self::error($message, 401, null, 'UNAUTHENTICATED');
     }
 
     public static function forbidden(string $message = 'Forbidden'): JsonResponse

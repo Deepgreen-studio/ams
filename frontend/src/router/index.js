@@ -1520,6 +1520,12 @@ const router = createRouter({
           meta: { title: 'Create Integration', requiresAuth: true },
         },
         {
+          path: 'integrations/docs',
+          name: 'integrations.docs',
+          component: () => import('@/modules/integrations/pages/ApiDocsPage.vue'),
+          meta: { title: 'API Documentation', requiresAuth: true },
+        },
+        {
           path: 'integrations/:id',
           name: 'integrations.show',
           component: () => import('@/modules/integrations/pages/IntegrationDetailsPage.vue'),

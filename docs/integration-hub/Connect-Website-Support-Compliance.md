@@ -31,7 +31,7 @@ cd k:\herd\ams\backend && php artisan db:seed --class=EasyCareCompanySeeder
 cd k:\herd\easycare-api && php artisan ams:sync-webhook && php artisan ams:verify-support-bridge --privacy
 ```
 
-Dashboard: `http://easycare-api.test/dashboard/sms`  
+Dashboard: `https://easycare.eh.studio/dashboard/sms` (local: `http://easycare-api.test/dashboard/sms`)  
 Bridge services: `AmsSupportBridge`, `SupportComplianceIntent`, `AmsReplyIngestService`  
 
 ---

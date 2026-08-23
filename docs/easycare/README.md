@@ -1,6 +1,17 @@
-# EasyCare — Local API Connection (Support / Complaint / SMS / Compliance)
+# EasyCare — AMS Connection (Support / Complaint / SMS / Compliance)
 
-Connects AMS Integration Hub to the local **easycare-api** project (`k:\herd\easycare-api`).
+Connects AMS Integration Hub to **EasyCare** (`k:\herd\easycare-api`).
+
+## Live hosts
+
+| Service | URL |
+|---------|-----|
+| EasyCare | `https://easycare.eh.studio` |
+| AMS SPA | `https://ams.eh.studio` |
+| AMS API | `https://amsapi.eh.studio` |
+| Incoming webhook | `POST https://amsapi.eh.studio/api/v1/webhooks/incoming/easycare` |
+| AMS → EasyCare replies | `POST https://easycare.eh.studio/api/v1/ams/support-replies` |
+| EasyCare Support UI | `https://easycare.eh.studio/dashboard/sms` |
 
 ## Seed (AMS)
 
@@ -33,7 +44,7 @@ Also included in `DatabaseSeeder`.
 
 | Variable | Purpose |
 |----------|---------|
-| `EASYCARE_API_BASE_URL` | EasyCare base (default `http://easycare-api.test`) |
+| `EASYCARE_API_BASE_URL` | EasyCare base (default `https://easycare.eh.studio`) |
 | `EASYCARE_SUPPORT_REPLY_URL` | Outgoing reply target |
 | `EASYCARE_API_TOKEN` | Sanctum bearer for auth tests |
 | `EASYCARE_AMS_WEBHOOK_SECRET` | Shared HMAC secret (default `easycare-ams-secret`) |
@@ -41,12 +52,14 @@ Also included in `DatabaseSeeder`.
 ## Env (easycare-api `.env`)
 
 ```env
-AMS_WEBHOOK_URL=http://ams.test/api/v1/webhooks/incoming/easycare
+AMS_WEBHOOK_URL=https://amsapi.eh.studio/api/v1/webhooks/incoming/easycare
 AMS_WEBHOOK_SECRET=easycare-ams-secret
 AMS_APPLICATION_SLUG=easycare-web
 AMS_SUPPORT_PHONE=+15550000999
 AMS_FORWARD_SUPPORT_SMS=true
 ```
+
+Local Herd fallback: `AMS_WEBHOOK_URL=http://ams.test/api/v1/webhooks/incoming/easycare`.
 
 Sync the EasyCare outbound endpoint from env:
 

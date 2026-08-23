@@ -10,7 +10,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Leave `VITE_API_BASE_URL` empty so the Vite dev server proxies `/api` and `/sanctum` to `VITE_PROXY_TARGET` (default `https://amsapi.eh.studio`). Direct cross-origin calls from `localhost:5173` cannot send Sanctum CSRF cookies and return `CSRF token mismatch.`
+Leave `VITE_API_BASE_URL` empty so the Vite dev server proxies `/api` and `/sanctum` to `VITE_PROXY_TARGET` (default `https://amsapi.eh.studio`). Direct calls from `localhost` to `https://amsapi.eh.studio` are a cross-origin request and are blocked by CORS (and cannot share Sanctum CSRF cookies).
 
 ## Production
 

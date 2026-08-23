@@ -11,6 +11,7 @@
 - [ ] Explicit `CORS_ALLOWED_ORIGINS` including the SPA origin (never `*` with credentials)
 - [ ] `SANCTUM_STATEFUL_DOMAINS` matches SPA host(s) (`ams.eh.studio,amsapi.eh.studio`)
 - [ ] HTTPS only (`SESSION_SECURE_COOKIE=true`, `SESSION_DOMAIN=.eh.studio` when using cookies)
+- [ ] `EASYCARE_API_BASE_URL=https://easycare.eh.studio` and matching outgoing reply URL
 - [ ] After env changes: `php artisan config:clear` (or `config:cache` in production)
 
 ### Database & Cache

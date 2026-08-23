@@ -26,8 +26,22 @@ $parseOrigins = static function (?string $value): array {
 $frontendOrigin = $parseOrigins((string) env('FRONTEND_URL', 'http://localhost:5173'));
 $configuredOrigins = $parseOrigins((string) env(
     'CORS_ALLOWED_ORIGINS',
-    'http://localhost:5173,http://127.0.0.1:5173'
+    'http://localhost:5173,http://localhost:5174,http://localhost:5175,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:5175'
 ));
+
+$originPatterns = array_values(array_filter(array_map(
+    'trim',
+    explode(',', (string) env(
+        'CORS_ALLOWED_ORIGIN_PATTERNS',
+        '#^https://([a-z0-9-]+\.)?eh\.studio$#'
+    ))
+)));
+
+$localOriginPattern = '#^https?://(localhost|127\.0\.0\.1)(:\d+)?$#';
+
+if (env('APP_ENV') !== 'production' && ! in_array($localOriginPattern, $originPatterns, true)) {
+    $originPatterns[] = $localOriginPattern;
+}
 
 return [
 
@@ -50,13 +64,7 @@ return [
         $frontendOrigin
     ))),
 
-    'allowed_origins_patterns' => array_values(array_filter(array_map(
-        'trim',
-        explode(',', (string) env(
-            'CORS_ALLOWED_ORIGIN_PATTERNS',
-            '#^https://([a-z0-9-]+\.)?eh\.studio$#'
-        ))
-    ))),
+    'allowed_origins_patterns' => $originPatterns,
 
     'allowed_headers' => ['*'],
 

@@ -22,9 +22,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Local EasyCare API (k:\herd\easycare-api) connection for AMS Integration Hub.
+ * EasyCare API (https://easycare.eh.studio) connection for AMS Integration Hub.
  *
- * Default local base URL: http://easycare-api.test
  * Override with EASYCARE_API_BASE_URL / EASYCARE_API_TOKEN / EASYCARE_AMS_WEBHOOK_SECRET.
  */
 class EasyCareCompanySeeder extends Seeder
@@ -43,7 +42,7 @@ class EasyCareCompanySeeder extends Seeder
 
     private function seedCompany(?User $actor): Company
     {
-        $base = rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/');
+        $base = rtrim((string) env('EASYCARE_API_BASE_URL', 'https://easycare.eh.studio'), '/');
 
         $company = Company::query()->firstOrCreate(
             ['company_name' => 'EasyCare'],
@@ -78,7 +77,7 @@ class EasyCareCompanySeeder extends Seeder
 
     private function seedIntegration(Company $company, ?User $actor): Integration
     {
-        $baseUrl = rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/').'/';
+        $baseUrl = rtrim((string) env('EASYCARE_API_BASE_URL', 'https://easycare.eh.studio'), '/').'/';
         $token = (string) env('EASYCARE_API_TOKEN', 'SEED_PLACEHOLDER_TOKEN');
 
         $integration = Integration::query()->firstOrCreate(
@@ -88,7 +87,7 @@ class EasyCareCompanySeeder extends Seeder
             ],
             [
                 'name' => 'EasyCare API',
-                'description' => 'Local EasyCare healthcare REST API (Sanctum bearer). Default http://easycare-api.test.',
+                'description' => 'EasyCare healthcare REST API (Sanctum bearer). Live host https://easycare.eh.studio.',
                 'type' => IntegrationType::RestApi,
                 'status' => IntegrationStatus::Active,
                 'authentication_type' => IntegrationAuthenticationType::BearerToken,
@@ -136,7 +135,7 @@ class EasyCareCompanySeeder extends Seeder
             [
                 'integration_id' => $integration->id,
                 'name' => 'EasyCare',
-                'description' => 'EasyCare healthcare platform (local easycare-api).',
+                'description' => 'EasyCare healthcare platform.',
                 'platform' => $platform,
                 'category' => ApplicationCategory::Health,
                 'current_version' => '1.0.0',
@@ -183,7 +182,7 @@ class EasyCareCompanySeeder extends Seeder
                 'timeout' => 30,
                 'retry_attempts' => 3,
                 'retry_delay_seconds' => 60,
-                'verify_ssl' => false,
+                'verify_ssl' => true,
                 'created_by' => $actor?->id,
                 'updated_by' => $actor?->id,
             ]
@@ -226,7 +225,7 @@ class EasyCareCompanySeeder extends Seeder
         $secret = (string) env('EASYCARE_AMS_WEBHOOK_SECRET', env('AMS_WEBHOOK_SECRET', 'easycare-ams-secret'));
         $replyUrl = rtrim((string) env(
             'EASYCARE_SUPPORT_REPLY_URL',
-            rtrim((string) env('EASYCARE_API_BASE_URL', 'http://easycare-api.test'), '/').'/api/v1/ams/support-replies'
+            rtrim((string) env('EASYCARE_API_BASE_URL', 'https://easycare.eh.studio'), '/').'/api/v1/ams/support-replies'
         ), '/');
 
         // Normalize if env base already includes path accidentally.
@@ -257,7 +256,7 @@ class EasyCareCompanySeeder extends Seeder
                 'timeout' => 30,
                 'retry_attempts' => 3,
                 'retry_delay_seconds' => 60,
-                'verify_ssl' => false,
+                'verify_ssl' => str_starts_with($replyUrl, 'https://'),
                 'created_by' => $actor?->id,
                 'updated_by' => $actor?->id,
             ]
@@ -276,6 +275,7 @@ class EasyCareCompanySeeder extends Seeder
                 'support.sms.sent',
                 'support.ticket.updated',
             ],
+            'verify_ssl' => str_starts_with($replyUrl, 'https://'),
             'updated_by' => $actor?->id,
         ])->save();
 

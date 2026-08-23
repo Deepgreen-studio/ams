@@ -17,10 +17,12 @@
 
     <IntegrationsHubSubnav />
 
-    <div class="grid gap-6 xl:grid-cols-12">
-      <aside class="xl:col-span-3">
+    <div class="grid items-start gap-6 xl:grid-cols-12">
+      <aside
+        class="xl:sticky xl:top-[106px] xl:col-span-3 xl:max-h-[calc(100vh-7.625rem)] xl:overflow-y-auto"
+      >
         <nav
-          class="sticky top-4 rounded-[12px] bg-white p-4 ring-1 ring-zinc-100"
+          class="rounded-[12px] bg-white p-4 ring-1 ring-zinc-100"
           aria-label="Documentation sections"
         >
           <p class="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
@@ -44,7 +46,7 @@
       </aside>
 
       <div class="min-w-0 space-y-6 xl:col-span-9">
-        <section id="overview" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="overview" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h1 class="text-xl font-semibold tracking-tight text-slate-900">How AMS connects another app</h1>
           <p class="mt-2 text-sm leading-6 text-slate-600">
             Your website or mobile app does not need a custom AMS plugin. Post signed JSON to one incoming
@@ -74,7 +76,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           </dl>
         </section>
 
-        <section id="connect" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="connect" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">One-time setup in AMS</h2>
           <ol class="mt-4 space-y-3 text-sm text-slate-700">
             <li class="flex gap-3">
@@ -128,7 +130,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           </ol>
         </section>
 
-        <section id="incoming" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="incoming" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">Incoming webhook API</h2>
           <p class="mt-2 text-sm text-slate-600">
             Your app POSTs signed JSON. Do not send a Sanctum token. Sign the
@@ -163,7 +165,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           <CodeSample label="curl" :code="curlExample" />
         </section>
 
-        <section id="forms" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="forms" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">Support, complaint, and compliance</h2>
           <p class="mt-2 text-sm text-slate-600">
             Complaint is not a separate AMS module. Send
@@ -213,7 +215,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           </div>
         </section>
 
-        <section id="replies" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="replies" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">Agent replies (AMS → your app)</h2>
           <p class="mt-2 text-sm text-slate-600">
             Only <strong>Public</strong> agent replies leave AMS. Private and internal notes stay here.
@@ -224,7 +226,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           <CodeSample label="Outgoing envelope" :code="replyExample" />
         </section>
 
-        <section id="sync" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="sync" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">Sync (AMS pulls your API)</h2>
           <p class="mt-2 text-sm text-slate-600">
             Sync is not a webhook. AMS calls your REST API using the Integration base URL plus the
@@ -252,7 +254,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
           </p>
         </section>
 
-        <section id="errors" class="scroll-mt-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
+        <section id="errors" class="scroll-mt-[106px] rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-7">
           <h2 class="text-lg font-semibold text-slate-900">Responses and errors</h2>
           <p class="mt-2 text-sm text-slate-600">
             Dashboard APIs use Sanctum. Incoming webhooks do not.
@@ -406,7 +408,7 @@ function onScroll() {
       return el ? { id: item.id, top: el.getBoundingClientRect().top } : null;
     })
     .filter(Boolean);
-  const current = [...positions].reverse().find((item) => item.top <= 120);
+  const current = [...positions].reverse().find((item) => item.top <= 140);
   if (current) {
     activeSection.value = current.id;
   }

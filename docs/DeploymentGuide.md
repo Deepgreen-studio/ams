@@ -30,7 +30,7 @@
 
 ### Workers
 
-- [ ] Queue worker(s): `php artisan queue:work --sleep=1 --tries=3`
+- [ ] Queue worker(s): `php artisan ams:queue-work --sleep=1 --tries=3`
 - [ ] Scheduler via cron: `* * * * * php artisan schedule:run`
 - [ ] Process managers (Supervisor/systemd) with restart on failure
 

@@ -80,7 +80,7 @@ Open `http://localhost:5173`
 | Seed | `cd backend && php artisan db:seed` |
 | Test | `cd backend && php artisan test` |
 | Format (Pint) | `cd backend && vendor/bin/pint` |
-| Queue worker | `cd backend && php artisan queue:work` |
+| Queue worker | `cd backend && php artisan ams:queue-work` |
 | Frontend build | `cd frontend && npm run build` |
 | Frontend lint | `cd frontend && npm run lint` (if configured) |
 

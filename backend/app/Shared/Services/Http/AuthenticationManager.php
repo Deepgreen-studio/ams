@@ -53,7 +53,13 @@ class AuthenticationManager
      */
     protected function applyBearer(array $credentials): array
     {
-        $token = (string) ($credentials['bearer_token'] ?? $credentials['access_token'] ?? '');
+        $token = (string) (
+            $credentials['bearer_token']
+            ?? $credentials['access_token']
+            ?? $credentials['api_token']
+            ?? $credentials['token']
+            ?? ''
+        );
         if ($token === '') {
             throw new ApiException('Bearer token credentials are not configured.', 422);
         }

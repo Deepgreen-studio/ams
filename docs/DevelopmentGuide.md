@@ -69,7 +69,7 @@ vendor/bin/pint
 ## Queues & Scheduler (local)
 
 ```bash
-php artisan queue:work
+php artisan ams:queue-work
 php artisan schedule:work
 ```
 

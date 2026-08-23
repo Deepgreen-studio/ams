@@ -135,6 +135,13 @@
               {{ lastRun.updated }} updated · {{ lastRun.failed }} failed ·
               {{ lastRun.skipped }} skipped
             </p>
+            <p v-if="isActiveRun(lastRun.status)" class="mt-2 text-xs text-amber-700">
+              Waiting for a queue worker. Uncheck Background queue to run now, or start
+              <code class="font-mono">php artisan ams:queue-work</code> in the backend folder.
+            </p>
+            <p v-if="lastRun.error_message" class="mt-2 text-xs text-rose-600">
+              {{ lastRun.error_message }}
+            </p>
             <RouterLink
               :to="{ name: 'sync.logs', query: { sync_run: lastRun.uuid } }"
               class="mt-3 inline-block text-xs font-medium text-brand-700 hover:underline"
@@ -149,19 +156,21 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { useToast } from '@/composables/useToast';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import SyncProgressBar from '@/modules/sync/components/SyncProgressBar.vue';
 import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
+import { syncService } from '@/modules/sync/services/syncService';
 import { useSyncStore } from '@/modules/sync/stores/sync';
 
 const route = useRoute();
 const store = useSyncStore();
 const toast = useToast();
 const lastRun = ref(null);
-const runForm = reactive({ mode: 'full', background: true });
+const runForm = reactive({ mode: 'full', background: false });
+let pollTimer = null;
 
 const config = computed(() => store.currentConfig);
 
@@ -193,15 +202,66 @@ onMounted(async () => {
   store.error = null;
   const item = await store.fetchConfig(route.params.id);
   runForm.mode = item?.default_mode || 'full';
+  lastRun.value = item?.latest_run ?? null;
+  if (isActiveRun(lastRun.value?.status)) {
+    startPolling();
+  }
 });
 
+onUnmounted(() => stopPolling());
+
+watch(
+  () => lastRun.value?.status,
+  (status) => {
+    if (isActiveRun(status)) {
+      startPolling();
+      return;
+    }
+    stopPolling();
+  },
+);
+
 async function run() {
+  stopPolling();
   const result = await store.runSync(route.params.id, {
     mode: runForm.mode,
     background: runForm.background,
   });
   lastRun.value = result?.run ?? null;
   await store.fetchConfig(route.params.id);
+  if (isActiveRun(lastRun.value?.status)) {
+    startPolling();
+  }
+}
+
+function isActiveRun(status) {
+  return status === 'queued' || status === 'running';
+}
+
+function startPolling() {
+  stopPolling();
+  if (!lastRun.value?.uuid || !isActiveRun(lastRun.value.status)) {
+    return;
+  }
+  pollTimer = window.setInterval(async () => {
+    try {
+      const { data } = await syncService.getRun(lastRun.value.uuid);
+      lastRun.value = data.data?.run ?? lastRun.value;
+      if (!isActiveRun(lastRun.value?.status)) {
+        stopPolling();
+        await store.fetchConfig(route.params.id);
+      }
+    } catch {
+      // Keep the last known run if a poll request fails.
+    }
+  }, 2000);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    window.clearInterval(pollTimer);
+    pollTimer = null;
+  }
 }
 
 function formatDate(value) {

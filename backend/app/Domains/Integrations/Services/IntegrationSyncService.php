@@ -38,7 +38,7 @@ class IntegrationSyncService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function listConfigs(array $filters = []): LengthAwarePaginator
     {
@@ -59,11 +59,12 @@ class IntegrationSyncService
             'integration:id,uuid,name,slug,status,base_url,authentication_type',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
+            'latestRun',
         ]);
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createConfig(array $data, User $actor): SyncConfig
     {
@@ -93,7 +94,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateConfig(string $identifier, array $data, User $actor): SyncConfig
     {
@@ -136,7 +137,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $options
+     * @param array<string, mixed> $options
      * @return array{config: SyncConfig, run: SyncRun}
      */
     public function run(
@@ -174,7 +175,7 @@ class IntegrationSyncService
 
         event(new SyncRunStarted($config, $run, $actor));
 
-        if (! $background || app()->environment('testing')) {
+        if (! $background) {
             $this->processRun($run->id);
 
             return [
@@ -217,7 +218,7 @@ class IntegrationSyncService
             'timeout' => $integration->timeout,
             'retry_attempts' => $integration->retry_attempts,
             'rate_limit_per_minute' => $integration->rate_limit_per_minute,
-            'rate_limit_key' => 'sync:'.$config->id,
+            'rate_limit_key' => 'sync:' . $config->id,
             'authentication_type' => $integration->authentication_type?->value ?? $integration->authentication_type,
             'credentials' => is_array($integration->credentials) ? $integration->credentials : [],
         ];
@@ -321,7 +322,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function listRuns(array $filters = []): LengthAwarePaginator
     {
@@ -335,7 +336,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function listLogs(array $filters = []): LengthAwarePaginator
     {
@@ -412,7 +413,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $context
+     * @param array<string, mixed> $context
      */
     protected function writeLog(
         SyncRun $run,
@@ -439,7 +440,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function prepareConfigPayload(array $data, bool $isUpdate = false): array
@@ -467,7 +468,7 @@ class IntegrationSyncService
         $candidate = $base;
         $i = 2;
         while ($this->syncConfigRepository->slugExists($companyId, $candidate, $ignoreId)) {
-            $candidate = $base.'-'.$i;
+            $candidate = $base . '-' . $i;
             $i++;
         }
 
@@ -475,7 +476,7 @@ class IntegrationSyncService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     protected function normalizeCompanyFilter(array &$filters): void
     {

@@ -329,7 +329,7 @@ const busiestQueue = computed(() => {
 });
 
 const workerCommand = computed(
-  () => `php artisan queue:work --queue=${(dash.value?.worker_queues || []).join(',')}`,
+  () => 'php artisan ams:queue-work',
 );
 
 const healthMessage = computed(() => {

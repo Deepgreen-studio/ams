@@ -44,6 +44,9 @@ class SyncConfigResource extends JsonResource
             'filters' => $this->filters ?? [],
             'options' => $this->options ?? [],
             'last_synced_at' => $this->last_synced_at,
+            'latest_run' => $this->whenLoaded('latestRun', fn () => $this->latestRun
+                ? (new SyncRunResource($this->latestRun))->resolve()
+                : null),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

@@ -8,6 +8,7 @@ use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -84,7 +85,7 @@ class QueueProcessingTest extends TestCase
     {
         Sanctum::actingAs($this->admin);
 
-        $uuid = (string) \Illuminate\Support\Str::uuid();
+        $uuid = (string) Str::uuid();
         DB::table('failed_jobs')->insert([
             'uuid' => $uuid,
             'connection' => 'database',
@@ -103,12 +104,12 @@ class QueueProcessingTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.failed.meta.total', 1);
 
-        $this->postJson('/api/v1/queue/failed/'.$uuid.'/retry')
+        $this->postJson('/api/v1/queue/failed/' . $uuid . '/retry')
             ->assertOk()
             ->assertJsonPath('data.retried', true);
 
         DB::table('failed_jobs')->insert([
-            'uuid' => $uuid.'-2',
+            'uuid' => $uuid . '-2',
             'connection' => 'database',
             'queue' => 'notifications',
             'payload' => json_encode(['displayName' => 'DemoJob']),
@@ -116,10 +117,10 @@ class QueueProcessingTest extends TestCase
             'failed_at' => now(),
         ]);
 
-        $this->deleteJson('/api/v1/queue/failed/'.$uuid.'-2')
+        $this->deleteJson('/api/v1/queue/failed/' . $uuid . '-2')
             ->assertOk();
 
-        $this->assertDatabaseMissing('failed_jobs', ['uuid' => $uuid.'-2']);
+        $this->assertDatabaseMissing('failed_jobs', ['uuid' => $uuid . '-2']);
     }
 
     public function test_restart_signal_can_be_sent(): void
@@ -136,7 +137,7 @@ class QueueProcessingTest extends TestCase
         Sanctum::actingAs($this->admin);
 
         DB::table('queue_job_tracks')->insert([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+            'uuid' => (string) Str::uuid(),
             'job_class' => ProcessNotificationJob::class,
             'display_name' => 'ProcessNotificationJob',
             'queue' => 'notifications',
@@ -159,5 +160,17 @@ class QueueProcessingTest extends TestCase
         $this->getJson('/api/v1/queue/tracks?type=notification')
             ->assertOk()
             ->assertJsonPath('data.tracks.meta.total', 1);
+    }
+
+    public function test_ams_queue_work_command_listens_to_configured_queues(): void
+    {
+        $queues = implode(',', config('ams_queue.worker_queues'));
+
+        $this->artisan('ams:queue-work', [
+            '--once' => true,
+            '--stop-when-empty' => true,
+        ])
+            ->expectsOutputToContain($queues)
+            ->assertSuccessful();
     }
 }

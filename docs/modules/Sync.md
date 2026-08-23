@@ -85,8 +85,8 @@ Domains/Integrations/
 }
 ```
 
-- In production, `background: true` queues `RunIntegrationSyncJob`.
-- In testing (or `background: false`), the run processes synchronously.
+- In production, `background: true` queues `ProcessImportJob` (imports), `ProcessExportJob` (exports), or `RunIntegrationSyncJob` (other directions).
+- With `background: false`, the run processes synchronously in the HTTP request.
 
 ### Local sample sync
 
@@ -101,7 +101,7 @@ Schedule::command('sync:dispatch-scheduled')->everyMinute()->withoutOverlapping(
 Queue worker:
 
 ```bash
-php artisan queue:work --queue=syncs,webhooks,default
+php artisan ams:queue-work
 ```
 
 ## Permissions

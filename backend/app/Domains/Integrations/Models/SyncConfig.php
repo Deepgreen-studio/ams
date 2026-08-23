@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 
@@ -70,6 +71,11 @@ class SyncConfig extends Model
     public function runs(): HasMany
     {
         return $this->hasMany(SyncRun::class);
+    }
+
+    public function latestRun(): HasOne
+    {
+        return $this->hasOne(SyncRun::class)->latestOfMany();
     }
 
     public function creator(): BelongsTo

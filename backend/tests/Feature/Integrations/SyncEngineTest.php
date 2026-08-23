@@ -5,10 +5,12 @@ namespace Tests\Feature\Integrations;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Models\Integration;
 use App\Domains\Integrations\Models\SyncConfig;
+use App\Domains\Queue\Jobs\ProcessImportJob;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -81,7 +83,7 @@ class SyncEngineTest extends TestCase
 
         $uuid = $create->json('data.config.uuid');
 
-        $run = $this->postJson('/api/v1/sync/configs/'.$uuid.'/run', [
+        $run = $this->postJson('/api/v1/sync/configs/' . $uuid . '/run', [
             'mode' => 'full',
             'background' => false,
         ])->assertOk();
@@ -115,11 +117,11 @@ class SyncEngineTest extends TestCase
             ],
         ]);
 
-        $this->postJson('/api/v1/sync/configs/'.$config->uuid.'/run', ['background' => false])
+        $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', ['background' => false])
             ->assertOk()
             ->assertJsonPath('data.run.imported', 2);
 
-        $second = $this->postJson('/api/v1/sync/configs/'.$config->uuid.'/run', ['background' => false])
+        $second = $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', ['background' => false])
             ->assertOk();
 
         $this->assertSame(2, $second->json('data.run.skipped'));
@@ -151,7 +153,7 @@ class SyncEngineTest extends TestCase
             'options' => [],
         ]);
 
-        $this->postJson('/api/v1/sync/configs/'.$config->uuid.'/run', ['background' => false])
+        $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', ['background' => false])
             ->assertOk()
             ->assertJsonPath('data.run.status', 'completed')
             ->assertJsonPath('data.run.imported', 1);
@@ -177,7 +179,7 @@ class SyncEngineTest extends TestCase
             ],
         ]);
 
-        $runUuid = $this->postJson('/api/v1/sync/configs/'.$config->uuid.'/run', ['background' => false])
+        $runUuid = $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', ['background' => false])
             ->json('data.run.uuid');
 
         $this->getJson('/api/v1/sync/dashboard')
@@ -188,11 +190,11 @@ class SyncEngineTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.runs.meta.total', 1);
 
-        $this->getJson('/api/v1/sync/logs?sync_run='.$runUuid)
+        $this->getJson('/api/v1/sync/logs?sync_run=' . $runUuid)
             ->assertOk()
             ->assertJsonPath('success', true);
 
-        $this->assertGreaterThan(0, $this->getJson('/api/v1/sync/logs?sync_run='.$runUuid)->json('data.logs.meta.total'));
+        $this->assertGreaterThan(0, $this->getJson('/api/v1/sync/logs?sync_run=' . $runUuid)->json('data.logs.meta.total'));
     }
 
     public function test_disabled_config_cannot_run(): void
@@ -211,7 +213,74 @@ class SyncEngineTest extends TestCase
             'options' => ['sample_records' => [['id' => 1]]],
         ]);
 
-        $this->postJson('/api/v1/sync/configs/'.$config->uuid.'/run')
+        $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run')
             ->assertStatus(422);
+    }
+
+    public function test_background_import_is_dispatched_to_imports_queue(): void
+    {
+        Sanctum::actingAs($this->admin);
+        Queue::fake();
+
+        $config = SyncConfig::query()->create([
+            'company_id' => $this->company->id,
+            'integration_id' => $this->integration->id,
+            'name' => 'Queued Import',
+            'slug' => 'queued-import',
+            'direction' => 'import',
+            'default_mode' => 'full',
+            'trigger_type' => 'manual',
+            'is_enabled' => true,
+            'source_path' => '/contacts',
+            'conflict_strategy' => 'overwrite',
+            'options' => [
+                'sample_records' => [
+                    ['id' => 'q1', 'name' => 'Queued'],
+                ],
+            ],
+        ]);
+
+        $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', [
+            'mode' => 'full',
+            'background' => true,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.run.status', 'queued');
+
+        Queue::assertPushedOn('imports', ProcessImportJob::class);
+    }
+
+    public function test_config_show_includes_latest_run(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $config = SyncConfig::query()->create([
+            'company_id' => $this->company->id,
+            'integration_id' => $this->integration->id,
+            'name' => 'Latest Run Config',
+            'slug' => 'latest-run-config',
+            'direction' => 'import',
+            'default_mode' => 'full',
+            'trigger_type' => 'manual',
+            'is_enabled' => true,
+            'source_path' => '/contacts',
+            'conflict_strategy' => 'overwrite',
+            'options' => [
+                'sample_records' => [
+                    ['id' => 'l1', 'name' => 'Latest'],
+                ],
+            ],
+        ]);
+
+        $runUuid = $this->postJson('/api/v1/sync/configs/' . $config->uuid . '/run', [
+            'background' => false,
+        ])
+            ->assertOk()
+            ->json('data.run.uuid');
+
+        $this->getJson('/api/v1/sync/configs/' . $config->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.config.latest_run.uuid', $runUuid)
+            ->assertJsonPath('data.config.latest_run.status', 'completed');
     }
 }

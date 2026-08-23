@@ -23,6 +23,16 @@ class QueueManager
         ];
     }
 
+    public function workerQueueList(): string
+    {
+        $queues = config('ams_queue.worker_queues', ['default']);
+
+        return implode(',', array_values(array_filter(
+            is_array($queues) ? $queues : ['default'],
+            fn ($queue) => is_string($queue) && $queue !== '',
+        )));
+    }
+
     public function size(?string $queue = null): int
     {
         try {
@@ -66,11 +76,11 @@ class QueueManager
             }
         }
 
-        return (string) config('queue.connections.'.config('queue.default').'.queue', 'default');
+        return (string) config('queue.connections.' . config('queue.default') . '.queue', 'default');
     }
 
     /**
-     * @param  class-string|ShouldQueue|object  $job
+     * @param class-string|ShouldQueue|object $job
      */
     public function dispatch(
         object|string $job,

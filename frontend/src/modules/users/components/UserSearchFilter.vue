@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+  <div class="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
     <div class="relative min-w-0 flex-1 lg:max-w-sm">
       <MagnifyingGlassIcon
         class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
@@ -13,7 +13,7 @@
       />
     </div>
 
-    <div class="flex flex-wrap items-center gap-2">
+    <div class="flex flex-wrap items-end gap-2">
       <SelectBox
         v-model="local.status"
         wrapper-class="min-w-[9.5rem]"
@@ -21,35 +21,45 @@
         @change="emitSubmit"
       />
 
-      <input
-        v-model="local.created_from"
-        type="date"
-        title="Created from"
-        class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        @change="emitSubmit"
-      />
+      <div>
+        <label for="users-filter-start-date" class="mb-1 block text-xs font-medium text-slate-500">
+          Start date
+        </label>
+        <input
+          id="users-filter-start-date"
+          v-model="local.created_from"
+          type="date"
+          class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          @change="emitSubmit"
+        />
+      </div>
 
-      <input
-        v-model="local.created_to"
-        type="date"
-        title="Created to"
-        class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        @change="emitSubmit"
-      />
+      <div>
+        <label for="users-filter-end-date" class="mb-1 block text-xs font-medium text-slate-500">
+          End date
+        </label>
+        <input
+          id="users-filter-end-date"
+          v-model="local.created_to"
+          type="date"
+          class="h-10 rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2 text-sm text-slate-700 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          @change="emitSubmit"
+        />
+      </div>
 
       <button
         type="button"
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
         @click="emitSubmit"
       >
-        Apply
+        Apply filter
       </button>
       <button
         type="button"
         class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="emitReset"
       >
-        Reset
+        Reset filter
       </button>
     </div>
   </div>

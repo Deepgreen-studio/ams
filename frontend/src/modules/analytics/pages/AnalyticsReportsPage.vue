@@ -44,14 +44,14 @@
               type="submit"
               class="inline-flex h-12 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
             >
-              Apply
+              Apply filter
             </button>
             <button
               type="button"
               class="inline-flex h-12 items-center rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="onReset"
             >
-              Reset
+              Reset filter
             </button>
           </div>
         </form>
@@ -72,7 +72,7 @@
             class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
             @click="onReset"
           >
-            Reset filters
+            Reset filter
           </button>
           <button
             type="button"

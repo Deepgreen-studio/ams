@@ -37,14 +37,14 @@
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
         @click="emitSubmit"
       >
-        Apply
+        Apply filter
       </button>
       <button
         type="button"
         class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="emitReset"
       >
-        Reset
+        Reset filter
       </button>
     </div>
   </div>

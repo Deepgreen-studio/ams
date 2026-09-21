@@ -45,14 +45,14 @@
     </div>
     <div class="flex gap-2">
       <button type="submit" class="h-12 rounded-[12px] bg-brand-600 px-4 text-sm font-medium text-white hover:bg-brand-700">
-        Filter
+        Apply filter
       </button>
       <button
         type="button"
         class="h-12 rounded-[12px] border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
         @click="onReset"
       >
-        Reset
+        Reset filter
       </button>
     </div>
   </form>

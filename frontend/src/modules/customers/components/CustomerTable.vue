@@ -245,6 +245,13 @@ function isTrashed(customer) {
   return Boolean(customer?.deleted_at);
 }
 
+function initials(name) {
+  return String(name || 'C')
+    .trim()
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {
     closeMenu();

@@ -30,7 +30,7 @@
         <div class="relative shrink-0">
           <button
             type="button"
-            class="relative inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-zinc-600 ring-1 ring-zinc-100 hover:bg-zinc-50"
+            class="relative inline-flex h-8 w-8 items-center justify-center rounded-full bg-white text-zinc-600 ring-1 ring-zinc-100 hover:bg-zinc-50"
             @click="toggleBell"
           >
             <BellIcon class="h-5 w-5" />
@@ -81,7 +81,7 @@
         <div class="relative shrink-0">
           <button
             type="button"
-            class="flex items-center gap-3 rounded-full bg-white py-1.5 pl-1.5 pr-3 ring-1 ring-zinc-100 transition hover:bg-zinc-50"
+            class="flex items-center gap-2 rounded-full bg-white py-1 pl-1 pr-2.5 ring-1 ring-zinc-100 transition hover:bg-zinc-50"
             :aria-expanded="profileOpen"
             aria-haspopup="menu"
             @click="toggleProfile"
@@ -91,7 +91,7 @@
               :name="displayName"
               :first-name="authStore.user?.first_name || ''"
               :last-name="authStore.user?.last_name || ''"
-              size="md"
+              size="sm"
             />
             <span class="hidden min-w-0 text-left sm:block">
               <span class="block max-w-[9rem] truncate text-sm font-semibold text-zinc-900 lg:max-w-[12rem]">

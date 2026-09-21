@@ -2,8 +2,8 @@
 
 namespace App\Domains\Users\Services;
 
-use App\Domains\Roles\Enums\RolePermission;
 use App\Domains\Roles\Services\RoleService;
+use App\Domains\Users\Enums\UserPermission;
 use App\Domains\Users\Events\AvatarUpdated;
 use App\Domains\Users\Events\UserCreated;
 use App\Domains\Users\Events\UserDeleted;
@@ -269,7 +269,7 @@ class UserService
      */
     protected function syncUserRoles(User $user, array $roleIdentifiers, User $actor): void
     {
-        if (! $actor->can(RolePermission::ASSIGN_USERS)) {
+        if (! $actor->can(UserPermission::ASSIGN_ROLES)) {
             throw new ApiException('You are not allowed to assign roles to users.', 403);
         }
 

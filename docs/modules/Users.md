@@ -65,6 +65,7 @@ frontend/src/modules/users/
 - `users.delete`
 - `users.restore`
 - `users.force-delete` (super-admin)
+- `users.assign-roles` (required to send `roles` on create/update)
 
 ## Events
 

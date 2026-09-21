@@ -13,6 +13,7 @@
         :loading="usersStore.saving"
         :errors="usersStore.fieldErrors"
         :error="usersStore.error || ''"
+        :show-role="canAssignRoles"
         :role-options="roleOptions"
         submit-label="Save changes"
         :require-password="false"
@@ -27,6 +28,7 @@
 import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import UserForm from '@/modules/users/components/UserForm.vue';
 import { useRolesStore } from '@/modules/roles/stores/roles';
 import { useUsersStore } from '@/modules/users/stores/users';
@@ -35,11 +37,18 @@ const route = useRoute();
 const router = useRouter();
 const usersStore = useUsersStore();
 const rolesStore = useRolesStore();
+const { can } = usePermissions();
 
+const canAssignRoles = computed(() => can('users.assign-roles'));
 const roleOptions = computed(() => rolesStore.roles || []);
 
 onMounted(() => {
   usersStore.fetchUser(route.params.id);
+
+  if (!canAssignRoles.value) {
+    return;
+  }
+
   rolesStore.fetchRoles({ per_page: 100, sort_by: 'name', sort_dir: 'asc', page: 1 });
 });
 

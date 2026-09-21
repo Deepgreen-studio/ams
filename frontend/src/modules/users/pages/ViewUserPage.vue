@@ -35,7 +35,7 @@
               Roles & access
             </h3>
             <RouterLink
-              v-if="can('users.update') || can('users.assign-roles')"
+              v-if="can('users.assign-roles')"
               :to="{ name: 'users.edit', params: { id: usersStore.currentUser.uuid } }"
               class="text-sm font-medium text-brand-700 hover:text-brand-800"
             >

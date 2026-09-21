@@ -372,7 +372,77 @@ class UserManagementTest extends TestCase
             ->assertJsonStructure(['data' => ['user' => ['avatar', 'avatar_url']]]);
 
         $path = $response->json('data.user.avatar');
-        Storage::disk('public')->assertExists($path);
+        $this->assertIsString($path);
+        $this->assertTrue(Storage::disk('public')->exists($path));
+    }
+
+    public function test_create_user_with_roles_requires_assign_roles_permission(): void
+    {
+        $actor = User::factory()->create();
+        $actor->givePermissionTo([UserPermission::CREATE, UserPermission::VIEW]);
+        Sanctum::actingAs($actor);
+
+        $this->postJson('/api/v1/users', [
+            'first_name' => 'No',
+            'last_name' => 'Roles',
+            'email' => 'noroles.assign@example.com',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+            'roles' => ['support-agent'],
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('success', false);
+
+        $this->assertDatabaseMissing('users', ['email' => 'noroles.assign@example.com']);
+    }
+
+    public function test_create_user_without_roles_does_not_require_assign_roles_permission(): void
+    {
+        $actor = User::factory()->create();
+        $actor->givePermissionTo([UserPermission::CREATE, UserPermission::VIEW]);
+        Sanctum::actingAs($actor);
+
+        $this->postJson('/api/v1/users', [
+            'first_name' => 'No',
+            'last_name' => 'Roles',
+            'email' => 'noroles.create@example.com',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.user.email', 'noroles.create@example.com');
+    }
+
+    public function test_manager_cannot_assign_roles_when_updating_user(): void
+    {
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        $target = User::factory()->create();
+        Sanctum::actingAs($manager);
+
+        $this->putJson('/api/v1/users/'.$target->uuid, [
+            'first_name' => 'Updated',
+            'roles' => ['support-agent'],
+        ])
+            ->assertForbidden()
+            ->assertJsonPath('success', false);
+
+        $this->assertFalse($target->fresh()->hasRole('support-agent'));
+        $this->assertSame($target->first_name, $target->fresh()->first_name);
+    }
+
+    public function test_manager_can_update_user_without_roles(): void
+    {
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        $target = User::factory()->create(['first_name' => 'Old']);
+        Sanctum::actingAs($manager);
+
+        $this->putJson('/api/v1/users/'.$target->uuid, [
+            'first_name' => 'Updated',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.user.first_name', 'Updated');
     }
 
     public function test_manager_without_create_permission_cannot_create_users(): void

@@ -13,12 +13,8 @@ use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
+    use AuthorizesRoleAssignment;
     use NormalizesPhoneInput;
-
-    public function authorize(): bool
-    {
-        return true;
-    }
 
     /**
      * @return array<string, mixed>

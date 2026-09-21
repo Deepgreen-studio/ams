@@ -68,4 +68,9 @@ class UserPolicy
     {
         return $user->id === $model->id && $user->isAccountActive();
     }
+
+    public function assignRoles(User $user): bool
+    {
+        return $user->can(UserPermission::ASSIGN_ROLES);
+    }
 }

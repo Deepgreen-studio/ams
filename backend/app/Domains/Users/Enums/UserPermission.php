@@ -20,6 +20,8 @@ final class UserPermission
 
     public const RESTORE = 'users.restore';
 
+    public const ASSIGN_ROLES = 'users.assign-roles';
+
     /**
      * @return list<string>
      */
@@ -32,6 +34,7 @@ final class UserPermission
             self::DELETE,
             self::FORCE_DELETE,
             self::RESTORE,
+            self::ASSIGN_ROLES,
         ];
     }
 }

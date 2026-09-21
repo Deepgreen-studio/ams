@@ -39,6 +39,7 @@ class UserController
     public function store(StoreUserRequest $request): JsonResponse
     {
         $this->authorize('create', User::class);
+        $this->authorizeRoleAssignment($request);
 
         /** @var User $actor */
         $actor = $request->user();
@@ -64,6 +65,7 @@ class UserController
     {
         $existing = $this->userRepository->findByIdentifierOrFail($user);
         $this->authorize('update', $existing);
+        $this->authorizeRoleAssignment($request);
 
         /** @var User $actor */
         $actor = $request->user();
@@ -110,5 +112,14 @@ class UserController
         $this->userService->forceDelete($user, $actor);
 
         return ApiResponse::success(null, 'User permanently deleted.');
+    }
+
+    private function authorizeRoleAssignment(StoreUserRequest|UpdateUserRequest $request): void
+    {
+        if (! array_key_exists('roles', $request->validated())) {
+            return;
+        }
+
+        $this->authorize('assignRoles', User::class);
     }
 }

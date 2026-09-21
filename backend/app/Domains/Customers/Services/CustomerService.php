@@ -13,6 +13,7 @@ use App\Domains\Customers\Models\Customer;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +25,7 @@ class CustomerService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      * @return array{customers: LengthAwarePaginator, statistics: array<string, int>}
      */
     public function list(array $filters = []): array
@@ -55,7 +56,7 @@ class CustomerService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): Customer
     {
@@ -77,7 +78,7 @@ class CustomerService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): Customer
     {
@@ -141,7 +142,7 @@ class CustomerService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      * @return array<string, mixed>
      */
     protected function resolveCompanyFilter(array $filters): array
@@ -157,7 +158,7 @@ class CustomerService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function preparePayload(array $data, bool $isUpdate = false): array
@@ -184,6 +185,10 @@ class CustomerService
             if (array_key_exists($nullable, $payload) && blank($payload[$nullable])) {
                 $payload[$nullable] = null;
             }
+        }
+
+        if (array_key_exists('phone', $payload) && $payload['phone'] !== null) {
+            $payload['phone'] = PhoneNumber::store($payload['phone']);
         }
 
         if (array_key_exists('email', $payload) && is_string($payload['email'])) {

@@ -10,6 +10,7 @@ use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -23,7 +24,7 @@ class CompanyService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function list(array $filters = []): LengthAwarePaginator
     {
@@ -50,7 +51,7 @@ class CompanyService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): Company
     {
@@ -68,7 +69,7 @@ class CompanyService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): Company
     {
@@ -122,7 +123,7 @@ class CompanyService
     }
 
     /**
-     * @param  array<string, mixed>  $branding
+     * @param array<string, mixed> $branding
      */
     public function updateBranding(string $identifier, array $branding, User $actor): Company
     {
@@ -180,7 +181,7 @@ class CompanyService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function preparePayload(array $data, bool $isUpdate = false): array
@@ -216,6 +217,10 @@ class CompanyService
             if (array_key_exists($nullable, $payload) && blank($payload[$nullable])) {
                 $payload[$nullable] = null;
             }
+        }
+
+        if (array_key_exists('phone', $payload) && $payload['phone'] !== null) {
+            $payload['phone'] = PhoneNumber::store($payload['phone']);
         }
 
         if (! $isUpdate && empty($payload['timezone'])) {

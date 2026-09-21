@@ -4,12 +4,16 @@ namespace App\Domains\Users\Requests;
 
 use App\Domains\Users\Enums\UserGender;
 use App\Domains\Users\Enums\UserStatus;
+use App\Shared\Http\NormalizesPhoneInput;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class StoreUserRequest extends FormRequest
 {
+    use NormalizesPhoneInput;
+
     public function authorize(): bool
     {
         return true;
@@ -24,7 +28,7 @@ class StoreUserRequest extends FormRequest
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->whereNull('deleted_at')],
-            'phone' => ['nullable', 'string', 'max:30', Rule::unique('users', 'phone')->whereNull('deleted_at'), 'regex:/^\+?[0-9\s\-\(\)]{7,30}$/'],
+            'phone' => [...PhoneNumber::inputRules(), Rule::unique('users', 'phone')->whereNull('deleted_at')],
             'password' => ['required', 'confirmed', Password::defaults()],
             'gender' => ['nullable', Rule::in(UserGender::values())],
             'date_of_birth' => ['nullable', 'date', 'before:today'],

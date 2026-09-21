@@ -38,14 +38,11 @@
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
-          <input
+          <PhoneInput
             v-model="form.phone"
-            type="text"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-            :class="fieldClass('phone')"
-            placeholder="+15551234567"
+            :error="Boolean(fieldError('phone'))"
           />
-          <p v-if="errors.phone" class="mt-1 text-xs text-rose-600">{{ errors.phone[0] }}</p>
+          <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Gender</label>
@@ -126,14 +123,11 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
-        <input
+        <PhoneInput
           v-model="form.phone"
-          type="text"
-          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('phone')"
-          placeholder="+15551234567"
+          :error="Boolean(fieldError('phone'))"
         />
-        <p v-if="errors.phone" class="mt-1 text-xs text-rose-600">{{ errors.phone[0] }}</p>
+        <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Gender</label>
@@ -238,12 +232,14 @@
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
+import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
+import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
   initial: {
@@ -297,6 +293,7 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 
 const form = reactive(createForm(props.initial));
+const localErrors = ref({});
 const timezoneOptionsBase = getTimezoneOptions();
 
 const genderOptions = [
@@ -354,6 +351,18 @@ watch(
   }
 );
 
+watch(
+  () => props.errors,
+  () => {
+    localErrors.value = {};
+  },
+  { deep: true }
+);
+
+function fieldError(field) {
+  return localErrors.value?.[field]?.[0] || props.errors?.[field]?.[0] || '';
+}
+
 function resolveInitialRole(value = {}) {
   if (value.role) {
     return value.role;
@@ -386,11 +395,18 @@ function createForm(value = {}) {
 }
 
 function fieldClass(field) {
-  return props.errors?.[field] ? 'border-rose-400 focus:border-rose-500 focus:ring-0' : '';
+  return fieldError(field) ? 'border-rose-400 focus:border-rose-500 focus:ring-0' : '';
 }
 
 function onSubmit() {
   const payload = { ...form };
+  localErrors.value = {};
+
+  if (payload.phone && !isValidE164(payload.phone)) {
+    localErrors.value = { phone: [PHONE_INVALID_MESSAGE] };
+    toast.error(PHONE_INVALID_MESSAGE, 'Validation Failed');
+    return;
+  }
 
   if (!props.showPassword || (!props.requirePassword && !payload.password)) {
     delete payload.password;

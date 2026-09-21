@@ -5,12 +5,16 @@ namespace App\Domains\Customers\Requests;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
+use App\Shared\Http\NormalizesPhoneInput;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreCustomerRequest extends FormRequest
 {
+    use NormalizesPhoneInput;
+
     public function authorize(): bool
     {
         return true;
@@ -36,7 +40,7 @@ class StoreCustomerRequest extends FormRequest
                 Rule::unique('customers', 'email')
                     ->where(fn ($query) => $query->where('company_id', $companyId)->whereNull('deleted_at')),
             ],
-            'phone' => ['nullable', 'string', 'max:30', 'regex:/^\+?[0-9\s\-\(\)]{7,30}$/'],
+            'phone' => PhoneNumber::inputRules(),
             'website' => ['nullable', 'url', 'max:255'],
             'industry' => ['nullable', 'string', 'max:120'],
             'country' => ['nullable', 'string', 'max:100'],

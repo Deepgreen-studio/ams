@@ -1,5 +1,5 @@
 <template>
-  <form class="space-y-4" @submit.prevent="$emit('submit', form)">
+  <form class="space-y-4" @submit.prevent="onSubmit">
     <div
       v-if="error"
       class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
@@ -61,8 +61,14 @@
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
           Phone
         </label>
-        <input v-model="form.phone" type="text" class="input" :disabled="loading" />
-        <p v-if="errors.phone" class="mt-1 text-xs text-rose-600">{{ errors.phone[0] }}</p>
+        <PhoneInput
+          v-model="form.phone"
+          :disabled="loading"
+          :error="Boolean(phoneError || errors.phone)"
+        />
+        <p v-if="phoneError || errors.phone" class="mt-1 text-xs text-rose-600">
+          {{ phoneError || errors.phone[0] }}
+        </p>
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -106,7 +112,9 @@
 
 <script setup>
 import { nextTick, onMounted, reactive, ref, watch } from 'vue';
+import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -116,9 +124,10 @@ const props = defineProps({
   submitLabel: { type: String, default: 'Save' },
 });
 
-defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submit', 'cancel']);
 
 const nameInput = ref(null);
+const phoneError = ref('');
 const form = reactive(createForm(props.initial));
 
 const typeOptions = [
@@ -160,6 +169,16 @@ function createForm(value = {}) {
     status: value.status || 'active',
     notes: value.notes || '',
   };
+}
+
+function onSubmit() {
+  phoneError.value = '';
+  if (form.phone && !isValidE164(form.phone)) {
+    phoneError.value = PHONE_INVALID_MESSAGE;
+    return;
+  }
+
+  emit('submit', { ...form, phone: form.phone || null });
 }
 </script>
 

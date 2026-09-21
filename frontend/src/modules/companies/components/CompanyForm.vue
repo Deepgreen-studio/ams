@@ -58,12 +58,9 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
-        <input
+        <PhoneInput
           v-model="form.phone"
-          type="text"
-          placeholder="+15551234567"
-          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('phone')"
+          :error="Boolean(displayErrors.phone)"
         />
         <p v-if="displayErrors.phone" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.phone[0] }}
@@ -188,10 +185,12 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
+import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
+import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -317,8 +316,8 @@ function validate() {
     next.email = ['The email must be a valid email address.'];
   }
 
-  if (form.phone && !/^\+?[0-9\s\-()]{7,30}$/.test(form.phone)) {
-    next.phone = ['The phone format is invalid.'];
+  if (form.phone && !isValidE164(form.phone)) {
+    next.phone = [PHONE_INVALID_MESSAGE];
   }
 
   if (form.website) {

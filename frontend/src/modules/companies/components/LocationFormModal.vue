@@ -107,14 +107,10 @@
             >
               Phone
             </label>
-            <input
+            <PhoneInput
               id="location-phone"
               v-model="form.phone"
-              type="text"
-              maxlength="50"
-              autocomplete="off"
-              class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-800 shadow-none outline-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-              placeholder="Phone"
+              size="md"
               :disabled="loading"
             />
           </div>
@@ -175,7 +171,9 @@
 
 <script setup>
 import { computed, nextTick, reactive, ref, watch } from 'vue';
+import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { isValidE164 } from '@/utils/phone';
 
 const props = defineProps({
   open: {
@@ -241,13 +239,14 @@ function onCancel() {
 function onSubmit() {
   const branchName = form.branch_name.trim();
   if (!branchName || props.loading) return;
+  if (form.phone && !isValidE164(form.phone)) return;
 
   emit('submit', {
     branch_name: branchName,
     address: form.address.trim() ? form.address.trim() : null,
     city: form.city.trim() ? form.city.trim() : null,
     country: form.country.trim() ? form.country.trim() : null,
-    phone: form.phone.trim() ? form.phone.trim() : null,
+    phone: form.phone || null,
     email: form.email.trim() ? form.email.trim() : null,
     status: form.status || 'active',
   });

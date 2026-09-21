@@ -3,11 +3,15 @@
 namespace App\Domains\Users\Requests;
 
 use App\Domains\Users\Enums\UserGender;
+use App\Shared\Http\NormalizesPhoneInput;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateProfileRequest extends FormRequest
 {
+    use NormalizesPhoneInput;
+
     public function authorize(): bool
     {
         return true;
@@ -31,10 +35,7 @@ class UpdateProfileRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore($userId)->whereNull('deleted_at'),
             ],
             'phone' => [
-                'nullable',
-                'string',
-                'max:30',
-                'regex:/^\+?[0-9\s\-\(\)]{7,30}$/',
+                ...PhoneNumber::inputRules(),
                 Rule::unique('users', 'phone')->ignore($userId)->whereNull('deleted_at'),
             ],
             'gender' => ['nullable', Rule::in(UserGender::values())],

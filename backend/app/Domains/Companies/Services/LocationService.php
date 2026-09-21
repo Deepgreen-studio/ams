@@ -7,6 +7,7 @@ use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Companies\Repositories\LocationRepository;
 use App\Models\User;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -18,7 +19,7 @@ class LocationService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function list(array $filters = []): LengthAwarePaginator
     {
@@ -32,7 +33,7 @@ class LocationService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): CompanyLocation
     {
@@ -48,7 +49,7 @@ class LocationService
                 'state' => $data['state'] ?? null,
                 'country' => $data['country'] ?? null,
                 'postal_code' => $data['postal_code'] ?? null,
-                'phone' => $data['phone'] ?? null,
+                'phone' => PhoneNumber::store($data['phone'] ?? null),
                 'email' => $data['email'] ?? null,
                 'is_headquarters' => (bool) ($data['is_headquarters'] ?? false),
                 'status' => $data['status'] ?? 'active',
@@ -63,7 +64,7 @@ class LocationService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): CompanyLocation
     {
@@ -82,6 +83,10 @@ class LocationService
                 'status',
             ]));
             $payload['updated_by'] = $actor->id;
+
+            if (array_key_exists('phone', $payload)) {
+                $payload['phone'] = PhoneNumber::store($payload['phone']);
+            }
 
             $location->fill($payload);
             $location->save();

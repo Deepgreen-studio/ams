@@ -118,8 +118,48 @@ class UserManagementTest extends TestCase
 
         $this->assertDatabaseHas('users', [
             'email' => 'grace@example.com',
+            'phone' => '+15551234567',
             'created_by' => $this->admin->id,
         ]);
+    }
+
+    public function test_create_user_normalizes_formatted_phone_to_e164(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->postJson('/api/v1/users', [
+            'first_name' => 'Phone',
+            'last_name' => 'Stored',
+            'email' => 'phone.stored@example.com',
+            'phone' => '+1 (555) 987-6543',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+            'status' => 'active',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.user.phone', '+15559876543');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'phone.stored@example.com',
+            'phone' => '+15559876543',
+        ]);
+    }
+
+    public function test_create_user_rejects_phone_without_country_code(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->postJson('/api/v1/users', [
+            'first_name' => 'Phone',
+            'last_name' => 'Invalid',
+            'email' => 'phone.invalid@example.com',
+            'phone' => '5551234567',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('success', false)
+            ->assertJsonStructure(['errors' => ['phone']]);
     }
 
     public function test_admin_can_create_user_with_role_assignment(): void
@@ -171,7 +211,7 @@ class UserManagementTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($this->admin);
 
-        $this->getJson('/api/v1/users/'.$user->uuid)
+        $this->getJson('/api/v1/users/' . $user->uuid)
             ->assertOk()
             ->assertJsonPath('data.user.uuid', $user->uuid)
             ->assertJsonStructure([
@@ -187,7 +227,7 @@ class UserManagementTest extends TestCase
         $user = User::factory()->create(['email' => 'old@example.com']);
         Sanctum::actingAs($this->admin);
 
-        $this->putJson('/api/v1/users/'.$user->uuid, [
+        $this->putJson('/api/v1/users/' . $user->uuid, [
             'first_name' => 'Updated',
             'last_name' => 'Name',
             'email' => 'new@example.com',
@@ -211,13 +251,13 @@ class UserManagementTest extends TestCase
         $user = User::factory()->create();
         Sanctum::actingAs($this->admin);
 
-        $this->deleteJson('/api/v1/users/'.$user->uuid)
+        $this->deleteJson('/api/v1/users/' . $user->uuid)
             ->assertOk()
             ->assertJsonPath('message', 'User deleted successfully.');
 
         $this->assertSoftDeleted('users', ['id' => $user->id]);
 
-        $this->postJson('/api/v1/users/'.$user->uuid.'/restore')
+        $this->postJson('/api/v1/users/' . $user->uuid . '/restore')
             ->assertOk()
             ->assertJsonPath('data.user.uuid', $user->uuid);
 
@@ -235,12 +275,12 @@ class UserManagementTest extends TestCase
         $manager->assignRole('manager');
         Sanctum::actingAs($manager);
 
-        $this->deleteJson('/api/v1/users/'.$target->uuid.'/force-delete')
+        $this->deleteJson('/api/v1/users/' . $target->uuid . '/force-delete')
             ->assertForbidden();
 
         Sanctum::actingAs($this->admin);
 
-        $this->deleteJson('/api/v1/users/'.$target->uuid.'/force-delete')
+        $this->deleteJson('/api/v1/users/' . $target->uuid . '/force-delete')
             ->assertOk()
             ->assertJsonPath('message', 'User permanently deleted.');
 
@@ -251,7 +291,7 @@ class UserManagementTest extends TestCase
     {
         Sanctum::actingAs($this->admin);
 
-        $this->deleteJson('/api/v1/users/'.$this->admin->uuid)
+        $this->deleteJson('/api/v1/users/' . $this->admin->uuid)
             ->assertForbidden();
     }
 
@@ -320,7 +360,7 @@ class UserManagementTest extends TestCase
         $target = User::factory()->create();
         Sanctum::actingAs($adminRoleUser);
 
-        $this->deleteJson('/api/v1/users/'.$target->uuid.'/force-delete')
+        $this->deleteJson('/api/v1/users/' . $target->uuid . '/force-delete')
             ->assertForbidden();
     }
 

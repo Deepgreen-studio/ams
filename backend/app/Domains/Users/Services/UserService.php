@@ -13,6 +13,7 @@ use App\Domains\Users\Notifications\UserWelcomeNotification;
 use App\Domains\Users\Repositories\UserRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,7 @@ class UserService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      * @return array{users: LengthAwarePaginator, statistics: array<string, int>}
      */
     public function list(array $filters = []): array
@@ -53,7 +54,7 @@ class UserService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): User
     {
@@ -79,7 +80,7 @@ class UserService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): User
     {
@@ -156,7 +157,7 @@ class UserService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateProfile(User $user, array $data): User
     {
@@ -207,7 +208,7 @@ class UserService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function prepareWritablePayload(array $data, bool $isUpdate = false, bool $isProfile = false): array
@@ -232,8 +233,8 @@ class UserService
 
         $payload = array_intersect_key($data, array_flip($allowed));
 
-        if (array_key_exists('phone', $payload) && blank($payload['phone'])) {
-            $payload['phone'] = null;
+        if (array_key_exists('phone', $payload)) {
+            $payload['phone'] = PhoneNumber::store($payload['phone']);
         }
 
         if (array_key_exists('gender', $payload) && blank($payload['gender'])) {
@@ -248,7 +249,7 @@ class UserService
     }
 
     /**
-     * @param  list<string>  $roleIdentifiers
+     * @param list<string> $roleIdentifiers
      */
     protected function syncUserRoles(User $user, array $roleIdentifiers, User $actor): void
     {

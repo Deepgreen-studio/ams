@@ -60,13 +60,10 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester phone</label>
-        <input
+        <PhoneInput
           v-model="form.requester_phone"
-          type="text"
-          class="input"
-          maxlength="50"
-          placeholder="Optional"
           :disabled="loading"
+          :error="Boolean(fieldError('requester_phone'))"
         />
         <p v-if="fieldError('requester_phone')" class="mt-1 text-xs text-rose-600">
           {{ fieldError('requester_phone') }}
@@ -131,6 +128,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from 'vue';
+import PhoneInput from '@/components/ui/PhoneInput.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { userService } from '@/modules/users/services/userService';
 import SelectBox from '@/modules/users/components/SelectBox.vue';

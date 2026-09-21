@@ -19,8 +19,10 @@ use App\Domains\Compliance\Events\PrivacyRequestRejected;
 use App\Domains\Compliance\Events\PrivacyRequestStatusChanged;
 use App\Domains\Compliance\Events\PrivacyRequestUpdated;
 use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Compliance\Models\PrivacyRequestLog;
 use App\Domains\Compliance\Repositories\PrivacyRequestLogRepository;
 use App\Domains\Compliance\Repositories\PrivacyRequestRepository;
+use App\Domains\Customers\Models\Customer;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
 use App\Domains\Support\Enums\SupportTicketMessageVisibility;
@@ -28,6 +30,7 @@ use App\Domains\Support\Models\SupportTicketMessage;
 use App\Domains\Support\Services\SupportTicketConversationService;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -65,7 +68,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function list(array $filters = []): LengthAwarePaginator
     {
@@ -147,7 +150,7 @@ class PrivacyRequestService
      * Public/private reply on the linked Support ticket.
      * Public replies on SMS-sourced tickets fire support.sms.sent to the app.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function replyToLinkedTicket(string $identifier, array $data, User $actor): SupportTicketMessage
     {
@@ -178,7 +181,7 @@ class PrivacyRequestService
             $privacyRequest->status?->value ?? (string) $privacyRequest->status,
             $privacyRequest->status?->value ?? (string) $privacyRequest->status,
             $actor->id,
-            'Agent reply posted on linked Support ticket '.$ticket->ticket_number.' ('.$visibility->value.').',
+            'Agent reply posted on linked Support ticket ' . $ticket->ticket_number . ' (' . $visibility->value . ').',
             [
                 'support_ticket_uuid' => $ticket->uuid,
                 'message_uuid' => $message->uuid,
@@ -190,7 +193,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @return Collection<int, \App\Domains\Compliance\Models\PrivacyRequestLog>
+     * @return Collection<int, PrivacyRequestLog>
      */
     public function timeline(string $identifier): Collection
     {
@@ -200,7 +203,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): PrivacyRequest
     {
@@ -258,7 +261,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -339,7 +342,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function verifyIdentity(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -394,7 +397,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function approve(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -436,7 +439,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function reject(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -485,7 +488,7 @@ class PrivacyRequestService
             $this->assertApprovedOrInProgress($request);
 
             $exportPayload = $this->buildExportPayload($request);
-            $relativePath = 'privacy-exports/'.$request->uuid.'/'.Str::slug($request->request_number).'-export.json';
+            $relativePath = 'privacy-exports/' . $request->uuid . '/' . Str::slug($request->request_number) . '-export.json';
             Storage::disk('local')->put($relativePath, json_encode($exportPayload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
             $fromStatus = $request->status;
@@ -523,7 +526,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function confirmDeletion(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -574,7 +577,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function complete(string $identifier, array $data, User $actor): PrivacyRequest
     {
@@ -694,7 +697,7 @@ class PrivacyRequestService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function preparePayload(array $data, bool $isUpdate = false): array
@@ -719,6 +722,10 @@ class PrivacyRequestService
             }
         }
 
+        if (array_key_exists('requester_phone', $payload) && $payload['requester_phone'] !== null) {
+            $payload['requester_phone'] = PhoneNumber::store($payload['requester_phone']);
+        }
+
         if (array_key_exists('support_ticket_id', $payload) && blank($payload['support_ticket_id'])) {
             $payload['support_ticket_id'] = null;
         }
@@ -726,7 +733,7 @@ class PrivacyRequestService
         return $payload;
     }
 
-    protected function resolveCustomer(mixed $identifier, int $companyId): ?\App\Domains\Customers\Models\Customer
+    protected function resolveCustomer(mixed $identifier, int $companyId): ?Customer
     {
         if (blank($identifier)) {
             return null;

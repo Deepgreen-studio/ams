@@ -114,6 +114,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
+            ->useLogName('users')
             ->logOnly([
                 'first_name',
                 'last_name',
@@ -126,9 +127,33 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
                 'timezone',
                 'language',
                 'gender',
+                'created_by',
+                'updated_by',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    public function getDescriptionForEvent(string $eventName): string
+    {
+        return match ($eventName) {
+            'created' => 'User created',
+            'updated' => 'User updated',
+            'deleted' => 'User deleted',
+            'restored' => 'User restored',
+            default => $eventName,
+        };
+    }
+
+    public function tapActivity($activity, string $eventName): void
+    {
+        $request = request();
+
+        $activity->properties = $activity->properties->merge([
+            'ip' => $request?->ip(),
+            'ip_address' => $request?->ip(),
+            'user_agent' => $request?->userAgent(),
+        ]);
     }
 
     public function getRouteKeyName(): string
@@ -148,7 +173,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
 
         // Relative path so the SPA (Vite proxy / same origin) can load the file.
         // Absolute APP_URL hosts (e.g. ams.test) are often unreachable from the Vite dev server.
-        return '/storage/'.ltrim((string) $this->avatar, '/');
+        return '/storage/' . ltrim((string) $this->avatar, '/');
     }
 
     public function isAccountActive(): bool
@@ -219,7 +244,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         $lastName = trim((string) ($this->last_name ?? ''));
 
         if ($firstName !== '' || $lastName !== '') {
-            $this->full_name = trim($firstName.' '.$lastName);
+            $this->full_name = trim($firstName . ' ' . $lastName);
         }
 
         if (filled($this->full_name)) {

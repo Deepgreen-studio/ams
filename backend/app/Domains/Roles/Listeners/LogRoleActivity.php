@@ -9,6 +9,7 @@ use App\Domains\Roles\Events\RoleDeleted;
 use App\Domains\Roles\Events\RoleUpdated;
 use App\Domains\Roles\Events\UserRoleAssigned;
 use App\Domains\Roles\Events\UserRoleRemoved;
+use App\Domains\Users\Support\UserLifecycleAuditor;
 
 class LogRoleActivity
 {
@@ -65,25 +66,51 @@ class LogRoleActivity
 
     public function handleUserRoleAssigned(UserRoleAssigned $event): void
     {
-        activity('roles')
+        activity('users')
             ->causedBy($event->actor)
             ->performedOn($event->user)
+            ->event('role_assigned')
             ->withProperties([
-                'event' => 'user_role_assigned',
+                'event' => 'role_assigned',
                 'role' => $event->role,
+                'ip' => request()?->ip(),
+                'ip_address' => request()?->ip(),
+                'user_agent' => request()?->userAgent(),
             ])
-            ->log('User role assigned');
+            ->log('Role assigned: ' . $event->role);
+
+        UserLifecycleAuditor::trail(
+            'role_assigned',
+            $event->actor,
+            $event->user,
+            null,
+            ['role' => $event->role],
+            'Role assigned: ' . $event->role
+        );
     }
 
     public function handleUserRoleRemoved(UserRoleRemoved $event): void
     {
-        activity('roles')
+        activity('users')
             ->causedBy($event->actor)
             ->performedOn($event->user)
+            ->event('role_removed')
             ->withProperties([
-                'event' => 'user_role_removed',
+                'event' => 'role_removed',
                 'role' => $event->role,
+                'ip' => request()?->ip(),
+                'ip_address' => request()?->ip(),
+                'user_agent' => request()?->userAgent(),
             ])
-            ->log('User role removed');
+            ->log('Role removed: ' . $event->role);
+
+        UserLifecycleAuditor::trail(
+            'role_removed',
+            $event->actor,
+            $event->user,
+            ['role' => $event->role],
+            null,
+            'Role removed: ' . $event->role
+        );
     }
 }

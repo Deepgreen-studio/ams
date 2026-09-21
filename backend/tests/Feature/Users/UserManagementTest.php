@@ -120,6 +120,16 @@ class UserManagementTest extends TestCase
             'email' => 'grace@example.com',
             'phone' => '+15551234567',
             'created_by' => $this->admin->id,
+            'updated_by' => $this->admin->id,
+        ]);
+
+        $created = User::query()->where('email', 'grace@example.com')->first();
+        $this->assertNotNull($created);
+        $this->assertDatabaseHas('audit_logs', [
+            'module' => 'users',
+            'action' => 'created',
+            'user_id' => $this->admin->id,
+            'subject_id' => $created->id,
         ]);
     }
 
@@ -216,7 +226,7 @@ class UserManagementTest extends TestCase
             ->assertJsonPath('data.user.uuid', $user->uuid)
             ->assertJsonStructure([
                 'data' => [
-                    'user',
+                    'user' => ['created_at', 'updated_at', 'created_by', 'updated_by'],
                     'activity_summary' => ['total', 'recent', 'last_activity_at'],
                 ],
             ]);
@@ -244,6 +254,20 @@ class UserManagementTest extends TestCase
             'status' => 'suspended',
             'updated_by' => $this->admin->id,
         ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'module' => 'users',
+            'action' => 'updated',
+            'user_id' => $this->admin->id,
+            'subject_id' => $user->id,
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'module' => 'users',
+            'action' => 'status_changed',
+            'user_id' => $this->admin->id,
+            'subject_id' => $user->id,
+        ]);
     }
 
     public function test_admin_can_soft_delete_and_restore_user(): void
@@ -257,6 +281,13 @@ class UserManagementTest extends TestCase
 
         $this->assertSoftDeleted('users', ['id' => $user->id]);
 
+        $this->assertDatabaseHas('audit_logs', [
+            'module' => 'users',
+            'action' => 'deleted',
+            'user_id' => $this->admin->id,
+            'subject_id' => $user->id,
+        ]);
+
         $this->postJson('/api/v1/users/' . $user->uuid . '/restore')
             ->assertOk()
             ->assertJsonPath('data.user.uuid', $user->uuid);
@@ -264,6 +295,14 @@ class UserManagementTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'deleted_at' => null,
+            'updated_by' => $this->admin->id,
+        ]);
+
+        $this->assertDatabaseHas('audit_logs', [
+            'module' => 'users',
+            'action' => 'restored',
+            'user_id' => $this->admin->id,
+            'subject_id' => $user->id,
         ]);
     }
 

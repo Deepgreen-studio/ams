@@ -70,7 +70,7 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -84,7 +84,7 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -154,7 +154,7 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createUser(array $data): User
     {
@@ -165,7 +165,7 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateUser(User $user, array $data): User
     {
@@ -219,6 +219,7 @@ class UserRepository extends BaseRepository
         $query = $activityModel::query()->forSubject($user);
 
         $activities = (clone $query)
+            ->with('causer')
             ->latest()
             ->limit(50)
             ->get();
@@ -226,14 +227,25 @@ class UserRepository extends BaseRepository
         return [
             'total' => (clone $query)->count(),
             'recent' => $activities->take(10)->map(static function ($activity): array {
+                $properties = $activity->properties?->toArray() ?? [];
+                $causer = $activity->causer;
+
                 return [
                     'id' => $activity->id,
                     'description' => $activity->description,
-                    'event' => $activity->event,
+                    'event' => $activity->event ?? $properties['event'] ?? null,
                     'log_name' => $activity->log_name,
                     'created_at' => $activity->created_at,
                     'causer_id' => $activity->causer_id,
-                    'properties' => $activity->properties,
+                    'causer' => $causer ? [
+                        'uuid' => $causer->uuid ?? null,
+                        'full_name' => $causer->full_name ?? $causer->email ?? null,
+                        'email' => $causer->email ?? null,
+                    ] : null,
+                    'ip_address' => $properties['ip_address'] ?? $properties['ip'] ?? null,
+                    'old_values' => $properties['old'] ?? null,
+                    'new_values' => $properties['attributes'] ?? $properties['new'] ?? null,
+                    'properties' => $properties,
                 ];
             })->values(),
             'last_activity_at' => $activities->first()?->created_at,
@@ -254,7 +266,7 @@ class UserRepository extends BaseRepository
     }
 
     /**
-     * @param  list<int|string>  $ids
+     * @param list<int|string> $ids
      * @return Collection<int, User>
      */
     public function findManyByIdentifiers(array $ids): Collection

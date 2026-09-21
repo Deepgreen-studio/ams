@@ -69,7 +69,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { formatDate } from '@/utils/formatters';
+import { formatDateTime } from '@/utils/formatters';
 import { getUserAvatarUrl } from '@/utils/avatar';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
@@ -97,8 +97,10 @@ const detailItems = computed(() => [
   { label: 'Phone', value: props.user?.phone || '—' },
   { label: 'Timezone', value: props.user?.timezone || '—' },
   { label: 'Language', value: props.user?.language || '—' },
-  { label: 'Last login', value: formatDate(props.user?.last_login_at) || '—' },
-  { label: 'Created', value: formatDate(props.user?.created_at) || '—' },
+  { label: 'Last login', value: formatDateTime(props.user?.last_login_at) || '—' },
+  { label: 'Created', value: formatDateTime(props.user?.created_at) || '—' },
   { label: 'Created by', value: props.user?.created_by?.full_name || '—' },
+  { label: 'Modified', value: formatDateTime(props.user?.updated_at) || '—' },
+  { label: 'Modified by', value: props.user?.updated_by?.full_name || '—' },
 ]);
 </script>

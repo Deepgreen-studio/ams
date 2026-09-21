@@ -11,6 +11,7 @@ use App\Domains\Users\Events\UserRestored;
 use App\Domains\Users\Events\UserUpdated;
 use App\Domains\Users\Notifications\UserWelcomeNotification;
 use App\Domains\Users\Repositories\UserRepository;
+use App\Domains\Users\Support\UserLifecycleAuditor;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
@@ -69,11 +70,11 @@ class UserService
                 $this->syncUserRoles($user, $data['roles'], $actor);
             }
 
-            event(new UserCreated($user, $actor));
-
             if (! empty($data['send_welcome_notification'])) {
                 $user->notify(new UserWelcomeNotification);
             }
+
+            event(new UserCreated($user->load(['roles']), $actor));
 
             return $user->load(['creator', 'updater', 'roles']);
         });
@@ -86,6 +87,7 @@ class UserService
     {
         return DB::transaction(function () use ($identifier, $data, $actor): User {
             $user = $this->userRepository->findByIdentifierOrFail($identifier);
+            $before = UserLifecycleAuditor::snapshot($user);
             $payload = $this->prepareWritablePayload($data, isUpdate: true);
             $payload['updated_by'] = $actor->id;
 
@@ -95,9 +97,16 @@ class UserService
                 $this->syncUserRoles($updated, $data['roles'] ?? [], $actor);
             }
 
-            event(new UserUpdated($updated, $actor, 'user_updated'));
+            $updated = $updated->load(['roles']);
+            event(new UserUpdated(
+                $updated,
+                $actor,
+                'user_updated',
+                $before,
+                UserLifecycleAuditor::snapshot($updated)
+            ));
 
-            return $updated->load(['roles']);
+            return $updated;
         });
     }
 
@@ -164,10 +173,17 @@ class UserService
         return DB::transaction(function () use ($user, $data): User {
             $payload = $this->prepareWritablePayload($data, isUpdate: true, isProfile: true);
             $payload['updated_by'] = $user->id;
+            $before = UserLifecycleAuditor::snapshot($user);
 
             $updated = $this->userRepository->updateUser($user, $payload);
 
-            event(new UserUpdated($updated, $user, 'profile_updated'));
+            event(new UserUpdated(
+                $updated,
+                $user,
+                'profile_updated',
+                $before,
+                UserLifecycleAuditor::snapshot($updated)
+            ));
 
             return $updated;
         });

@@ -99,28 +99,31 @@
                 {{ usersStore.currentUser.email_verified ? 'Yes' : 'No' }}
               </dd>
             </div>
-            <div>
-              <dt class="text-xs text-slate-500">Updated by</dt>
-              <dd class="text-sm text-slate-900">
-                {{ usersStore.currentUser.updated_by?.full_name || '—' }}
-              </dd>
-            </div>
           </dl>
         </div>
       </div>
 
       <div class="space-y-6">
         <div class="rounded-[12px] bg-white p-6">
-          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Activity summary
-          </h3>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+              Activity summary
+            </h3>
+            <RouterLink
+              v-if="can('audit.view')"
+              :to="{ name: 'audit.trail', query: { module: 'users' } }"
+              class="text-sm font-medium text-brand-700 hover:text-brand-800"
+            >
+              View audit logs
+            </RouterLink>
+          </div>
           <p class="mt-3 text-3xl font-semibold text-slate-900">
             {{ usersStore.activitySummary?.total ?? 0 }}
           </p>
-          <p class="text-sm text-slate-500">Logged events</p>
+          <p class="text-sm text-slate-500">Logged lifecycle events</p>
           <p class="mt-4 text-xs text-slate-500">
             Last activity:
-            {{ formatDate(usersStore.activitySummary?.last_activity_at) || 'None yet' }}
+            {{ formatDateTime(usersStore.activitySummary?.last_activity_at) || 'None yet' }}
           </p>
 
           <ul class="mt-4 space-y-2">
@@ -130,7 +133,11 @@
               class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600"
             >
               <p class="font-medium text-slate-800">{{ item.description }}</p>
-              <p class="mt-0.5 text-slate-500">{{ formatDate(item.created_at) }}</p>
+              <p class="mt-0.5 text-slate-500">
+                {{ item.causer?.full_name || 'System' }}
+                ·
+                {{ formatDateTime(item.created_at) || '—' }}
+              </p>
             </li>
             <li
               v-if="!(usersStore.activitySummary?.recent || []).length"
@@ -167,7 +174,7 @@ import { TrashIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
-import { formatDate } from '@/utils/formatters';
+import { formatDateTime } from '@/utils/formatters';
 import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import ProfileCard from '@/modules/users/components/ProfileCard.vue';

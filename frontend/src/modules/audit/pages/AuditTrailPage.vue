@@ -95,6 +95,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import {
   ArrowPathIcon,
   DocumentTextIcon,
@@ -111,6 +112,7 @@ import { useAuditStore } from '@/modules/audit/stores/audit';
 import Pagination from '@/modules/users/components/Pagination.vue';
 
 const store = useAuditStore();
+const route = useRoute();
 const toast = useToast();
 const selected = ref(null);
 const exporting = ref(false);
@@ -171,7 +173,14 @@ watch(
 
 onMounted(() => {
   store.error = null;
-  store.fetchList().catch(() => {});
+  const queryFilters = {};
+  if (typeof route.query.module === 'string' && route.query.module) {
+    queryFilters.module = route.query.module;
+  }
+  if (typeof route.query.action === 'string' && route.query.action) {
+    queryFilters.action = route.query.action;
+  }
+  store.fetchList(queryFilters).catch(() => {});
 });
 
 function countByAction(items, actions) {

@@ -7,78 +7,89 @@ use App\Domains\Users\Events\UserCreated;
 use App\Domains\Users\Events\UserDeleted;
 use App\Domains\Users\Events\UserRestored;
 use App\Domains\Users\Events\UserUpdated;
+use App\Domains\Users\Support\UserLifecycleAuditor;
 
 /**
- * Persists user-management audit trail via Spatie Activity Log.
- * Additional notification listeners can subscribe to the same events later.
+ * Writes user lifecycle actions to the enterprise Audit Trail.
+ * Attribute-level create/update/delete activity remains on Spatie LogsActivity.
  */
 class LogUserActivity
 {
     public function handleUserCreated(UserCreated $event): void
     {
-        activity('users')
-            ->causedBy($event->actor)
-            ->performedOn($event->user)
-            ->withProperties([
-                'event' => 'user_created',
-                'email' => $event->user->email,
-                'status' => $event->user->status?->value ?? $event->user->status,
-            ])
-            ->log('User created');
+        UserLifecycleAuditor::trail(
+            'created',
+            $event->actor,
+            $event->user,
+            null,
+            UserLifecycleAuditor::snapshot($event->user),
+            'User account created'
+        );
     }
 
     public function handleUserUpdated(UserUpdated $event): void
     {
-        $description = $event->context === 'profile_updated'
-            ? 'Profile updated'
-            : 'User updated';
+        $action = $event->context === 'profile_updated' ? 'profile_updated' : 'updated';
 
-        activity('users')
-            ->causedBy($event->actor)
-            ->performedOn($event->user)
-            ->withProperties([
-                'event' => $event->context,
-                'email' => $event->user->email,
-                'status' => $event->user->status?->value ?? $event->user->status,
-            ])
-            ->log($description);
+        UserLifecycleAuditor::trail(
+            $action,
+            $event->actor,
+            $event->user,
+            $event->before,
+            $event->after,
+            $action === 'profile_updated' ? 'User profile updated' : 'User account updated'
+        );
+
+        $oldStatus = $event->before['status'] ?? null;
+        $newStatus = $event->after['status'] ?? null;
+
+        if ($oldStatus !== null && $newStatus !== null && $oldStatus !== $newStatus) {
+            UserLifecycleAuditor::trail(
+                'status_changed',
+                $event->actor,
+                $event->user,
+                ['status' => $oldStatus],
+                ['status' => $newStatus],
+                sprintf('User status changed from %s to %s', $oldStatus, $newStatus)
+            );
+        }
     }
 
     public function handleUserDeleted(UserDeleted $event): void
     {
-        activity('users')
-            ->causedBy($event->actor)
-            ->performedOn($event->user)
-            ->withProperties([
-                'event' => $event->forceDeleted ? 'user_force_deleted' : 'user_deleted',
-                'email' => $event->user->email,
-                'force_deleted' => $event->forceDeleted,
-            ])
-            ->log($event->forceDeleted ? 'User permanently deleted' : 'User deleted');
+        $action = $event->forceDeleted ? 'force_deleted' : 'deleted';
+
+        UserLifecycleAuditor::trail(
+            $action,
+            $event->actor,
+            $event->user,
+            UserLifecycleAuditor::snapshot($event->user),
+            null,
+            $event->forceDeleted ? 'User permanently deleted' : 'User archived'
+        );
     }
 
     public function handleUserRestored(UserRestored $event): void
     {
-        activity('users')
-            ->causedBy($event->actor)
-            ->performedOn($event->user)
-            ->withProperties([
-                'event' => 'user_restored',
-                'email' => $event->user->email,
-            ])
-            ->log('User restored');
+        UserLifecycleAuditor::trail(
+            'restored',
+            $event->actor,
+            $event->user,
+            null,
+            UserLifecycleAuditor::snapshot($event->user),
+            'User restored'
+        );
     }
 
     public function handleAvatarUpdated(AvatarUpdated $event): void
     {
-        activity('users')
-            ->causedBy($event->actor)
-            ->performedOn($event->user)
-            ->withProperties([
-                'event' => 'avatar_changed',
-                'previous_avatar' => $event->previousAvatar,
-                'avatar' => $event->avatar,
-            ])
-            ->log('Avatar changed');
+        UserLifecycleAuditor::trail(
+            'avatar_changed',
+            $event->actor,
+            $event->user,
+            ['avatar' => $event->previousAvatar],
+            ['avatar' => $event->avatar],
+            'User avatar changed'
+        );
     }
 }

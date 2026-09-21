@@ -62,6 +62,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'last_login_ip',
         'created_by',
         'updated_by',
+        'deleted_by',
         'email_verified_at',
     ];
 
@@ -129,6 +130,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
                 'gender',
                 'created_by',
                 'updated_by',
+                'deleted_by',
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
@@ -187,12 +189,17 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
 
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'created_by');
+        return $this->belongsTo(self::class, 'created_by')->withTrashed();
     }
 
     public function updater(): BelongsTo
     {
-        return $this->belongsTo(self::class, 'updated_by');
+        return $this->belongsTo(self::class, 'updated_by')->withTrashed();
+    }
+
+    public function deleter(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'deleted_by')->withTrashed();
     }
 
     public function customer(): BelongsTo

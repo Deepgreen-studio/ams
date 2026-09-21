@@ -39,7 +39,7 @@ frontend/src/modules/users/
 
 ## Database Tables
 
-- `users` (extended enterprise fields)
+- `users` (extended enterprise fields, including `deleted_by`)
 - `user_login_histories` (architecture ready)
 
 ## API Endpoints

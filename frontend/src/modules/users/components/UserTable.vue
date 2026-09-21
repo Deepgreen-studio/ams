@@ -170,7 +170,7 @@
           @click="onDelete(activeUser)"
         >
           <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
+          Soft Delete
         </button>
       </div>
     </Teleport>

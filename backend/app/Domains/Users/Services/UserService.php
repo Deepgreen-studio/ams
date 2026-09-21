@@ -46,7 +46,12 @@ class UserService
     public function show(string $identifier): array
     {
         $user = $this->userRepository->findByIdentifierOrFail($identifier);
-        $user->load(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email', 'roles']);
+        $user->load([
+            'creator:id,uuid,full_name,email',
+            'updater:id,uuid,full_name,email',
+            'deleter:id,uuid,full_name,email',
+            'roles',
+        ]);
 
         return [
             'user' => $user,
@@ -76,7 +81,7 @@ class UserService
 
             event(new UserCreated($user->load(['roles']), $actor));
 
-            return $user->load(['creator', 'updater', 'roles']);
+            return $user->load(['creator', 'updater', 'deleter', 'roles']);
         });
     }
 
@@ -119,7 +124,10 @@ class UserService
                 throw new ApiException('You cannot delete your own account.', 422);
             }
 
-            $this->userRepository->updateUser($user, ['updated_by' => $actor->id]);
+            $this->userRepository->updateUser($user, [
+                'updated_by' => $actor->id,
+                'deleted_by' => $actor->id,
+            ]);
             $this->userRepository->softDeleteUser($user);
 
             event(new UserDeleted($user, $actor, false));
@@ -136,7 +144,10 @@ class UserService
             }
 
             $restored = $this->userRepository->restoreUser($user);
-            $restored = $this->userRepository->updateUser($restored, ['updated_by' => $actor->id]);
+            $restored = $this->userRepository->updateUser($restored, [
+                'updated_by' => $actor->id,
+                'deleted_by' => null,
+            ]);
 
             event(new UserRestored($restored, $actor));
 
@@ -162,7 +173,11 @@ class UserService
 
     public function profile(User $user): User
     {
-        return $user->load(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
+        return $user->load([
+            'creator:id,uuid,full_name,email',
+            'updater:id,uuid,full_name,email',
+            'deleter:id,uuid,full_name,email',
+        ]);
     }
 
     /**

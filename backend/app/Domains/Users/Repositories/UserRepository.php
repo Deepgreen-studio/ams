@@ -78,7 +78,11 @@ class UserRepository extends BaseRepository
         $perPage = max(1, min($perPage, 100));
 
         $query = $this->filteredQuery($filters)
-            ->with(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
+            ->with([
+                'creator:id,uuid,full_name,name,email',
+                'updater:id,uuid,full_name,name,email',
+                'deleter:id,uuid,full_name,name,email',
+            ]);
 
         return $query->paginate($perPage)->withQueryString();
     }
@@ -144,6 +148,7 @@ class UserRepository extends BaseRepository
             'created_at',
             'updated_at',
             'last_login_at',
+            'deleted_at',
         ];
 
         if (! in_array($sortBy, $allowedSorts, true)) {
@@ -161,7 +166,7 @@ class UserRepository extends BaseRepository
         /** @var User $user */
         $user = $this->model->newQuery()->create($data);
 
-        return $user->fresh(['creator', 'updater']) ?? $user;
+        return $user->fresh(['creator', 'updater', 'deleter']) ?? $user;
     }
 
     /**
@@ -172,7 +177,7 @@ class UserRepository extends BaseRepository
         $user->fill($data);
         $user->save();
 
-        return $user->refresh()->load(['creator', 'updater']);
+        return $user->refresh()->load(['creator', 'updater', 'deleter']);
     }
 
     public function softDeleteUser(User $user): bool
@@ -184,7 +189,7 @@ class UserRepository extends BaseRepository
     {
         $user->restore();
 
-        return $user->refresh()->load(['creator', 'updater']);
+        return $user->refresh()->load(['creator', 'updater', 'deleter']);
     }
 
     public function forceDeleteUser(User $user): bool

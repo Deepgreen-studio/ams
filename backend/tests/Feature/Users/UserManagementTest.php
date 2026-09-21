@@ -280,6 +280,15 @@ class UserManagementTest extends TestCase
             ->assertJsonPath('message', 'User deleted successfully.');
 
         $this->assertSoftDeleted('users', ['id' => $user->id]);
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'deleted_by' => $this->admin->id,
+        ]);
+
+        $this->getJson('/api/v1/users?trashed=only')
+            ->assertOk()
+            ->assertJsonPath('data.users.items.0.deleted_by.full_name', $this->admin->full_name)
+            ->assertJsonPath('data.users.items.0.deleted_by_name', $this->admin->full_name);
 
         $this->assertDatabaseHas('audit_logs', [
             'module' => 'users',
@@ -296,6 +305,7 @@ class UserManagementTest extends TestCase
             'id' => $user->id,
             'deleted_at' => null,
             'updated_by' => $this->admin->id,
+            'deleted_by' => null,
         ]);
 
         $this->assertDatabaseHas('audit_logs', [

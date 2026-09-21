@@ -102,5 +102,11 @@ const detailItems = computed(() => [
   { label: 'Created by', value: props.user?.created_by?.full_name || '—' },
   { label: 'Modified', value: formatDateTime(props.user?.updated_at) || '—' },
   { label: 'Modified by', value: props.user?.updated_by?.full_name || '—' },
+  ...(props.user?.deleted_at
+    ? [
+        { label: 'Deleted', value: formatDateTime(props.user.deleted_at) || '—' },
+        { label: 'Deleted by', value: props.user?.deleted_by_name || props.user?.deleted_by?.full_name || '—' },
+      ]
+    : []),
 ]);
 </script>

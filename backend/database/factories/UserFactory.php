@@ -45,6 +45,7 @@ class UserFactory extends Factory
             'is_active' => true,
             'created_by' => null,
             'updated_by' => null,
+            'deleted_by' => null,
         ];
     }
 

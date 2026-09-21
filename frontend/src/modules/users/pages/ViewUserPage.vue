@@ -16,7 +16,7 @@
           @click="showDelete = true"
         >
           <TrashIcon class="h-4 w-4 text-white" />
-          Delete
+          Soft Delete
         </button>
     </Teleport>
 
@@ -157,9 +157,9 @@
 
     <DeleteConfirmation
       :open="showDelete"
-      title="Delete user"
+      title="Soft delete user"
       :message="`Soft delete ${usersStore.currentUser?.full_name || 'this user'}?`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="usersStore.saving"
       @cancel="showDelete = false"
       @confirm="onDelete"

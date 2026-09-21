@@ -40,6 +40,9 @@
               Status
             </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
+              Deleted By
+            </th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
@@ -81,6 +84,9 @@
             <td class="px-5 py-4 text-slate-600">{{ user.email }}</td>
             <td class="hidden px-5 py-4 md:table-cell">
               <StatusBadge :status="user.status" />
+            </td>
+            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+              {{ deletedByName(user) }}
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ formatDate(user.deleted_at) }}
@@ -217,6 +223,21 @@ function toggleMenu(id, event) {
 
 function closeMenu() {
   openMenuId.value = null;
+}
+
+function deletedByName(user) {
+  if (!user) {
+    return '—';
+  }
+
+  if (typeof user.deleted_by === 'string' && user.deleted_by.trim()) {
+    return user.deleted_by;
+  }
+
+  const nested = user.deleted_by?.full_name || user.deleted_by?.name || user.deleted_by?.data?.full_name;
+  const name = user.deleted_by_name || nested || user.updater?.full_name || user.updated_by?.full_name;
+
+  return name || '—';
 }
 
 function onRestore(user) {

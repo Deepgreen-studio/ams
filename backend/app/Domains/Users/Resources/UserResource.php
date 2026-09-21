@@ -45,25 +45,41 @@ class UserResource extends JsonResource
                 $request->user()?->can('users.view'),
                 $this->last_login_ip
             ),
-            'created_by' => $this->whenLoaded('creator', function () {
-                return $this->creator ? [
-                    'id' => $this->creator->id,
-                    'uuid' => $this->creator->uuid,
-                    'full_name' => $this->creator->full_name,
-                    'email' => $this->creator->email,
-                ] : null;
-            }),
-            'updated_by' => $this->whenLoaded('updater', function () {
-                return $this->updater ? [
-                    'id' => $this->updater->id,
-                    'uuid' => $this->updater->uuid,
-                    'full_name' => $this->updater->full_name,
-                    'email' => $this->updater->email,
-                ] : null;
-            }),
+            'created_by' => $this->whenLoaded('creator', fn () => $this->actorPayload($this->creator)),
+            'updated_by' => $this->whenLoaded('updater', fn () => $this->actorPayload($this->updater)),
+            'deleted_by' => $this->actorPayload($this->deleter),
+            'deleted_by_name' => $this->actorName($this->deleter),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
         ];
+    }
+
+    /**
+     * @return array{id: int, uuid: string|null, full_name: string, email: string|null}|null
+     */
+    private function actorPayload(mixed $actor): ?array
+    {
+        if (! $actor) {
+            return null;
+        }
+
+        return [
+            'id' => $actor->id,
+            'uuid' => $actor->uuid,
+            'full_name' => $this->actorName($actor),
+            'email' => $actor->email,
+        ];
+    }
+
+    private function actorName(mixed $actor): ?string
+    {
+        if (! $actor) {
+            return null;
+        }
+
+        $name = trim((string) ($actor->full_name ?: $actor->name ?: ''));
+
+        return $name !== '' ? $name : null;
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Domains\Users\Resources;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class UserCollection extends ResourceCollection
@@ -15,7 +16,9 @@ class UserCollection extends ResourceCollection
     public function toArray(Request $request): array
     {
         return [
-            'items' => $this->collection,
+            'items' => $this->collection
+                ->map(fn ($resource) => $resource instanceof JsonResource ? $resource->resolve($request) : $resource)
+                ->values(),
             'meta' => [
                 'current_page' => $this->resource->currentPage(),
                 'from' => $this->resource->firstItem(),

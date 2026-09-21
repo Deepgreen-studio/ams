@@ -6,13 +6,7 @@
         :to="{ name: 'users.trash' }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Trash
-        <span
-          v-if="usersStore.statistics?.trashed"
-          class="ml-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-xs font-semibold text-rose-600"
-        >
-          {{ usersStore.statistics.trashed }}
-        </span>
+        Soft Deleted
       </RouterLink>
       <RouterLink
         v-if="can('users.create')"
@@ -99,9 +93,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete user"
+      title="Soft delete user"
       :message="`Soft delete ${pendingDelete?.full_name || 'this user'}? They can be restored later.`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="usersStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"

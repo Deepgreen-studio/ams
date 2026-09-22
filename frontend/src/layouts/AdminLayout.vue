@@ -31,9 +31,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
+import { settingsService } from '@/modules/settings/services/settingsService';
 import { useAppStore } from '@/stores/app';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TopNavigation from '@/components/layout/TopNavigation.vue';
 import Breadcrumb from '@/components/ui/Breadcrumb.vue';
@@ -44,4 +46,20 @@ const route = useRoute();
 
 const showBreadcrumb = computed(() => route.name !== 'dashboard');
 const showToolbar = computed(() => showBreadcrumb.value);
+
+onMounted(async () => {
+    try {
+        const { data } = await settingsService.branding();
+        const branding = data.data?.branding;
+        if (!branding) {
+            return;
+        }
+        appStore.setBranding({
+            appName: branding.app_name,
+            logoUrl: resolveMediaUrl(branding.logo_url),
+        });
+    } catch {
+        // The shell keeps the default mark when branding cannot be loaded.
+    }
+});
 </script>

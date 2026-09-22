@@ -6,6 +6,7 @@ use App\Domains\Settings\Models\SystemSetting;
 use App\Domains\Settings\Requests\UpdateApiSettingsRequest;
 use App\Domains\Settings\Requests\UpdateEmailSettingsRequest;
 use App\Domains\Settings\Requests\UpdateGeneralSettingsRequest;
+use App\Domains\Settings\Requests\UploadApplicationLogoRequest;
 use App\Domains\Settings\Requests\UpdateQueueSettingsRequest;
 use App\Domains\Settings\Requests\UpdateSecuritySettingsRequest;
 use App\Domains\Settings\Requests\UpdateStorageSettingsRequest;
@@ -48,6 +49,35 @@ class SettingController
         $settings = $this->settingService->updateGroup('general', $request->validated(), $actor, $request->ip());
 
         return ApiResponse::success(['settings' => $settings], 'General settings updated successfully.');
+    }
+
+    public function uploadLogo(UploadApplicationLogoRequest $request): JsonResponse
+    {
+        $this->authorize('update', SystemSetting::class);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $settings = $this->settingService->uploadLogo($request->file('file'), $actor, $request->ip());
+
+        return ApiResponse::success(['settings' => $settings], 'Application logo updated successfully.');
+    }
+
+    public function removeLogo(Request $request): JsonResponse
+    {
+        $this->authorize('update', SystemSetting::class);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $settings = $this->settingService->removeLogo($actor, $request->ip());
+
+        return ApiResponse::success(['settings' => $settings], 'Application logo removed successfully.');
+    }
+
+    public function branding(): JsonResponse
+    {
+        return ApiResponse::success([
+            'branding' => $this->settingService->publicBranding(),
+        ]);
     }
 
     public function showEmail(): JsonResponse

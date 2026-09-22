@@ -139,6 +139,41 @@ class SettingsManagementTest extends TestCase
     public function test_defaults_are_seeded(): void
     {
         $this->assertTrue(SystemSetting::query()->where('group', 'general')->where('key', 'app_name')->exists());
+        $this->assertTrue(SystemSetting::query()->where('group', 'general')->where('key', 'logo')->exists());
         $this->assertTrue(SystemSetting::query()->where('group', 'storage')->where('key', 'max_upload_kb')->exists());
+    }
+
+    public function test_admin_can_upload_and_remove_application_logo(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs($this->admin);
+
+        $upload = $this->post('/api/v1/settings/logo', [
+            'file' => UploadedFile::fake()->image('mark.png', 64, 64),
+        ], ['Accept' => 'application/json']);
+
+        $upload->assertOk()
+            ->assertJsonPath('success', true);
+
+        $path = $upload->json('data.settings.logo.path');
+        $this->assertNotEmpty($path);
+        $this->assertNotEmpty($upload->json('data.settings.logo.value'));
+        Storage::disk('public')->assertExists($path);
+
+        $this->deleteJson('/api/v1/settings/logo')
+            ->assertOk()
+            ->assertJsonPath('data.settings.logo.value', null);
+
+        Storage::disk('public')->assertMissing($path);
+    }
+
+    public function test_logo_upload_rejects_non_images(): void
+    {
+        Storage::fake('public');
+        Sanctum::actingAs($this->admin);
+
+        $this->post('/api/v1/settings/logo', [
+            'file' => UploadedFile::fake()->create('notes.pdf', 20, 'application/pdf'),
+        ], ['Accept' => 'application/json'])->assertStatus(422);
     }
 }

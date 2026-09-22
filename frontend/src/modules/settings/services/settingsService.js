@@ -7,6 +7,19 @@ export const settingsService = {
   updateGeneral(payload) {
     return api.put('/settings', payload);
   },
+  uploadLogo(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/settings/logo', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  removeLogo() {
+    return api.delete('/settings/logo');
+  },
+  branding() {
+    return api.get('/settings/branding');
+  },
   getEmail() {
     return api.get('/settings/email');
   },

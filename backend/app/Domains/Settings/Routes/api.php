@@ -12,6 +12,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.SettingPermission::VIEW);
         Route::put('/', [SettingController::class, 'update'])
             ->middleware('permission:'.SettingPermission::UPDATE);
+        Route::post('/logo', [SettingController::class, 'uploadLogo'])
+            ->middleware('permission:'.SettingPermission::UPDATE);
+        Route::delete('/logo', [SettingController::class, 'removeLogo'])
+            ->middleware('permission:'.SettingPermission::UPDATE);
+        Route::get('/branding', [SettingController::class, 'branding']);
 
         Route::get('/email', [SettingController::class, 'showEmail'])
             ->middleware('permission:'.SettingPermission::VIEW);

@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { mediaService, settingsService } from '@/modules/settings/services/settingsService';
+import { useAppStore } from '@/stores/app';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 function useAsyncState() {
   const loading = ref(false);
@@ -25,8 +27,27 @@ function useAsyncState() {
 
 function extractValues(settingsMap = {}) {
   return Object.fromEntries(
-    Object.entries(settingsMap).map(([key, meta]) => [key, meta?.value ?? meta]),
+    Object.entries(settingsMap).map(([key, meta]) => {
+      if (meta && typeof meta === 'object' && 'value' in meta) {
+        return [key, meta.value];
+      }
+
+      return [key, meta];
+    }),
   );
+}
+
+function syncApplicationBranding(settingsMap = {}) {
+  const values = extractValues(settingsMap);
+  const appStore = useAppStore();
+  appStore.setBranding({
+    appName: values.app_name,
+    logoUrl: resolveMediaUrl(values.logo),
+  });
+  if (values.logo) {
+    values.logo = resolveMediaUrl(values.logo);
+  }
+  return values;
 }
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -123,13 +144,56 @@ export const useSettingsStore = defineStore('settings', () => {
     loadQueue: () => fetchGroup(settingsService.getQueue),
     saveQueue: (payload) => save(settingsService.updateQueue, payload),
     loadCache: () => fetchGroup(settingsService.getCache),
-    saveGeneral: (payload) => save(settingsService.updateGeneral, payload),
+    saveGeneral: async (payload) => {
+      const saved = await save(settingsService.updateGeneral, payload);
+      current.value = syncApplicationBranding(
+        Object.fromEntries(
+          Object.entries(current.value).map(([key, value]) => [key, { value }]),
+        ),
+      );
+      return saved;
+    },
+    uploadLogo: async (file) => {
+      state.saving.value = true;
+      state.clearMessages();
+      try {
+        const { data } = await settingsService.uploadLogo(file);
+        current.value = syncApplicationBranding(data.data?.settings ?? {});
+        state.successMessage.value = data.message;
+        return current.value;
+      } catch (err) {
+        const errors = { ...(err?.errors || {}) };
+        if (errors.file && !errors.logo) {
+          errors.logo = errors.file;
+        }
+        state.error.value = err?.message || 'Unable to upload logo';
+        state.fieldErrors.value = errors;
+        throw err;
+      } finally {
+        state.saving.value = false;
+      }
+    },
+    removeLogo: async () => {
+      state.saving.value = true;
+      state.clearMessages();
+      try {
+        const { data } = await settingsService.removeLogo();
+        current.value = syncApplicationBranding(data.data?.settings ?? {});
+        state.successMessage.value = data.message;
+        return current.value;
+      } catch (err) {
+        state.applyError(err, 'Unable to remove logo');
+        throw err;
+      } finally {
+        state.saving.value = false;
+      }
+    },
     loadGeneral: async () => {
       state.loading.value = true;
       state.clearMessages();
       try {
         const { data } = await settingsService.all();
-        current.value = extractValues(data.data?.settings?.general ?? {});
+        current.value = syncApplicationBranding(data.data?.settings?.general ?? {});
         return current.value;
       } catch (err) {
         state.applyError(err, 'Unable to load settings');

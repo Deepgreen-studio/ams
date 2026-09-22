@@ -8,9 +8,13 @@ use App\Domains\Settings\Models\SystemSetting;
 use App\Domains\Settings\Repositories\ConfigurationRepository;
 use App\Domains\Settings\Repositories\SystemSettingRepository;
 use App\Models\User;
+use App\Shared\Exceptions\ApiException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SystemSettingService
 {
@@ -115,6 +119,97 @@ class SystemSettingService
     }
 
     /**
+     * @return array<string, mixed>
+     */
+    public function uploadLogo(UploadedFile $file, User $actor, ?string $ip = null): array
+    {
+        return DB::transaction(function () use ($file, $actor, $ip): array {
+            $disk = $this->logoDisk();
+            $extension = strtolower($file->getClientOriginalExtension() ?: $file->extension() ?: 'png');
+            $filename = Str::uuid()->toString().'.'.$extension;
+            $path = $file->storeAs('branding', $filename, $disk);
+
+            if (! $path) {
+                throw new ApiException('Unable to store application logo.', 500);
+            }
+
+            $setting = $this->ensureLogoSetting($actor);
+            $previous = $setting->value;
+
+            $setting->fill([
+                'value' => $path,
+                'updated_by' => $actor->id,
+            ]);
+            $setting->save();
+
+            $this->configurationRepository->logChange([
+                'setting_key' => $setting->fullKey(),
+                'group' => 'general',
+                'old_value' => $previous,
+                'new_value' => $path,
+                'changed_by' => $actor->id,
+                'ip_address' => $ip,
+            ]);
+
+            $this->settingRepository->forgetCache();
+            $this->deleteStoredFile($previous, $disk);
+            event(new SettingsUpdated('general', [$setting->fullKey()], $actor));
+            event(new ConfigurationChanged('general', [$setting->fullKey()], $actor));
+
+            return $this->getGroup('general');
+        });
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function removeLogo(User $actor, ?string $ip = null): array
+    {
+        return DB::transaction(function () use ($actor, $ip): array {
+            $setting = $this->settingRepository->findByGroupAndKey('general', 'logo')
+                ?? $this->ensureLogoSetting($actor);
+            $previous = $setting->value;
+
+            if (filled($previous)) {
+                $setting->fill([
+                    'value' => null,
+                    'updated_by' => $actor->id,
+                ]);
+                $setting->save();
+
+                $this->configurationRepository->logChange([
+                    'setting_key' => $setting->fullKey(),
+                    'group' => 'general',
+                    'old_value' => $previous,
+                    'new_value' => null,
+                    'changed_by' => $actor->id,
+                    'ip_address' => $ip,
+                ]);
+
+                $this->settingRepository->forgetCache();
+                $this->deleteStoredFile($previous, $this->logoDisk());
+                event(new SettingsUpdated('general', [$setting->fullKey()], $actor));
+                event(new ConfigurationChanged('general', [$setting->fullKey()], $actor));
+            }
+
+            return $this->getGroup('general');
+        });
+    }
+
+    /**
+     * @return array{app_name: mixed, logo_url: ?string}
+     */
+    public function publicBranding(): array
+    {
+        $path = $this->getValue('general', 'logo');
+
+        return [
+            'app_name' => $this->getValue('general', 'app_name', config('app.name')),
+            'logo_url' => $this->logoUrl(is_string($path) ? $path : null),
+        ];
+    }
+
+    /**
      * @return Collection<int, SystemSetting>
      */
     public function seedDefaults(User $actor): Collection
@@ -174,7 +269,7 @@ class SystemSettingService
             $value = filled($setting->value) ? '********' : null;
         }
 
-        return [
+        $presented = [
             'uuid' => $setting->uuid,
             'group' => $setting->group,
             'key' => $setting->key,
@@ -185,6 +280,60 @@ class SystemSettingService
             'is_encrypted' => $setting->is_encrypted,
             'full_key' => $setting->fullKey(),
         ];
+
+        if ($setting->group === 'general' && $setting->key === 'logo') {
+            $presented['path'] = is_string($value) ? $value : null;
+            $presented['value'] = $this->logoUrl(is_string($value) ? $value : null);
+        }
+
+        return $presented;
+    }
+
+    protected function ensureLogoSetting(User $actor): SystemSetting
+    {
+        $existing = $this->settingRepository->findByGroupAndKey('general', 'logo');
+        if ($existing) {
+            return $existing;
+        }
+
+        return $this->settingRepository->upsertSetting('general', 'logo', [
+            'value' => null,
+            'type' => 'string',
+            'description' => 'Application logo',
+            'is_public' => true,
+            'is_encrypted' => false,
+            'created_by' => $actor->id,
+            'updated_by' => $actor->id,
+        ]);
+    }
+
+    protected function logoDisk(): string
+    {
+        return (string) config('filesystems.company_media_disk', 'public');
+    }
+
+    protected function logoUrl(?string $path): ?string
+    {
+        if (blank($path)) {
+            return null;
+        }
+
+        if (Str::startsWith($path, ['http://', 'https://'])) {
+            return $path;
+        }
+
+        return Storage::disk($this->logoDisk())->url($path);
+    }
+
+    protected function deleteStoredFile(?string $path, string $disk): void
+    {
+        if (blank($path) || Str::startsWith($path, ['http://', 'https://'])) {
+            return;
+        }
+
+        if (Storage::disk($disk)->exists($path)) {
+            Storage::disk($disk)->delete($path);
+        }
     }
 
     protected function castStoredValue(mixed $value, string $type, bool $encrypted): mixed
@@ -247,6 +396,7 @@ class SystemSettingService
             ['group' => 'general', 'key' => 'date_format', 'value' => 'Y-m-d', 'type' => 'string', 'description' => 'Date format', 'is_public' => true],
             ['group' => 'general', 'key' => 'time_format', 'value' => 'H:i', 'type' => 'string', 'description' => 'Time format', 'is_public' => true],
             ['group' => 'general', 'key' => 'maintenance_mode', 'value' => false, 'type' => 'boolean', 'description' => 'Enable maintenance mode'],
+            ['group' => 'general', 'key' => 'logo', 'value' => null, 'type' => 'string', 'description' => 'Application logo', 'is_public' => true],
 
             ['group' => 'email', 'key' => 'smtp_host', 'value' => env('MAIL_HOST'), 'type' => 'string', 'description' => 'SMTP host'],
             ['group' => 'email', 'key' => 'smtp_port', 'value' => (int) env('MAIL_PORT', 587), 'type' => 'integer', 'description' => 'SMTP port'],

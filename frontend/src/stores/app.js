@@ -6,6 +6,7 @@ export const useAppStore = defineStore('app', () => {
     const sidebarCollapsed = ref(false);
     const isLoading = ref(false);
     const appName = ref(import.meta.env.VITE_APP_NAME || 'AMS');
+    const logoUrl = ref('');
 
     function toggleSidebar() {
         sidebarOpen.value = !sidebarOpen.value;
@@ -31,16 +32,25 @@ export const useAppStore = defineStore('app', () => {
         isLoading.value = value;
     }
 
+    function setBranding({ appName: name, logoUrl: logo } = {}) {
+        if (name) {
+            appName.value = name;
+        }
+        logoUrl.value = logo || '';
+    }
+
     return {
         sidebarOpen,
         sidebarCollapsed,
         isLoading,
         appName,
+        logoUrl,
         toggleSidebar,
         closeSidebar,
         openSidebar,
         toggleSidebarCollapse,
         setSidebarCollapsed,
         setLoading,
+        setBranding,
     };
 });

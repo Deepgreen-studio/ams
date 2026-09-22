@@ -19,8 +19,14 @@
             class="relative z-20 flex shrink-0 items-center gap-3 overflow-visible py-5"
             :class="collapsed ? 'justify-center px-2' : 'px-5'"
         >
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center" aria-hidden="true">
-                <AmsMark class="h-9 w-9" />
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
+                <img
+                    v-if="appStore.logoUrl"
+                    :src="appStore.logoUrl"
+                    alt="Application logo"
+                    class="h-9 w-9 object-contain"
+                />
+                <AmsMark v-else class="h-9 w-9" />
             </div>
             <p v-if="!collapsed" class="truncate text-xl font-bold tracking-tight text-white">
                 {{ appStore.appName }}

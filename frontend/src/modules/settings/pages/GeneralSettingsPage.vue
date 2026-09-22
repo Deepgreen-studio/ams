@@ -15,7 +15,10 @@
           :error="settingsStore.error || ''"
           :success="settingsStore.successMessage || ''"
           :loading="settingsStore.saving"
+          :uploading-key="uploadingKey"
           @submit="onSubmit"
+          @upload="onUpload"
+          @remove="onRemove"
         />
       </div>
 
@@ -42,7 +45,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';
@@ -78,7 +81,16 @@ const fields = [
   { key: 'date_format', label: 'Date format', options: DATE_FORMAT_OPTIONS },
   { key: 'time_format', label: 'Time format', options: TIME_FORMAT_OPTIONS },
   { key: 'maintenance_mode', label: 'Maintenance mode', type: 'boolean' },
+  {
+    key: 'logo',
+    label: 'Logo',
+    type: 'image',
+    accept: 'image/png,image/jpeg,image/webp',
+    hint: 'PNG, JPG or WebP · Max 2MB',
+  },
 ];
+
+const uploadingKey = ref('');
 
 onMounted(async () => {
   await settingsStore.loadGeneral();
@@ -87,5 +99,31 @@ onMounted(async () => {
 
 async function onSubmit(payload) {
   await settingsStore.saveGeneral(payload);
+}
+
+async function onUpload({ key, file }) {
+  if (key !== 'logo') {
+    return;
+  }
+
+  uploadingKey.value = key;
+  try {
+    await settingsStore.uploadLogo(file);
+  } finally {
+    uploadingKey.value = '';
+  }
+}
+
+async function onRemove(key) {
+  if (key !== 'logo') {
+    return;
+  }
+
+  uploadingKey.value = key;
+  try {
+    await settingsStore.removeLogo();
+  } finally {
+    uploadingKey.value = '';
+  }
 }
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <form class="space-y-6" @submit.prevent="$emit('submit', model)">
+  <form class="space-y-6" @submit.prevent="submitForm">
     <div
       v-if="error"
       class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
@@ -45,6 +45,49 @@
           :placeholder="field.placeholder || ''"
           :error="Boolean(errors[field.key])"
         />
+        <div
+          v-else-if="field.type === 'image'"
+          class="flex h-12 items-center gap-2 rounded-xl border bg-white pl-2 pr-1.5"
+          :class="errors[field.key] ? 'border-rose-400' : 'border-slate-200'"
+        >
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+            <img
+              v-if="imageSrc(field)"
+              :src="imageSrc(field)"
+              alt=""
+              class="h-full w-full object-contain"
+            />
+            <PhotoIcon v-else class="h-4 w-4 text-slate-400" />
+          </span>
+          <span
+            class="min-w-0 flex-1 truncate text-sm"
+            :class="imageLabel(field) ? 'text-slate-700' : 'text-slate-400'"
+          >
+            {{ imageLabel(field) || 'No logo selected' }}
+          </span>
+          <button
+            v-if="model[field.key]"
+            type="button"
+            class="shrink-0 px-1 text-xs font-medium text-rose-600 hover:text-rose-700 disabled:opacity-60"
+            :disabled="uploadingKey === field.key"
+            @click="emit('remove', field.key)"
+          >
+            Remove
+          </button>
+          <label
+            class="inline-flex h-8 shrink-0 cursor-pointer items-center rounded-lg bg-slate-100 px-3 text-xs font-medium text-slate-700 hover:bg-slate-200"
+            :class="uploadingKey === field.key ? 'pointer-events-none opacity-60' : ''"
+          >
+            {{ uploadingKey === field.key ? 'Uploading…' : 'Choose' }}
+            <input
+              type="file"
+              class="sr-only"
+              :accept="field.accept || 'image/png,image/jpeg,image/webp'"
+              :disabled="uploadingKey === field.key"
+              @change="onImageSelected(field, $event)"
+            />
+          </label>
+        </div>
         <input
           v-else
           v-model="model[field.key]"
@@ -78,8 +121,10 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import { PhotoIcon } from '@heroicons/vue/24/outline';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const booleanOptions = [
   { value: true, label: 'Enabled' },
@@ -94,17 +139,25 @@ const props = defineProps({
   success: { type: String, default: '' },
   loading: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Save settings' },
+  uploadingKey: { type: String, default: '' },
 });
 
-defineEmits(['submit']);
+const emit = defineEmits(['submit', 'upload', 'remove']);
 
 const model = reactive({});
+const imagePreview = reactive({});
+const imageNames = reactive({});
 
 watch(
   () => props.initial,
   (value) => {
     props.fields.forEach((field) => {
       model[field.key] = value?.[field.key] ?? (field.type === 'boolean' ? false : '');
+      if (field.type === 'image' && imagePreview[field.key]) {
+        URL.revokeObjectURL(imagePreview[field.key]);
+        imagePreview[field.key] = '';
+        imageNames[field.key] = '';
+      }
     });
   },
   { immediate: true, deep: true },
@@ -136,4 +189,56 @@ function searchableButtonClass(field) {
 
   return `${base} border-slate-200 text-slate-900 focus:border-brand-500`;
 }
+
+function imageSrc(field) {
+  return imagePreview[field.key] || resolveMediaUrl(model[field.key]);
+}
+
+function imageLabel(field) {
+  if (imageNames[field.key]) {
+    return imageNames[field.key];
+  }
+
+  return model[field.key] ? 'Current logo' : '';
+}
+
+function onImageSelected(field, event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) {
+    return;
+  }
+
+  if (imagePreview[field.key]) {
+    URL.revokeObjectURL(imagePreview[field.key]);
+  }
+
+  imagePreview[field.key] = URL.createObjectURL(file);
+  imageNames[field.key] = file.name;
+  emit('upload', { key: field.key, file });
+}
+
+function submitForm() {
+  const payload = { ...model };
+  props.fields.forEach((field) => {
+    if (field.type === 'image') {
+      delete payload[field.key];
+    }
+  });
+  emit('submit', payload);
+}
+
+watch(
+  () => props.errors,
+  (errors) => {
+    props.fields.forEach((field) => {
+      if (field.type === 'image' && errors?.[field.key] && imagePreview[field.key]) {
+        URL.revokeObjectURL(imagePreview[field.key]);
+        imagePreview[field.key] = '';
+        imageNames[field.key] = '';
+      }
+    });
+  },
+  { deep: true },
+);
 </script>

@@ -19,12 +19,15 @@
             class="relative z-20 flex shrink-0 items-center gap-3 overflow-visible py-5"
             :class="collapsed ? 'justify-center px-2' : 'px-5'"
         >
-            <div class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden">
+            <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden"
+                :class="appStore.logoUrl ? 'rounded-[12px] border border-white/15 bg-white p-1' : ''"
+            >
                 <img
                     v-if="appStore.logoUrl"
                     :src="appStore.logoUrl"
                     alt="Application logo"
-                    class="h-9 w-9 object-contain"
+                    class="h-full w-full rounded-[8px] object-contain"
                 />
                 <AmsMark v-else class="h-9 w-9" />
             </div>

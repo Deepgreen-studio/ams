@@ -22,27 +22,29 @@
         <label class="mb-1.5 block text-sm font-medium text-slate-700">
           {{ field.label }}
         </label>
-        <select
+        <SelectBox
           v-if="field.type === 'boolean'"
           v-model="model[field.key]"
-          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        >
-          <option :value="true">Enabled</option>
-          <option :value="false">Disabled</option>
-        </select>
-        <select
+          size="lg"
+          :options="booleanOptions"
+          :error="Boolean(errors[field.key])"
+        />
+        <SearchableSelect
+          v-else-if="field.searchable"
+          v-model="model[field.key]"
+          :options="optionsFor(field)"
+          :placeholder="field.placeholder || 'Select…'"
+          :search-placeholder="field.searchPlaceholder || 'Search…'"
+          :button-class="searchableButtonClass(field)"
+        />
+        <SelectBox
           v-else-if="field.options?.length"
           v-model="model[field.key]"
-          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        >
-          <option
-            v-for="option in field.options"
-            :key="String(option.value)"
-            :value="option.value"
-          >
-            {{ option.label }}
-          </option>
-        </select>
+          size="lg"
+          :options="optionsFor(field)"
+          :placeholder="field.placeholder || ''"
+          :error="Boolean(errors[field.key])"
+        />
         <input
           v-else
           v-model="model[field.key]"
@@ -76,6 +78,13 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import SearchableSelect from '@/components/ui/SearchableSelect.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
+
+const booleanOptions = [
+  { value: true, label: 'Enabled' },
+  { value: false, label: 'Disabled' },
+];
 
 const props = defineProps({
   fields: { type: Array, default: () => [] },
@@ -100,4 +109,31 @@ watch(
   },
   { immediate: true, deep: true },
 );
+
+function optionsFor(field) {
+  const options = field.options || [];
+  const current = model[field.key];
+
+  if (
+    current !== '' &&
+    current !== null &&
+    current !== undefined &&
+    !options.some((option) => option.value === current)
+  ) {
+    return [{ value: current, label: String(current) }, ...options];
+  }
+
+  return options;
+}
+
+function searchableButtonClass(field) {
+  const base =
+    'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:outline-none focus:ring-0';
+
+  if (props.errors[field.key]) {
+    return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
+  }
+
+  return `${base} border-slate-200 text-slate-900 focus:border-brand-500`;
+}
 </script>

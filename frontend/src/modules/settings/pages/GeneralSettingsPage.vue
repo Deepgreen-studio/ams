@@ -46,16 +46,37 @@ import { onMounted } from 'vue';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';
+import {
+  CURRENCY_OPTIONS,
+  DATE_FORMAT_OPTIONS,
+  getTimezoneOptions,
+  LANGUAGE_OPTIONS,
+  TIME_FORMAT_OPTIONS,
+} from '@/utils/localeOptions';
 
 const settingsStore = useSettingsStore();
 const fields = [
   { key: 'app_name', label: 'Application name' },
   { key: 'app_url', label: 'Application URL', type: 'url' },
-  { key: 'timezone', label: 'Timezone' },
-  { key: 'language', label: 'Language' },
-  { key: 'currency', label: 'Currency' },
-  { key: 'date_format', label: 'Date format' },
-  { key: 'time_format', label: 'Time format' },
+  {
+    key: 'timezone',
+    label: 'Timezone',
+    searchable: true,
+    placeholder: 'Select timezone',
+    searchPlaceholder: 'Search timezone…',
+    options: getTimezoneOptions(),
+  },
+  {
+    key: 'language',
+    label: 'Language',
+    searchable: true,
+    placeholder: 'Select language',
+    searchPlaceholder: 'Search language…',
+    options: LANGUAGE_OPTIONS,
+  },
+  { key: 'currency', label: 'Currency', options: CURRENCY_OPTIONS },
+  { key: 'date_format', label: 'Date format', options: DATE_FORMAT_OPTIONS },
+  { key: 'time_format', label: 'Time format', options: TIME_FORMAT_OPTIONS },
   { key: 'maintenance_mode', label: 'Maintenance mode', type: 'boolean' },
 ];
 

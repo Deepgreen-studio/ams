@@ -29,6 +29,33 @@ const FALLBACK_TIMEZONES = [
   'Pacific/Auckland',
 ];
 
+export const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'USD — US Dollar' },
+  { value: 'GBP', label: 'GBP — British Pound' },
+  { value: 'EUR', label: 'EUR — Euro' },
+  { value: 'CAD', label: 'CAD — Canadian Dollar' },
+  { value: 'AUD', label: 'AUD — Australian Dollar' },
+  { value: 'INR', label: 'INR — Indian Rupee' },
+  { value: 'BDT', label: 'BDT — Bangladeshi Taka' },
+  { value: 'JPY', label: 'JPY — Japanese Yen' },
+  { value: 'CNY', label: 'CNY — Chinese Yuan' },
+  { value: 'SGD', label: 'SGD — Singapore Dollar' },
+  { value: 'AED', label: 'AED — UAE Dirham' },
+];
+
+export const DATE_FORMAT_OPTIONS = [
+  { value: 'Y-m-d', label: 'Y-m-d (2026-08-10)' },
+  { value: 'd/m/Y', label: 'd/m/Y (10/08/2026)' },
+  { value: 'm/d/Y', label: 'm/d/Y (08/10/2026)' },
+  { value: 'd-m-Y', label: 'd-m-Y (10-08-2026)' },
+  { value: 'd M Y', label: 'd M Y (10 Aug 2026)' },
+];
+
+export const TIME_FORMAT_OPTIONS = [
+  { value: 'H:i', label: '24-hour (14:30)' },
+  { value: 'h:i A', label: '12-hour (02:30 PM)' },
+];
+
 export const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'en-GB', label: 'English (UK)' },

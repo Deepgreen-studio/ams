@@ -17,7 +17,10 @@ class UpdateDepartmentRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:150'],
+            'department_name' => ['sometimes', 'required', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'note' => ['nullable', 'string', 'max:2000'],
+            'company_id' => ['sometimes', 'required', 'string'],
             'status' => ['sometimes', 'required', Rule::in(CompanyStatus::values())],
         ];
     }

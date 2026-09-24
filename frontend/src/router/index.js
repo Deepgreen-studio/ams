@@ -159,6 +159,12 @@ const router = createRouter({
           meta: { title: 'Company Profile', requiresAuth: true },
         },
         {
+          path: 'departments',
+          name: 'departments.index',
+          component: () => import('@/modules/companies/pages/DepartmentsIndexPage.vue'),
+          meta: { title: 'Department', requiresAuth: true },
+        },
+        {
           path: 'companies/:id/departments',
           name: 'companies.departments',
           component: () => import('@/modules/companies/pages/DepartmentsPage.vue'),

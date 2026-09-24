@@ -43,8 +43,9 @@ class DepartmentService
             /** @var Department $department */
             $department = $this->departmentRepository->create([
                 'company_id' => $company->id,
-                'name' => $data['name'],
+                'name' => $data['department_name'] ?? $data['name'],
                 'description' => $data['description'] ?? null,
+                'note' => $data['note'] ?? null,
                 'status' => $data['status'] ?? 'active',
                 'created_by' => $actor->id,
                 'updated_by' => $actor->id,
@@ -63,7 +64,15 @@ class DepartmentService
     {
         return DB::transaction(function () use ($identifier, $data, $actor): Department {
             $department = $this->departmentRepository->findByIdentifierOrFail($identifier);
-            $payload = array_intersect_key($data, array_flip(['name', 'description', 'status']));
+            if (array_key_exists('department_name', $data) && ! array_key_exists('name', $data)) {
+                $data['name'] = $data['department_name'];
+            }
+
+            $payload = array_intersect_key($data, array_flip(['name', 'description', 'note', 'status']));
+            if (array_key_exists('company_id', $data)) {
+                $company = $this->companyRepository->findByIdentifierOrFail((string) $data['company_id']);
+                $payload['company_id'] = $company->id;
+            }
             $payload['updated_by'] = $actor->id;
 
             $department->fill($payload);

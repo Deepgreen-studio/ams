@@ -14,7 +14,9 @@ class DepartmentResource extends JsonResource
             'uuid' => $this->uuid,
             'company_id' => $this->company_id,
             'name' => $this->name,
+            'department_name' => $this->name,
             'description' => $this->description,
+            'note' => $this->note,
             'status' => $this->status?->value ?? $this->status,
             'company' => $this->whenLoaded('company', fn () => [
                 'id' => $this->company->id,

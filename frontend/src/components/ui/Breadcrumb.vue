@@ -25,6 +25,7 @@ const SECTION_LABELS = {
   users: 'Users',
   roles: 'Roles',
   companies: 'Companies',
+  departments: 'Department',
   applications: 'Applications',
   content: 'Content',
   customers: 'Customers',

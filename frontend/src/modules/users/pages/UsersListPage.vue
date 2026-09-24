@@ -4,7 +4,7 @@
       <RouterLink
         v-if="canAny('users.view', 'users.restore', 'users.force-delete')"
         :to="{ name: 'users.trash' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Soft Deleted
       </RouterLink>
@@ -31,13 +31,10 @@
     </div>
 
     <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-      <button
+      <div
         v-for="card in statCards"
         :key="card.label"
-        type="button"
-        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 text-left ring-1 ring-zinc-100 transition hover:ring-brand-200"
-        :class="card.active ? 'ring-brand-300' : ''"
-        @click="card.onClick?.()"
+        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 text-left ring-1 ring-zinc-100"
       >
         <div class="min-w-0">
           <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
@@ -49,7 +46,7 @@
         >
           <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
         </div>
-      </button>
+      </div>
     </div>
 
     <UserTable
@@ -105,7 +102,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 import {
   CheckCircleIcon,
   NoSymbolIcon,
@@ -120,7 +117,6 @@ import UserTable from '@/modules/users/components/UserTable.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useUsersStore } from '@/modules/users/stores/users';
 
-const router = useRouter();
 const usersStore = useUsersStore();
 const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
@@ -132,8 +128,6 @@ const statCards = computed(() => [
     icon: UsersIcon,
     iconBg: 'bg-brand-50',
     iconColor: 'text-brand-500',
-    active: !usersStore.filters.status,
-    onClick: () => usersStore.fetchUsers({ status: '', page: 1 }),
   },
   {
     label: 'Active',
@@ -141,8 +135,6 @@ const statCards = computed(() => [
     icon: CheckCircleIcon,
     iconBg: 'bg-emerald-50',
     iconColor: 'text-emerald-600',
-    active: usersStore.filters.status === 'active',
-    onClick: () => usersStore.fetchUsers({ status: 'active', page: 1 }),
   },
   {
     label: 'Inactive',
@@ -150,8 +142,6 @@ const statCards = computed(() => [
     icon: NoSymbolIcon,
     iconBg: 'bg-slate-100',
     iconColor: 'text-slate-500',
-    active: usersStore.filters.status === 'inactive',
-    onClick: () => usersStore.fetchUsers({ status: 'inactive', page: 1 }),
   },
   {
     label: 'Suspended',
@@ -159,8 +149,6 @@ const statCards = computed(() => [
     icon: PauseCircleIcon,
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-600',
-    active: usersStore.filters.status === 'suspended',
-    onClick: () => usersStore.fetchUsers({ status: 'suspended', page: 1 }),
   },
   {
     label: 'Trashed',
@@ -168,8 +156,6 @@ const statCards = computed(() => [
     icon: TrashIcon,
     iconBg: 'bg-rose-50',
     iconColor: 'text-rose-600',
-    active: false,
-    onClick: () => router.push({ name: 'users.trash' }),
   },
 ]);
 

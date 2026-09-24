@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Domains\Authentication\Notifications\EmailVerificationNotification;
 use App\Domains\Authentication\Notifications\PasswordResetNotification;
+use App\Domains\Companies\Models\Company;
+use App\Domains\Companies\Models\Department;
 use App\Domains\Customers\Models\Customer;
 use App\Domains\Notifications\Models\DatabaseNotification;
 use App\Domains\Users\Enums\UserGender;
@@ -15,6 +17,7 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -55,6 +58,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'date_of_birth',
         'timezone',
         'language',
+        'department_id',
         'status',
         'password',
         'is_active',
@@ -205,6 +209,18 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class)
+            ->withPivot(['is_primary', 'status'])
+            ->withTimestamps();
     }
 
     public function isPortalCustomer(): bool

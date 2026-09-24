@@ -17,8 +17,10 @@ class StoreDepartmentRequest extends FormRequest
     {
         return [
             'company_id' => ['required', 'string'],
-            'name' => ['required', 'string', 'max:150'],
+            'name' => ['required_without:department_name', 'string', 'max:150'],
+            'department_name' => ['required_without:name', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'note' => ['nullable', 'string', 'max:2000'],
             'status' => ['nullable', Rule::in(CompanyStatus::values())],
         ];
     }

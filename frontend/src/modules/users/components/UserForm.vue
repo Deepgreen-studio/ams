@@ -130,22 +130,6 @@
         <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Gender</label>
-        <SelectBox
-          v-model="form.gender"
-          size="lg"
-          :options="genderOptions"
-        />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Date of birth</label>
-        <input
-          v-model="form.date_of_birth"
-          type="date"
-          class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        />
-      </div>
-      <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
         <SearchableSelect
           v-model="form.timezone"
@@ -162,6 +146,29 @@
           placeholder="Select language"
           search-placeholder="Search language…"
         />
+      </div>
+      <div v-if="layout !== 'profile'">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <SearchableSelect
+          v-model="form.company_id"
+          :options="companySelectOptions"
+          placeholder="Select a company"
+          search-placeholder="Search company…"
+          :button-class="companyButtonClass"
+        />
+        <p v-if="errors.company_id" class="mt-1 text-xs text-rose-600">{{ errors.company_id[0] }}</p>
+      </div>
+      <div v-if="layout !== 'profile'">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Department</label>
+        <SearchableSelect
+          v-model="form.department_id"
+          :options="departmentSelectOptions"
+          :disabled="!form.company_id"
+          :placeholder="form.company_id ? 'Select a department' : 'Select a company first'"
+          search-placeholder="Search department…"
+          :button-class="departmentButtonClass"
+        />
+        <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
       </div>
       <div v-if="showStatus">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
@@ -237,6 +244,7 @@ import PasswordInput from '@/modules/authentication/components/PasswordInput.vue
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { companyService } from '@/modules/companies/services/companyService';
 import { useToast } from '@/composables/useToast';
 import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
@@ -279,6 +287,10 @@ const props = defineProps({
     default: true,
   },
   roleOptions: {
+    type: Array,
+    default: () => [],
+  },
+  companyOptions: {
     type: Array,
     default: () => [],
   },
@@ -334,6 +346,75 @@ const roleSelectOptions = computed(() =>
   }))
 );
 
+const companySelectOptions = computed(() =>
+  (props.companyOptions || []).map((company) => ({
+    value: company.uuid,
+    label: company.company_name || company.legal_name || company.uuid,
+  }))
+);
+
+const companyButtonClass = computed(() => {
+  const base =
+    'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:outline-none focus:ring-0';
+
+  if (props.errors.company_id) {
+    return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
+  }
+
+  return `${base} border-slate-200 text-slate-900 focus:border-brand-500`;
+});
+
+const departmentItems = ref([]);
+
+const departmentSelectOptions = computed(() =>
+  departmentItems.value.map((department) => ({
+    value: department.uuid,
+    label: department.department_name || department.name,
+  })),
+);
+
+const departmentButtonClass = computed(() => {
+  const base =
+    'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:outline-none focus:ring-0';
+
+  if (!form.company_id) {
+    return `${base} border-slate-200 text-slate-400`;
+  }
+
+  if (props.errors.department_id) {
+    return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
+  }
+
+  return `${base} border-slate-200 text-slate-900 focus:border-brand-500`;
+});
+
+watch(
+  () => form.company_id,
+  async (companyId, previous) => {
+    if (previous && companyId !== previous) {
+      form.department_id = '';
+    }
+
+    if (!companyId) {
+      departmentItems.value = [];
+      form.department_id = '';
+      return;
+    }
+
+    try {
+      const { data } = await companyService.listDepartments({
+        company: companyId,
+        per_page: 100,
+        page: 1,
+      });
+      departmentItems.value = data.data?.departments?.items ?? [];
+    } catch {
+      departmentItems.value = [];
+    }
+  },
+  { immediate: true },
+);
+
 watch(
   () => props.initial,
   (value) => {
@@ -387,6 +468,8 @@ function createForm(value = {}) {
     date_of_birth: value.date_of_birth || '',
     timezone: value.timezone || 'UTC',
     language: value.language || 'en',
+    company_id: value.company_id || '',
+    department_id: value.department_id || '',
     status: value.status || 'active',
     role: resolveInitialRole(value),
     password: '',
@@ -415,6 +498,23 @@ function onSubmit() {
 
   if (!props.showStatus) {
     delete payload.status;
+  }
+
+  if (props.layout !== 'profile') {
+    delete payload.gender;
+    delete payload.date_of_birth;
+  } else {
+    delete payload.company_id;
+    delete payload.department_id;
+  }
+
+  if (props.layout !== 'profile' && !payload.company_id) {
+    payload.company_id = null;
+    payload.department_id = null;
+  }
+
+  if (props.layout !== 'profile' && !payload.department_id) {
+    payload.department_id = null;
   }
 
   if (props.showRole) {

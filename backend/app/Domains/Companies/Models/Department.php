@@ -22,6 +22,7 @@ class Department extends Model
         'company_id',
         'name',
         'description',
+        'note',
         'status',
         'created_by',
         'updated_by',

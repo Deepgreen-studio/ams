@@ -58,7 +58,8 @@ class DepartmentRepository extends BaseRepository
             $search = trim((string) $filters['search']);
             $query->where(function (Builder $builder) use ($search): void {
                 $builder->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('description', 'like', "%{$search}%")
+                    ->orWhere('note', 'like', "%{$search}%");
             });
         }
 

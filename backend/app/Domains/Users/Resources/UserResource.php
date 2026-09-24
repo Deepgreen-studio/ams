@@ -27,6 +27,12 @@ class UserResource extends JsonResource
             'date_of_birth' => optional($this->date_of_birth)?->toDateString(),
             'timezone' => $this->timezone,
             'language' => $this->language,
+            'company_id' => $this->whenLoaded('companies', function () {
+                $company = $this->companies->firstWhere('pivot.is_primary', true) ?? $this->companies->first();
+
+                return $company?->uuid;
+            }),
+            'department_id' => $this->whenLoaded('department', fn () => $this->department?->uuid),
             'status' => $this->status?->value ?? $this->status,
             'roles' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(static fn ($role) => [

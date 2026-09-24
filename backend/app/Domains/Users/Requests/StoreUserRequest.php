@@ -33,6 +33,8 @@ class StoreUserRequest extends FormRequest
             'status' => ['nullable', Rule::in(UserStatus::values())],
             'roles' => ['sometimes', 'array'],
             'roles.*' => ['required', 'string', 'max:255'],
+            'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
+            'department_id' => ['nullable', 'string', Rule::exists('departments', 'uuid')->whereNull('deleted_at')],
             'send_welcome_notification' => ['sometimes', 'boolean'],
         ];
     }

@@ -2,6 +2,8 @@
 
 namespace App\Domains\Users\Services;
 
+use App\Domains\Companies\Models\Department;
+use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Roles\Services\RoleService;
 use App\Domains\Users\Enums\UserPermission;
 use App\Domains\Users\Events\AvatarUpdated;
@@ -51,6 +53,8 @@ class UserService
             'updater:id,uuid,full_name,email',
             'deleter:id,uuid,full_name,email',
             'roles',
+            'companies',
+            'department',
         ]);
 
         return [
@@ -75,13 +79,21 @@ class UserService
                 $this->syncUserRoles($user, $data['roles'], $actor);
             }
 
+            if (array_key_exists('company_id', $data)) {
+                $this->syncPrimaryCompany($user, $data['company_id']);
+            }
+
+            if (array_key_exists('department_id', $data)) {
+                $this->syncDepartment($user, $data['department_id'], $data['company_id'] ?? null);
+            }
+
             if (! empty($data['send_welcome_notification'])) {
                 $user->notify(new UserWelcomeNotification);
             }
 
             event(new UserCreated($user->load(['roles']), $actor));
 
-            return $user->load(['creator', 'updater', 'deleter', 'roles']);
+            return $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department']);
         });
     }
 
@@ -102,7 +114,15 @@ class UserService
                 $this->syncUserRoles($updated, $data['roles'] ?? [], $actor);
             }
 
-            $updated = $updated->load(['roles']);
+            if (array_key_exists('company_id', $data)) {
+                $this->syncPrimaryCompany($updated, $data['company_id']);
+            }
+
+            if (array_key_exists('department_id', $data)) {
+                $this->syncDepartment($updated, $data['department_id'], $data['company_id'] ?? null);
+            }
+
+            $updated = $updated->load(['roles', 'companies', 'department']);
             event(new UserUpdated(
                 $updated,
                 $actor,
@@ -277,6 +297,46 @@ class UserService
         }
 
         return $payload;
+    }
+
+    protected function syncPrimaryCompany(User $user, mixed $companyUuid): void
+    {
+        if (blank($companyUuid)) {
+            $user->companies()->detach();
+
+            return;
+        }
+
+        $company = app(CompanyRepository::class)->findByIdentifierOrFail((string) $companyUuid);
+        $user->companies()->sync([
+            $company->id => [
+                'is_primary' => true,
+                'status' => 'active',
+            ],
+        ]);
+    }
+
+    protected function syncDepartment(User $user, mixed $departmentUuid, mixed $companyUuid): void
+    {
+        if (blank($departmentUuid)) {
+            $user->forceFill(['department_id' => null])->save();
+
+            return;
+        }
+
+        $department = Department::query()->where('uuid', (string) $departmentUuid)->first();
+        if (! $department) {
+            throw new ApiException('Department not found.', 422);
+        }
+
+        if (filled($companyUuid)) {
+            $company = app(CompanyRepository::class)->findByIdentifierOrFail((string) $companyUuid);
+            if ($department->company_id !== $company->id) {
+                throw new ApiException('The selected department does not belong to the selected company.', 422);
+            }
+        }
+
+        $user->forceFill(['department_id' => $department->id])->save();
     }
 
     /**

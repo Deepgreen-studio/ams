@@ -47,43 +47,43 @@
         />
         <div
           v-else-if="field.type === 'image'"
-          class="flex h-12 items-center gap-2 rounded-xl border bg-white pl-2 pr-1.5"
+          class="flex h-12 w-full items-center gap-2 rounded-xl border bg-white pl-2 pr-1.5"
           :class="errors[field.key] ? 'border-rose-400' : 'border-slate-200'"
         >
-          <span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-50">
+          <span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
             <img
               v-if="imageSrc(field)"
               :src="imageSrc(field)"
-              alt=""
+              alt="Application logo"
               class="h-full w-full object-contain"
             />
-            <PhotoIcon v-else class="h-4 w-4 text-slate-400" />
+            <PhotoIcon v-else class="h-4 w-4 text-slate-500" />
           </span>
           <span
             class="min-w-0 flex-1 truncate text-sm"
-            :class="imageLabel(field) ? 'text-slate-700' : 'text-slate-400'"
+            :class="imageLabel(field) ? 'text-slate-800' : 'text-slate-500'"
           >
             {{ imageLabel(field) || 'No logo selected' }}
           </span>
           <button
-            v-if="model[field.key]"
+            v-if="canRemoveImage(field)"
             type="button"
-            class="shrink-0 px-1 text-xs font-medium text-rose-600 hover:text-rose-700 disabled:opacity-60"
-            :disabled="uploadingKey === field.key"
-            @click="emit('remove', field.key)"
+            class="shrink-0 px-2 text-xs font-medium text-rose-600 hover:text-rose-700 disabled:opacity-60"
+            :disabled="loading"
+            @click="clearImage(field)"
           >
             Remove
           </button>
           <label
-            class="inline-flex h-8 shrink-0 cursor-pointer items-center rounded-lg bg-slate-100 px-3 text-xs font-medium text-slate-700 hover:bg-slate-200"
-            :class="uploadingKey === field.key ? 'pointer-events-none opacity-60' : ''"
+            class="inline-flex h-8 shrink-0 cursor-pointer items-center rounded-lg bg-brand-600 px-3 text-xs font-medium text-white hover:bg-brand-700"
+            :class="loading ? 'pointer-events-none opacity-60' : ''"
           >
-            {{ uploadingKey === field.key ? 'Uploading…' : 'Choose' }}
+            Choose
             <input
               type="file"
               class="sr-only"
               :accept="field.accept || 'image/png,image/jpeg,image/webp'"
-              :disabled="uploadingKey === field.key"
+              :disabled="loading"
               @change="onImageSelected(field, $event)"
             />
           </label>
@@ -139,24 +139,23 @@ const props = defineProps({
   success: { type: String, default: '' },
   loading: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Save settings' },
-  uploadingKey: { type: String, default: '' },
 });
 
-const emit = defineEmits(['submit', 'upload', 'remove']);
+const emit = defineEmits(['submit']);
 
 const model = reactive({});
 const imagePreview = reactive({});
 const imageNames = reactive({});
+const pendingFiles = reactive({});
+const removedImages = reactive({});
 
 watch(
   () => props.initial,
   (value) => {
     props.fields.forEach((field) => {
       model[field.key] = value?.[field.key] ?? (field.type === 'boolean' ? false : '');
-      if (field.type === 'image' && imagePreview[field.key]) {
-        URL.revokeObjectURL(imagePreview[field.key]);
-        imagePreview[field.key] = '';
-        imageNames[field.key] = '';
+      if (field.type === 'image') {
+        resetImageSelection(field.key);
       }
     });
   },
@@ -191,7 +190,15 @@ function searchableButtonClass(field) {
 }
 
 function imageSrc(field) {
-  return imagePreview[field.key] || resolveMediaUrl(model[field.key]);
+  if (imagePreview[field.key]) {
+    return imagePreview[field.key];
+  }
+
+  if (removedImages[field.key]) {
+    return '';
+  }
+
+  return resolveMediaUrl(model[field.key]);
 }
 
 function imageLabel(field) {
@@ -199,7 +206,26 @@ function imageLabel(field) {
     return imageNames[field.key];
   }
 
-  return model[field.key] ? 'Current logo' : '';
+  if (removedImages[field.key] || !model[field.key]) {
+    return '';
+  }
+
+  return 'Current logo';
+}
+
+function resetImageSelection(key) {
+  if (imagePreview[key]) {
+    URL.revokeObjectURL(imagePreview[key]);
+  }
+
+  imagePreview[key] = '';
+  imageNames[key] = '';
+  pendingFiles[key] = null;
+  removedImages[key] = false;
+}
+
+function canRemoveImage(field) {
+  return Boolean(pendingFiles[field.key] || (model[field.key] && !removedImages[field.key]));
 }
 
 function onImageSelected(field, event) {
@@ -215,27 +241,52 @@ function onImageSelected(field, event) {
 
   imagePreview[field.key] = URL.createObjectURL(file);
   imageNames[field.key] = file.name;
-  emit('upload', { key: field.key, file });
+  pendingFiles[field.key] = file;
+  removedImages[field.key] = false;
+}
+
+function clearImage(field) {
+  if (pendingFiles[field.key]) {
+    resetImageSelection(field.key);
+    return;
+  }
+
+  if (model[field.key]) {
+    removedImages[field.key] = true;
+  }
 }
 
 function submitForm() {
   const payload = { ...model };
+  const images = {};
+  const removed = [];
+
   props.fields.forEach((field) => {
-    if (field.type === 'image') {
-      delete payload[field.key];
+    if (field.type !== 'image') {
+      return;
+    }
+
+    delete payload[field.key];
+
+    if (pendingFiles[field.key]) {
+      images[field.key] = pendingFiles[field.key];
+      return;
+    }
+
+    if (removedImages[field.key]) {
+      removed.push(field.key);
     }
   });
-  emit('submit', payload);
+
+  emit('submit', payload, { images, removed });
 }
 
 watch(
   () => props.errors,
   (errors) => {
     props.fields.forEach((field) => {
-      if (field.type === 'image' && errors?.[field.key] && imagePreview[field.key]) {
-        URL.revokeObjectURL(imagePreview[field.key]);
-        imagePreview[field.key] = '';
-        imageNames[field.key] = '';
+      if (field.type === 'image' && errors?.[field.key]) {
+        resetImageSelection(field.key);
       }
     });
   },

@@ -144,14 +144,35 @@ export const useSettingsStore = defineStore('settings', () => {
     loadQueue: () => fetchGroup(settingsService.getQueue),
     saveQueue: (payload) => save(settingsService.updateQueue, payload),
     loadCache: () => fetchGroup(settingsService.getCache),
-    saveGeneral: async (payload) => {
-      const saved = await save(settingsService.updateGeneral, payload);
-      current.value = syncApplicationBranding(
-        Object.fromEntries(
-          Object.entries(current.value).map(([key, value]) => [key, { value }]),
-        ),
-      );
-      return saved;
+    saveGeneral: async (payload, { logoFile = null, removeLogo = false } = {}) => {
+      state.saving.value = true;
+      state.clearMessages();
+      try {
+        const { data } = await settingsService.updateGeneral(payload);
+        let settings = data.data?.settings ?? {};
+
+        if (logoFile) {
+          const uploaded = await settingsService.uploadLogo(logoFile);
+          settings = uploaded.data.data?.settings ?? settings;
+        } else if (removeLogo) {
+          const removed = await settingsService.removeLogo();
+          settings = removed.data.data?.settings ?? settings;
+        }
+
+        current.value = syncApplicationBranding(settings);
+        state.successMessage.value = data.message || 'General settings updated successfully.';
+        return current.value;
+      } catch (err) {
+        const errors = { ...(err?.errors || {}) };
+        if (errors.file && !errors.logo) {
+          errors.logo = errors.file;
+        }
+        state.error.value = err?.message || 'Unable to save settings';
+        state.fieldErrors.value = errors;
+        throw err;
+      } finally {
+        state.saving.value = false;
+      }
     },
     uploadLogo: async (file) => {
       state.saving.value = true;

@@ -47,9 +47,6 @@
                 </span>
               </button>
             </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              Phone
-            </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
                 type="button"
@@ -59,6 +56,21 @@
                 Status
                 <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              Role
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'last_login_at')"
+              >
+                Last login
+                <span class="text-base leading-none text-zinc-400">
+                  {{ sortBy === 'last_login_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -104,9 +116,23 @@
               </div>
             </td>
             <td class="px-5 py-4 text-slate-600">{{ user.email }}</td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">{{ user.phone || '—' }}</td>
             <td class="px-5 py-4">
               <StatusBadge :status="user.status" />
+            </td>
+            <td class="px-5 py-4">
+              <div v-if="user.roles?.length" class="flex flex-wrap gap-1.5">
+                <RoleBadge
+                  v-for="role in user.roles"
+                  :key="role.uuid || role.name"
+                  :name="role.name"
+                  :display-name="role.display_name"
+                  :system="Boolean(role.is_system)"
+                />
+              </div>
+              <span v-else class="text-slate-400">—</span>
+            </td>
+            <td class="px-5 py-4 text-slate-600">
+              {{ user.last_login_at ? formatDate(user.last_login_at) : '—' }}
             </td>
             <td class="hidden px-5 py-4 lg:table-cell">
               <p class="font-medium text-slate-800">{{ formatDate(user.created_at) }}</p>
@@ -186,6 +212,7 @@ import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { formatDate } from '@/utils/formatters';
 import { getUserAvatarUrl } from '@/utils/avatar';
+import RoleBadge from '@/modules/roles/components/RoleBadge.vue';
 import StatusBadge from '@/modules/users/components/StatusBadge.vue';
 
 const props = defineProps({

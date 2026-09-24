@@ -63,6 +63,16 @@
         <UserSearchFilter :model-value="usersStore.filters" @submit="onFilter" @reset="onReset" />
       </template>
 
+      <template v-if="emptyState.filtered" #empty-action>
+        <button
+          type="button"
+          class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          @click="onReset"
+        >
+          Reset filter
+        </button>
+      </template>
+
       <template #footer>
         <Pagination
           :meta="usersStore.meta"
@@ -138,12 +148,14 @@ const emptyState = computed(() => {
     return {
       title: 'No users found',
       description: 'No users have been added yet.',
+      filtered: false,
     };
   }
 
   return {
     title: 'No users found',
     description: `No users found for ${joinFilterParts(parts)}.`,
+    filtered: true,
   };
 });
 

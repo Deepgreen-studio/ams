@@ -4,14 +4,14 @@
       <RouterLink
         v-if="rolesStore.currentRole && canAny('roles.assign', 'roles.update')"
         :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Assign permissions
+        Assign Permissions
       </RouterLink>
       <RouterLink
         v-if="rolesStore.currentRole && can('roles.update')"
         :to="{ name: 'roles.edit', params: { id: rolesStore.currentRole.uuid } }"
-        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         <PencilSquareIcon class="h-4 w-4 text-slate-500" />
         Edit
@@ -23,7 +23,7 @@
         @click="showDelete = true"
       >
         <TrashIcon class="h-4 w-4 text-white" />
-        Delete
+        Soft Delete
       </button>
     </Teleport>
 
@@ -164,9 +164,9 @@
 
     <DeleteConfirmation
       :open="showDelete"
-      title="Delete role"
-      :message="`Soft delete ${rolesStore.currentRole?.display_name || 'this role'}?`"
-      confirm-label="Delete"
+      title="Soft delete role"
+      :message="`Soft delete ${rolesStore.currentRole?.display_name || 'this role'}? They can be restored later.`"
+      confirm-label="Soft Delete"
       :loading="rolesStore.saving"
       @cancel="showDelete = false"
       @confirm="onDelete"

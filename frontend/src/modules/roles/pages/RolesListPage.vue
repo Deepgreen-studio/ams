@@ -4,30 +4,31 @@
       <RouterLink
         v-if="canAny('roles.view', 'roles.restore', 'roles.force-delete')"
         :to="{ name: 'roles.trash' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Trash
+        Soft Delete
       </RouterLink>
       <RouterLink
         v-if="can('roles.view')"
         :to="{ name: 'roles.matrix' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Permission matrix
+        Permission Matrix
       </RouterLink>
       <RouterLink
         v-if="can('roles.assign')"
         :to="{ name: 'roles.assign' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Assign roles
+        Assign Roles
       </RouterLink>
       <RouterLink
         v-if="can('roles.create')"
         :to="{ name: 'roles.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create role
+        <PlusIcon class="h-4 w-4" />
+        Create Role
       </RouterLink>
     </Teleport>
 
@@ -62,14 +63,15 @@
           class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="onReset"
         >
-          Reset filter
+          Reset Filter
         </button>
         <RouterLink
           v-if="can('roles.create')"
           :to="{ name: 'roles.create' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+          class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         >
-          Create role
+          <PlusIcon class="h-4 w-4" />
+          Create Role
         </RouterLink>
       </template>
 
@@ -85,9 +87,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete role"
-      :message="`Soft delete ${pendingDelete?.display_name || 'this role'}?`"
-      confirm-label="Delete"
+      title="Soft delete role"
+      :message="`Soft delete ${pendingDelete?.display_name || 'this role'}? They can be restored later.`"
+      confirm-label="Soft Delete"
       :loading="rolesStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -98,6 +100,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { usePermissions } from '@/composables/usePermissions';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';

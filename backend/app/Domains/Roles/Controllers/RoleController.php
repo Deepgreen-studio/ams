@@ -85,7 +85,7 @@ class RoleController
         $actor = $request->user();
         $this->roleService->delete($role, $actor);
 
-        return ApiResponse::success(null, 'Role deleted successfully.');
+        return ApiResponse::success(null, 'Role soft deleted successfully.');
     }
 
     public function restore(Request $request, string $role): JsonResponse

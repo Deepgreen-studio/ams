@@ -8,7 +8,7 @@
         :show-role="canAssignRoles"
         :role-options="roleOptions"
         :company-options="companyOptions"
-        submit-label="Create user"
+        submit-label="Create User"
         require-password
         @submit="onSubmit"
         @cancel="router.push({ name: 'users.index' })"

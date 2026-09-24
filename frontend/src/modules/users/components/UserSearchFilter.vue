@@ -9,7 +9,8 @@
         type="search"
         placeholder="Search name, email, phone..."
         class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-        @keyup.enter="emitSubmit"
+        @input="onSearchInput"
+        @search="onSearchInput"
       />
     </div>
 
@@ -52,21 +53,21 @@
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
         @click="emitSubmit"
       >
-        Apply filter
+        Apply Filter
       </button>
       <button
         type="button"
         class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="emitReset"
       >
-        Reset filter
+        Reset Filter
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { onBeforeUnmount, reactive, watch } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
@@ -94,10 +95,17 @@ const local = reactive({
   created_to: props.modelValue.created_to || '',
 });
 
+let searchTimer = null;
+let skipSearchSync = false;
+
 watch(
   () => props.modelValue,
   (value) => {
-    local.search = value.search || '';
+    if (!skipSearchSync) {
+      local.search = value.search || '';
+    }
+
+    skipSearchSync = false;
     local.status = value.status || '';
     local.created_from = value.created_from || '';
     local.created_to = value.created_to || '';
@@ -105,16 +113,29 @@ watch(
   { deep: true },
 );
 
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const delay = String(local.search || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(emitSubmit, delay);
+}
+
 function emitSubmit() {
+  window.clearTimeout(searchTimer);
+  skipSearchSync = true;
   emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
   emit('submit', { ...local, page: 1 });
 }
 
 function emitReset() {
+  window.clearTimeout(searchTimer);
   local.search = '';
   local.status = '';
   local.created_from = '';
   local.created_to = '';
   emit('reset');
 }
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

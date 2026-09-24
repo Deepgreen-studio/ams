@@ -6,7 +6,7 @@
           :loading="rolesStore.saving"
           :errors="rolesStore.fieldErrors"
           :error="rolesStore.error || ''"
-          submit-label="Create role"
+          submit-label="Create Role"
           @submit="onSubmit"
           @cancel="router.push({ name: 'roles.index' })"
         />

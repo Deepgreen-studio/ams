@@ -232,6 +232,7 @@ watch(userSearch, () => {
   const selected = users.value.find((user) => user.uuid === userIdentifier.value);
   if (selected && userSearch.value !== formatUser(selected)) {
     userIdentifier.value = '';
+    selectedRole.value = '';
   }
 });
 
@@ -265,12 +266,48 @@ function toggleDropdown() {
   dropdownOpen.value = !dropdownOpen.value;
 }
 
-function selectUser(user) {
+function resolveAssignedRole(user) {
+  const assigned = Array.isArray(user?.roles) ? user.roles : [];
+  const available = rolesStore.roles || [];
+
+  for (const role of assigned) {
+    const roleName = typeof role === 'string' ? role : role?.name;
+    const roleUuid = typeof role === 'string' ? role : role?.uuid;
+    const match = available.find(
+      (item) => item.uuid === roleUuid || item.name === roleName,
+    );
+
+    if (match) {
+      return match.uuid;
+    }
+  }
+
+  return '';
+}
+
+async function selectUser(user) {
   userIdentifier.value = user.uuid;
   syncingSearchFromSelection.value = true;
   userSearch.value = formatUser(user);
   syncingSearchFromSelection.value = false;
   closeDropdown();
+
+  let source = user;
+
+  if (!Array.isArray(user.roles)) {
+    try {
+      const { data } = await userService.get(user.uuid);
+      source = data.data?.user ?? user;
+      const index = users.value.findIndex((item) => item.uuid === user.uuid);
+      if (index !== -1) {
+        users.value[index] = { ...users.value[index], roles: source.roles || [] };
+      }
+    } catch {
+      source = user;
+    }
+  }
+
+  selectedRole.value = resolveAssignedRole(source);
 }
 
 function selectHighlighted() {
@@ -352,6 +389,12 @@ async function onAssign() {
   error.value = '';
   try {
     await rolesStore.assignUserRoles(userIdentifier.value, [selectedRole.value]);
+
+    const index = users.value.findIndex((item) => item.uuid === userIdentifier.value);
+    const role = (rolesStore.roles || []).find((item) => item.uuid === selectedRole.value);
+    if (index !== -1 && role) {
+      users.value[index] = { ...users.value[index], roles: [role] };
+    }
   } catch (err) {
     error.value = err?.message || rolesStore.error || 'Unable to assign roles';
   }

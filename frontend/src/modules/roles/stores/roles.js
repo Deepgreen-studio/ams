@@ -115,7 +115,7 @@ export const useRolesStore = defineStore('roles', () => {
 
     try {
       const { data } = await roleService.remove(id);
-      successMessage.value = data.message || 'Role deleted successfully.';
+      successMessage.value = data.message || 'Role soft deleted successfully.';
       return data;
     } catch (err) {
       applyError(err, 'Unable to delete role');

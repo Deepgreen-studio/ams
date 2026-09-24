@@ -12,8 +12,6 @@
           :fields="fields"
           :initial="settingsStore.current"
           :errors="settingsStore.fieldErrors"
-          :error="settingsStore.error || ''"
-          :success="settingsStore.successMessage || ''"
           :loading="settingsStore.saving"
           @submit="onSubmit"
         />
@@ -42,7 +40,8 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, watch } from 'vue';
+import { useToast } from '@/composables/useToast';
 import SettingsForm from '@/modules/settings/components/SettingsForm.vue';
 import SettingsTabs from '@/modules/settings/components/SettingsTabs.vue';
 import { useSettingsStore } from '@/modules/settings/stores/settings';
@@ -55,6 +54,25 @@ import {
 } from '@/utils/localeOptions';
 
 const settingsStore = useSettingsStore();
+const toast = useToast();
+
+watch(
+  () => settingsStore.successMessage,
+  (message) => {
+    if (message) {
+      toast.success(message);
+    }
+  },
+);
+
+watch(
+  () => settingsStore.error,
+  (message) => {
+    if (message) {
+      toast.error(message);
+    }
+  },
+);
 const fields = [
   { key: 'app_name', label: 'Application name' },
   { key: 'app_url', label: 'Application URL', type: 'url' },

@@ -7,30 +7,33 @@
       </div>
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">First name</label>
+          <FormLabel required>First name</FormLabel>
           <input
             v-model="form.first_name"
             type="text"
+            required
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('first_name')"
           />
           <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Last name</label>
+          <FormLabel required>Last name</FormLabel>
           <input
             v-model="form.last_name"
             type="text"
+            required
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('last_name')"
           />
           <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+          <FormLabel required>Email</FormLabel>
           <input
             v-model="form.email"
             type="email"
+            required
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('email')"
           />
@@ -92,30 +95,33 @@
 
     <div v-else class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">First name</label>
+        <FormLabel required>First name</FormLabel>
         <input
           v-model="form.first_name"
           type="text"
+          required
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('first_name')"
         />
         <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Last name</label>
+        <FormLabel required>Last name</FormLabel>
         <input
           v-model="form.last_name"
           type="text"
+          required
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('last_name')"
         />
         <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+        <FormLabel required>Email</FormLabel>
         <input
           v-model="form.email"
           type="email"
+          required
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('email')"
         />
@@ -129,24 +135,6 @@
         />
         <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
       </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-        <SearchableSelect
-          v-model="form.timezone"
-          :options="timezoneOptions"
-          placeholder="Select timezone"
-          search-placeholder="Search timezone…"
-        />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-        <SearchableSelect
-          v-model="form.language"
-          :options="languageOptions"
-          placeholder="Select language"
-          search-placeholder="Search language…"
-        />
-      </div>
       <div v-if="layout !== 'profile'">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
         <SearchableSelect
@@ -157,6 +145,14 @@
           :button-class="companyButtonClass"
         />
         <p v-if="errors.company_id" class="mt-1 text-xs text-rose-600">{{ errors.company_id[0] }}</p>
+      </div>
+      <div v-if="showStatus">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+        <SelectBox
+          v-model="form.status"
+          size="lg"
+          :options="statusOptions"
+        />
       </div>
       <div v-if="layout !== 'profile'">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Department</label>
@@ -170,49 +166,42 @@
         />
         <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
       </div>
-      <div v-if="showStatus">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
-        <SelectBox
-          v-model="form.status"
-          size="lg"
-          :options="statusOptions"
-        />
-      </div>
       <div v-if="showRole">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Role</label>
+        <FormLabel required>Role</FormLabel>
         <SelectBox
           v-model="form.role"
           size="lg"
           placeholder="Select a role"
           :options="roleSelectOptions"
-          :error="Boolean(errors.roles)"
+          :error="Boolean(fieldError('roles'))"
         />
-        <p v-if="errors.roles" class="mt-1 text-xs text-rose-600">{{ errors.roles[0] }}</p>
+        <p v-if="fieldError('roles')" class="mt-1 text-xs text-rose-600">{{ fieldError('roles') }}</p>
       </div>
     </div>
 
     <div v-if="showPassword" class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <label for="user-form-password" class="mb-1.5 block text-sm font-medium text-slate-700">
+        <FormLabel html-for="user-form-password" :required="requirePassword" :optional="!requirePassword">
           Password
-          <span v-if="!requirePassword" class="font-normal text-slate-400">(optional)</span>
-        </label>
+        </FormLabel>
         <PasswordInput
           id="user-form-password"
           v-model="form.password"
           autocomplete="new-password"
+          :required="requirePassword"
           :input-class="fieldClass('password')"
         />
         <p v-if="errors.password" class="mt-1 text-xs text-rose-600">{{ errors.password[0] }}</p>
       </div>
       <div>
-        <label for="user-form-password-confirmation" class="mb-1.5 block text-sm font-medium text-slate-700">
+        <FormLabel html-for="user-form-password-confirmation" :required="requirePassword">
           Confirm password
-        </label>
+        </FormLabel>
         <PasswordInput
           id="user-form-password-confirmation"
           v-model="form.password_confirmation"
           autocomplete="new-password"
+          :required="requirePassword"
           :input-class="fieldClass('password')"
         />
       </div>
@@ -240,6 +229,7 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
@@ -483,13 +473,23 @@ function fieldClass(field) {
 
 function onSubmit() {
   const payload = { ...form };
-  localErrors.value = {};
+  const nextErrors = {};
 
   if (payload.phone && !isValidE164(payload.phone)) {
-    localErrors.value = { phone: [PHONE_INVALID_MESSAGE] };
-    toast.error(PHONE_INVALID_MESSAGE, 'Validation Failed');
+    nextErrors.phone = [PHONE_INVALID_MESSAGE];
+  }
+
+  if (props.showRole && !payload.role) {
+    nextErrors.roles = ['The role field is required.'];
+  }
+
+  if (Object.keys(nextErrors).length) {
+    localErrors.value = nextErrors;
+    toast.error(Object.values(nextErrors)[0][0], 'Validation Failed');
     return;
   }
+
+  localErrors.value = {};
 
   if (!props.showPassword || (!props.requirePassword && !payload.password)) {
     delete payload.password;
@@ -503,6 +503,8 @@ function onSubmit() {
   if (props.layout !== 'profile') {
     delete payload.gender;
     delete payload.date_of_birth;
+    delete payload.timezone;
+    delete payload.language;
   } else {
     delete payload.company_id;
     delete payload.department_id;

@@ -122,16 +122,6 @@
         :style="menuStyle"
         @click.stop
       >
-        <RouterLink
-          v-if="can('users.view')"
-          :to="{ name: 'users.show', params: { id: activeUser.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <EyeIcon class="h-4 w-4 text-slate-400" />
-          View
-        </RouterLink>
         <button
           v-if="can('users.restore')"
           type="button"
@@ -159,11 +149,9 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
-  EyeIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
@@ -184,7 +172,7 @@ const emit = defineEmits(['sort', 'restore', 'force-delete']);
 
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('users.view', 'users.restore', 'users.force-delete'),
+  canAny('users.restore', 'users.force-delete'),
 );
 
 const openMenuId = ref(null);
@@ -203,7 +191,6 @@ function toggleMenu(id, event) {
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 176;
   const itemCount = [
-    can('users.view'),
     can('users.restore'),
     can('users.force-delete'),
   ].filter(Boolean).length;

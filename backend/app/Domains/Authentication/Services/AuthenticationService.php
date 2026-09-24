@@ -155,6 +155,7 @@ class AuthenticationService
             $data,
             function (User $user, string $password): void {
                 $this->repository->updatePassword($user, $password);
+                $this->repository->markEmailAsVerified($user);
                 $user->forceFill(['remember_token' => Str::random(60)])->save();
                 $this->repository->revokeAllTokens($user);
 

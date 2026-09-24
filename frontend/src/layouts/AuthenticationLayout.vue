@@ -38,10 +38,15 @@ const copy = computed(() => {
         subtitle: 'Enter your email and we will send a reset link.',
       };
     case 'reset-password':
-      return {
-        title: 'Reset password',
-        subtitle: 'Choose a new password for your account.',
-      };
+      return route.query.setup === '1'
+        ? {
+            title: 'Set your password',
+            subtitle: 'Choose a password, then sign in with your email.',
+          }
+        : {
+            title: 'Reset password',
+            subtitle: 'Choose a new password for your account.',
+          };
     case 'verify-email':
       return {
         title: 'Verify email',

@@ -3,7 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'users.index' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back to users
       </RouterLink>

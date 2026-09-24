@@ -54,28 +54,13 @@
       :loading="usersStore.loading"
       :sort-by="usersStore.filters.sort_by"
       :sort-dir="usersStore.filters.sort_dir"
+      :empty-title="emptyState.title"
+      :empty-description="emptyState.description"
       @sort="onSort"
       @delete="openDelete"
     >
       <template #toolbar>
         <UserSearchFilter :model-value="usersStore.filters" @submit="onFilter" @reset="onReset" />
-      </template>
-
-      <template #empty-action>
-        <button
-          type="button"
-          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-          @click="onReset"
-        >
-          Reset filter
-        </button>
-        <RouterLink
-          v-if="can('users.create')"
-          :to="{ name: 'users.create' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Create user
-        </RouterLink>
       </template>
 
       <template #footer>
@@ -121,6 +106,47 @@ const usersStore = useUsersStore();
 const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
+const STATUS_LABELS = {
+  active: 'Active',
+  inactive: 'Inactive',
+  suspended: 'Suspended',
+  pending: 'Pending',
+};
+
+const emptyState = computed(() => {
+  const filters = usersStore.filters;
+  const parts = [];
+  const search = String(filters.search || '').trim();
+
+  if (search) {
+    parts.push(`search "${search}"`);
+  }
+
+  if (filters.status && STATUS_LABELS[filters.status]) {
+    parts.push(`status ${STATUS_LABELS[filters.status]}`);
+  }
+
+  if (filters.created_from) {
+    parts.push(`start date ${formatFilterDate(filters.created_from)}`);
+  }
+
+  if (filters.created_to) {
+    parts.push(`end date ${formatFilterDate(filters.created_to)}`);
+  }
+
+  if (!parts.length) {
+    return {
+      title: 'No users found',
+      description: 'No users have been added yet.',
+    };
+  }
+
+  return {
+    title: 'No users found',
+    description: `No users found for ${joinFilterParts(parts)}.`,
+  };
+});
+
 const statCards = computed(() => [
   {
     label: 'Total',
@@ -162,6 +188,23 @@ const statCards = computed(() => [
 onMounted(() => {
   usersStore.fetchUsers({ trashed: '', page: usersStore.filters.page || 1 });
 });
+
+function formatFilterDate(value) {
+  const [year, month, day] = String(value).split('-');
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return `${month}/${day}/${year}`;
+}
+
+function joinFilterParts(parts) {
+  if (parts.length === 1) {
+    return parts[0];
+  }
+
+  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+}
 
 function onFilter(filters) {
   usersStore.fetchUsers({ ...filters, trashed: '' });

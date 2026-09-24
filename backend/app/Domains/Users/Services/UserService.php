@@ -11,7 +11,7 @@ use App\Domains\Users\Events\UserCreated;
 use App\Domains\Users\Events\UserDeleted;
 use App\Domains\Users\Events\UserRestored;
 use App\Domains\Users\Events\UserUpdated;
-use App\Domains\Users\Notifications\UserWelcomeNotification;
+use App\Domains\Users\Notifications\UserPasswordSetupNotification;
 use App\Domains\Users\Repositories\UserRepository;
 use App\Domains\Users\Support\UserLifecycleAuditor;
 use App\Models\User;
@@ -20,6 +20,7 @@ use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -87,14 +88,22 @@ class UserService
                 $this->syncDepartment($user, $data['department_id'], $data['company_id'] ?? null);
             }
 
-            if (! empty($data['send_welcome_notification'])) {
-                $user->notify(new UserWelcomeNotification);
-            }
+            $created = $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department']);
 
-            event(new UserCreated($user->load(['roles']), $actor));
+            DB::afterCommit(function () use ($created): void {
+                $this->sendPasswordSetupEmail($created);
+            });
 
-            return $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department']);
+            event(new UserCreated($created->load(['roles']), $actor));
+
+            return $created;
         });
+    }
+
+    protected function sendPasswordSetupEmail(User $user): void
+    {
+        $token = Password::broker()->createToken($user);
+        $user->notify(new UserPasswordSetupNotification($token));
     }
 
     /**

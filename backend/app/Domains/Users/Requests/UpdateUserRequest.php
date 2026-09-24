@@ -44,10 +44,20 @@ class UpdateUserRequest extends FormRequest
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'status' => ['sometimes', 'required', Rule::in(UserStatus::values())],
-            'roles' => ['sometimes', 'array'],
+            'roles' => ['sometimes', 'required', 'array', 'min:1'],
             'roles.*' => ['required', 'string', 'max:255'],
             'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
             'department_id' => ['nullable', 'string', Rule::exists('departments', 'uuid')->whereNull('deleted_at')],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'roles' => 'role',
         ];
     }
 }

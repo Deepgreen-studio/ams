@@ -10,8 +10,8 @@
 
     <EmptyState
       v-else-if="!users.length"
-      title="No users found"
-      description="Try adjusting your search or create a new user."
+      :title="emptyTitle"
+      :description="emptyDescription"
       class="px-8 py-6"
     >
       <template #action>
@@ -204,6 +204,14 @@ const props = defineProps({
   sortDir: {
     type: String,
     default: 'desc',
+  },
+  emptyTitle: {
+    type: String,
+    default: 'No users found',
+  },
+  emptyDescription: {
+    type: String,
+    default: 'No users have been added yet.',
   },
 });
 

@@ -423,6 +423,25 @@ class UserManagementTest extends TestCase
             ->assertJsonPath('data.user.email', 'noroles.create@example.com');
     }
 
+    public function test_create_user_rejects_an_empty_role_list(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->postJson('/api/v1/users', [
+            'first_name' => 'No',
+            'last_name' => 'Role',
+            'email' => 'empty.role@example.com',
+            'password' => 'Password@123',
+            'password_confirmation' => 'Password@123',
+            'roles' => [],
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('errors.roles.0', 'The role field is required.');
+
+        $this->assertDatabaseMissing('users', ['email' => 'empty.role@example.com']);
+    }
+
     public function test_manager_cannot_assign_roles_when_updating_user(): void
     {
         $manager = User::factory()->create();

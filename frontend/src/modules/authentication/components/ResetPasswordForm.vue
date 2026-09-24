@@ -53,13 +53,13 @@
       class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold text-white transition hover:bg-brand-700 disabled:opacity-60"
       :disabled="loading"
     >
-      {{ loading ? 'Updating...' : 'Reset password' }}
+      {{ loading ? 'Saving...' : submitLabel }}
     </button>
   </form>
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import { authService } from '@/modules/authentication/services/authService';
@@ -69,6 +69,9 @@ const router = useRouter();
 const loading = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+
+const isSetup = computed(() => route.query.setup === '1');
+const submitLabel = computed(() => (isSetup.value ? 'Set password and continue' : 'Reset password'));
 
 const form = reactive({
   email: typeof route.query.email === 'string' ? route.query.email : '',

@@ -4,7 +4,7 @@
       v-if="companiesStore.loading && !companiesStore.currentCompany"
       class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
+    <div v-else class="mx-auto w-full max-w-[1200px] rounded-[12px] bg-white p-6 sm:p-8">
       <CompanyForm
         :initial="companiesStore.currentCompany || {}"
         :loading="companiesStore.saving"

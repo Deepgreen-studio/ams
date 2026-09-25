@@ -44,6 +44,11 @@ class CompanyManagementTest extends TestCase
             'legal_name' => 'Acme Corporation Ltd',
             'registration_number' => 'REG-1001',
             'email' => 'hello@acme.test',
+            'phone' => '+12025550123',
+            'address' => '1 Main Street',
+            'city' => 'Austin',
+            'state' => 'Texas',
+            'postal_code' => '78701',
             'website' => 'https://acme.test',
             'country' => 'US',
             'timezone' => 'UTC',
@@ -78,7 +83,7 @@ class CompanyManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
-            ->assertJsonStructure(['errors' => ['company_name', 'email', 'website', 'currency']]);
+            ->assertJsonStructure(['errors' => ['company_name', 'registration_number', 'email', 'phone', 'address', 'city', 'state', 'postal_code', 'country', 'website', 'currency']]);
     }
 
     public function test_admin_can_update_soft_delete_and_restore_company(): void
@@ -212,6 +217,15 @@ class CompanyManagementTest extends TestCase
         $this->postJson('/api/v1/companies', [
             'company_name' => 'Second',
             'registration_number' => 'DUP-1',
-        ])->assertStatus(422)->assertJsonStructure(['errors' => ['registration_number']]);
+            'email' => 'second@example.test',
+            'phone' => '+12025550199',
+            'address' => '2 Main Street',
+            'city' => 'Austin',
+            'state' => 'Texas',
+            'postal_code' => '78701',
+            'country' => 'US',
+            'currency' => 'USD',
+        ])->assertStatus(422)
+            ->assertJsonPath('errors.registration_number.0', 'The company code has already been taken.');
     }
 }

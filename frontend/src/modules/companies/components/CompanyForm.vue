@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company Name</label>
+        <FormLabel required>Company Name</FormLabel>
         <input
           v-model="form.company_name"
           type="text"
@@ -15,19 +15,11 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal Name</label>
-        <input
-          v-model="form.legal_name"
-          type="text"
-          placeholder="Acme Corporation Ltd"
-          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-        />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration Number</label>
+        <FormLabel required>Company Code</FormLabel>
         <input
           v-model="form.registration_number"
           type="text"
+          placeholder="ACME-001"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('registration_number')"
         />
@@ -40,11 +32,12 @@
         <input
           v-model="form.tax_number"
           type="text"
+          placeholder="GB123456789"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+        <FormLabel required>Email</FormLabel>
         <input
           v-model="form.email"
           type="email"
@@ -57,7 +50,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
+        <FormLabel required>Phone</FormLabel>
         <PhoneInput
           v-model="form.phone"
           :error="Boolean(displayErrors.phone)"
@@ -83,83 +76,77 @@
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
         <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
-      <div class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Address</label>
-        <textarea
+      <div>
+        <FormLabel required>Address</FormLabel>
+        <input
           v-model="form.address"
-          rows="3"
+          type="text"
           placeholder="Street address"
-          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('address')"
         />
+        <p v-if="displayErrors.address" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.address[0] }}
+        </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">City</label>
+        <FormLabel required>City</FormLabel>
         <input
           v-model="form.city"
           type="text"
+          placeholder="London"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('city')"
         />
+        <p v-if="displayErrors.city" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.city[0] }}
+        </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">State</label>
+        <FormLabel required>State</FormLabel>
         <input
           v-model="form.state"
           type="text"
+          placeholder="England"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('state')"
         />
+        <p v-if="displayErrors.state" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.state[0] }}
+        </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Postal Code</label>
+        <FormLabel required>Postal Code</FormLabel>
         <input
           v-model="form.postal_code"
           type="text"
+          placeholder="SW1A 1AA"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('postal_code')"
         />
+        <p v-if="displayErrors.postal_code" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.postal_code[0] }}
+        </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Country</label>
+        <FormLabel required>Country</FormLabel>
         <input
           v-model="form.country"
           type="text"
           placeholder="GB"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('country')"
         />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-        <SearchableSelect
-          v-model="form.timezone"
-          :options="timezoneOptions"
-          placeholder="Select timezone"
-          search-placeholder="Search timezone…"
-        />
-        <p v-if="displayErrors.timezone" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.timezone[0] }}
+        <p v-if="displayErrors.country" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.country[0] }}
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-        <SearchableSelect
-          v-model="form.language"
-          :options="languageOptions"
-          placeholder="Select language"
-          search-placeholder="Search language…"
-        />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Currency</label>
+        <FormLabel required>Currency</FormLabel>
         <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
         <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.currency[0] }}
         </p>
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Format</label>
-        <SelectBox v-model="form.date_format" size="lg" :options="dateFormatOptions" />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Time Format</label>
-        <SelectBox v-model="form.time_format" size="lg" :options="timeFormatOptions" />
       </div>
     </div>
 
@@ -185,11 +172,10 @@
 
 <script setup>
 import { computed, reactive, ref, watch } from 'vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
-import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
-import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
@@ -203,7 +189,6 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const localErrors = ref({});
-const timezoneOptionsBase = getTimezoneOptions();
 
 const statusOptions = [
   { value: 'active', label: 'Active' },
@@ -224,19 +209,6 @@ const currencyOptionsBase = [
   { value: 'CNY', label: 'CNY — Chinese Yuan' },
   { value: 'SGD', label: 'SGD — Singapore Dollar' },
   { value: 'AED', label: 'AED — UAE Dirham' },
-];
-
-const dateFormatOptionsBase = [
-  { value: 'Y-m-d', label: 'Y-m-d (2026-08-10)' },
-  { value: 'd/m/Y', label: 'd/m/Y (10/08/2026)' },
-  { value: 'm/d/Y', label: 'm/d/Y (08/10/2026)' },
-  { value: 'd-m-Y', label: 'd-m-Y (10-08-2026)' },
-  { value: 'd M Y', label: 'd M Y (10 Aug 2026)' },
-];
-
-const timeFormatOptionsBase = [
-  { value: 'H:i', label: '24-hour (14:30)' },
-  { value: 'h:i A', label: '12-hour (02:30 PM)' },
 ];
 
 const form = reactive(createForm(props.initial));
@@ -272,11 +244,7 @@ function withCurrentOption(options, current) {
   return options;
 }
 
-const timezoneOptions = computed(() => withCurrentOption(timezoneOptionsBase, form.timezone));
-const languageOptions = computed(() => withCurrentOption(LANGUAGE_OPTIONS, form.language));
 const currencyOptions = computed(() => withCurrentOption(currencyOptionsBase, form.currency));
-const dateFormatOptions = computed(() => withCurrentOption(dateFormatOptionsBase, form.date_format));
-const timeFormatOptions = computed(() => withCurrentOption(timeFormatOptionsBase, form.time_format));
 
 function createForm(value = {}) {
   return {
@@ -312,12 +280,40 @@ function validate() {
     next.company_name = ['The company name field is required.'];
   }
 
-  if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+  if (!String(form.registration_number || '').trim()) {
+    next.registration_number = ['The company code field is required.'];
+  }
+
+  if (!String(form.email || '').trim()) {
+    next.email = ['The email field is required.'];
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
     next.email = ['The email must be a valid email address.'];
   }
 
-  if (form.phone && !isValidE164(form.phone)) {
+  if (!String(form.phone || '').trim()) {
+    next.phone = ['The phone field is required.'];
+  } else if (!isValidE164(form.phone)) {
     next.phone = [PHONE_INVALID_MESSAGE];
+  }
+
+  if (!String(form.address || '').trim()) {
+    next.address = ['The address field is required.'];
+  }
+
+  if (!String(form.city || '').trim()) {
+    next.city = ['The city field is required.'];
+  }
+
+  if (!String(form.state || '').trim()) {
+    next.state = ['The state field is required.'];
+  }
+
+  if (!String(form.postal_code || '').trim()) {
+    next.postal_code = ['The postal code field is required.'];
+  }
+
+  if (!String(form.country || '').trim()) {
+    next.country = ['The country field is required.'];
   }
 
   if (form.website) {
@@ -328,7 +324,9 @@ function validate() {
     }
   }
 
-  if (form.currency && String(form.currency).length !== 3) {
+  if (!String(form.currency || '').trim()) {
+    next.currency = ['The currency field is required.'];
+  } else if (String(form.currency).length !== 3) {
     next.currency = ['The currency must be a 3-letter code.'];
   }
 

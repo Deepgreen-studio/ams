@@ -176,7 +176,7 @@ const fullAddress = computed(() => {
 
 const businessItems = computed(() => [
   { label: 'Legal name', value: company.value?.legal_name || '-' },
-  { label: 'Registration', value: company.value?.registration_number || '-' },
+  { label: 'Company Code', value: company.value?.registration_number || '-' },
   { label: 'Tax number', value: company.value?.tax_number || '-' },
   { label: 'Date format', value: company.value?.date_format || '-' },
   { label: 'Time format', value: company.value?.time_format || '-' },

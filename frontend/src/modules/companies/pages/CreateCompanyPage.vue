@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mx-auto w-full max-w-[1200px]">
     <div class="rounded-[12px] bg-white p-6 sm:p-8">
       <CompanyForm
         :loading="companiesStore.saving"

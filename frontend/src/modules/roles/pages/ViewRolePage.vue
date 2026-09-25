@@ -142,7 +142,7 @@
           </p>
           <p class="text-sm text-zinc-500">Logged events</p>
 
-          <ul class="mt-4 space-y-2">
+          <ul class="scrollbar-light mt-4 max-h-80 space-y-2 overflow-y-auto pr-1">
             <li
               v-for="item in rolesStore.activityHistory?.recent || []"
               :key="item.id"

@@ -24,6 +24,19 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Users
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Added by</th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'created_at')"
+              >
+                Added date
+                <span class="text-base leading-none text-zinc-400">
+                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
             <th
               v-if="hasAnyAction"
               class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
@@ -63,6 +76,8 @@
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ role.users_count ?? 0 }}
             </td>
+            <td class="px-5 py-4 text-slate-600">{{ addedBy(role) }}</td>
+            <td class="px-5 py-4 text-slate-600">{{ formatDate(role.created_at) || '—' }}</td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
@@ -151,6 +166,7 @@ import {
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
+import { formatDate } from '@/utils/formatters';
 
 const props = defineProps({
   roles: {
@@ -185,7 +201,16 @@ const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
   canAny('roles.view', 'roles.update', 'roles.assign', 'roles.delete'),
 );
-const columnCount = computed(() => 3 + (hasAnyAction.value ? 1 : 0));
+const columnCount = computed(() => 5 + (hasAnyAction.value ? 1 : 0));
+
+function addedBy(role) {
+  const name = role?.created_by?.full_name;
+  if (name) {
+    return name;
+  }
+
+  return role?.is_system ? 'System' : '—';
+}
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

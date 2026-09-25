@@ -3,6 +3,7 @@
 namespace App\Domains\Roles\Models;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -27,6 +28,7 @@ class Role extends SpatieRole
         'description',
         'guard_name',
         'is_system',
+        'created_by',
     ];
 
     protected static function booted(): void
@@ -70,6 +72,11 @@ class Role extends SpatieRole
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by')->withTrashed();
     }
 
     public function users(): BelongsToMany

@@ -75,7 +75,9 @@ class RoleManagementTest extends TestCase
 
         $create->assertCreated()
             ->assertJsonPath('data.role.name', 'custom-ops')
-            ->assertJsonPath('data.role.display_name', 'Custom Ops');
+            ->assertJsonPath('data.role.display_name', 'Custom Ops')
+            ->assertJsonPath('data.role.created_by.uuid', $this->admin->uuid)
+            ->assertJsonPath('data.role.created_by.full_name', $this->admin->full_name);
 
         $uuid = $create->json('data.role.uuid');
 

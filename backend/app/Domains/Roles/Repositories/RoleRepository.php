@@ -70,7 +70,10 @@ class RoleRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->withCount(['permissions', 'users'])
-            ->with('permissions:id,name,display_name,module')
+            ->with([
+                'permissions:id,name,display_name,module',
+                'creator:id,uuid,full_name,name,email',
+            ])
             ->paginate($perPage)
             ->withQueryString();
     }

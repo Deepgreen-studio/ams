@@ -42,7 +42,7 @@ class RoleService
     public function show(string $identifier): array
     {
         $role = $this->roleRepository->findByIdentifierOrFail($identifier);
-        $role->load(['permissions']);
+        $role->load(['permissions', 'creator']);
         $role->loadCount(['permissions', 'users']);
 
         return [
@@ -63,6 +63,7 @@ class RoleService
                 'description' => $data['description'] ?? null,
                 'guard_name' => $data['guard_name'] ?? 'web',
                 'is_system' => (bool) ($data['is_system'] ?? false),
+                'created_by' => $actor->id,
             ];
 
             if ($this->roleRepository->findByName($payload['name'], $payload['guard_name'])) {
@@ -76,9 +77,10 @@ class RoleService
             }
 
             app(PermissionRegistrar::class)->forgetCachedPermissions();
-            event(new RoleCreated($role->fresh(['permissions']) ?? $role, $actor));
+            $role = $role->fresh(['permissions', 'creator']) ?? $role;
+            event(new RoleCreated($role, $actor));
 
-            return $role->fresh(['permissions']) ?? $role;
+            return $role;
         });
     }
 

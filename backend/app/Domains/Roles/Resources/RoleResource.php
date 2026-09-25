@@ -22,6 +22,19 @@ class RoleResource extends JsonResource
             'is_system' => (bool) $this->is_system,
             'permissions_count' => $this->whenCounted('permissions'),
             'users_count' => $this->whenCounted('users'),
+            'created_by' => $this->whenLoaded('creator', function () {
+                if (! $this->creator) {
+                    return null;
+                }
+
+                $name = trim((string) ($this->creator->full_name ?: $this->creator->name ?: ''));
+
+                return [
+                    'uuid' => $this->creator->uuid,
+                    'full_name' => $name !== '' ? $name : null,
+                    'email' => $this->creator->email,
+                ];
+            }),
             'permissions' => $this->whenLoaded('permissions', function () {
                 return $this->permissions->map(static fn ($permission) => [
                     'id' => $permission->id,

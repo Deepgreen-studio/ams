@@ -20,6 +20,18 @@
                 </span>
               </button>
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'registration_number')"
+              >
+                Company Code
+                <span class="text-base leading-none text-zinc-400">
+                  {{ sortBy === 'registration_number' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
               <button
                 type="button"
@@ -46,6 +58,18 @@
             </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Org units
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'created_at')"
+              >
+                Created At
+                <span class="text-base leading-none text-zinc-400">
+                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
             </th>
             <th
               v-if="hasAnyAction"
@@ -108,6 +132,9 @@
                 </div>
               </div>
             </td>
+            <td class="px-5 py-4 text-slate-600">
+              {{ company.registration_number || '—' }}
+            </td>
             <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
               {{ company.country || '—' }}
             </td>
@@ -117,6 +144,9 @@
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ company.departments_count || 0 }} dept · {{ company.teams_count || 0 }} teams ·
               {{ company.locations_count || 0 }} locs
+            </td>
+            <td class="px-5 py-4 text-slate-600">
+              {{ formatDate(company.created_at) || '—' }}
             </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
@@ -211,6 +241,7 @@ import {
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
+import { formatDate } from '@/utils/formatters';
 
 const props = defineProps({
   companies: {

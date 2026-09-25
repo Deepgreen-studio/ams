@@ -7,7 +7,7 @@
       <input
         v-model="local.search"
         type="search"
-        placeholder="Name, email, registration..."
+        placeholder="Name, email, company code..."
         class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
         @input="onSearchInput"
         @search="onSearchInput"

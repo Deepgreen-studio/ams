@@ -14,7 +14,7 @@
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
         <PlusIcon class="h-4 w-4" />
-        Record consent
+        Record Consent
       </RouterLink>
     </Teleport>
 
@@ -41,7 +41,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject email</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject Email</label>
           <input
             v-model="lookup.subject_email"
             type="email"
@@ -52,7 +52,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject name</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject Name</label>
           <input
             v-model="lookup.subject_name"
             type="text"

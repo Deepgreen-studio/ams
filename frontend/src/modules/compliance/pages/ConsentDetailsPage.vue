@@ -8,7 +8,7 @@
           :disabled="store.saving"
           @click="onWithdraw"
         >
-          Withdraw consent
+          Withdraw Consent
         </button>
     </Teleport>
 

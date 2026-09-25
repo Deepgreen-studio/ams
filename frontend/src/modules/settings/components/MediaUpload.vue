@@ -11,7 +11,7 @@
     <label
       class="mt-4 inline-flex cursor-pointer rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
     >
-      Browse files
+      Browse Files
       <input type="file" multiple class="hidden" @change="onSelect" />
     </label>
     <div

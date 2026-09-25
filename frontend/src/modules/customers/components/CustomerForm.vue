@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <FormLabel required>Owning company</FormLabel>
+        <FormLabel required>Owning Company</FormLabel>
         <SelectBox
           v-model="form.company_id"
           size="lg"
@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <FormLabel required>Customer type</FormLabel>
+        <FormLabel required>Customer Type</FormLabel>
         <SelectBox
           v-model="form.customer_type"
           size="lg"
@@ -31,7 +31,7 @@
 
       <template v-if="form.customer_type === 'individual'">
         <div>
-          <FormLabel required>First name</FormLabel>
+          <FormLabel required>First Name</FormLabel>
           <input
             v-model="form.first_name"
             type="text"
@@ -43,7 +43,7 @@
           </p>
         </div>
         <div>
-          <FormLabel required>Last name</FormLabel>
+          <FormLabel required>Last Name</FormLabel>
           <input
             v-model="form.last_name"
             type="text"
@@ -57,7 +57,7 @@
       </template>
 
       <div v-if="form.customer_type !== 'individual'" class="md:col-span-2">
-        <FormLabel required>Company name</FormLabel>
+        <FormLabel required>Company Name</FormLabel>
         <input
           v-model="form.company_name"
           type="text"
@@ -70,7 +70,7 @@
       </div>
 
       <div v-if="form.customer_type !== 'individual'">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact first name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact First Name</label>
         <input
           v-model="form.first_name"
           type="text"
@@ -78,7 +78,7 @@
         />
       </div>
       <div v-if="form.customer_type !== 'individual'">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact last name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Contact Last Name</label>
         <input
           v-model="form.last_name"
           type="text"

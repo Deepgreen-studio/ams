@@ -16,7 +16,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Consent type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Consent Type</label>
         <SelectBox
           v-model="form.consent_type_id"
           size="lg"
@@ -31,7 +31,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject Name</label>
         <input
           v-model="form.subject_name"
           type="text"
@@ -42,7 +42,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject email</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject Email</label>
         <input
           v-model="form.subject_email"
           type="email"

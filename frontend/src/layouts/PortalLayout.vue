@@ -17,7 +17,7 @@
             :to="{ name: 'portal.tickets.create' }"
             class="rounded-lg bg-brand-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-700"
           >
-            New ticket
+            New Ticket
           </RouterLink>
           <span class="hidden text-sm text-slate-600 sm:inline">{{ authStore.user?.full_name }}</span>
           <button

@@ -15,7 +15,7 @@
         @click="onSave"
       >
         <CheckIcon class="h-4 w-4" />
-        Save designer
+        Save Designer
       </button>
     </Teleport>
 
@@ -49,7 +49,7 @@
                 type="checkbox"
                 class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
               />
-              Saved report
+              Saved Report
             </label>
           </div>
         </section>
@@ -76,7 +76,7 @@
           <h3 class="text-sm font-semibold text-slate-900">Sorting & grouping</h3>
           <div class="mt-3 space-y-3">
             <div>
-              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Sort field</label>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Sort Field</label>
               <SelectBox v-model="form.sorting.field" :options="columnOptions" />
             </div>
             <div>
@@ -84,7 +84,7 @@
               <SelectBox v-model="form.sorting.direction" :options="directionOptions" />
             </div>
             <div>
-              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Group by</label>
+              <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Group By</label>
               <SelectBox v-model="groupField" :options="groupFieldOptions" />
             </div>
             <div>
@@ -122,7 +122,7 @@
                 type="checkbox"
                 class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
               />
-              Enable scheduled generation
+              Enable Scheduled Generation
             </label>
             <div>
               <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Cron</label>
@@ -138,7 +138,7 @@
               :disabled="store.saving"
               @click="onSchedule"
             >
-              Save schedule
+              Save Schedule
             </button>
           </div>
         </section>

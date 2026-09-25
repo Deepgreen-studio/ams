@@ -16,7 +16,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || formError"
-        submit-label="Create config"
+        submit-label="Create Config"
         @submit="onSubmit"
         @cancel="router.push({ name: 'sync.configs' })"
       />

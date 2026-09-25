@@ -6,7 +6,7 @@
         :loading="environmentsStore.saving"
         :errors="environmentsStore.fieldErrors"
         :error="environmentsStore.error || ''"
-        submit-label="Create environment"
+        submit-label="Create Environment"
         @submit="onSubmit"
         @cancel="
           router.push({ name: 'applications.environments', params: { id: route.params.id } })

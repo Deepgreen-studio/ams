@@ -9,7 +9,7 @@
             :to="{ name: 'dashboard' }"
             class="mt-6 inline-flex rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
-            Back to dashboard
+            Back To Dashboard
         </RouterLink>
     </div>
 </template>

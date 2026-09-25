@@ -45,7 +45,7 @@
           :disabled="loading"
           @click="$emit('download')"
         >
-          Download export
+          Download Export
         </button>
         <button
           v-if="request?.requires_deletion"
@@ -62,7 +62,7 @@
           :disabled="loading || !canComplete"
           @click="$emit('complete', { notes })"
         >
-          Complete request
+          Complete Request
         </button>
       </div>
       <p v-if="!canDecide" class="text-xs text-amber-700">

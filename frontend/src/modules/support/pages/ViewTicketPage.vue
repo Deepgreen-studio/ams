@@ -33,7 +33,7 @@
           :disabled="store.saving"
           @click="closeTicket"
         >
-          Close ticket
+          Close Ticket
         </button>
         <button
           v-if="ticket.deleted_at"
@@ -186,7 +186,7 @@
             :disabled="store.saving || !transitionStatus"
             @click="applyTransition"
           >
-            Update status
+            Update Status
           </button>
         </section>
 

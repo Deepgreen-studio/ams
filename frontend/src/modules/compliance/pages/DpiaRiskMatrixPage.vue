@@ -156,7 +156,7 @@
               class="text-xs font-medium text-brand-700 hover:underline"
               @click="selectedKey = ''"
             >
-              Show all
+              Show All
             </button>
           </div>
 

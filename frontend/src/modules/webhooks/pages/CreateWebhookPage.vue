@@ -6,7 +6,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Create webhook"
+        submit-label="Create Webhook"
         @submit="onSubmit"
         @cancel="router.push({ name: 'webhooks.index' })"
       />

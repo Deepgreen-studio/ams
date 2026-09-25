@@ -30,7 +30,7 @@
         <CaseForm
           :loading="store.saving"
           :field-errors="store.fieldErrors"
-          submit-label="Create case"
+          submit-label="Create Case"
           @submit="onSubmit"
           @cancel="router.push({ name: 'compliance.cases.index' })"
         />

@@ -14,7 +14,7 @@
     </div>
 
     <div>
-      <label for="reset-password" class="mb-1.5 block text-sm font-medium text-zinc-700">New password</label>
+      <label for="reset-password" class="mb-1.5 block text-sm font-medium text-zinc-700">New Password</label>
       <PasswordInput
         id="reset-password"
         v-model="form.password"
@@ -26,7 +26,7 @@
     </div>
 
     <div>
-      <label for="reset-password-confirmation" class="mb-1.5 block text-sm font-medium text-zinc-700">Confirm password</label>
+      <label for="reset-password-confirmation" class="mb-1.5 block text-sm font-medium text-zinc-700">Confirm Password</label>
       <PasswordInput
         id="reset-password-confirmation"
         v-model="form.password_confirmation"

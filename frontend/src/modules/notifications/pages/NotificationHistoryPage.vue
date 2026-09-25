@@ -7,7 +7,7 @@
         :disabled="store.loading"
         @click="markAll"
       >
-        Mark all read
+        Mark All Read
       </button>
     </Teleport>
 
@@ -160,7 +160,7 @@
                   class="text-sm font-medium text-brand-700 hover:underline"
                   @click="markOne(item.uuid)"
                 >
-                  Mark read
+                  Mark Read
                 </button>
                 <span
                   v-else

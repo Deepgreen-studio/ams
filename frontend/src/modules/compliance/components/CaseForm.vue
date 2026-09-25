@@ -16,7 +16,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Case type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Case Type</label>
         <SelectBox
           v-model="form.case_type"
           size="lg"
@@ -69,7 +69,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign to</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign To</label>
         <SelectBox
           v-model="form.assigned_to"
           size="lg"
@@ -83,7 +83,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due date</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due Date</label>
         <input
           v-model="form.due_date"
           type="date"

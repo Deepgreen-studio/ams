@@ -10,7 +10,7 @@
         :loading="applicationsStore.saving"
         :errors="applicationsStore.fieldErrors"
         :error="applicationsStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         hide-company
         @submit="onSubmit"
         @cancel="router.push({ name: 'applications.show', params: { id: route.params.id } })"

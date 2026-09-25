@@ -16,7 +16,7 @@
         :show-role="canAssignRoles"
         :role-options="roleOptions"
         :company-options="companyOptions"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         :require-password="false"
         @submit="onSubmit"
         @cancel="router.push({ name: 'users.show', params: { id: route.params.id } })"

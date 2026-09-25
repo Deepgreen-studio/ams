@@ -4,9 +4,10 @@
       <RouterLink
         v-if="can('content.create')"
         :to="{ name: 'content.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create content
+        <PlusIcon class="h-4 w-4" />
+        Create Content
       </RouterLink>
     </Teleport>
 
@@ -99,12 +100,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { RouterLink } from 'vue-router';
-import {
-  DocumentTextIcon,
-  CheckCircleIcon,
-  PencilSquareIcon,
-  StarIcon,
-} from '@heroicons/vue/24/outline';
+import { CheckCircleIcon, DocumentTextIcon, PencilSquareIcon, PlusIcon, StarIcon } from '@heroicons/vue/24/outline';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/content/components/StatusBadge.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';

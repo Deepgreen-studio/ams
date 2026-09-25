@@ -4,7 +4,7 @@
 
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Environment name</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Environment Name</label>
         <input v-model="form.name" type="text" class="input" required />
         <p v-if="errors.name" class="mt-1 text-xs text-rose-600">{{ errors.name[0] }}</p>
       </div>
@@ -44,7 +44,7 @@
       <div class="md:col-span-2">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
           <input v-model="form.is_current" type="checkbox" class="rounded border-slate-300" />
-          Set as current environment
+          Set As Current Environment
         </label>
       </div>
     </div>
@@ -52,7 +52,7 @@
     <div class="rounded-xl border border-slate-200 p-4">
       <div class="mb-3 flex items-center justify-between">
         <h3 class="text-sm font-semibold text-slate-800">Environment variables</h3>
-        <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="addVariable">Add variable</button>
+        <button type="button" class="text-xs font-medium text-brand-700 hover:underline" @click="addVariable">Add Variable</button>
       </div>
       <p class="mb-3 text-xs text-slate-500">Values are encrypted at rest and masked in API responses.</p>
       <div class="space-y-2">

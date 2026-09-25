@@ -5,7 +5,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Create subscription"
+        submit-label="Create Subscription"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.subscriptions', params: { id: route.params.id } })"
       />

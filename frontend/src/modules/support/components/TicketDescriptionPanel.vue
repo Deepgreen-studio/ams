@@ -84,7 +84,7 @@
         @click="metaOpen = !metaOpen"
       >
         <span class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-          Ingest details
+          Ingest Details
         </span>
         <span class="text-xs font-medium text-brand-700">{{ metaOpen ? 'Hide' : 'Show' }}</span>
       </button>

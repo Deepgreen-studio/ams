@@ -23,7 +23,7 @@
             for="settings-folder-name"
             class="mb-1.5 block text-sm font-medium text-slate-700"
           >
-            Folder name
+            Folder Name
           </label>
           <input
             id="settings-folder-name"

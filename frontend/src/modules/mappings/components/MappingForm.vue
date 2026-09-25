@@ -22,11 +22,11 @@
         <input v-model="form.name" type="text" class="input" required />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Source entity</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Source Entity</label>
         <input v-model="form.source_entity" type="text" class="input" placeholder="EasyCarbs" required />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Target entity</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Target Entity</label>
         <input v-model="form.target_entity" type="text" class="input" placeholder="Users" list="target-entities" />
       </div>
       <div>
@@ -51,11 +51,11 @@
         <textarea v-model="form.description" rows="2" class="input" />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">Sample payload JSON</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Sample Payload JSON</label>
         <textarea v-model="samplePayloadText" rows="4" class="input font-mono text-xs" placeholder='{"customer_name":"Ada Lovelace","weight":"62.5"}' />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">External schema fields (comma-separated)</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">External Schema Fields (Comma-Separated)</label>
         <input v-model="externalSchemaText" type="text" class="input" placeholder="customer_name, weight, email" />
       </div>
     </div>

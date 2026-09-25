@@ -7,7 +7,7 @@
         :disabled="!store.unreadCount"
         @click="markAll"
       >
-        Mark all read
+        Mark All Read
       </button>
       <RouterLink
         :to="{ name: 'notifications.preferences' }"

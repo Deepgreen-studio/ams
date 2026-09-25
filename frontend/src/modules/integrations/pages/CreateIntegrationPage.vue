@@ -5,7 +5,7 @@
         :loading="integrationsStore.saving"
         :errors="integrationsStore.fieldErrors"
         :error="integrationsStore.error || ''"
-        submit-label="Create integration"
+        submit-label="Create Integration"
         @submit="onSubmit"
         @cancel="router.push({ name: 'integrations.index' })"
       />

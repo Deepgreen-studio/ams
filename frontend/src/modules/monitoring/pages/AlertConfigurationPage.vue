@@ -76,10 +76,11 @@
       <div class="md:col-span-2 flex justify-end border-t border-zinc-100 pt-5">
         <button
           type="submit"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+          class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
         >
-          Create alert
+          <PlusIcon class="h-4 w-4" />
+          Create Alert
         </button>
       </div>
     </form>
@@ -179,6 +180,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, reactive } from 'vue';
 import MonitoringSubnav from '@/modules/monitoring/components/MonitoringSubnav.vue';
 import { useMonitoringStore } from '@/modules/monitoring/stores/monitoring';

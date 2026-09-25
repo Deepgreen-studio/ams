@@ -15,7 +15,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tag-slug">SEO slug</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tag-slug">SEO Slug</label>
         <input
           id="tag-slug"
           v-model="form.slug"
@@ -30,7 +30,7 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tag-sort">
-          Sort order
+          Sort Order
         </label>
         <input
           id="tag-sort"
@@ -71,7 +71,7 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tag-seo-title">
-          SEO title
+          SEO Title
         </label>
         <input
           id="tag-seo-title"
@@ -82,7 +82,7 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700" for="tag-seo-description">
-          SEO description
+          SEO Description
         </label>
         <input
           id="tag-seo-description"

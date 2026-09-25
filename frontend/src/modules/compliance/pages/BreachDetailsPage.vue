@@ -110,7 +110,7 @@
             </div>
             <textarea v-model="assessForm.impact_analysis" rows="3" class="input" placeholder="Impact analysis" />
             <textarea v-model="assessForm.risk_assessment_notes" rows="2" class="input" placeholder="Assessment notes" />
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save assessment</button>
+            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save Assessment</button>
           </form>
         </div>
 
@@ -118,11 +118,11 @@
           <h2 class="mb-3 text-sm font-semibold text-slate-900">Containment & recovery</h2>
           <form class="mb-4 space-y-2" @submit.prevent="onContain">
             <textarea v-model="containForm.containment_summary" rows="2" class="input" placeholder="Containment actions" required />
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Record containment</button>
+            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Record Containment</button>
           </form>
           <form class="space-y-2" @submit.prevent="onRecover">
             <textarea v-model="recoverForm.recovery_summary" rows="2" class="input" placeholder="Recovery actions" required />
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Record recovery</button>
+            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Record Recovery</button>
           </form>
         </div>
 
@@ -130,11 +130,11 @@
           <h2 class="mb-3 text-sm font-semibold text-slate-900">Root cause & lessons</h2>
           <form class="mb-4 space-y-2" @submit.prevent="onRootCause">
             <textarea v-model="rootCauseForm.root_cause" rows="3" class="input" placeholder="Root cause analysis" required />
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save root cause</button>
+            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save Root Cause</button>
           </form>
           <form class="space-y-2" @submit.prevent="onLessons">
             <textarea v-model="lessonsForm.lessons_learned" rows="3" class="input" placeholder="Lessons learned" required />
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save lessons learned</button>
+            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Save Lessons Learned</button>
           </form>
         </div>
 
@@ -159,9 +159,16 @@
             />
             <label class="flex items-center gap-2 text-sm text-slate-700">
               <input v-model="notifyForm.send_now" type="checkbox" class="rounded border-slate-300" />
-              Send now
+              Send Now
             </label>
-            <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60" :disabled="store.saving">Create notification</button>
+            <button
+              type="submit"
+              class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+              :disabled="store.saving"
+            >
+              <PlusIcon class="h-4 w-4" />
+              Create Notification
+            </button>
           </form>
           <button
             type="button"
@@ -169,7 +176,7 @@
             :disabled="store.saving || store.current.status === 'closed'"
             @click="onClose"
           >
-            Close incident
+            Close Incident
           </button>
         </div>
       </div>
@@ -183,6 +190,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, reactive } from 'vue';
 import { useRoute, RouterLink } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';

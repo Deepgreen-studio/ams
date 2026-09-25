@@ -87,7 +87,7 @@
               :disabled="contentStore.saving"
               @click="act('submit')"
             >
-              Submit for review
+              Submit For Review
             </button>
             <button
               v-if="status === 'pending_review' && can('content.review')"
@@ -96,7 +96,7 @@
               :disabled="contentStore.saving"
               @click="act('review')"
             >
-              Mark reviewed
+              Mark Reviewed
             </button>
             <button
               v-if="status === 'reviewed' && can('content.approve')"
@@ -132,7 +132,7 @@
               :disabled="contentStore.saving"
               @click="act('returnToDraft')"
             >
-              Return to draft
+              Return To Draft
             </button>
             <button
               v-if="status === 'published' && canAny('content.publish', 'content.update')"

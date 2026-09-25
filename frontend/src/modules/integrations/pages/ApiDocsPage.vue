@@ -3,15 +3,17 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'webhooks.create' }"
-        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
-        Create webhook
+        <PlusIcon class="h-4 w-4" />
+        Create Webhook
       </RouterLink>
       <RouterLink
         :to="{ name: 'integrations.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create integration
+        <PlusIcon class="h-4 w-4" />
+        Create Integration
       </RouterLink>
     </Teleport>
 
@@ -299,6 +301,7 @@ AMS Sync  ── GET your REST API ──►  import patients / records</pre>
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import CodeSample from '@/modules/integrations/components/CodeSample.vue';

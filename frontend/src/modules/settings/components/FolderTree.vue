@@ -16,7 +16,7 @@
       :class="!selected ? 'bg-brand-50 text-brand-700' : 'text-slate-700 hover:bg-zinc-50'"
       @click="$emit('select', null)"
     >
-      All files
+      All Files
     </button>
     <button
       v-for="folder in folders"

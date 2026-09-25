@@ -58,7 +58,7 @@
             :disabled="integrationsStore.saving || !integration.has_credentials"
             @click="runAuth"
           >
-            Run authentication test
+            Run Authentication Test
           </button>
         </div>
       </div>

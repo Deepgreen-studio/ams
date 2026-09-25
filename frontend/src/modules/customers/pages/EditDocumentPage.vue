@@ -18,7 +18,7 @@
           <input v-model="form.name" type="text" class="input" required />
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Category / folder</label>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Category / Folder</label>
           <select v-model="form.category" class="input" required>
             <option value="contracts">Contracts</option>
             <option value="nda">NDA</option>
@@ -38,7 +38,7 @@
           </select>
         </div>
         <div>
-          <label class="mb-1 block text-sm font-medium text-slate-700">Expiry date</label>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Expiry Date</label>
           <input v-model="form.expires_at" type="datetime-local" class="input" />
         </div>
         <div class="md:col-span-2">

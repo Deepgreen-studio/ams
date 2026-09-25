@@ -32,7 +32,7 @@
           :loading="loading"
           :errors="errors"
           :error="error"
-          :submit-label="submitLabel"
+          :submit-label="SubmitLabel"
           @submit="onSubmit"
           @cancel="onCancel"
         />

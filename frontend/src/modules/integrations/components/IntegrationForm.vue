@@ -90,7 +90,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">API version</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">API Version</label>
         <input
           v-model="form.api_version"
           type="text"
@@ -100,7 +100,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (Seconds)</label>
         <input
           v-model.number="form.timeout"
           type="number"
@@ -115,7 +115,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry attempts</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry Attempts</label>
         <input
           v-model.number="form.retry_attempts"
           type="number"

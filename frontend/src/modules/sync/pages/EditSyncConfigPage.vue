@@ -21,7 +21,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || formError"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         hide-company
         @submit="onSubmit"
         @cancel="router.push({ name: 'sync.configs.show', params: { id: route.params.id } })"

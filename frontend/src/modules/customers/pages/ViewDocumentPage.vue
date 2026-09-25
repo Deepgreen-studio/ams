@@ -124,7 +124,7 @@
                 class="rounded-lg bg-brand-600 px-3 py-2 text-xs font-medium text-white hover:bg-brand-700"
                 @click="tryPreview"
               >
-                Load preview
+                Load Preview
               </button>
             </div>
           </div>
@@ -137,7 +137,7 @@
           <label
             class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-brand-700"
           >
-            <span>Upload new version</span>
+            <span>Upload New Version</span>
             <input type="file" class="hidden" @change="onVersionUpload" />
           </label>
         </div>

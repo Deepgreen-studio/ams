@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-2">
-    <label class="block text-sm font-medium text-slate-700">Featured image</label>
+    <label class="block text-sm font-medium text-slate-700">Featured Image</label>
 
     <div
       class="overflow-hidden rounded-[12px] bg-zinc-50 ring-1 ring-zinc-100"
@@ -28,7 +28,7 @@
             class="rounded-[10px] bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-white"
             @click="pickerOpen = true"
           >
-            Browse library
+            Browse Library
           </button>
           <button
             type="button"
@@ -72,7 +72,7 @@
             class="rounded-[12px] border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
             @click="pickerOpen = true"
           >
-            Browse library
+            Browse Library
           </button>
         </div>
       </div>

@@ -3,9 +3,10 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'applications.versions.create', params: { id: route.params.id } }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create version
+        <PlusIcon class="h-4 w-4" />
+        Create Version
       </RouterLink>
     </Teleport>
 
@@ -106,7 +107,7 @@
 <script setup>
 import {onMounted, ref, onBeforeUnmount } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';

@@ -33,7 +33,7 @@
           </label>
 
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Trigger type</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Trigger Type</span>
             <SelectBox
               v-model="form.trigger_type"
               wrapper-class="w-full"
@@ -60,7 +60,7 @@
           </label>
 
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Cron expression</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Cron Expression</span>
             <input
               v-model="form.schedule_cron"
               placeholder="0 8 * * *"
@@ -81,7 +81,7 @@
           </label>
 
           <label v-if="form.trigger_type === 'time'" class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Delay (minutes)</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Delay (Minutes)</span>
             <input
               v-model.number="form.delay_minutes"
               type="number"
@@ -135,7 +135,7 @@
               class="h-10 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="addCondition()"
             >
-              Add condition
+              Add Condition
             </button>
           </div>
         </div>
@@ -204,7 +204,7 @@
             class="h-10 rounded-[12px] border border-zinc-200 px-4 text-sm font-medium text-slate-700 hover:bg-zinc-50"
             @click="addAction"
           >
-            Add action
+            Add Action
           </button>
         </div>
 
@@ -296,7 +296,7 @@
           :disabled="store.saving"
           @click="runTest"
         >
-          Test run
+          Test Run
         </button>
         <RouterLink
           :to="{ name: 'automation.rules' }"

@@ -59,7 +59,7 @@
 
         <form class="mt-6 space-y-5" @submit.prevent="runTest">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Event name</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Event Name</label>
             <input
               v-model="form.event_name"
               type="text"
@@ -70,7 +70,7 @@
           </div>
 
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">JSON payload</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">JSON Payload</label>
             <textarea
               v-model="payloadText"
               rows="12"

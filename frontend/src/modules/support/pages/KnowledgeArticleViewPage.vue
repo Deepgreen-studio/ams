@@ -197,7 +197,7 @@
               :disabled="store.saving || !cmsContentId"
               @click="linkCms"
             >
-              Link & sync from CMS
+              Link & Sync From CMS
             </button>
           </div>
         </section>

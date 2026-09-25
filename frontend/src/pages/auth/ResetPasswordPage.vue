@@ -17,7 +17,7 @@
     </div>
 
     <div>
-      <label for="password" class="mb-1 block text-sm font-medium text-slate-700">New password</label>
+      <label for="password" class="mb-1 block text-sm font-medium text-slate-700">New Password</label>
       <input
         id="password"
         v-model="form.password"
@@ -28,7 +28,7 @@
     </div>
 
     <div>
-      <label for="password_confirmation" class="mb-1 block text-sm font-medium text-slate-700">Confirm password</label>
+      <label for="password_confirmation" class="mb-1 block text-sm font-medium text-slate-700">Confirm Password</label>
       <input
         id="password_confirmation"
         v-model="form.password_confirmation"

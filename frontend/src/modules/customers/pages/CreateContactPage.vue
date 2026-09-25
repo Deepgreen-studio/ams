@@ -5,7 +5,7 @@
         :loading="contactsStore.saving"
         :errors="contactsStore.fieldErrors"
         :error="contactsStore.error || ''"
-        submit-label="Create contact"
+        submit-label="Create Contact"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.contacts', params: { id: route.params.id } })"
       />

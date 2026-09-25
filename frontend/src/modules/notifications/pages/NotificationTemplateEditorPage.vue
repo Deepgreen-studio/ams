@@ -152,7 +152,7 @@
               class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="submitReview"
             >
-              Submit for review
+              Submit For Review
             </button>
             <button
               type="button"
@@ -166,7 +166,7 @@
               class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="goVersions"
             >
-              Version history
+              Version History
             </button>
           </template>
         </div>

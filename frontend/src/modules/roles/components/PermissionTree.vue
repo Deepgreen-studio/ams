@@ -13,7 +13,7 @@
           class="rounded-[12px] border border-zinc-200 px-3.5 py-2 text-xs font-medium text-slate-700 hover:bg-zinc-50"
           @click="selectAll"
         >
-          Select all
+          Select All
         </button>
         <button
           type="button"

@@ -22,7 +22,7 @@
         <SelectBox v-model="form.category" :options="categories" />
       </div>
       <div>
-        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Auto refresh (sec)</label>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Auto Refresh (Sec)</label>
         <input
           v-model.number="form.settings.auto_refresh_seconds"
           type="number"
@@ -34,15 +34,15 @@
     <div class="flex flex-wrap gap-4">
       <label class="flex items-center gap-2 text-sm text-slate-700">
         <input v-model="form.is_default" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-        Default dashboard
+        Default Dashboard
       </label>
       <label class="flex items-center gap-2 text-sm text-slate-700">
         <input v-model="form.is_template" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-        Save as template
+        Save As Template
       </label>
       <label class="flex items-center gap-2 text-sm text-slate-700">
         <input v-model="form.settings.show_filters" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-        Show filters
+        Show Filters
       </label>
     </div>
     <div class="flex justify-end gap-2">
@@ -59,7 +59,7 @@
         :disabled="saving"
         @click="emit('save', { ...form, settings: { ...form.settings } })"
       >
-        Save settings
+        Save Settings
       </button>
     </div>
   </div>

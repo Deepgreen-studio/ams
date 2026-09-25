@@ -18,7 +18,7 @@
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
       >
-        New subscription
+        New Subscription
       </button>
     </Teleport>
 

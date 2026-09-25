@@ -53,7 +53,7 @@
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
                 @click="$emit('sort', 'last_login_at')"
               >
-                Last login
+                Last Login
                 <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'last_login_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>

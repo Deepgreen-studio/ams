@@ -25,7 +25,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Health check path</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Health Check Path</label>
           <input
             v-model="form.health_check_path"
             type="text"
@@ -35,7 +35,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (Seconds)</label>
           <input
             v-model.number="form.timeout"
             type="number"
@@ -46,7 +46,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry attempts</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry Attempts</label>
           <input
             v-model.number="form.retry_attempts"
             type="number"
@@ -57,7 +57,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Rate limit / minute</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Rate Limit / Minute</label>
           <input
             v-model.number="form.rate_limit_per_minute"
             type="number"
@@ -69,7 +69,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Authentication type</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Authentication Type</label>
           <SelectBox v-model="form.authentication_type" size="lg" :options="authOptions" />
         </div>
       </div>
@@ -84,7 +84,7 @@
       <div class="mt-5 space-y-5">
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
-            >Default headers (JSON object)</label
+            >Default Headers (JSON Object)</label
           >
           <textarea
             v-model="headersText"
@@ -97,7 +97,7 @@
 
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
-            >Default query (JSON object)</label
+            >Default Query (JSON Object)</label
           >
           <textarea
             v-model="queryText"
@@ -128,7 +128,7 @@
       <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
         <template v-if="form.authentication_type === 'api_key'">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">API key</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">API Key</label>
             <input
               v-model="form.credentials.api_key"
               type="password"
@@ -138,7 +138,7 @@
             />
           </div>
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Header name</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Header Name</label>
             <input
               v-model="form.credentials.api_key_header"
               type="text"
@@ -158,7 +158,7 @@
 
         <template v-else-if="form.authentication_type === 'bearer_token'">
           <div class="md:col-span-2">
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Bearer token</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Bearer Token</label>
             <input
               v-model="form.credentials.bearer_token"
               type="password"
@@ -192,7 +192,7 @@
 
         <template v-else-if="form.authentication_type === 'jwt'">
           <div class="md:col-span-2">
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">JWT token</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">JWT Token</label>
             <input
               v-model="form.credentials.jwt_token"
               type="password"
@@ -206,7 +206,7 @@
         <template v-else>
           <div class="md:col-span-2">
             <label class="mb-1.5 block text-sm font-medium text-slate-700"
-              >OAuth2 access token</label
+              >OAuth2 Access Token</label
             >
             <input
               v-model="form.credentials.oauth_access_token"
@@ -225,7 +225,7 @@
           type="checkbox"
           class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500/20"
         />
-        Clear all stored credentials
+        Clear All Stored Credentials
       </label>
     </div>
 

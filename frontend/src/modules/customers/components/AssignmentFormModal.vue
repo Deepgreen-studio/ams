@@ -31,7 +31,7 @@
         :errors="errors"
         :error="error"
         :hide-application="isEdit"
-        :submit-label="submitLabel"
+        :submit-label="SubmitLabel"
         @submit="onSubmit"
         @cancel="onCancel"
       />

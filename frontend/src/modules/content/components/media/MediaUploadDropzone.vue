@@ -12,7 +12,7 @@
       <label
         class="inline-flex cursor-pointer rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Browse files
+        Browse Files
         <input type="file" multiple class="hidden" :accept="accept" @change="onSelect" />
       </label>
       <button
@@ -20,7 +20,7 @@
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="$emit('crop')"
       >
-        Upload & crop image
+        Upload & Crop Image
       </button>
     </div>
     <div

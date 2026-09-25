@@ -9,7 +9,7 @@
 
     <div>
       <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-        Note type
+        Note Type
       </label>
       <SelectBox
         v-model="form.note_type"
@@ -57,7 +57,7 @@
         class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
         :disabled="loading"
       />
-      Pin note
+      PIN Note
     </label>
 
     <div class="flex flex-wrap justify-end gap-2 pt-2">

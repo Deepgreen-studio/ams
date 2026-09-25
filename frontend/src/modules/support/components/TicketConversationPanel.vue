@@ -165,7 +165,7 @@
           :class="saving ? 'pointer-events-none opacity-60' : ''"
         >
           <PaperClipIcon class="h-4 w-4 text-slate-500" />
-          Attach files
+          Attach Files
           <input
             ref="fileInput"
             type="file"

@@ -4,9 +4,10 @@
       <RouterLink
         v-if="can('applications.create')"
         :to="{ name: 'applications.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create application
+        <PlusIcon class="h-4 w-4" />
+        Create Application
       </RouterLink>
     </Teleport>
 
@@ -93,13 +94,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import {
-  ArchiveBoxIcon,
-  CheckCircleIcon,
-  DocumentTextIcon,
-  NoSymbolIcon,
-  Squares2X2Icon,
-} from '@heroicons/vue/24/outline';
+import { ArchiveBoxIcon, CheckCircleIcon, DocumentTextIcon, NoSymbolIcon, PlusIcon, Squares2X2Icon } from '@heroicons/vue/24/outline';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';

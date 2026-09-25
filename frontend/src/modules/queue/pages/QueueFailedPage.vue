@@ -7,7 +7,7 @@
         :disabled="store.saving || !store.failed.length"
         @click="onRetryAll"
       >
-        Retry all
+        Retry All
       </button>
       <button
         type="button"
@@ -15,7 +15,7 @@
         :disabled="store.saving || !store.failed.length"
         @click="onFlush"
       >
-        Flush all
+        Flush All
       </button>
     </Teleport>
 

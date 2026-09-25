@@ -2,7 +2,7 @@
   <form class="space-y-5" @submit.prevent="onSubmit">
     <div class="grid gap-5 md:grid-cols-2">
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Display name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Display Name</label>
         <input
           v-model="form.display_name"
           type="text"
@@ -15,7 +15,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Machine name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Machine Name</label>
         <input
           v-model="form.name"
           type="text"

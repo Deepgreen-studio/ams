@@ -57,7 +57,7 @@
           :initial="current"
           :loading="store.saving"
           :field-errors="store.fieldErrors"
-          submit-label="Update case"
+          submit-label="Update Case"
           hide-company
           @submit="onSubmit"
           @cancel="router.push({ name: 'compliance.cases.show', params: { id: route.params.id } })"

@@ -7,7 +7,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="
           router.push({

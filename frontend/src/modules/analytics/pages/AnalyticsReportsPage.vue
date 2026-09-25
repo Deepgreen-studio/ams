@@ -8,7 +8,7 @@
         @click="showCreate = true"
       >
         <PlusIcon class="h-4 w-4" />
-        New report
+        New Report
       </button>
     </Teleport>
 

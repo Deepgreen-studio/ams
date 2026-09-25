@@ -1,17 +1,17 @@
 <template>
   <form class="space-y-4" @submit.prevent="onSubmit">
     <div>
-      <label for="current-password" class="mb-1 block text-sm font-medium text-slate-700">Current password</label>
+      <label for="current-password" class="mb-1 block text-sm font-medium text-slate-700">Current Password</label>
       <PasswordInput id="current-password" v-model="form.current_password" required :disabled="loading" />
     </div>
 
     <div>
-      <label for="new-password" class="mb-1 block text-sm font-medium text-slate-700">New password</label>
+      <label for="new-password" class="mb-1 block text-sm font-medium text-slate-700">New Password</label>
       <PasswordInput id="new-password" v-model="form.password" autocomplete="new-password" required :disabled="loading" />
     </div>
 
     <div>
-      <label for="new-password-confirmation" class="mb-1 block text-sm font-medium text-slate-700">Confirm new password</label>
+      <label for="new-password-confirmation" class="mb-1 block text-sm font-medium text-slate-700">Confirm New Password</label>
       <PasswordInput
         id="new-password-confirmation"
         v-model="form.password_confirmation"

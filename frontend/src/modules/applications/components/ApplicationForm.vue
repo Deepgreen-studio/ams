@@ -97,7 +97,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Current version</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Current Version</label>
         <input
           v-model="form.current_version"
           type="text"
@@ -108,7 +108,7 @@
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700"
-          >Minimum supported version</label
+          >Minimum Supported Version</label
         >
         <input
           v-model="form.minimum_supported_version"

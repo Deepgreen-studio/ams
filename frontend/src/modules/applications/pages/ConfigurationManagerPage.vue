@@ -5,7 +5,7 @@
         :to="{ name: 'applications.configurations.create', params: { id: route.params.id } }"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Add configuration
+        Add Configuration
       </RouterLink>
     </Teleport>
 
@@ -13,7 +13,7 @@
 
     <div class="mb-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100">
       <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-zinc-500">
-        Environment scope
+        Environment Scope
       </label>
       <SelectBox
         v-model="environmentFilter"

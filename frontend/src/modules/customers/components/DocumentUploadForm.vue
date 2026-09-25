@@ -10,7 +10,7 @@
     <div class="grid gap-4 md:grid-cols-2">
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Document name
+          Document Name
         </label>
         <input
           v-model="form.name"
@@ -23,7 +23,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Category / folder
+          Category / Folder
         </label>
         <SelectBox
           v-model="form.category"
@@ -50,7 +50,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Expiry date
+          Expiry Date
         </label>
         <input v-model="form.expires_at" type="datetime-local" class="input" :disabled="loading" />
       </div>

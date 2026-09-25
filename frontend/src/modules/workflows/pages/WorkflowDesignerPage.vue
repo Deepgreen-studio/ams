@@ -186,7 +186,7 @@
             class="rounded-[12px] border border-rose-200 px-3.5 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50"
             @click="removeSelected"
           >
-            Remove stage
+            Remove Stage
           </button>
         </div>
 
@@ -199,7 +199,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Step key</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Step Key</span>
             <input
               v-model="selectedStep.step_key"
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 font-mono text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
@@ -214,7 +214,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Next step keys</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Next Step Keys</span>
             <SelectBox
               v-model="nextStepKeys"
               multiple
@@ -224,7 +224,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">On approve →</span>
+            <span class="mb-1.5 block font-medium text-slate-700">On Approve →</span>
             <SelectBox
               v-model="onApproveStepKey"
               wrapper-class="w-full"
@@ -233,7 +233,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">On reject →</span>
+            <span class="mb-1.5 block font-medium text-slate-700">On Reject →</span>
             <SelectBox
               v-model="onRejectStepKey"
               wrapper-class="w-full"
@@ -242,7 +242,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Approver roles</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Approver Roles</span>
             <SelectBox
               v-model="approverRoles"
               multiple
@@ -252,7 +252,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Timeout (minutes)</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Timeout (Minutes)</span>
             <input
               v-model.number="selectedStep.config.timeout_minutes"
               type="number"
@@ -261,7 +261,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Escalate to role</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Escalate To Role</span>
             <SelectBox
               v-model="escalateRole"
               wrapper-class="w-full"
@@ -270,7 +270,7 @@
             />
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Approvals required</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Approvals Required</span>
             <input
               v-model.number="selectedStep.config.approvals_required"
               type="number"

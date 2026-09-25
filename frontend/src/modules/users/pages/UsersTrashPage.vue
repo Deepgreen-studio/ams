@@ -82,7 +82,7 @@
       :open="Boolean(pendingForceDelete)"
       title="Force delete user"
       :message="`Permanently delete ${pendingForceDelete?.full_name || 'this user'}? This cannot be undone.`"
-      confirm-label="Force delete"
+      confirm-label="Force Delete"
       :loading="usersStore.saving"
       @cancel="pendingForceDelete = null"
       @confirm="confirmForceDelete"

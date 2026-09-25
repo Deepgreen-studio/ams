@@ -30,7 +30,7 @@
         <PrivacyRequestForm
           :loading="store.saving"
           :field-errors="store.fieldErrors"
-          submit-label="Create request"
+          submit-label="Create Request"
           @submit="onSubmit"
           @cancel="router.push({ name: 'compliance.privacy.index' })"
         />

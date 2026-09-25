@@ -60,12 +60,12 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Signature algorithm</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Signature Algorithm</label>
         <SelectBox v-model="form.signature_algorithm" size="lg" :options="signatureOptions" />
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Signature header</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Signature Header</label>
         <input
           v-model="form.signature_header"
           type="text"
@@ -75,7 +75,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (seconds)</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout (Seconds)</label>
         <input
           v-model.number="form.timeout"
           type="number"
@@ -90,7 +90,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry attempts</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry Attempts</label>
         <input
           v-model.number="form.retry_attempts"
           type="number"
@@ -106,7 +106,7 @@
 
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">
-          Subscribed events (comma-separated)
+          Subscribed Events (Comma-Separated)
         </label>
         <input
           v-model="eventsText"
@@ -135,7 +135,7 @@
             type="checkbox"
             class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
           />
-          Rotate webhook secret
+          Rotate Webhook Secret
         </label>
       </div>
     </div>

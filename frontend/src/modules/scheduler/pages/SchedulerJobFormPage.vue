@@ -24,7 +24,7 @@
             <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
           </label>
           <label class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Job type</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Job Type</span>
             <select
               v-model="form.job_type"
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
@@ -47,7 +47,7 @@
             <p v-if="fieldErrors.handler_key" class="mt-1 text-xs text-rose-600">{{ fieldErrors.handler_key[0] }}</p>
           </label>
           <label v-if="needsCron" class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Cron expression</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Cron Expression</span>
             <input
               v-model="form.schedule_cron"
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 font-mono text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
@@ -59,7 +59,7 @@
             </p>
           </label>
           <label v-if="form.job_type === 'one_time'" class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Run at</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Run At</span>
             <input
               v-model="form.run_at"
               type="datetime-local"
@@ -69,7 +69,7 @@
             <p v-if="fieldErrors.run_at" class="mt-1 text-xs text-rose-600">{{ fieldErrors.run_at[0] }}</p>
           </label>
           <label v-if="form.job_type === 'delayed'" class="block text-sm">
-            <span class="mb-1.5 block font-medium text-slate-700">Delay (minutes)</span>
+            <span class="mb-1.5 block font-medium text-slate-700">Delay (Minutes)</span>
             <input
               v-model.number="form.delay_minutes"
               type="number"
@@ -102,7 +102,7 @@
           </label>
           <label class="flex items-center gap-2 text-sm text-slate-700">
             <input v-model="form.without_overlapping" type="checkbox" class="rounded border-zinc-300" />
-            Without overlapping
+            Without Overlapping
           </label>
         </div>
       </section>

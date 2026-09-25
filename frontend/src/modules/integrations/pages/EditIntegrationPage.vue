@@ -10,7 +10,7 @@
         :loading="integrationsStore.saving"
         :errors="integrationsStore.fieldErrors"
         :error="integrationsStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         hide-company
         @submit="onSubmit"
         @cancel="router.push({ name: 'integrations.show', params: { id: route.params.id } })"

@@ -10,7 +10,7 @@
         :loading="customersStore.saving"
         :errors="customersStore.fieldErrors"
         :error="customersStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.show', params: { id: route.params.id } })"
       />

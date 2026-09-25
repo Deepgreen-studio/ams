@@ -8,7 +8,7 @@
         :loading="rolesStore.saving"
         :errors="rolesStore.fieldErrors"
         :error="rolesStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="router.push({ name: 'roles.show', params: { id: route.params.id } })"
       />

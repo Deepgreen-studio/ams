@@ -3,10 +3,11 @@
     <Teleport defer to="#page-header-actions">
       <button
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
       >
-        Create category
+        <PlusIcon class="h-4 w-4" />
+        Create Category
       </button>
     </Teleport>
 
@@ -230,7 +231,7 @@
             :loading="taxonomy.saving"
             :errors="taxonomy.fieldErrors"
             :error="taxonomy.error || ''"
-            :submit-label="editing ? 'Save changes' : 'Create category'"
+            :submit-label="editing ? 'Save Changes' : 'Create Category'"
             @submit="saveCategory"
             @cancel="closeForm"
           />
@@ -252,12 +253,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import {
-  EllipsisVerticalIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from '@heroicons/vue/24/outline';
+import { EllipsisVerticalIcon, MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';

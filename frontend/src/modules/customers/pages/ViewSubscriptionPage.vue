@@ -23,7 +23,7 @@
           :disabled="store.saving"
           @click="cancelSubscription"
         >
-          Cancel plan
+          Cancel Plan
         </button>
         <button
           v-if="subscription.deleted_at"

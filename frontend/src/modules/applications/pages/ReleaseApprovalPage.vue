@@ -106,7 +106,7 @@
             :disabled="releasesStore.saving || release.approval_status !== 'pending'"
             @click="onReject"
           >
-            Reject release
+            Reject Release
           </button>
         </div>
       </aside>

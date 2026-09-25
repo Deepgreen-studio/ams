@@ -8,7 +8,7 @@
         @click="onRestart"
       >
         <ArrowPathIcon class="h-4 w-4" :class="{ 'animate-spin': store.saving }" />
-        Restart workers
+        Restart Workers
       </button>
       <button
         type="button"
@@ -17,7 +17,7 @@
         @click="onSample"
       >
         <PaperAirplaneIcon class="h-4 w-4" />
-        Dispatch sample
+        Dispatch Sample
       </button>
     </Teleport>
 

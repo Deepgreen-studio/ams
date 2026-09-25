@@ -10,7 +10,7 @@
       </div>
       <div class="space-y-4 p-5">
         <label class="inline-flex cursor-pointer rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
-          Choose image
+          Choose Image
           <input type="file" accept="image/*" class="hidden" @change="onFile" />
         </label>
         <div v-if="previewUrl" class="overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-3">

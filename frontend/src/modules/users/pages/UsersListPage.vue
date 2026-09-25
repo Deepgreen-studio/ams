@@ -11,8 +11,9 @@
       <RouterLink
         v-if="can('users.create')"
         :to="{ name: 'users.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
+        <PlusIcon class="h-4 w-4" />
         Create User
       </RouterLink>
     </Teleport>
@@ -98,13 +99,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import {
-  CheckCircleIcon,
-  NoSymbolIcon,
-  PauseCircleIcon,
-  TrashIcon,
-  UsersIcon,
-} from '@heroicons/vue/24/outline';
+import { CheckCircleIcon, NoSymbolIcon, PauseCircleIcon, PlusIcon, TrashIcon, UsersIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import UserSearchFilter from '@/modules/users/components/UserSearchFilter.vue';

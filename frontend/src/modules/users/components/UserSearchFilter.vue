@@ -24,7 +24,7 @@
 
       <div>
         <label for="users-filter-start-date" class="mb-1 block text-xs font-medium text-slate-500">
-          Start date
+          Start Date
         </label>
         <input
           id="users-filter-start-date"
@@ -37,7 +37,7 @@
 
       <div>
         <label for="users-filter-end-date" class="mb-1 block text-xs font-medium text-slate-500">
-          End date
+          End Date
         </label>
         <input
           id="users-filter-end-date"

@@ -29,7 +29,7 @@
         :loading="loading"
         :errors="errors"
         :error="error"
-        submit-label="Upload document"
+        submit-label="Upload Document"
         @submit="onSubmit"
         @cancel="onCancel"
       />
@@ -51,7 +51,7 @@
           </div>
           <div>
             <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-              Category / folder
+              Category / Folder
             </label>
             <SelectBox
               v-model="editForm.category"
@@ -75,7 +75,7 @@
           </div>
           <div class="md:col-span-2">
             <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-              Expiry date
+              Expiry Date
             </label>
             <input
               v-model="editForm.expires_at"

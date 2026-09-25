@@ -45,7 +45,7 @@
             />
           </div>
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Default model</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Default Model</label>
             <input
               v-model="form.default_model"
               :placeholder="activePreset?.default_model || 'model-id'"
@@ -53,7 +53,7 @@
             />
           </div>
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Embedding model</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Embedding Model</label>
             <input
               v-model="form.embedding_model"
               :placeholder="activePreset?.embedding_model || 'optional'"
@@ -71,7 +71,7 @@
             <p v-if="activePreset?.hint" class="mt-1.5 text-xs text-slate-500">{{ activePreset.hint }}</p>
           </div>
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">API key</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">API Key</label>
             <input
               v-model="form.api_key"
               type="password"
@@ -82,7 +82,7 @@
           </div>
           <label class="flex items-center gap-2 text-sm text-slate-700">
             <input v-model="form.is_default" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-            Default provider
+            Default Provider
           </label>
           <label class="flex items-center gap-2 text-sm text-slate-700">
             <input v-model="form.is_enabled" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />

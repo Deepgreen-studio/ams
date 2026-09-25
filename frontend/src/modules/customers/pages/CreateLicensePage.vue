@@ -6,7 +6,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Issue license"
+        submit-label="Issue License"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.licenses', params: { id: route.params.id } })"
       />

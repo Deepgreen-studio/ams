@@ -13,7 +13,7 @@
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
         <BookmarkIcon class="h-4 w-4" />
-        Saved views
+        Saved Views
       </RouterLink>
     </Teleport>
 
@@ -101,7 +101,7 @@
           <p class="mt-4 text-2xl font-bold tracking-tight text-slate-900">
             {{ formatNumber(category.event_count) }}
           </p>
-          <p class="mt-0.5 text-xs text-slate-400">events in period</p>
+          <p class="mt-0.5 text-xs text-slate-400">Events In Period</p>
         </button>
       </div>
 
@@ -136,7 +136,7 @@
               :to="{ name: 'analytics.dashboards' }"
               class="mt-6 inline-flex rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
             >
-              Manage dashboards
+              Manage Dashboards
             </RouterLink>
           </div>
           <ul v-else class="divide-y divide-zinc-50 px-3 py-2">

@@ -7,7 +7,7 @@
       :disabled="disabled"
       @change="$emit('update:modelValue', $event.target.checked)"
     />
-    Remember me
+    Remember Me
   </label>
 </template>
 

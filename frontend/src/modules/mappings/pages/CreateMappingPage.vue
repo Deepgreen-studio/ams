@@ -6,7 +6,7 @@
         :loading="store.saving"
         :error="store.error || ''"
         :catalogs="store.catalogs"
-        submit-label="Create mapping"
+        submit-label="Create Mapping"
         @submit="onSubmit"
         @cancel="router.push({ name: 'mappings.index' })"
       />

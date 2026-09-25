@@ -11,7 +11,7 @@
         :loading="environmentsStore.saving"
         :errors="environmentsStore.fieldErrors"
         :error="environmentsStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="
           router.push({

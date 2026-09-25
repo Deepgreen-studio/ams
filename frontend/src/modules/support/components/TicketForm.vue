@@ -96,7 +96,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign to</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign To</label>
         <SelectBox
           v-model="form.assigned_to"
           placeholder="Unassigned"

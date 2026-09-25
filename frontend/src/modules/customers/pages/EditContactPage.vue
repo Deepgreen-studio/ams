@@ -10,7 +10,7 @@
         :loading="contactsStore.saving"
         :errors="contactsStore.fieldErrors"
         :error="contactsStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="
           router.push({

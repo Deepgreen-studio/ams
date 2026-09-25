@@ -28,7 +28,7 @@
           :disabled="releasesStore.saving"
           @click="onDeploy"
         >
-          Mark deployed
+          Mark Deployed
         </button>
         <button
           v-if="canRollback"
@@ -121,7 +121,7 @@
               :disabled="releasesStore.saving"
               @click="onSubmitApproval"
             >
-              Submit for approval
+              Submit For Approval
             </button>
             <RouterLink
               :to="{ name: 'applications.releases', params: { id: route.params.id } }"

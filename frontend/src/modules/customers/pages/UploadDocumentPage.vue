@@ -6,7 +6,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Upload document"
+        submit-label="Upload Document"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.documents', params: { id: route.params.id } })"
       />

@@ -12,7 +12,7 @@
         :error="store.error || ''"
         :catalogs="store.catalogs"
         hide-company
-        submit-label="Save mapping"
+        submit-label="Save Mapping"
         @submit="onSubmit"
         @cancel="router.push({ name: 'mappings.show', params: { id: route.params.id } })"
       />

@@ -6,7 +6,7 @@
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="startCreate"
       >
-        New prompt
+        New Prompt
       </button>
     </Teleport>
 
@@ -37,7 +37,7 @@
           />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">System prompt</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">System Prompt</label>
           <textarea
             v-model="form.system_prompt"
             rows="3"
@@ -45,7 +45,7 @@
           />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">User template</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">User Template</label>
           <textarea
             v-model="form.user_template"
             rows="3"

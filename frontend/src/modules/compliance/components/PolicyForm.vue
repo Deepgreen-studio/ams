@@ -16,7 +16,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Policy type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Policy Type</label>
         <SelectBox
           v-model="form.policy_type"
           size="lg"
@@ -73,7 +73,7 @@
         </p>
       </div>
       <div v-if="initial?.uuid" class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Change summary</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Change Summary</label>
         <input
           v-model="form.change_summary"
           type="text"
@@ -87,7 +87,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Effective at</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Effective At</label>
         <input
           v-model="form.effective_at"
           type="datetime-local"
@@ -99,7 +99,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Review due</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Review Due</label>
         <input
           v-model="form.review_due_at"
           type="date"

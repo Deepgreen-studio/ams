@@ -43,14 +43,14 @@
 
     <div>
       <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-        Summary / body
+        Summary / Body
       </label>
       <textarea v-model="form.body" rows="4" class="input" :disabled="loading" />
     </div>
 
     <div v-if="form.type === 'call'">
       <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-        Duration (seconds)
+        Duration (Seconds)
       </label>
       <input
         v-model="form.duration_seconds"
@@ -63,7 +63,7 @@
 
     <div>
       <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-        Occurred at
+        Occurred At
       </label>
       <input v-model="form.occurred_at" type="datetime-local" class="input" :disabled="loading" />
     </div>

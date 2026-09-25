@@ -16,7 +16,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Request type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Request Type</label>
         <SelectBox
           v-model="form.request_type"
           size="lg"
@@ -29,7 +29,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Name</label>
         <input
           v-model="form.requester_name"
           type="text"
@@ -44,7 +44,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester email</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Email</label>
         <input
           v-model="form.requester_email"
           type="email"
@@ -59,7 +59,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester phone</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Phone</label>
         <PhoneInput
           v-model="form.requester_phone"
           :disabled="loading"
@@ -70,7 +70,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due date</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Due Date</label>
         <input
           v-model="form.due_date"
           type="date"
@@ -82,7 +82,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign officer</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign Officer</label>
         <SelectBox
           v-model="form.assigned_to"
           size="lg"

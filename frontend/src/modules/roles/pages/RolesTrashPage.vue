@@ -82,7 +82,7 @@
       :open="Boolean(pendingForceDelete)"
       title="Force delete role"
       :message="`Permanently delete ${pendingForceDelete?.display_name || 'this role'}? This cannot be undone.`"
-      confirm-label="Force delete"
+      confirm-label="Force Delete"
       :loading="rolesStore.saving"
       @cancel="pendingForceDelete = null"
       @confirm="confirmForceDelete"

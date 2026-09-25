@@ -12,7 +12,7 @@
         "
         @click="$emit('update:modelValue', '')"
       >
-        <span>All documents</span>
+        <span>All Documents</span>
         <span class="text-xs text-slate-500">{{ totalCount }}</span>
       </button>
       <button

@@ -82,7 +82,7 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-600">Tags (comma separated)</label>
+          <label class="mb-1.5 block text-xs font-medium text-slate-600">Tags (Comma Separated)</label>
           <input
             v-model="tagsInput"
             class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
@@ -91,14 +91,14 @@
         </div>
 
         <div>
-          <label class="mb-1.5 block text-xs font-medium text-slate-600">CMS content UUID (optional)</label>
+          <label class="mb-1.5 block text-xs font-medium text-slate-600">CMS Content UUID (Optional)</label>
           <input
             v-model="form.content_id"
             class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           />
           <label class="mt-2 flex items-center gap-2 text-xs text-slate-600">
             <input v-model="form.sync_from_cms" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-            Sync title/body from CMS on save
+            Sync Title/Body From CMS On Save
           </label>
         </div>
 

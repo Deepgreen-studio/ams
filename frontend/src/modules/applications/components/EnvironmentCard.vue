@@ -76,7 +76,7 @@
         :disabled="checking"
         @click="$emit('health-check', environment)"
       >
-        Health check
+        Health Check
       </button>
     </div>
   </article>

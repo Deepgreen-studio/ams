@@ -61,12 +61,12 @@
           </div>
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1 block text-sm font-medium text-slate-700">Mitigation plan</label>
+          <label class="mb-1 block text-sm font-medium text-slate-700">Mitigation Plan</label>
           <textarea v-model="form.mitigation_plan" rows="3" class="input" />
         </div>
         <div class="md:col-span-2 flex justify-end">
           <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white" :disabled="store.saving">
-            Save risk
+            Save Risk
           </button>
         </div>
       </form>
@@ -105,7 +105,7 @@
                 class="text-xs font-medium text-brand-700 hover:underline"
                 @click="openActions(item)"
               >
-                Add action
+                Add Action
               </button>
             </td>
           </tr>
@@ -125,7 +125,7 @@
             Cancel
           </button>
           <button type="submit" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white" :disabled="store.saving">
-            Save action
+            Save Action
           </button>
         </div>
       </form>

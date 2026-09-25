@@ -10,7 +10,7 @@
     <div class="grid gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Plan type
+          Plan Type
         </label>
         <SelectBox
           v-model="form.plan_type"
@@ -24,7 +24,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Plan name
+          Plan Name
         </label>
         <input
           v-model="form.plan_name"
@@ -50,7 +50,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Payment status
+          Payment Status
         </label>
         <SelectBox
           v-model="form.payment_status"
@@ -91,28 +91,28 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Starts at
+          Starts At
         </label>
         <input v-model="form.starts_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Expires at
+          Expires At
         </label>
         <input v-model="form.expires_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Renews at
+          Renews At
         </label>
         <input v-model="form.renews_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Renewal reminder (days)
+          Renewal Reminder (Days)
         </label>
         <input
           v-model="form.renewal_reminder_days"
@@ -132,13 +132,13 @@
             class="rounded border-zinc-300"
             :disabled="loading"
           />
-          Automatically issue license key
+          Automatically Issue License Key
         </label>
       </div>
 
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Features (comma separated)
+          Features (Comma Separated)
         </label>
         <input
           v-model="featuresText"

@@ -22,7 +22,7 @@
       <form class="mt-5 space-y-4" @submit.prevent="onSubmit">
         <div>
           <label for="folder-name" class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-            Folder name
+            Folder Name
           </label>
           <input
             id="folder-name"

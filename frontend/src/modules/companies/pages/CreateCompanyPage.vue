@@ -5,7 +5,7 @@
         :loading="companiesStore.saving"
         :errors="companiesStore.fieldErrors"
         :error="companiesStore.error || ''"
-        submit-label="Create company"
+        submit-label="Create Company"
         @submit="onSubmit"
         @cancel="router.push({ name: 'companies.index' })"
       />

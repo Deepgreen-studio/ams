@@ -111,7 +111,7 @@
           @click="goTo('content.review', activeItem)"
         >
           <ClipboardDocumentCheckIcon class="h-4 w-4 text-slate-400" />
-          Open review
+          Open Review
         </button>
         <button
           type="button"
@@ -120,7 +120,7 @@
           @click="goTo('content.show', activeItem)"
         >
           <EyeIcon class="h-4 w-4 text-slate-400" />
-          View details
+          View Details
         </button>
         <button
           type="button"

@@ -7,7 +7,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Assign application"
+        submit-label="Assign Application"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.applications', params: { id: route.params.id } })"
       />

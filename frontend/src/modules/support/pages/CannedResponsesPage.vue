@@ -7,7 +7,7 @@
         @click="openCreate"
       >
         <PlusIcon class="h-4 w-4" />
-        New response
+        New Response
       </button>
     </Teleport>
 

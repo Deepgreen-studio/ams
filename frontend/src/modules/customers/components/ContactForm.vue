@@ -10,7 +10,7 @@
     <div class="grid gap-4 md:grid-cols-2">
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Contact type
+          Contact Type
         </label>
         <SelectBox
           v-model="form.contact_type"

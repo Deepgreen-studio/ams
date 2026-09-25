@@ -44,13 +44,13 @@
     <div class="grid gap-4 sm:grid-cols-2">
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Due at
+          Due At
         </label>
         <input v-model="form.due_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Remind at
+          Remind At
         </label>
         <input v-model="form.remind_at" type="datetime-local" class="input" :disabled="loading" />
       </div>

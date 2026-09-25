@@ -96,7 +96,7 @@
         @click="onView(activeItem)"
       >
         <EyeIcon class="h-4 w-4 text-slate-400" />
-        View details
+        View Details
       </button>
     </div>
   </Teleport>

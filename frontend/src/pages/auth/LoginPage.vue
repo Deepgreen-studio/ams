@@ -27,7 +27,7 @@
     <div class="flex items-center justify-between gap-3">
       <label class="inline-flex items-center gap-2 text-sm text-slate-600">
         <input v-model="form.remember" type="checkbox" class="rounded border-slate-300 text-brand-600" />
-        Remember me
+        Remember Me
       </label>
       <RouterLink :to="{ name: 'forgot-password' }" class="text-sm font-medium text-brand-600 hover:text-brand-700">
         Forgot password?

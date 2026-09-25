@@ -3,7 +3,7 @@
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">
-          Version number
+          Version Number
         </label>
         <input
           v-model="form.version_number"
@@ -22,7 +22,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Build number</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Build Number</label>
         <input
           v-model="form.build_number"
           type="text"
@@ -47,7 +47,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Release date</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Release Date</label>
         <input
           v-model="form.release_date"
           type="datetime-local"
@@ -61,7 +61,7 @@
 
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">
-          Minimum supported version
+          Minimum Supported Version
         </label>
         <input
           v-model="form.minimum_supported_version"
@@ -76,7 +76,7 @@
       </div>
 
       <div class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Release notes</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Release Notes</label>
         <textarea
           v-model="form.release_notes"
           rows="5"

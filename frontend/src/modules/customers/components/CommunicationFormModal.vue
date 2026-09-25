@@ -28,7 +28,7 @@
         :loading="loading"
         :errors="errors"
         :error="error"
-        :submit-label="submitLabel"
+        :submit-label="SubmitLabel"
         @submit="$emit('submit', $event)"
         @cancel="onCancel"
       />

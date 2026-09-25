@@ -151,7 +151,7 @@
           @click="onForceDelete(activeUser)"
         >
           <TrashIcon class="h-4 w-4 text-red-500" />
-          Force delete
+          Force Delete
         </button>
       </div>
     </Teleport>

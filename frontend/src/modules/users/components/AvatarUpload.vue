@@ -30,7 +30,7 @@
       <label
         class="flex-1 cursor-pointer rounded-[12px] bg-slate-50 px-3 py-2.5 text-xs font-medium text-slate-700 transition hover:bg-slate-100"
       >
-        Choose file
+        Choose File
         <input type="file" accept="image/png,image/jpeg,image/webp" class="hidden" @change="onFileChange" />
       </label>
       <button

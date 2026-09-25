@@ -15,7 +15,7 @@
         @click="showCreate = true"
       >
         <PlusIcon class="h-4 w-4" />
-        Create dashboard
+        Create Dashboard
       </button>
     </Teleport>
 

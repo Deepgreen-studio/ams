@@ -4,9 +4,10 @@
       <RouterLink
         v-if="can('companies.create')"
         :to="{ name: 'companies.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create company
+        <PlusIcon class="h-4 w-4" />
+        Create Company
       </RouterLink>
     </Teleport>
 
@@ -69,6 +70,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';

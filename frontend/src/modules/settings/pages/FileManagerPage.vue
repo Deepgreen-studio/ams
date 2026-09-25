@@ -54,7 +54,7 @@
               class="h-10 shrink-0 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="openFolderModal"
             >
-              New folder
+              New Folder
             </button>
           </div>
         </div>

@@ -29,7 +29,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout override</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Timeout Override</label>
           <input
             v-model.number="form.timeout"
             type="number"
@@ -40,7 +40,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry override</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Retry Override</label>
           <input
             v-model.number="form.retry_attempts"
             type="number"
@@ -65,7 +65,7 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700"
-          >Query parameters (JSON)</label
+          >Query Parameters (JSON)</label
         >
         <textarea
           v-model="queryText"
@@ -75,7 +75,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">JSON body</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">JSON Body</label>
         <textarea
           v-model="bodyText"
           rows="6"
@@ -84,7 +84,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">File upload (optional)</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">File Upload (Optional)</label>
         <input
           type="file"
           class="block w-full rounded-xl border border-dashed border-slate-200 bg-zinc-50 px-3.5 py-3 text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-700"
@@ -100,7 +100,7 @@
           type="checkbox"
           class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500/20"
         />
-        Apply authentication
+        Apply Authentication
       </label>
       <label class="flex items-center gap-2.5 text-sm text-slate-700">
         <input
@@ -108,7 +108,7 @@
           type="checkbox"
           class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500/20"
         />
-        Treat response as download
+        Treat Response As Download
       </label>
     </div>
 

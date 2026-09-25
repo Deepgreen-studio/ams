@@ -10,7 +10,7 @@
         :loading="companiesStore.saving"
         :errors="companiesStore.fieldErrors"
         :error="companiesStore.error || ''"
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="router.push({ name: 'companies.show', params: { id: route.params.id } })"
       />

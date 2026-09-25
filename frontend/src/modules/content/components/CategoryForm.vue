@@ -23,7 +23,7 @@
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-slug">
-            SEO slug
+            SEO Slug
           </label>
           <input
             id="category-slug"
@@ -39,7 +39,7 @@
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-parent">
-            Parent category
+            Parent Category
           </label>
           <select
             id="category-parent"
@@ -64,7 +64,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-sort">
-              Sort order
+              Sort Order
             </label>
             <input
               id="category-sort"
@@ -115,7 +115,7 @@
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="sm:col-span-2">
           <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-seo-title">
-            SEO title
+            SEO Title
           </label>
           <input
             id="category-seo-title"
@@ -129,7 +129,7 @@
             class="mb-1.5 block text-sm font-medium text-slate-700"
             for="category-seo-description"
           >
-            SEO description
+            SEO Description
           </label>
           <textarea
             id="category-seo-description"

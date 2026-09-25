@@ -54,7 +54,7 @@
           <form class="space-y-8" @submit.prevent="onBrandingSubmit">
             <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Primary color</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Primary Color</label>
                 <div class="flex items-center gap-3">
                   <input
                     v-model="branding.primary_color"
@@ -70,7 +70,7 @@
                 </div>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Secondary color</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Secondary Color</label>
                 <div class="flex items-center gap-3">
                   <input
                     v-model="branding.secondary_color"
@@ -108,11 +108,11 @@
                 <SelectBox v-model="branding.currency" size="lg" :options="currencyOptions" />
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Date format</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Format</label>
                 <SelectBox v-model="branding.date_format" size="lg" :options="dateFormatOptions" />
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Time format</label>
+                <label class="mb-1.5 block text-sm font-medium text-slate-700">Time Format</label>
                 <SelectBox v-model="branding.time_format" size="lg" :options="timeFormatOptions" />
               </div>
             </div>

@@ -5,7 +5,7 @@
         :loading="applicationsStore.saving"
         :errors="applicationsStore.fieldErrors"
         :error="applicationsStore.error || ''"
-        submit-label="Create application"
+        submit-label="Create Application"
         @submit="onSubmit"
         @cancel="router.push({ name: 'applications.index' })"
       />

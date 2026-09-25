@@ -20,7 +20,7 @@
       "
       @click="$emit('select', null)"
     >
-      All media (root)
+      All Media (Root)
     </button>
     <ul class="space-y-1">
       <MediaFolderNode

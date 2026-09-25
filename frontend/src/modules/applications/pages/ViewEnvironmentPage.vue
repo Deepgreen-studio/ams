@@ -10,7 +10,7 @@
           @click="switchTo"
         >
           <ArrowPathIcon class="h-4 w-4 text-slate-500" />
-          Switch to this
+          Switch To This
         </button>
         <button
           type="button"
@@ -19,7 +19,7 @@
           @click="healthCheck"
         >
           <HeartIcon class="h-4 w-4 text-slate-500" />
-          Run health check
+          Run Health Check
         </button>
         <RouterLink
           :to="{

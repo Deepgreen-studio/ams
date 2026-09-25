@@ -26,17 +26,17 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Release type</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Release Type</label>
           <SelectBox v-model="form.release_type" size="lg" :options="releaseTypeOptions" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
-            >Environment (optional)</label
+            >Environment (Optional)</label
           >
           <SelectBox v-model="form.environment_id" size="lg" :options="environmentOptions" />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Scheduled at</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Scheduled At</label>
           <input
             v-model="form.scheduled_at"
             type="datetime-local"
@@ -44,7 +44,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Deployment date</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Deployment Date</label>
           <input
             v-model="form.deployment_date"
             type="datetime-local"
@@ -52,7 +52,7 @@
           />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Plan summary</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Plan Summary</label>
           <textarea
             v-model="form.plan_summary"
             rows="3"
@@ -66,7 +66,7 @@
               type="checkbox"
               class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
             />
-            Requires approval before deployment
+            Requires Approval Before Deployment
           </label>
         </div>
       </div>
@@ -79,7 +79,7 @@
             class="rounded-[10px] px-3 py-1.5 text-xs font-medium text-brand-700 transition hover:bg-brand-50"
             @click="addNote"
           >
-            Add note
+            Add Note
           </button>
         </div>
 

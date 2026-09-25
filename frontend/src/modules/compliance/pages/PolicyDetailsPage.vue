@@ -113,7 +113,7 @@
               :disabled="store.saving"
               @click="onSubmitForReview"
             >
-              Submit for review
+              Submit For Review
             </button>
             <button
               v-if="policy.status === 'approved' && can('compliance.update')"

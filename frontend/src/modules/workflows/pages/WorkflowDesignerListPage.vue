@@ -3,9 +3,10 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'workflows.designer.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create workflow
+        <PlusIcon class="h-4 w-4" />
+        Create Workflow
       </RouterLink>
     </Teleport>
 
@@ -211,13 +212,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import {
-  EllipsisVerticalIcon,
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  PlayIcon,
-  TrashIcon,
-} from '@heroicons/vue/24/outline';
+import { EllipsisVerticalIcon, MagnifyingGlassIcon, PencilSquareIcon, PlayIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';

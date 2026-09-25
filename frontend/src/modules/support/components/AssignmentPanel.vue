@@ -5,7 +5,7 @@
     </p>
 
     <div>
-      <label class="mb-1.5 block text-sm font-medium text-slate-700">Assignment type</label>
+      <label class="mb-1.5 block text-sm font-medium text-slate-700">Assignment Type</label>
       <SelectBox v-model="form.type" :options="assignmentTypeOptions" />
     </div>
 

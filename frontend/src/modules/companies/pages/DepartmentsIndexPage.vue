@@ -4,10 +4,11 @@
       <button
         v-if="can('companies.update')"
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
       >
-        Create department
+        <PlusIcon class="h-4 w-4" />
+        Create Department
       </button>
     </Teleport>
 
@@ -42,7 +43,7 @@
         </h3>
         <form class="mt-5 space-y-4" @submit.prevent="onSave">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Department name</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Department Name</label>
             <input
               v-model="form.department_name"
               type="text"
@@ -103,6 +104,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { computed, onMounted, reactive, ref } from 'vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import { useToast } from '@/composables/useToast';

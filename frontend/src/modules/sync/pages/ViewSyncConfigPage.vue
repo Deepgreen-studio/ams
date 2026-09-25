@@ -102,7 +102,7 @@
               class="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-zinc-50 px-4 py-3"
             >
               <span>
-                <span class="block text-sm font-medium text-slate-900">Background queue</span>
+                <span class="block text-sm font-medium text-slate-900">Background Queue</span>
                 <span class="mt-0.5 block text-xs text-slate-500">Run asynchronously via workers.</span>
               </span>
               <input

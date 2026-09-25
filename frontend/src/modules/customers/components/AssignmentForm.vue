@@ -54,7 +54,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Owner contact
+          Owner Contact
         </label>
         <SelectBox
           v-model="form.owner_contact_id"
@@ -93,7 +93,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Activation date
+          Activation Date
         </label>
         <input
           v-model="form.activated_at"
@@ -105,7 +105,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Expiration date
+          Expiration Date
         </label>
         <input
           v-model="form.expires_at"

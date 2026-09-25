@@ -66,7 +66,7 @@
         <SelectBox v-model="form.direction" size="lg" :options="directionOptions" />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Default mode</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Default Mode</label>
         <SelectBox v-model="form.default_mode" size="lg" :options="modeOptions" />
       </div>
       <div>
@@ -74,11 +74,11 @@
         <SelectBox v-model="form.trigger_type" size="lg" :options="triggerOptions" />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Conflict strategy</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Conflict Strategy</label>
         <SelectBox v-model="form.conflict_strategy" size="lg" :options="conflictOptions" />
       </div>
       <div v-if="form.trigger_type === 'scheduled'" class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cron expression</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cron Expression</label>
         <input
           v-model="form.schedule_cron"
           type="text"
@@ -92,7 +92,7 @@
         <p v-else class="mt-1 text-xs text-slate-400">Standard five-field cron, for example every 15 minutes.</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Source path</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Source Path</label>
         <input
           v-model="form.source_path"
           type="text"
@@ -101,7 +101,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Target path</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Target Path</label>
         <input
           v-model="form.target_path"
           type="text"
@@ -110,7 +110,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Entity type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Entity Type</label>
         <input
           v-model="form.entity_type"
           type="text"
@@ -119,7 +119,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Batch size</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Batch Size</label>
         <input
           v-model.number="form.batch_size"
           type="number"
@@ -134,7 +134,7 @@
         <p v-else class="mt-1 text-xs text-slate-400">Records processed per batch (1–500).</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cursor field</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Cursor Field</label>
         <input
           v-model="form.cursor_field"
           type="text"
@@ -153,7 +153,7 @@
         />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Sample records JSON</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Sample Records JSON</label>
         <textarea
           v-model="sampleRecordsText"
           rows="6"

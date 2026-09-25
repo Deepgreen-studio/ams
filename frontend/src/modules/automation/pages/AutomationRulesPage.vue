@@ -3,9 +3,10 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'automation.rules.create' }"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Create rule
+        <PlusIcon class="h-4 w-4" />
+        Create Rule
       </RouterLink>
     </Teleport>
 
@@ -200,11 +201,7 @@
 <script setup>
 import {computed, onMounted, reactive, ref, watch, onBeforeUnmount } from 'vue';
 import { RouterLink } from 'vue-router';
-import {
-  MagnifyingGlassIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from '@heroicons/vue/24/outline';
+import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
 import { useToast } from '@/composables/useToast';

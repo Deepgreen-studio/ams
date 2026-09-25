@@ -32,7 +32,7 @@
           :disabled="loading"
           @click="$emit('verify', { verified: true, notes })"
         >
-          Mark verified
+          Mark Verified
         </button>
         <button
           type="button"
@@ -40,7 +40,7 @@
           :disabled="loading"
           @click="$emit('verify', { verified: false, notes })"
         >
-          Mark failed
+          Mark Failed
         </button>
       </div>
     </div>

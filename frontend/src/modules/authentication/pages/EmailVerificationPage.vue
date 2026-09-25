@@ -13,7 +13,7 @@
       :to="{ name: 'login' }"
       class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-brand-600 text-sm font-semibold text-white hover:bg-brand-700"
     >
-      Continue to sign in
+      Continue To Sign In
     </RouterLink>
   </div>
 </template>

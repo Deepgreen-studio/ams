@@ -45,7 +45,7 @@
         </div>
 
         <div class="border-t border-slate-200 px-5 py-4">
-          <label class="mb-1 block text-xs font-medium text-slate-600">Your reply</label>
+          <label class="mb-1 block text-xs font-medium text-slate-600">Your Reply</label>
           <textarea
             v-model="replyBody"
             rows="5"

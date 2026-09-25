@@ -8,7 +8,7 @@
         @click="showCreate = true"
       >
         <BookmarkIcon class="h-4 w-4" />
-        Save current filters
+        Save Current Filters
       </button>
     </Teleport>
 
@@ -152,7 +152,7 @@
               class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="store.saving"
             >
-              Save view
+              Save View
             </button>
           </div>
         </form>

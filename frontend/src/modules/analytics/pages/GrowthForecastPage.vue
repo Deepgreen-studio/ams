@@ -23,7 +23,7 @@
       class="mb-4 flex flex-col gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100 sm:flex-row sm:items-end sm:justify-between"
     >
       <div>
-        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Horizon (days)</label>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Horizon (Days)</label>
         <input v-model.number="filters.horizon_days" type="number" min="1" max="90" class="input w-28" />
       </div>
       <p class="text-xs text-slate-500 sm:pb-3">Projected days beyond the selected date range.</p>
@@ -32,7 +32,7 @@
         class="inline-flex h-12 items-center rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
         @click="load"
       >
-        Update forecast
+        Update Forecast
       </button>
     </div>
 

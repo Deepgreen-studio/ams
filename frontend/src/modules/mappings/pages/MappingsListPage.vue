@@ -3,9 +3,10 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
           :to="{ name: 'mappings.create' }"
-          class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="inline-flex items-center gap-2 rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
         >
-          Create mapping
+          <PlusIcon class="h-4 w-4" />
+          Create Mapping
         </RouterLink>
     </Teleport>
     <MappingSubnav />
@@ -134,6 +135,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';

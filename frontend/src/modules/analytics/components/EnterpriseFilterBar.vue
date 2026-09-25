@@ -87,7 +87,7 @@
           class="border border-zinc-200 text-slate-700 hover:bg-zinc-50"
           @click="emit('save-view', { ...local })"
         >
-          Save view
+          Save View
         </button>
       </div>
     </form>

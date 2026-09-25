@@ -19,7 +19,7 @@
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
-            >Environment (optional)</label
+            >Environment (Optional)</label
           >
           <SelectBox v-model="form.environment_id" size="lg" :options="environmentOptions" />
         </div>

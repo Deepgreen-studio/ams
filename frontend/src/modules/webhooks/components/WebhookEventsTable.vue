@@ -118,7 +118,7 @@
           @click.stop="onCopy(activeEvent)"
         >
           <ClipboardDocumentIcon class="h-4 w-4 text-slate-400" />
-          Copy name
+          Copy Name
         </button>
       </div>
     </Teleport>

@@ -56,7 +56,7 @@
           :disabled="store.saving"
           @click="useTemplate(template)"
         >
-          Use template
+          Use Template
         </button>
       </div>
     </div>

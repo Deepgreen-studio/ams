@@ -141,7 +141,7 @@
               :to="{ name: 'support.sla.escalations' }"
               class="mt-4 inline-flex h-10 items-center rounded-[12px] bg-brand-600 px-4 text-sm font-medium text-white hover:bg-brand-700"
             >
-              Open escalation queue
+              Open Escalation Queue
             </RouterLink>
           </section>
 

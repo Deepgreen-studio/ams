@@ -6,7 +6,7 @@
         :loading="versionsStore.saving"
         :errors="versionsStore.fieldErrors"
         :error="versionsStore.error || ''"
-        submit-label="Create version"
+        submit-label="Create Version"
         @submit="onSubmit"
         @cancel="router.push({ name: 'applications.versions', params: { id: route.params.id } })"
       />

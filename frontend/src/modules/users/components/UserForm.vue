@@ -7,7 +7,7 @@
       </div>
       <div class="grid gap-4 md:grid-cols-2">
         <div>
-          <FormLabel required>First name</FormLabel>
+          <FormLabel required>First Name</FormLabel>
           <input
             v-model="form.first_name"
             type="text"
@@ -18,7 +18,7 @@
           <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
         </div>
         <div>
-          <FormLabel required>Last name</FormLabel>
+          <FormLabel required>Last Name</FormLabel>
           <input
             v-model="form.last_name"
             type="text"
@@ -56,7 +56,7 @@
           />
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Date of birth</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Of Birth</label>
           <input
             v-model="form.date_of_birth"
             type="date"
@@ -95,7 +95,7 @@
 
     <div v-else class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <FormLabel required>First name</FormLabel>
+        <FormLabel required>First Name</FormLabel>
         <input
           v-model="form.first_name"
           type="text"
@@ -106,7 +106,7 @@
         <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
       </div>
       <div>
-        <FormLabel required>Last name</FormLabel>
+        <FormLabel required>Last Name</FormLabel>
         <input
           v-model="form.last_name"
           type="text"
@@ -195,7 +195,7 @@
       </div>
       <div>
         <FormLabel html-for="user-form-password-confirmation" :required="requirePassword">
-          Confirm password
+          Confirm Password
         </FormLabel>
         <PasswordInput
           id="user-form-password-confirmation"

@@ -15,14 +15,14 @@
         @click="showWidgetForm = true"
       >
         <PlusIcon class="h-4 w-4" />
-        Add widget
+        Add Widget
       </button>
       <RouterLink
         :to="{ name: 'analytics.dashboards.designer', params: { uuid: dashboardUuid } }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
         <PencilSquareIcon class="h-4 w-4" />
-        Open designer
+        Open Designer
       </RouterLink>
     </Teleport>
 
@@ -58,7 +58,7 @@
             :disabled="store.saving || !dashboardUuid"
             @click="showWidgetForm = true"
           >
-            Add widget
+            Add Widget
           </button>
         </template>
       </EmptyState>
@@ -100,7 +100,7 @@
               class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
               :disabled="store.saving"
             >
-              Add widget
+              Add Widget
             </button>
           </div>
         </form>

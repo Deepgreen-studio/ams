@@ -97,7 +97,7 @@
                   class="rounded-[10px] px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-100"
                   @click="openViewer(item)"
                 >
-                  View snapshot
+                  View Snapshot
                 </button>
                 <button
                   type="button"

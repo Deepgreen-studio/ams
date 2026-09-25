@@ -13,7 +13,7 @@
         :errors="store.fieldErrors"
         :error="store.error || ''"
         hide-application
-        submit-label="Save changes"
+        submit-label="Save Changes"
         @submit="onSubmit"
         @cancel="
           router.push({

@@ -16,7 +16,7 @@
         :loading="store.saving"
         :errors="store.fieldErrors"
         :error="store.error || ''"
-        submit-label="Create ticket"
+        submit-label="Create Ticket"
         @submit="onSubmit"
         @cancel="router.push({ name: 'support.tickets.index' })"
       />

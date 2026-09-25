@@ -4,7 +4,7 @@
 
     <div class="grid gap-4 md:grid-cols-2">
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Content type</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Content Type</label>
         <SelectBox
           v-model="form.content_type_id"
           size="lg"
@@ -39,7 +39,7 @@
         <p class="mt-1 text-xs text-slate-500">Hold Ctrl/Cmd to select multiple categories.</p>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Featured image URL</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Featured Image URL</label>
         <input v-model="form.featured_image" type="url" class="input" placeholder="https://" />
       </div>
       <div class="md:col-span-2">
@@ -51,15 +51,15 @@
         <textarea v-model="form.body" rows="8" class="input font-mono text-sm" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">SEO title</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">SEO Title</label>
         <input v-model="form.seo_title" type="text" class="input" />
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">SEO keywords</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">SEO Keywords</label>
         <input v-model="form.seo_keywords" type="text" class="input" placeholder="comma separated" />
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1 block text-sm font-medium text-slate-700">SEO description</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">SEO Description</label>
         <textarea v-model="form.seo_description" rows="2" class="input" />
       </div>
       <div class="md:col-span-2">
@@ -69,10 +69,10 @@
       </div>
       <div class="flex items-center gap-2">
         <input id="is_featured" v-model="form.is_featured" type="checkbox" class="rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
-        <label for="is_featured" class="text-sm font-medium text-slate-700">Featured content</label>
+        <label for="is_featured" class="text-sm font-medium text-slate-700">Featured Content</label>
       </div>
       <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Sort order</label>
+        <label class="mb-1 block text-sm font-medium text-slate-700">Sort Order</label>
         <input v-model.number="form.sort_order" type="number" min="0" class="input" />
       </div>
     </div>

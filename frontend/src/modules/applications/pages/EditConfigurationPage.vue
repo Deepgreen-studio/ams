@@ -52,7 +52,7 @@
           <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
         </div>
         <div class="md:col-span-2">
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Change summary</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Change Summary</label>
           <input
             v-model="form.change_summary"
             type="text"

@@ -5,7 +5,7 @@
         :loading="customersStore.saving"
         :errors="customersStore.fieldErrors"
         :error="customersStore.error || ''"
-        submit-label="Create customer"
+        submit-label="Create Customer"
         @submit="onSubmit"
         @cancel="router.push({ name: 'customers.index' })"
       />

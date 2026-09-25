@@ -6,7 +6,7 @@
         <p class="text-xs text-slate-500">Map external fields to internal AMS fields with transforms and rules.</p>
       </div>
       <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="addRow">
-        Add field
+        Add Field
       </button>
     </div>
 

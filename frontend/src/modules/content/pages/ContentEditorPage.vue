@@ -28,7 +28,7 @@
         :disabled="contentStore.saving"
         @click="submitForReview"
       >
-        Submit for review
+        Submit For Review
       </button>
       <button
         v-else-if="!isCreate && form.statusSlug === 'published' && can('content.publish')"
@@ -85,7 +85,7 @@
           <div class="space-y-6 px-6 py-6 sm:px-8">
             <div class="grid gap-5 sm:grid-cols-2">
               <div>
-                <label class="field-label">Content type</label>
+                <label class="field-label">Content Type</label>
                 <SelectBox
                   v-model="form.content_type_id"
                   size="lg"
@@ -208,7 +208,7 @@
                 type="checkbox"
                 class="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
               />
-              Live preview
+              Live Preview
             </label>
           </header>
           <div class="px-6 py-6 sm:px-8">
@@ -234,7 +234,7 @@
             @click="seoOpen = !seoOpen"
           >
             <div>
-              <h2 class="text-base font-semibold text-slate-900">SEO &amp; social</h2>
+              <h2 class="text-base font-semibold text-slate-900">SEO &amp; Social</h2>
               <p class="mt-0.5 text-xs text-slate-500">
                 Search snippets, Open Graph, Twitter, and Schema.org.
               </p>
@@ -261,7 +261,7 @@
           <div v-show="seoOpen" class="border-t border-zinc-100 px-6 pb-6 pt-5 sm:px-8">
             <div class="grid gap-5 sm:grid-cols-2">
               <div>
-                <label class="field-label">SEO title</label>
+                <label class="field-label">SEO Title</label>
                 <input v-model="form.seo_title" type="text" class="input" />
               </div>
               <div>
@@ -274,7 +274,7 @@
                 />
               </div>
               <div class="sm:col-span-2">
-                <label class="field-label">SEO description</label>
+                <label class="field-label">SEO Description</label>
                 <textarea v-model="form.seo_description" rows="2" class="input" />
               </div>
               <div class="sm:col-span-2">
@@ -287,11 +287,11 @@
                 />
               </div>
               <div>
-                <label class="field-label">Open Graph title</label>
+                <label class="field-label">Open Graph Title</label>
                 <input v-model="form.og_title" type="text" class="input" />
               </div>
               <div>
-                <label class="field-label">Open Graph image URL</label>
+                <label class="field-label">Open Graph Image URL</label>
                 <input
                   v-model="form.og_image"
                   type="url"
@@ -300,11 +300,11 @@
                 />
               </div>
               <div class="sm:col-span-2">
-                <label class="field-label">Open Graph description</label>
+                <label class="field-label">Open Graph Description</label>
                 <textarea v-model="form.og_description" rows="2" class="input" />
               </div>
               <div>
-                <label class="field-label">Twitter card</label>
+                <label class="field-label">Twitter Card</label>
                 <select v-model="form.twitter_card" class="input">
                   <option value="">Default (summary_large_image)</option>
                   <option value="summary">summary</option>
@@ -312,7 +312,7 @@
                 </select>
               </div>
               <div>
-                <label class="field-label">Twitter image URL</label>
+                <label class="field-label">Twitter Image URL</label>
                 <input
                   v-model="form.twitter_image"
                   type="url"
@@ -321,7 +321,7 @@
                 />
               </div>
               <div>
-                <label class="field-label">Twitter title</label>
+                <label class="field-label">Twitter Title</label>
                 <input v-model="form.twitter_title" type="text" class="input" />
               </div>
               <div>
@@ -334,7 +334,7 @@
                 />
               </div>
               <div class="sm:col-span-2">
-                <label class="field-label">Twitter description</label>
+                <label class="field-label">Twitter Description</label>
                 <textarea v-model="form.twitter_description" rows="2" class="input" />
               </div>
               <div class="sm:col-span-2">
@@ -425,7 +425,7 @@
             class="w-full rounded-[12px] border border-dashed border-zinc-300 bg-white px-4 py-10 text-sm font-medium text-slate-600 hover:border-zinc-400 hover:bg-zinc-50"
             @click="showPreviewPanel = true"
           >
-            Show preview panel
+            Show Preview Panel
           </button>
         </div>
       </aside>

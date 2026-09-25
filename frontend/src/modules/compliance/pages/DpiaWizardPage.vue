@@ -124,7 +124,7 @@
         <template v-else-if="currentStep === 2">
           <div class="grid gap-4 md:grid-cols-2">
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing purpose</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing Purpose</label>
               <textarea
                 v-model="form.processing_purpose"
                 rows="4"
@@ -133,7 +133,7 @@
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Data categories</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Data Categories</label>
               <input
                 v-model="categoriesInput"
                 type="text"
@@ -143,7 +143,7 @@
               <p class="mt-1.5 text-xs text-slate-500">Comma-separated personal data types.</p>
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Data subjects</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Data Subjects</label>
               <input
                 v-model="subjectsInput"
                 type="text"
@@ -153,7 +153,7 @@
               <p class="mt-1.5 text-xs text-slate-500">Comma-separated groups of people.</p>
             </div>
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing operations</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing Operations</label>
               <textarea
                 v-model="form.processing_operations"
                 rows="4"
@@ -167,7 +167,7 @@
         <template v-else-if="currentStep === 3">
           <div class="space-y-4">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Necessity & proportionality</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Necessity & Proportionality</label>
               <textarea
                 v-model="form.necessity_proportionality"
                 rows="5"
@@ -176,7 +176,7 @@
               />
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Consultation notes</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Consultation Notes</label>
               <textarea
                 v-model="form.consultation_notes"
                 rows="4"
@@ -190,7 +190,7 @@
         <template v-else-if="currentStep === 4">
           <div class="grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Overall risk score</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Overall Risk Score</label>
               <input
                 v-model.number="form.overall_risk_score"
                 type="number"
@@ -202,7 +202,7 @@
               <p class="mt-1.5 text-xs text-slate-500">Likelihood × impact before mitigation.</p>
             </div>
             <div>
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Residual risk score</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Residual Risk Score</label>
               <input
                 v-model.number="form.residual_risk_score"
                 type="number"
@@ -214,7 +214,7 @@
               <p class="mt-1.5 text-xs text-slate-500">Score remaining after planned controls.</p>
             </div>
             <div class="sm:col-span-2">
-              <label class="mb-1.5 block text-sm font-medium text-slate-700">Mitigation plan summary</label>
+              <label class="mb-1.5 block text-sm font-medium text-slate-700">Mitigation Plan Summary</label>
               <textarea
                 v-model="form.mitigation_summary"
                 rows="5"
@@ -227,7 +227,7 @@
 
         <template v-else>
           <div class="max-w-md">
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Review due date</label>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Review Due Date</label>
             <input v-model="form.review_due_at" type="date" class="input" />
           </div>
           <div class="rounded-[12px] bg-zinc-50 px-4 py-3 text-sm text-slate-600">

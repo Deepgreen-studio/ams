@@ -31,7 +31,7 @@
     <div v-if="activeTab === 'content'" class="grid gap-4 xl:grid-cols-5">
       <div class="space-y-4 xl:col-span-2">
         <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100">
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Content UUID or slug</label>
+          <label class="mb-1.5 block text-sm font-medium text-slate-700">Content UUID Or Slug</label>
           <input
             v-model="contentId"
             type="text"
@@ -39,7 +39,7 @@
             placeholder="uuid or slug"
           />
           <label class="mb-1.5 block text-sm font-medium text-slate-700"
-            >Type (optional for slug)</label
+            >Type (Optional For Slug)</label
           >
           <input
             v-model="contentType"
@@ -53,14 +53,14 @@
               class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
               @click="loadPublicContent"
             >
-              Load public
+              Load Public
             </button>
             <button
               type="button"
               class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="loadPrivatePreview"
             >
-              Private preview
+              Private Preview
             </button>
           </div>
         </div>
@@ -111,7 +111,7 @@
 
     <div v-else class="grid gap-4 xl:grid-cols-5">
       <div class="rounded-[12px] bg-white p-5 ring-1 ring-zinc-100 xl:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Search query</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Search Query</label>
         <div class="flex gap-2">
           <input
             v-model="searchQuery"

@@ -37,7 +37,7 @@
             for="team-name"
             class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
           >
-            Team name
+            Team Name
           </label>
           <input
             id="team-name"
@@ -60,7 +60,7 @@
             class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
           >
             Description
-            <span class="normal-case tracking-normal text-slate-400">(optional)</span>
+            <span class="normal-case tracking-normal text-slate-400">(Optional)</span>
           </label>
           <input
             id="team-description"

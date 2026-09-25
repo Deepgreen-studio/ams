@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company Name</label>
         <input
           v-model="form.company_name"
           type="text"
@@ -15,7 +15,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal name</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal Name</label>
         <input
           v-model="form.legal_name"
           type="text"
@@ -24,7 +24,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration number</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration Number</label>
         <input
           v-model="form.registration_number"
           type="text"
@@ -36,7 +36,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Tax number</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Tax Number</label>
         <input
           v-model="form.tax_number"
           type="text"
@@ -109,7 +109,7 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Postal code</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Postal Code</label>
         <input
           v-model="form.postal_code"
           type="text"
@@ -154,11 +154,11 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Date format</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Format</label>
         <SelectBox v-model="form.date_format" size="lg" :options="dateFormatOptions" />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Time format</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Time Format</label>
         <SelectBox v-model="form.time_format" size="lg" :options="timeFormatOptions" />
       </div>
     </div>

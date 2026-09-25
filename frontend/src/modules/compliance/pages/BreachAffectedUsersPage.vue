@@ -34,7 +34,7 @@
           class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50"
           @click="addRow"
         >
-          Add user
+          Add User
         </button>
       </div>
 
@@ -61,7 +61,7 @@
 
       <div class="mt-4">
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Data categories
+          Data Categories
         </label>
         <input
           v-model="categoriesInput"

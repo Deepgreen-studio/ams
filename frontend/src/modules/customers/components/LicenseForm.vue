@@ -45,7 +45,7 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Max activations
+          Max Activations
         </label>
         <input
           v-model="form.max_activations"
@@ -58,21 +58,21 @@
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Starts at
+          Starts At
         </label>
         <input v-model="form.starts_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Expires at
+          Expires At
         </label>
         <input v-model="form.expires_at" type="datetime-local" class="input" :disabled="loading" />
       </div>
 
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-          Features (comma separated)
+          Features (Comma Separated)
         </label>
         <input v-model="featuresText" type="text" class="input" :disabled="loading" />
       </div>

@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <form class="grid gap-3 sm:grid-cols-4" @submit.prevent="onShare">
       <div>
-        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Share type</label>
+        <label class="mb-1.5 block text-xs font-medium uppercase tracking-wide text-slate-500">Share Type</label>
         <SelectBox v-model="form.share_type" :options="shareTypeOptions" />
       </div>
       <div class="sm:col-span-2">
@@ -19,7 +19,7 @@
       <div class="flex items-end gap-3">
         <label class="flex items-center gap-2 text-sm text-slate-700">
           <input v-model="form.can_edit" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
-          Can edit
+          Can Edit
         </label>
         <button
           type="submit"

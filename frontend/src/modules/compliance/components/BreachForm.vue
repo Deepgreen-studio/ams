@@ -31,7 +31,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Breach type</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Breach Type</label>
         <SelectBox
           v-model="form.breach_type"
           size="lg"
@@ -57,7 +57,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Discovered at</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Discovered At</label>
         <input
           v-model="form.discovered_at"
           type="datetime-local"
@@ -69,7 +69,7 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Occurred at</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Occurred At</label>
         <input
           v-model="form.occurred_at"
           type="datetime-local"
@@ -95,7 +95,7 @@
         </p>
       </div>
       <div class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Affected data categories</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Affected Data Categories</label>
         <input
           v-model="categoriesInput"
           type="text"
@@ -115,7 +115,7 @@
           class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
           :disabled="loading"
         />
-        Personal data involved
+        Personal Data Involved
       </label>
       <label class="flex items-center gap-2.5 text-sm text-slate-700">
         <input
@@ -124,7 +124,7 @@
           class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500"
           :disabled="loading"
         />
-        Special category data
+        Special Category Data
       </label>
     </div>
 

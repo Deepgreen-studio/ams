@@ -64,18 +64,6 @@
         class="px-6 py-10 sm:px-8"
       >
         <template #action>
-          <RouterLink
-            :to="{ name: 'notifications.history' }"
-            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-          >
-            View history
-          </RouterLink>
-          <RouterLink
-            :to="{ name: 'notifications.center' }"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Open center
-          </RouterLink>
         </template>
       </EmptyState>
 

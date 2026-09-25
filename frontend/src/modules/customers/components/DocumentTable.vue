@@ -4,22 +4,7 @@
       <slot name="toolbar" />
     </div>
 
-    <div v-if="loading" class="space-y-3 px-6 py-5 sm:px-8">
-      <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!documents.length"
-      title="No documents"
-      description="Upload contracts, NDAs, invoices, and more."
-      class="px-6 py-5 sm:px-8"
-    >
-      <template #action>
-        <slot name="empty-action" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -34,7 +19,33 @@
             <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 5" :key="n">
+            <td colspan="12" class="px-5 py-3">
+              <div class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!documents.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                title="No documents"
+                description="Upload contracts, NDAs, invoices, and more."
+                >
+                <template #action>
+                <slot name="empty-action" />
+                </template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr
             v-for="item in documents"
             :key="item.uuid"

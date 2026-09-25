@@ -138,13 +138,6 @@
         description="Add a note or meeting summary for this customer."
       >
         <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="openCreateNote"
-          >
-            Add note
-          </button>
         </template>
       </EmptyState>
       <ul v-else class="divide-y divide-zinc-100">
@@ -219,13 +212,6 @@
         description="Create a follow-up task or reminder for this customer."
       >
         <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="openCreateTask"
-          >
-            Create task
-          </button>
         </template>
       </EmptyState>
       <ul v-else class="divide-y divide-zinc-100">
@@ -370,13 +356,6 @@
         description="Log emails, calls, or meetings with this customer."
       >
         <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="openCreateCommunication"
-          >
-            Log communication
-          </button>
         </template>
       </EmptyState>
       <ul v-else class="divide-y divide-zinc-100">

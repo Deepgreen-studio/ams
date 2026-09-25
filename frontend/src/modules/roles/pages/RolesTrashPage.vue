@@ -42,7 +42,8 @@
               type="search"
               placeholder="Search trashed roles..."
               class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @keyup.enter="applySearch"
+              @input="onSearchInput"
+        @search="onSearchInput"
             />
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -65,12 +66,6 @@
       </template>
 
       <template #empty-action>
-        <RouterLink
-          :to="{ name: 'roles.index' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Back to roles
-        </RouterLink>
       </template>
 
       <template #footer>
@@ -96,7 +91,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import {onMounted, ref, onBeforeUnmount } from 'vue';
 import { RouterLink } from 'vue-router';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/roles/components/DeleteConfirmation.vue';
@@ -160,4 +155,17 @@ async function confirmForceDelete() {
   pendingForceDelete.value = null;
   await loadTrash();
 }
+
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const term = typeof local !== 'undefined' ? local.search : (typeof filters !== 'undefined' ? filters.search : '');
+  const delay = String(term || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => applySearch(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

@@ -1,16 +1,6 @@
 <template>
   <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div v-if="loading" class="space-y-3 p-6">
-      <div v-for="n in 5" :key="n" class="h-10 animate-pulse rounded bg-slate-100" />
-    </div>
-    <EmptyState
-      v-else-if="!requests.length"
-      title="No privacy requests found"
-      description="Create a GDPR or privacy request to begin the workflow."
-    >
-      <template #action><slot name="empty-action" /></template>
-    </EmptyState>
-    <div v-else class="overflow-x-auto">
+    <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-slate-200 text-sm">
         <thead class="bg-slate-50">
           <tr>
@@ -27,7 +17,38 @@
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-slate-100">
+        <tbody v-if="loading">
+
+          <tr v-for="n in 5" :key="n">
+
+            <td colspan="12" class="px-5 py-3">
+
+              <div class="h-10 animate-pulse rounded bg-slate-100" />
+
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else-if="!requests.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                title="No privacy requests found"
+                description="Create a GDPR or privacy request to begin the workflow."
+                >
+                <template #action><slot name="empty-action" /></template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr v-for="item in requests" :key="item.uuid" class="hover:bg-slate-50/80">
             <td class="px-4 py-3">
               <p class="font-medium text-slate-900">{{ item.requester_name }}</p>

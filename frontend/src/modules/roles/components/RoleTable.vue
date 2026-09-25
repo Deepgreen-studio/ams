@@ -4,22 +4,7 @@
       <slot name="toolbar" />
     </div>
 
-    <div v-if="loading" class="space-y-3 px-8 py-6">
-      <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!roles.length"
-      title="No roles found"
-      description="Try adjusting your search or create a new role."
-      class="px-8 py-6"
-    >
-      <template #action>
-        <slot name="empty-action" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -47,7 +32,25 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 5" :key="n">
+            <td :colspan="columnCount" class="px-5 py-3">
+              <div class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!roles.length">
+          <tr>
+            <td :colspan="columnCount" class="p-0">
+              <EmptyState :title="emptyTitle" :description="emptyDescription">
+                <template #action>
+                  <slot name="empty-action" />
+                </template>
+              </EmptyState>
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
           <tr
             v-for="role in roles"
             :key="role.uuid"
@@ -166,6 +169,14 @@ const props = defineProps({
     type: String,
     default: 'asc',
   },
+  emptyTitle: {
+    type: String,
+    default: 'No roles found',
+  },
+  emptyDescription: {
+    type: String,
+    default: 'No roles have been added yet.',
+  },
 });
 
 const emit = defineEmits(['sort', 'delete']);
@@ -174,6 +185,7 @@ const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
   canAny('roles.view', 'roles.update', 'roles.assign', 'roles.delete'),
 );
+const columnCount = computed(() => 3 + (hasAnyAction.value ? 1 : 0));
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

@@ -10,6 +10,8 @@
         type="search"
         placeholder="Number, name, email..."
         class="h-12 w-full rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+      @input="onSearchInput"
+      @search="onSearchInput"
       />
     </div>
     <div class="w-full lg:w-40">
@@ -45,21 +47,21 @@
     </div>
     <div class="flex gap-2">
       <button type="submit" class="h-12 rounded-[12px] bg-brand-600 px-4 text-sm font-medium text-white hover:bg-brand-700">
-        Apply filter
+        Apply Filter
       </button>
       <button
         type="button"
         class="h-12 rounded-[12px] border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
         @click="onReset"
       >
-        Reset filter
+        Reset Filter
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue';
+import { reactive, watch, onBeforeUnmount } from 'vue';
 
 const props = defineProps({
   modelValue: { type: Object, default: () => ({}) },
@@ -125,4 +127,15 @@ function onReset() {
   });
   emit('reset');
 }
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const delay = String(local.search || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => onSubmit(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

@@ -37,14 +37,8 @@
           class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="onReset"
         >
-          Reset filter
+          Reset Filter
         </button>
-        <RouterLink
-          :to="{ name: 'customers.applications', params: { id: route.params.id } }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Back to assignments
-        </RouterLink>
       </template>
 
       <template #footer>

@@ -44,27 +44,7 @@
         <p class="text-xs text-slate-500">{{ monitoringStore.devices.length || 0 }} models</p>
       </div>
 
-      <div v-if="monitoringStore.loading" class="space-y-3 px-6 py-5">
-        <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
-      </div>
-
-      <EmptyState
-        v-else-if="!monitoringStore.devices.length"
-        title="No device data"
-        description="Device statistics appear after crash or API error reports are ingested."
-        class="px-6 py-10"
-      >
-        <template #action>
-          <RouterLink
-            :to="{ name: 'applications.monitoring.crashes', params: { id: route.params.id } }"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Open crash dashboard
-          </RouterLink>
-        </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
         <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-zinc-100">
@@ -74,7 +54,32 @@
               <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Unique devices</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="monitoringStore.loading">
+        <tr v-for="n in 5" :key="n">
+          <td colspan="12" class="px-5 py-3">
+            <div class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-else-if="!monitoringStore.devices.length">
+
+            <tr>
+
+              <td colspan="12" class="p-0">
+              <EmptyState
+                title="No device data"
+                description="Device statistics appear after crash or API error reports are ingested."
+                >
+                <template #action>
+                </template>
+              </EmptyState>
+            </td>
+
+            </tr>
+
+          </tbody>
+
+          <tbody v-else>
             <tr
               v-for="(item, index) in monitoringStore.devices"
               :key="`${item.device_model}-${index}`"

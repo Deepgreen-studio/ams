@@ -1,21 +1,6 @@
 <template>
   <div :class="framed ? 'overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100' : ''">
-    <div v-if="loading" class="space-y-3 px-6 py-6 sm:px-8">
-      <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!events.length"
-      title="No analytics events"
-      description="No events were recorded in this period. Try a different date range or category."
-      class="px-6 py-10 sm:px-8"
-    >
-      <template #action>
-        <slot name="empty-action" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="scrollbar-light overflow-x-auto px-3">
+    <div class="scrollbar-light overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -32,7 +17,33 @@
             <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 6" :key="n">
+            <td colspan="12" class="px-5 py-3">
+              <div class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!events.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                title="No analytics events"
+                description="No events were recorded in this period. Try a different date range or category."
+                >
+                <template #action>
+                <slot name="empty-action" />
+                </template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr
             v-for="event in events"
             :key="event.uuid"

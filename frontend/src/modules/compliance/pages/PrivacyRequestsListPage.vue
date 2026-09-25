@@ -36,13 +36,6 @@
 
       <PrivacyRequestTable :requests="store.requests" :loading="store.loading" @delete="openDelete">
         <template #empty-action>
-          <RouterLink
-            v-if="can('compliance.create')"
-            :to="{ name: 'compliance.privacy.create' }"
-            class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            New request
-          </RouterLink>
         </template>
       </PrivacyRequestTable>
 

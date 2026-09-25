@@ -91,13 +91,6 @@
           >
             View active queue
           </button>
-          <RouterLink
-            v-if="can('support.create')"
-            :to="{ name: 'support.tickets.create' }"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Create ticket
-          </RouterLink>
         </template>
       </TicketTable>
 

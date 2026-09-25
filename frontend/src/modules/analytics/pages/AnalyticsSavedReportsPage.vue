@@ -29,12 +29,6 @@
       description="Mark a report as saved in the designer to reuse it from this library."
     >
       <template #action>
-        <RouterLink
-          :to="{ name: 'analytics.reports' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          New report
-        </RouterLink>
       </template>
     </EmptyState>
 

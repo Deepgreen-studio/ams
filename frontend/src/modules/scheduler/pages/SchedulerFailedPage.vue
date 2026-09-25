@@ -22,7 +22,8 @@
               type="search"
               placeholder="Search failed jobs…"
               class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @keyup.enter="applyFilters"
+              @input="onSearchInput"
+        @search="onSearchInput"
             />
           </div>
           <div class="flex flex-wrap items-center gap-2">
@@ -31,14 +32,14 @@
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="applyFilters"
             >
-              Apply filter
+              Apply Filter
             </button>
             <button
               type="button"
               class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="resetFilters"
             >
-              Reset filter
+              Reset Filter
             </button>
           </div>
         </div>
@@ -50,7 +51,7 @@
           class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="resetFilters"
         >
-          Reset filter
+          Reset Filter
         </button>
       </template>
 
@@ -68,7 +69,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, watch } from 'vue';
+import {onMounted, reactive, watch, onBeforeUnmount } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { useToast } from '@/composables/useToast';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -141,5 +142,18 @@ onMounted(() => {
   store.successMessage = null;
   store.error = null;
   load();
+});
+
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const term = typeof local !== 'undefined' ? local.search : (typeof filters !== 'undefined' ? filters.search : '');
+  const delay = String(term || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => applyFilters(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
 });
 </script>

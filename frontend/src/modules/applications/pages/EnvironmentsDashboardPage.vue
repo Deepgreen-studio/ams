@@ -53,12 +53,6 @@
       description="Create Development, Testing, Staging, Production, or Sandbox environments."
     >
       <template #action>
-        <RouterLink
-          :to="{ name: 'applications.environments.create', params: { id: route.params.id } }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Add environment
-        </RouterLink>
       </template>
     </EmptyState>
 

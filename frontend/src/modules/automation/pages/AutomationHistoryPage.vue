@@ -44,7 +44,8 @@
               type="search"
               placeholder="Filter by event key…"
               class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @keyup.enter="applyFilters"
+              @input="onSearchInput"
+        @search="onSearchInput"
             />
           </div>
 
@@ -60,41 +61,20 @@
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="applyFilters"
             >
-              Apply filter
+              Apply Filter
             </button>
             <button
               type="button"
               class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="resetFilters"
             >
-              Reset filter
+              Reset Filter
             </button>
           </div>
         </div>
       </div>
 
-      <div v-if="store.loading" class="space-y-3 px-6 py-6 sm:px-8">
-        <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
-      </div>
-
-      <EmptyState
-        v-else-if="!store.logs.length"
-        title="No automation runs yet"
-        description="Execution logs will appear here when rules run."
-        class="px-6 py-10 sm:px-8"
-      >
-        <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-            @click="resetFilters"
-          >
-            Reset filter
-          </button>
-        </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
         <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-zinc-100">
@@ -105,7 +85,39 @@
               <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Message</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="store.loading">
+        <tr v-for="n in 6" :key="n">
+          <td colspan="12" class="px-5 py-3">
+            <div class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-else-if="!store.logs.length">
+
+            <tr>
+
+              <td colspan="12" class="p-0">
+              <EmptyState
+                title="No automation runs yet"
+                description="Execution logs will appear here when rules run."
+                >
+                <template #action>
+                <button
+                type="button"
+                class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+                @click="resetFilters"
+                >
+                Reset Filter
+                </button>
+                </template>
+              </EmptyState>
+            </td>
+
+            </tr>
+
+          </tbody>
+
+          <tbody v-else>
             <tr
               v-for="log in store.logs"
               :key="log.uuid"
@@ -154,7 +166,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive } from 'vue';
+import {computed, onMounted, reactive, onBeforeUnmount } from 'vue';
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -263,4 +275,17 @@ function formatDate(value) {
   if (!value) return '—';
   return new Date(value).toLocaleString();
 }
+
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const term = typeof local !== 'undefined' ? local.search : (typeof filters !== 'undefined' ? filters.search : '');
+  const delay = String(term || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => applyFilters(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

@@ -34,13 +34,6 @@
         description="Save your current date range and category to reopen this analytics slice later."
       >
         <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="showCreate = true"
-          >
-            Save current filters
-          </button>
         </template>
       </EmptyState>
     </div>

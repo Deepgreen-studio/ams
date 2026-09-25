@@ -52,7 +52,7 @@
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="reload()"
             >
-              Apply filter
+              Apply Filter
             </button>
           </div>
         </div>

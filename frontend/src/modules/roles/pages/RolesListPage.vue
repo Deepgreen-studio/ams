@@ -50,6 +50,8 @@
       :loading="rolesStore.loading"
       :sort-by="rolesStore.filters.sort_by"
       :sort-dir="rolesStore.filters.sort_dir"
+      :empty-title="emptyState.title"
+      :empty-description="emptyState.description"
       @sort="onSort"
       @delete="openDelete"
     >
@@ -57,22 +59,14 @@
         <RoleSearchFilter :model-value="rolesStore.filters" @submit="onFilter" @reset="onReset" />
       </template>
 
-      <template #empty-action>
+      <template v-if="emptyState.filtered" #empty-action>
         <button
           type="button"
-          class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="onReset"
         >
           Reset Filter
         </button>
-        <RouterLink
-          v-if="can('roles.create')"
-          :to="{ name: 'roles.create' }"
-          class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          <PlusIcon class="h-4 w-4" />
-          Create Role
-        </RouterLink>
       </template>
 
       <template #footer>
@@ -98,7 +92,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { PlusIcon } from '@heroicons/vue/24/outline';
 import { usePermissions } from '@/composables/usePermissions';
@@ -112,9 +106,50 @@ const rolesStore = useRolesStore();
 const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
+const TYPE_LABELS = {
+  1: 'System roles',
+  0: 'Custom roles',
+};
+
+const emptyState = computed(() => {
+  const filters = rolesStore.filters;
+  const parts = [];
+  const search = String(filters.search || '').trim();
+
+  if (search) {
+    parts.push(`search "${search}"`);
+  }
+
+  if (filters.is_system !== '' && filters.is_system !== null && TYPE_LABELS[filters.is_system] !== undefined) {
+    parts.push(`type ${TYPE_LABELS[filters.is_system]}`);
+  }
+
+  if (!parts.length) {
+    return {
+      title: 'No roles found',
+      description: 'No roles have been added yet.',
+      filtered: false,
+    };
+  }
+
+  return {
+    title: 'No roles found',
+    description: `No roles found for ${joinFilterParts(parts)}.`,
+    filtered: true,
+  };
+});
+
 onMounted(() => {
   rolesStore.fetchRoles({ trashed: '' });
 });
+
+function joinFilterParts(parts) {
+  if (parts.length === 1) {
+    return parts[0];
+  }
+
+  return `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}`;
+}
 
 function onFilter(filters) {
   rolesStore.fetchRoles({ ...filters, trashed: '' });

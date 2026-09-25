@@ -63,14 +63,14 @@
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="applyFilters"
             >
-              Apply filter
+              Apply Filter
             </button>
             <button
               type="button"
               class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="resetFilters"
             >
-              Reset filter
+              Reset Filter
             </button>
           </div>
         </div>
@@ -80,31 +80,7 @@
         <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
       </div>
 
-      <EmptyState
-        v-else-if="!store.logs.length"
-        title="No delivery logs found"
-        description="Try adjusting your filters or wait for new notifications to be sent."
-        class="px-6 py-10 sm:px-8"
-      >
-        <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-            @click="resetFilters"
-          >
-            Reset filter
-          </button>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="reload"
-          >
-            Refresh
-          </button>
-        </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
+      <div class="overflow-x-auto px-3">
         <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-zinc-100">
@@ -116,7 +92,25 @@
               <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">When</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="!store.logs.length">
+
+            <tr>
+
+              <td colspan="12" class="p-0">
+              <EmptyState
+                title="No delivery logs found"
+                description="Try adjusting your filters or wait for new notifications to be sent."
+                >
+                <template #action>
+                </template>
+              </EmptyState>
+            </td>
+
+            </tr>
+
+          </tbody>
+
+          <tbody v-else>
             <tr
               v-for="log in store.logs"
               :key="log.uuid"

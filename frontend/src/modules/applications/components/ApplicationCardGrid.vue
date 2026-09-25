@@ -11,7 +11,7 @@
     <EmptyState
       v-else-if="!applications.length"
       title="No applications found"
-      description="Try adjusting your search or create a new application."
+      description="No results match the current search."
       class="px-8 py-6"
     >
       <template #action>

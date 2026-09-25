@@ -87,30 +87,7 @@
         <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
       </div>
 
-      <EmptyState
-        v-else-if="!store.items.length"
-        title="No canned responses found"
-        description="Create a personal or shared reply template to speed up ticket replies."
-      >
-        <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-            @click="resetFilters"
-          >
-            Reset filter
-          </button>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="openCreate"
-          >
-            New response
-          </button>
-        </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
+      <div class="overflow-x-auto px-3">
         <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-zinc-100">
@@ -126,7 +103,25 @@
               <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="!store.items.length">
+
+            <tr>
+
+              <td colspan="12" class="p-0">
+              <EmptyState
+                title="No canned responses found"
+                description="Create a personal or shared reply template to speed up ticket replies."
+                >
+                <template #action>
+                </template>
+              </EmptyState>
+            </td>
+
+            </tr>
+
+          </tbody>
+
+          <tbody v-else>
             <tr
               v-for="item in store.items"
               :key="item.uuid"

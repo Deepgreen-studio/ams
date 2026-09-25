@@ -50,13 +50,6 @@
         :description="store.error || 'Refresh to try loading leadership KPIs again.'"
       >
         <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="load"
-          >
-            Retry
-          </button>
         </template>
       </EmptyState>
     </div>

@@ -77,7 +77,7 @@
             class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
             @click="onApply({})"
           >
-            Reset filter
+            Reset Filter
           </button>
         </template>
       </AnalyticsEventsTable>

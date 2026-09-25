@@ -4,22 +4,7 @@
       <slot name="toolbar" />
     </div>
 
-    <div v-if="loading" class="space-y-3 px-6 py-6 sm:px-8">
-      <div v-for="n in 6" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!runs.length"
-      :title="emptyTitle"
-      :description="emptyDescription"
-      class="px-6 py-10 sm:px-8"
-    >
-      <template v-if="$slots.emptyAction" #action>
-        <slot name="emptyAction" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -36,7 +21,33 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 6" :key="n">
+            <td colspan="12" class="px-5 py-3">
+              <div class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!runs.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                :title="emptyTitle"
+                :description="emptyDescription"
+                >
+                <template v-if="$slots.emptyAction" #action>
+                <slot name="emptyAction" />
+                </template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr
             v-for="run in runs"
             :key="run.uuid"

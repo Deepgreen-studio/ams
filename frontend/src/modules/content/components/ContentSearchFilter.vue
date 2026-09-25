@@ -9,7 +9,8 @@
         type="search"
         placeholder="Title, slug, excerpt..."
         class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-        @keyup.enter="onSubmit"
+        @input="onSearchInput"
+        @search="onSearchInput"
       />
     </div>
 
@@ -44,21 +45,21 @@
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
         @click="onSubmit"
       >
-        Apply filter
+        Apply Filter
       </button>
       <button
         type="button"
         class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="onReset"
       >
-        Reset filter
+        Reset Filter
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, watch } from 'vue';
+import {computed, reactive, watch, onBeforeUnmount } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
@@ -133,4 +134,17 @@ function onReset() {
   local.trashed = '';
   emit('reset');
 }
+
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const term = typeof local !== 'undefined' ? local.search : (typeof filters !== 'undefined' ? filters.search : '');
+  const delay = String(term || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => onSubmit(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

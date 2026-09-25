@@ -4,22 +4,7 @@
       <slot name="toolbar" />
     </div>
 
-    <div v-if="loading" class="space-y-3 px-8 py-6">
-      <div v-for="n in 4" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!items.length"
-      :title="emptyTitle"
-      :description="emptyDescription"
-      class="px-8 py-6"
-    >
-      <template v-if="$slots['empty-action']" #action>
-        <slot name="empty-action" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="overflow-x-auto">
+    <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
         <thead class="bg-slate-50">
           <tr class="border-b border-zinc-100">
@@ -33,7 +18,33 @@
             <th class="px-6 py-4 text-right text-sm font-semibold text-slate-600">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 4" :key="n">
+            <td colspan="12" class="px-5 py-3">
+              <div class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!items.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                :title="emptyTitle"
+                :description="emptyDescription"
+                >
+                <template v-if="$slots['empty-action']" #action>
+                <slot name="empty-action" />
+                </template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr
             v-for="item in items"
             :key="item.uuid"

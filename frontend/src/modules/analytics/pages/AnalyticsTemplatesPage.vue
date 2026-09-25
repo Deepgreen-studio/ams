@@ -22,12 +22,6 @@
       description="Published dashboard templates will appear here so you can start from a curated layout."
     >
       <template #action>
-        <RouterLink
-          :to="{ name: 'analytics.dashboards' }"
-          class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-        >
-          Browse dashboards
-        </RouterLink>
       </template>
     </EmptyState>
 

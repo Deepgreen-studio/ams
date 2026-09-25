@@ -12,6 +12,8 @@
         type="search"
         placeholder="Search case #, title…"
         class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+      @input="onSearchInput"
+      @search="onSearchInput"
       />
     </div>
     <div class="flex flex-wrap items-center gap-2">
@@ -44,21 +46,21 @@
         type="submit"
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
       >
-        Apply filter
+        Apply Filter
       </button>
       <button
         type="button"
         class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="onReset"
       >
-        Reset filter
+        Reset Filter
       </button>
     </div>
   </form>
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch, onBeforeUnmount } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { companyService } from '@/modules/companies/services/companyService';
 import { priorityOptions, statusOptions, typeOptions } from '@/modules/compliance/utils/caseOptions';
@@ -137,4 +139,15 @@ function onReset() {
   });
   emit('reset');
 }
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const delay = String(local.search || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => onSubmit(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

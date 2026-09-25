@@ -53,48 +53,20 @@
               type="submit"
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
             >
-              Apply filter
+              Apply Filter
             </button>
             <button
               type="button"
               class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="onReset"
             >
-              Reset filter
+              Reset Filter
             </button>
           </div>
         </form>
       </div>
 
-      <div v-if="taxonomy.loading" class="space-y-3 px-8 py-6">
-        <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-zinc-100" />
-      </div>
-
-      <EmptyState
-        v-else-if="!taxonomy.categories.length"
-        title="No categories found"
-        description="Create nested CMS categories with SEO slugs, status, and sort order."
-        class="px-8 py-6"
-      >
-        <template #action>
-          <button
-            type="button"
-            class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
-            @click="onReset"
-          >
-            Reset filter
-          </button>
-          <button
-            type="button"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-            @click="openCreate"
-          >
-            Create category
-          </button>
-        </template>
-      </EmptyState>
-
-      <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
         <table class="min-w-full text-sm">
           <thead>
             <tr class="border-b border-zinc-100">
@@ -113,7 +85,32 @@
               <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody v-if="taxonomy.loading">
+        <tr v-for="n in 5" :key="n">
+          <td colspan="12" class="px-5 py-3">
+            <div class="h-12 animate-pulse rounded-[12px] bg-zinc-100" />
+          </td>
+        </tr>
+      </tbody>
+      <tbody v-else-if="!taxonomy.categories.length">
+
+            <tr>
+
+              <td colspan="12" class="p-0">
+              <EmptyState
+                title="No categories found"
+                description="Create nested CMS categories with SEO slugs, status, and sort order."
+                >
+                <template #action>
+                </template>
+              </EmptyState>
+            </td>
+
+            </tr>
+
+          </tbody>
+
+          <tbody v-else>
             <tr
               v-for="item in taxonomy.categories"
               :key="item.uuid"

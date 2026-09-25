@@ -4,22 +4,7 @@
       <slot name="toolbar" />
     </div>
 
-    <div v-if="loading" class="space-y-3 px-8 py-6">
-      <div v-for="n in 5" :key="n" class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
-    </div>
-
-    <EmptyState
-      v-else-if="!applications.length"
-      title="No applications found"
-      description="Try adjusting your search or create a new application."
-      class="px-8 py-6"
-    >
-      <template #action>
-        <slot name="empty-action" />
-      </template>
-    </EmptyState>
-
-    <div v-else class="overflow-x-auto px-3">
+    <div class="overflow-x-auto px-3">
       <table class="min-w-full text-sm">
         <thead>
           <tr class="border-b border-zinc-100">
@@ -91,7 +76,33 @@
             </th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="loading">
+          <tr v-for="n in 5" :key="n">
+            <td colspan="12" class="px-5 py-3">
+              <div class="h-12 animate-pulse rounded-[12px] bg-slate-100" />
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else-if="!applications.length">
+
+          <tr>
+
+            <td colspan="12" class="p-0">
+              <EmptyState
+                title="No applications found"
+                description="No results match the current search."
+                >
+                <template #action>
+                <slot name="empty-action" />
+                </template>
+              </EmptyState>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+        <tbody v-else>
           <tr
             v-for="item in applications"
             :key="item.uuid"

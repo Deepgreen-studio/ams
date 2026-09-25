@@ -60,12 +60,6 @@
           >
             Add widget
           </button>
-          <RouterLink
-            :to="{ name: 'analytics.dashboards.designer', params: { uuid: dashboardUuid } }"
-            class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
-          >
-            Open designer
-          </RouterLink>
         </template>
       </EmptyState>
     </div>

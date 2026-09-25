@@ -21,7 +21,8 @@
               type="search"
               placeholder="URL or error..."
               class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
-              @keyup.enter="applyFilters"
+              @input="onSearchInput"
+        @search="onSearchInput"
             />
           </div>
 
@@ -37,14 +38,14 @@
               class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
               @click="applyFilters"
             >
-              Apply filter
+              Apply Filter
             </button>
             <button
               type="button"
               class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="resetFilters"
             >
-              Reset filter
+              Reset Filter
             </button>
           </div>
         </div>
@@ -145,7 +146,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue';
+import {onMounted, reactive, ref, onBeforeUnmount } from 'vue';
 import { useRoute } from 'vue-router';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -228,4 +229,17 @@ function tryParse(value) {
     return value;
   }
 }
+
+let searchTimer = null;
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const term = typeof local !== 'undefined' ? local.search : (typeof filters !== 'undefined' ? filters.search : '');
+  const delay = String(term || '').trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => applyFilters(), delay);
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 </script>

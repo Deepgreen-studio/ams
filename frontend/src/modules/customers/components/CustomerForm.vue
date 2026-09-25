@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Owning company</label>
+        <FormLabel required>Owning company</FormLabel>
         <SelectBox
           v-model="form.company_id"
           size="lg"
@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Customer type</label>
+        <FormLabel required>Customer type</FormLabel>
         <SelectBox
           v-model="form.customer_type"
           size="lg"
@@ -31,7 +31,7 @@
 
       <template v-if="form.customer_type === 'individual'">
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">First name</label>
+          <FormLabel required>First name</FormLabel>
           <input
             v-model="form.first_name"
             type="text"
@@ -43,7 +43,7 @@
           </p>
         </div>
         <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Last name</label>
+          <FormLabel required>Last name</FormLabel>
           <input
             v-model="form.last_name"
             type="text"
@@ -57,7 +57,7 @@
       </template>
 
       <div v-if="form.customer_type !== 'individual'" class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company name</label>
+        <FormLabel required>Company name</FormLabel>
         <input
           v-model="form.company_name"
           type="text"
@@ -87,7 +87,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Email</label>
+        <FormLabel required>Email</FormLabel>
         <input
           v-model="form.email"
           type="email"
@@ -138,14 +138,6 @@
         />
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-        <SelectBox v-model="form.timezone" size="lg" :options="timezoneOptions" />
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-        <SelectBox v-model="form.language" size="lg" :options="languageOptions" />
-      </div>
-      <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
         <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
@@ -181,11 +173,11 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
-import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
@@ -201,7 +193,6 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const companies = ref([]);
 const localErrors = ref({});
-const timezoneOptionsBase = getTimezoneOptions();
 const form = reactive(createForm(props.initial));
 
 const typeOptions = [
@@ -258,16 +249,6 @@ const displayErrors = computed(() => ({
   ...localErrors.value,
   ...props.errors,
 }));
-
-function withCurrentOption(options, current) {
-  if (current && !options.some((option) => option.value === current)) {
-    return [{ value: current, label: current }, ...options];
-  }
-  return options;
-}
-
-const timezoneOptions = computed(() => withCurrentOption(timezoneOptionsBase, form.timezone));
-const languageOptions = computed(() => withCurrentOption(LANGUAGE_OPTIONS, form.language));
 
 onMounted(async () => {
   if (props.hideCompany) {

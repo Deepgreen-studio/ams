@@ -4,7 +4,7 @@
       v-if="customersStore.loading && !customersStore.currentCustomer"
       class="h-64 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
+    <div v-else class="mx-auto w-full max-w-[1000px] rounded-[12px] bg-white p-6 sm:p-8">
       <CustomerForm
         :initial="customersStore.currentCustomer || {}"
         :loading="customersStore.saving"

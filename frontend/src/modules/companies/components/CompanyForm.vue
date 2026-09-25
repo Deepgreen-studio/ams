@@ -60,16 +60,10 @@
         </p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
-        <input
-          v-model="form.website"
-          type="url"
-          placeholder="https://"
-          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('website')"
-        />
-        <p v-if="displayErrors.website" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.website[0] }}
+        <FormLabel required>Currency</FormLabel>
+        <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
+        <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.currency[0] }}
         </p>
       </div>
       <div>
@@ -77,29 +71,16 @@
         <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
       <div>
-        <FormLabel required>Address</FormLabel>
-        <input
-          v-model="form.address"
-          type="text"
-          placeholder="Street address"
-          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('address')"
+        <FormLabel required>Country</FormLabel>
+        <SearchableSelect
+          v-model="form.country"
+          :options="countryOptions"
+          placeholder="Select country"
+          search-placeholder="Search country"
+          :button-class="countryButtonClass"
         />
-        <p v-if="displayErrors.address" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.address[0] }}
-        </p>
-      </div>
-      <div>
-        <FormLabel required>City</FormLabel>
-        <input
-          v-model="form.city"
-          type="text"
-          placeholder="London"
-          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('city')"
-        />
-        <p v-if="displayErrors.city" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.city[0] }}
+        <p v-if="displayErrors.country" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.country[0] }}
         </p>
       </div>
       <div>
@@ -116,6 +97,32 @@
         </p>
       </div>
       <div>
+        <FormLabel required>City</FormLabel>
+        <input
+          v-model="form.city"
+          type="text"
+          placeholder="London"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('city')"
+        />
+        <p v-if="displayErrors.city" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.city[0] }}
+        </p>
+      </div>
+      <div>
+        <FormLabel required>Address</FormLabel>
+        <input
+          v-model="form.address"
+          type="text"
+          placeholder="Street address"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('address')"
+        />
+        <p v-if="displayErrors.address" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.address[0] }}
+        </p>
+      </div>
+      <div>
         <FormLabel required>Postal Code</FormLabel>
         <input
           v-model="form.postal_code"
@@ -129,23 +136,16 @@
         </p>
       </div>
       <div>
-        <FormLabel required>Country</FormLabel>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
         <input
-          v-model="form.country"
-          type="text"
-          placeholder="GB"
+          v-model="form.website"
+          type="url"
+          placeholder="https://"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          :class="fieldClass('country')"
+          :class="fieldClass('website')"
         />
-        <p v-if="displayErrors.country" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.country[0] }}
-        </p>
-      </div>
-      <div>
-        <FormLabel required>Currency</FormLabel>
-        <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
-        <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.currency[0] }}
+        <p v-if="displayErrors.website" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.website[0] }}
         </p>
       </div>
     </div>
@@ -174,9 +174,10 @@
 import { computed, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
+import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
-import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
+import { getPhoneCountries, isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -196,6 +197,10 @@ const statusOptions = [
   { value: 'suspended', label: 'Suspended' },
   { value: 'pending', label: 'Pending' },
 ];
+
+const countryOptionsBase = getPhoneCountries()
+  .map((country) => ({ value: country.iso, label: country.name }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 
 const currencyOptionsBase = [
   { value: 'USD', label: 'USD — US Dollar' },
@@ -244,6 +249,13 @@ function withCurrentOption(options, current) {
   return options;
 }
 
+const countryOptions = computed(() => withCurrentOption(countryOptionsBase, form.country));
+const countryButtonClass = computed(() =>
+  [
+    'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0',
+    displayErrors.value.country ? 'border-rose-400' : 'border-slate-200',
+  ].join(' '),
+);
 const currencyOptions = computed(() => withCurrentOption(currencyOptionsBase, form.currency));
 
 function createForm(value = {}) {

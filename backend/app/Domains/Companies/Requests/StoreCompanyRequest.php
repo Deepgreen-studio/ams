@@ -23,6 +23,7 @@ class StoreCompanyRequest extends FormRequest
     public function attributes(): array
     {
         return [
+            'company_name' => 'display name',
             'registration_number' => 'company code',
         ];
     }

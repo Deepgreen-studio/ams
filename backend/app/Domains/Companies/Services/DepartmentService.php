@@ -32,6 +32,18 @@ class DepartmentService
         return $this->departmentRepository->paginateFiltered($filters);
     }
 
+    public function show(string $identifier): Department
+    {
+        return $this->departmentRepository
+            ->findByIdentifierOrFail($identifier)
+            ->load([
+                'company:id,uuid,company_name',
+                'teams' => fn ($query) => $query
+                    ->select(['id', 'uuid', 'department_id', 'name', 'description', 'status'])
+                    ->orderBy('name'),
+            ]);
+    }
+
     /**
      * @param  array<string, mixed>  $data
      */

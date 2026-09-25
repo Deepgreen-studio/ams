@@ -2,6 +2,13 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="canAny('companies.view', 'companies.restore', 'companies.delete')"
+        :to="{ name: 'companies.trash' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Soft Deleted
+      </RouterLink>
+      <RouterLink
         v-if="can('companies.create')"
         :to="{ name: 'companies.create' }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -59,9 +66,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete company"
+      title="Soft delete company"
       :message="`Soft delete ${pendingDelete?.company_name || 'this company'}? It can be restored later.`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="companiesStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -81,7 +88,7 @@ import SearchFilters from '@/modules/companies/components/SearchFilters.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 
 const companiesStore = useCompaniesStore();
-const { can } = usePermissions();
+const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
 onMounted(() => {

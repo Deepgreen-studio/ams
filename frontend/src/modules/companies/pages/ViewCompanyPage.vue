@@ -32,7 +32,7 @@
         @click="showDelete = true"
       >
         <TrashIcon class="h-4 w-4 text-white" />
-        Delete
+        Soft Delete
       </button>
     </Teleport>
 
@@ -123,9 +123,9 @@
 
     <DeleteConfirmation
       :open="showDelete"
-      title="Delete company"
+      title="Soft delete company"
       :message="deleteMessage"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="companiesStore.saving"
       @cancel="showDelete = false"
       @confirm="confirmDelete"

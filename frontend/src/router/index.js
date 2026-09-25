@@ -135,6 +135,12 @@ const router = createRouter({
           meta: { title: 'Companies', requiresAuth: true },
         },
         {
+          path: 'companies/trash',
+          name: 'companies.trash',
+          component: () => import('@/modules/companies/pages/CompaniesTrashPage.vue'),
+          meta: { title: 'Soft Deleted', requiresAuth: true },
+        },
+        {
           path: 'companies/create',
           name: 'companies.create',
           component: () => import('@/modules/companies/pages/CreateCompanyPage.vue'),
@@ -163,6 +169,12 @@ const router = createRouter({
           name: 'departments.index',
           component: () => import('@/modules/companies/pages/DepartmentsIndexPage.vue'),
           meta: { title: 'Department', requiresAuth: true },
+        },
+        {
+          path: 'departments/:id',
+          name: 'departments.show',
+          component: () => import('@/modules/companies/pages/DepartmentShowPage.vue'),
+          meta: { title: 'Department Details', requiresAuth: true },
         },
         {
           path: 'companies/:id/departments',

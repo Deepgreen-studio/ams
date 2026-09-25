@@ -20,54 +20,22 @@
                 </span>
               </button>
             </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'registration_number')"
-              >
-                Company Code
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'registration_number' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Company Code</th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'country')"
-              >
-                Country
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'country' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'status')"
-              >
-                Status
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'status' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
+              Status
             </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
-              Org units
+              Deleted By
             </th>
-            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'created_at')"
+                @click="$emit('sort', 'deleted_at')"
               >
-                Created At
+                Deleted
                 <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{ sortBy === 'deleted_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -87,24 +55,19 @@
           </tr>
         </tbody>
         <tbody v-else-if="!companies.length">
-
           <tr>
-
             <td colspan="12" class="p-0">
               <EmptyState
-                title="No companies found"
-                description="No results match the current search."
-                >
+                title="Trash is empty"
+                description="Soft-deleted companies will appear here."
+              >
                 <template #action>
-                <slot name="empty-action" />
+                  <slot name="empty-action" />
                 </template>
               </EmptyState>
             </td>
-
           </tr>
-
         </tbody>
-
         <tbody v-else>
           <tr
             v-for="company in companies"
@@ -127,33 +90,25 @@
                 </div>
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-slate-900">{{ company.company_name }}</p>
-                  <p class="truncate text-xs text-slate-500">
-                    {{ company.email || company.registration_number || '—' }}
-                  </p>
+                  <p class="truncate text-xs text-slate-500">{{ company.email || '—' }}</p>
                 </div>
               </div>
             </td>
-            <td class="px-5 py-4 text-slate-600">
-              {{ company.registration_number || '—' }}
-            </td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
-              {{ company.country || '—' }}
-            </td>
-            <td class="px-5 py-4">
+            <td class="px-5 py-4 text-slate-600">{{ company.registration_number || '—' }}</td>
+            <td class="hidden px-5 py-4 md:table-cell">
               <StatusBadge :status="company.status" />
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
-              {{ company.departments_count || 0 }} dept · {{ company.teams_count || 0 }} teams ·
-              {{ company.locations_count || 0 }} locs
+              {{ company.updater?.full_name || '—' }}
             </td>
-            <td class="px-5 py-4 text-slate-600">
-              {{ formatDate(company.created_at) || '—' }}
+            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+              {{ formatDate(company.deleted_at) || '—' }}
             </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
                   type="button"
-                  class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+                  class="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
                   :aria-expanded="openMenuId === company.uuid"
                   aria-haspopup="menu"
                   aria-label="Open actions"
@@ -175,55 +130,21 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeCompany"
-        class="fixed z-[80] w-48 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
       >
-        <RouterLink
-          v-if="can('companies.view')"
-          :to="{ name: 'companies.show', params: { id: activeCompany.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+        <button
+          v-if="can('companies.restore') || can('companies.delete')"
+          type="button"
+          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
-          @click="closeMenu"
+          @click="onRestore(activeCompany)"
         >
-          <EyeIcon class="h-4 w-4 text-slate-400" />
-          View
-        </RouterLink>
-        <template v-if="isTrashed(activeCompany)">
-          <button
-            v-if="can('companies.restore')"
-            type="button"
-            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
-            role="menuitem"
-            @click="onRestore(activeCompany)"
-          >
-            <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
-            Restore
-          </button>
-        </template>
-        <template v-else>
-          <RouterLink
-            v-if="can('companies.update')"
-            :to="{ name: 'companies.edit', params: { id: activeCompany.uuid } }"
-            class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-            role="menuitem"
-            @click="closeMenu"
-          >
-            <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-            Edit
-          </RouterLink>
-          <button
-            v-if="can('companies.delete')"
-            type="button"
-            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-            role="menuitem"
-            @click="onDelete(activeCompany)"
-          >
-            <TrashIcon class="h-4 w-4 text-red-500" />
-            Soft Delete
-          </button>
-        </template>
+          <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+          Restore
+        </button>
       </div>
     </Teleport>
   </div>
@@ -231,14 +152,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
-import {
-  ArrowUturnLeftIcon,
-  EllipsisVerticalIcon,
-  EyeIcon,
-  PencilSquareIcon,
-  TrashIcon,
-} from '@heroicons/vue/24/outline';
+import { ArrowUturnLeftIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
@@ -246,31 +160,16 @@ import { formatDate } from '@/utils/formatters';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
-  companies: {
-    type: Array,
-    default: () => [],
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  sortBy: {
-    type: String,
-    default: 'created_at',
-  },
-  sortDir: {
-    type: String,
-    default: 'desc',
-  },
+  companies: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  sortBy: { type: String, default: 'deleted_at' },
+  sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete', 'restore']);
+const emit = defineEmits(['sort', 'restore']);
 
 const { can, canAny } = usePermissions();
-const hasAnyAction = computed(() =>
-  canAny('companies.view', 'companies.update', 'companies.delete', 'companies.restore'),
-);
-
+const hasAnyAction = computed(() => canAny('companies.restore', 'companies.delete'));
 const failedLogos = ref({});
 const openMenuId = ref(null);
 const menuStyle = ref({});
@@ -278,10 +177,6 @@ const menuStyle = ref({});
 const activeCompany = computed(
   () => props.companies.find((company) => company.uuid === openMenuId.value) || null,
 );
-
-function isTrashed(company) {
-  return Boolean(company?.deleted_at);
-}
 
 function logoSrc(company) {
   return resolveMediaUrl(company?.logo_url || company?.logo || '');
@@ -300,14 +195,9 @@ function toggleMenu(id, event) {
     return;
   }
 
-  const company = props.companies.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 192;
-  const itemCount = isTrashed(company)
-    ? [can('companies.view'), can('companies.restore')].filter(Boolean).length
-    : [can('companies.view'), can('companies.update'), can('companies.delete')].filter(Boolean)
-        .length;
-  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
+  const menuWidth = 176;
+  const menuHeight = 44;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;
@@ -323,11 +213,6 @@ function toggleMenu(id, event) {
 
 function closeMenu() {
   openMenuId.value = null;
-}
-
-function onDelete(company) {
-  closeMenu();
-  emit('delete', company);
 }
 
 function onRestore(company) {

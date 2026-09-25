@@ -196,6 +196,7 @@ export const useCompaniesStore = defineStore('companies', () => {
 
 export const useDepartmentsStore = defineStore('departments', () => {
   const departments = ref([]);
+  const currentDepartment = ref(null);
   const meta = ref(null);
   const state = useAsyncState();
 
@@ -207,6 +208,21 @@ export const useDepartmentsStore = defineStore('departments', () => {
       meta.value = data.data?.departments?.meta ?? null;
     } catch (err) {
       state.applyError(err, 'Unable to load departments');
+      throw err;
+    } finally {
+      state.loading.value = false;
+    }
+  }
+
+  async function fetchDepartment(id) {
+    state.loading.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await companyService.getDepartment(id);
+      currentDepartment.value = data.data?.department ?? null;
+      return currentDepartment.value;
+    } catch (err) {
+      state.applyError(err, 'Unable to load department');
       throw err;
     } finally {
       state.loading.value = false;
@@ -257,9 +273,11 @@ export const useDepartmentsStore = defineStore('departments', () => {
 
   return {
     departments,
+    currentDepartment,
     meta,
     ...state,
     fetchDepartments,
+    fetchDepartment,
     createDepartment,
     updateDepartment,
     deleteDepartment,

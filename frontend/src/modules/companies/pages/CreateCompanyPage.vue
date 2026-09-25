@@ -22,7 +22,11 @@ const router = useRouter();
 const companiesStore = useCompaniesStore();
 
 async function onSubmit(payload) {
-  const company = await companiesStore.createCompany(payload);
+  const { logo, ...fields } = payload;
+  const company = await companiesStore.createCompany(fields);
+  if (logo) {
+    await companiesStore.uploadLogo(company.uuid, logo);
+  }
   await router.push({ name: 'companies.show', params: { id: company.uuid } });
 }
 </script>

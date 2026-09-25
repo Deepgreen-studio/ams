@@ -5,8 +5,8 @@
         class="inline-flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-brand-50 text-base font-semibold text-brand-700"
       >
         <img
-          v-if="company?.logo_url"
-          :src="company.logo_url"
+          v-if="logoSrc"
+          :src="logoSrc"
           alt=""
           class="h-full w-full object-cover"
         />
@@ -70,6 +70,7 @@
 <script setup>
 import { computed } from 'vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
   company: {
@@ -79,6 +80,7 @@ const props = defineProps({
 });
 
 const initials = computed(() => (props.company?.company_name || 'C').slice(0, 2).toUpperCase());
+const logoSrc = computed(() => resolveMediaUrl(props.company?.logo_url || props.company?.logo || ''));
 
 const subtitle = computed(() => {
   const legal = props.company?.legal_name;

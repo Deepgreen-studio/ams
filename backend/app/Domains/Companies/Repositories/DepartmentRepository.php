@@ -48,7 +48,12 @@ class DepartmentRepository extends BaseRepository
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
         $perPage = max(1, min((int) ($filters['per_page'] ?? 15), 100));
-        $query = $this->model->newQuery()->with(['company:id,uuid,company_name']);
+        $query = $this->model->newQuery()->with([
+            'company:id,uuid,company_name',
+            'teams' => fn ($teams) => $teams
+                ->select(['id', 'uuid', 'department_id', 'name', 'status'])
+                ->orderBy('name'),
+        ]);
 
         if (! empty($filters['company_id'])) {
             $query->where('company_id', $filters['company_id']);
@@ -59,7 +64,13 @@ class DepartmentRepository extends BaseRepository
             $query->where(function (Builder $builder) use ($search): void {
                 $builder->where('name', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('note', 'like', "%{$search}%");
+                    ->orWhere('note', 'like', "%{$search}%")
+                    ->orWhereHas('company', function (Builder $company) use ($search): void {
+                        $company->where('company_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('teams', function (Builder $team) use ($search): void {
+                        $team->where('name', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -67,6 +78,21 @@ class DepartmentRepository extends BaseRepository
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('name')->paginate($perPage)->withQueryString();
+        $sortBy = (string) ($filters['sort_by'] ?? 'name');
+        $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'asc')) === 'desc' ? 'desc' : 'asc';
+        $sortable = [
+            'name' => 'departments.name',
+            'created_at' => 'departments.created_at',
+        ];
+
+        if ($sortBy === 'company') {
+            $query->leftJoin('companies', 'companies.id', '=', 'departments.company_id')
+                ->select('departments.*')
+                ->orderBy('companies.company_name', $sortDir);
+        } else {
+            $query->orderBy($sortable[$sortBy] ?? 'departments.name', $sortDir);
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 }

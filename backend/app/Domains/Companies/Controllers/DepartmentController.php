@@ -28,7 +28,7 @@ class DepartmentController
         $this->authorize('viewDepartments', Company::class);
 
         $departments = $this->departmentService->list($request->only([
-            'company', 'search', 'status', 'per_page', 'page',
+            'company', 'search', 'status', 'per_page', 'page', 'sort_by', 'sort_dir',
         ]));
 
         return ApiResponse::success([
@@ -41,6 +41,16 @@ class DepartmentController
                     'total' => $departments->total(),
                 ],
             ],
+        ]);
+    }
+
+    public function show(string $department): JsonResponse
+    {
+        $existing = $this->departmentService->show($department);
+        $this->authorize('viewDepartment', $existing);
+
+        return ApiResponse::success([
+            'department' => new DepartmentResource($existing),
         ]);
     }
 

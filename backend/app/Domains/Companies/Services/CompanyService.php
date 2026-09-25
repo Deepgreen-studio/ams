@@ -91,6 +91,16 @@ class CompanyService
             $company = $this->companyRepository->findByIdentifierOrFail($identifier);
             $this->companyRepository->updateCompany($company, ['updated_by' => $actor->id]);
             $company->delete();
+
+            $stamp = $company->deleted_at;
+            foreach (['departments', 'teams', 'locations'] as $relation) {
+                $company->{$relation}()->update([
+                    'deleted_at' => $stamp,
+                    'updated_at' => $stamp,
+                    'updated_by' => $actor->id,
+                ]);
+            }
+
             event(new CompanyDeleted($company, $actor));
         });
     }
@@ -104,7 +114,13 @@ class CompanyService
                 throw new ApiException('Company is not deleted.', 422);
             }
 
+            $stamp = $company->deleted_at;
             $company->restore();
+
+            foreach (['departments', 'teams', 'locations'] as $relation) {
+                $company->{$relation}()->onlyTrashed()->where('deleted_at', $stamp)->restore();
+            }
+
             $restored = $this->companyRepository->updateCompany($company, ['updated_by' => $actor->id]);
             event(new CompanyUpdated($restored, $actor));
 

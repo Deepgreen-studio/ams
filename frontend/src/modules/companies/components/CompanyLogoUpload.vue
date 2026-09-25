@@ -5,8 +5,8 @@
         class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[20px] bg-brand-50 text-xl font-semibold text-brand-700 ring-1 ring-zinc-100"
       >
         <img
-          v-if="preview || company?.logo_url"
-          :src="preview || company?.logo_url"
+          v-if="preview || logoSrc"
+          :src="preview || logoSrc"
           alt="Company logo"
           class="h-full w-full object-cover"
         />
@@ -62,6 +62,7 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
   company: { type: Object, default: null },
@@ -75,6 +76,7 @@ const preview = ref('');
 
 const fileName = computed(() => file.value?.name || '');
 const initials = computed(() => (props.company?.company_name || 'C').slice(0, 2).toUpperCase());
+const logoSrc = computed(() => resolveMediaUrl(props.company?.logo_url || props.company?.logo || ''));
 
 watch(
   () => props.company?.logo_url,

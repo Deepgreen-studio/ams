@@ -33,7 +33,11 @@ onMounted(() => {
 });
 
 async function onSubmit(payload) {
-  await companiesStore.updateCompany(route.params.id, payload);
+  const { logo, ...fields } = payload;
+  await companiesStore.updateCompany(route.params.id, fields);
+  if (logo) {
+    await companiesStore.uploadLogo(route.params.id, logo);
+  }
   await router.push({ name: 'companies.show', params: { id: route.params.id } });
 }
 </script>

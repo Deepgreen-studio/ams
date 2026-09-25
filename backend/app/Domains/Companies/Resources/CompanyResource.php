@@ -47,6 +47,10 @@ class CompanyResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
+            'updater' => $this->whenLoaded('updater', fn () => [
+                'uuid' => $this->updater->uuid,
+                'full_name' => $this->updater->full_name,
+            ]),
         ];
     }
 }

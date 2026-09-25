@@ -23,6 +23,13 @@ class DepartmentResource extends JsonResource
                 'uuid' => $this->company->uuid,
                 'company_name' => $this->company->company_name,
             ]),
+            'teams' => $this->whenLoaded('teams', fn () => $this->teams->map(fn ($team) => [
+                'id' => $team->id,
+                'uuid' => $team->uuid,
+                'name' => $team->name,
+                'description' => $team->description,
+                'status' => $team->status?->value ?? $team->status,
+            ])->values()),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

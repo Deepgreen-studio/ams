@@ -39,6 +39,9 @@ export const companyService = {
   listDepartments(params = {}) {
     return api.get('/departments', { params });
   },
+  getDepartment(id) {
+    return api.get(`/departments/${id}`);
+  },
   createDepartment(payload) {
     return api.post('/departments', payload);
   },

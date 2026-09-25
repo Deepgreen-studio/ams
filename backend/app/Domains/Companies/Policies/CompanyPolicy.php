@@ -56,6 +56,11 @@ class CompanyPolicy
         return $user->can(CompanyPermission::VIEW);
     }
 
+    public function viewDepartment(User $user, Department $department): bool
+    {
+        return $this->viewDepartments($user);
+    }
+
     public function manageTeams(User $user): bool
     {
         return $user->can(CompanyPermission::UPDATE);

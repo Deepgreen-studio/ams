@@ -34,6 +34,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.CompanyPermission::VIEW);
         Route::post('/', [DepartmentController::class, 'store'])
             ->middleware('permission:'.CompanyPermission::UPDATE);
+        Route::get('/{department}', [DepartmentController::class, 'show'])
+            ->middleware('permission:'.CompanyPermission::VIEW);
         Route::put('/{department}', [DepartmentController::class, 'update'])
             ->middleware('permission:'.CompanyPermission::UPDATE);
         Route::delete('/{department}', [DepartmentController::class, 'destroy'])

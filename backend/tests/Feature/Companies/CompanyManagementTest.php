@@ -3,6 +3,7 @@
 namespace Tests\Feature\Companies;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Companies\Models\Department;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -104,12 +105,25 @@ class CompanyManagementTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.company.company_name', 'Updated Inc');
 
+        $department = Department::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Engineering',
+            'status' => 'active',
+        ]);
+
         $this->deleteJson('/api/v1/companies/'.$company->uuid)->assertOk();
         $this->assertSoftDeleted('companies', ['id' => $company->id]);
+        $this->assertSoftDeleted('departments', ['id' => $department->id]);
+
+        $this->getJson('/api/v1/companies?trashed=only')
+            ->assertOk()
+            ->assertJsonPath('data.companies.items.0.uuid', $company->uuid);
 
         $this->postJson('/api/v1/companies/'.$company->uuid.'/restore')
             ->assertOk()
             ->assertJsonPath('data.company.uuid', $company->uuid);
+
+        $this->assertNotSoftDeleted('departments', ['id' => $department->id]);
     }
 
     public function test_admin_can_manage_departments_teams_and_locations(): void
@@ -148,7 +162,33 @@ class CompanyManagementTest extends TestCase
 
         $this->assertTrue($location['is_headquarters']);
 
-        $this->getJson('/api/v1/departments?company='.$company->uuid)->assertOk();
+        $this->getJson('/api/v1/departments?company='.$company->uuid)
+            ->assertOk()
+            ->assertJsonPath('data.departments.items.0.teams.0.name', 'Platform')
+            ->assertJsonPath('data.departments.items.0.status', 'active');
+        $this->getJson('/api/v1/departments?search=Engineer')
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Engineering']);
+
+        $this->postJson('/api/v1/departments', [
+            'company_id' => $company->uuid,
+            'name' => 'Alpha',
+        ])->assertCreated();
+
+        $sorted = $this->getJson('/api/v1/departments?company='.$company->uuid.'&sort_by=name&sort_dir=asc')
+            ->assertOk()
+            ->json('data.departments.items');
+        $this->assertSame(['Alpha', 'Engineering'], array_column($sorted, 'name'));
+
+        $byDate = $this->getJson('/api/v1/departments?company='.$company->uuid.'&sort_by=created_at&sort_dir=desc')
+            ->assertOk()
+            ->json('data.departments.items');
+        $this->assertSame('Alpha', $byDate[0]['name']);
+        $this->getJson('/api/v1/departments/'.$department['uuid'])
+            ->assertOk()
+            ->assertJsonPath('data.department.uuid', $department['uuid'])
+            ->assertJsonPath('data.department.company.company_name', 'Org Co')
+            ->assertJsonPath('data.department.teams.0.name', 'Platform');
         $this->getJson('/api/v1/teams?company='.$company->uuid)->assertOk();
         $this->getJson('/api/v1/company-locations?company='.$company->uuid)->assertOk();
 

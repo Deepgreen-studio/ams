@@ -21,6 +21,7 @@
         :departments="departmentsStore.departments"
         :loading="departmentsStore.loading"
         embedded
+        @view="openView"
         @edit="openEdit"
         @delete="openDelete"
       />
@@ -56,7 +57,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
-import { RouterLink, useRoute } from 'vue-router';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import DepartmentFormModal from '@/modules/companies/components/DepartmentFormModal.vue';
@@ -66,6 +67,7 @@ import { companyService } from '@/modules/companies/services/companyService';
 import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
+const router = useRouter();
 const toast = useToast();
 const companiesStore = useCompaniesStore();
 const departmentsStore = useDepartmentsStore();
@@ -100,6 +102,10 @@ function onPerPageChange(value) {
 function openCreate() {
   editingDepartment.value = null;
   formOpen.value = true;
+}
+
+function openView(item) {
+  router.push({ name: 'departments.show', params: { id: item.uuid } });
 }
 
 function openEdit(item) {

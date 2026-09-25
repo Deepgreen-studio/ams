@@ -13,11 +13,33 @@
     </Teleport>
 
     <div class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+      <div class="border-b border-zinc-100 px-6 py-5 sm:px-8">
+        <div class="relative max-w-sm">
+          <MagnifyingGlassIcon
+            class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+          />
+          <input
+            v-model="search"
+            type="search"
+            placeholder="Search department, company, or team"
+            class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white py-2 pl-10 pr-3 text-sm text-slate-800 shadow-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+            @input="onSearchInput"
+            @search="onSearchInput"
+          />
+        </div>
+      </div>
+
       <DepartmentTable
         :departments="departmentsStore.departments"
         :loading="departmentsStore.loading"
         :columns="columns"
+        :empty-title="emptyState.title"
+        :empty-description="emptyState.description"
+        :sort-by="sortBy"
+        :sort-dir="sortDir"
         embedded
+        @sort="onSort"
+        @view="openView"
         @edit="openEdit"
         @delete="openDelete"
       />
@@ -70,6 +92,16 @@
               class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none focus:border-brand-500"
             />
           </div>
+          <div>
+            <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
+            <SelectBox
+              v-model="form.status"
+              size="lg"
+              wrapper-class="w-full"
+              :options="statusOptions"
+              :disabled="departmentsStore.saving"
+            />
+          </div>
           <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
           <div class="flex justify-end gap-2 pt-1">
             <button
@@ -104,9 +136,11 @@
 </template>
 
 <script setup>
-import { PlusIcon } from '@heroicons/vue/24/outline';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { MagnifyingGlassIcon, PlusIcon } from '@heroicons/vue/24/outline';
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { usePermissions } from '@/composables/usePermissions';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -116,12 +150,15 @@ import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vu
 import Pagination from '@/modules/users/components/Pagination.vue';
 
 const columns = [
-  { key: 'name', label: 'Department name' },
-  { key: 'company', label: 'Company' },
-  { key: 'note', label: 'Note' },
+  { key: 'name', label: 'Department name', sortable: true },
+  { key: 'company', label: 'Company', sortable: true },
+  { key: 'team', label: 'Team name' },
+  { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Created at', sortable: true },
 ];
 
 const toast = useToast();
+const router = useRouter();
 const { can } = usePermissions();
 const departmentsStore = useDepartmentsStore();
 const companies = ref([]);
@@ -131,10 +168,34 @@ const pending = ref(null);
 const formError = ref('');
 const page = ref(1);
 const perPage = ref(10);
+const search = ref('');
+const sortBy = ref('name');
+const sortDir = ref('asc');
+let searchTimer = null;
+
+const emptyState = computed(() => {
+  if (search.value.trim()) {
+    return {
+      title: 'No departments found',
+      description: 'No departments match this search.',
+    };
+  }
+
+  return {
+    title: 'No departments',
+    description: 'Add a department to organize your company.',
+  };
+});
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+];
+
 const form = reactive({
   department_name: '',
   company_id: '',
   note: '',
+  status: 'active',
 });
 
 const companyOptions = computed(() =>
@@ -166,14 +227,42 @@ async function load() {
   await departmentsStore.fetchDepartments({
     page: page.value,
     per_page: perPage.value,
+    search: search.value.trim() || undefined,
+    sort_by: sortBy.value,
+    sort_dir: sortDir.value,
   });
 }
+
+function onSort(column) {
+  sortDir.value = sortBy.value === column && sortDir.value === 'asc' ? 'desc' : 'asc';
+  sortBy.value = column;
+  page.value = 1;
+  load();
+}
+
+function onSearchInput() {
+  window.clearTimeout(searchTimer);
+  const delay = search.value.trim() ? 300 : 0;
+  searchTimer = window.setTimeout(() => {
+    page.value = 1;
+    load();
+  }, delay);
+}
+
+function openView(department) {
+  router.push({ name: 'departments.show', params: { id: department.uuid } });
+}
+
+onBeforeUnmount(() => {
+  window.clearTimeout(searchTimer);
+});
 
 function openCreate() {
   editing.value = null;
   form.department_name = '';
   form.company_id = '';
   form.note = '';
+  form.status = 'active';
   formError.value = '';
   formOpen.value = true;
 }
@@ -183,6 +272,7 @@ function openEdit(department) {
   form.department_name = department.department_name || department.name || '';
   form.company_id = department.company?.uuid || '';
   form.note = department.note || '';
+  form.status = department.status || 'active';
   formError.value = '';
   formOpen.value = true;
 }
@@ -207,6 +297,7 @@ async function onSave() {
     department_name: form.department_name.trim(),
     company_id: form.company_id,
     note: form.note.trim() || null,
+    status: form.status || 'active',
   };
 
   try {

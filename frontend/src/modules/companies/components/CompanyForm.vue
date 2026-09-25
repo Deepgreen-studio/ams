@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
-        <FormLabel required>Company Name</FormLabel>
+        <FormLabel required>Display Name</FormLabel>
         <input
           v-model="form.company_name"
           type="text"
@@ -12,6 +12,19 @@
         />
         <p v-if="displayErrors.company_name" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_name[0] }}
+        </p>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal Name</label>
+        <input
+          v-model="form.legal_name"
+          type="text"
+          placeholder="Acme Corporation Ltd"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+          :class="fieldClass('legal_name')"
+        />
+        <p v-if="displayErrors.legal_name" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.legal_name[0] }}
         </p>
       </div>
       <div>
@@ -136,6 +149,32 @@
         </p>
       </div>
       <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Logo</label>
+        <div class="flex items-center gap-3">
+          <div
+            class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 text-xs font-semibold text-slate-500 ring-1 ring-slate-200"
+          >
+            <img v-if="logoPreview" :src="logoPreview" alt="Logo preview" class="h-full w-full object-cover" />
+            <span v-else>Logo</span>
+          </div>
+          <label
+            class="inline-flex h-12 cursor-pointer items-center rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-700 transition hover:bg-slate-50"
+          >
+            Choose file
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              class="hidden"
+              @change="onLogoChange"
+            />
+          </label>
+          <span class="min-w-0 truncate text-xs text-slate-500">{{ logoName || 'JPG, PNG or WebP · Max 2MB' }}</span>
+        </div>
+        <p v-if="displayErrors.logo" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.logo[0] }}
+        </p>
+      </div>
+      <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
         <input
           v-model="form.website"
@@ -171,12 +210,13 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 import { getPhoneCountries, isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
@@ -190,6 +230,9 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const localErrors = ref({});
+const logoFile = ref(null);
+const logoPreview = ref('');
+const logoName = computed(() => logoFile.value?.name || '');
 
 const statusOptions = [
   { value: 'active', label: 'Active' },
@@ -289,7 +332,7 @@ function validate() {
   const next = {};
 
   if (!String(form.company_name || '').trim()) {
-    next.company_name = ['The company name field is required.'];
+    next.company_name = ['The display name field is required.'];
   }
 
   if (!String(form.registration_number || '').trim()) {
@@ -342,6 +385,10 @@ function validate() {
     next.currency = ['The currency must be a 3-letter code.'];
   }
 
+  if (localErrors.value.logo) {
+    next.logo = localErrors.value.logo;
+  }
+
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }
@@ -353,6 +400,53 @@ function onSubmit() {
   }
 
   localErrors.value = {};
-  emit('submit', { ...form });
+  emit('submit', { ...form, logo: logoFile.value });
 }
+
+function onLogoChange(event) {
+  const selected = event.target.files?.[0] || null;
+  if (logoPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(logoPreview.value);
+  }
+
+  if (!selected) {
+    logoFile.value = null;
+    logoPreview.value = resolveMediaUrl(props.initial?.logo_url || props.initial?.logo || '');
+    return;
+  }
+
+  const allowed = ['image/png', 'image/jpeg', 'image/webp'];
+  if (!allowed.includes(selected.type) || selected.size > 2 * 1024 * 1024) {
+    logoFile.value = null;
+    logoPreview.value = resolveMediaUrl(props.initial?.logo_url || props.initial?.logo || '');
+    localErrors.value = {
+      ...localErrors.value,
+      logo: ['The logo must be a JPG, PNG, or WebP image under 2MB.'],
+    };
+    event.target.value = '';
+    return;
+  }
+
+  logoFile.value = selected;
+  logoPreview.value = URL.createObjectURL(selected);
+  const next = { ...localErrors.value };
+  delete next.logo;
+  localErrors.value = next;
+}
+
+watch(
+  () => props.initial?.logo_url,
+  (url) => {
+    if (!logoFile.value) {
+      logoPreview.value = resolveMediaUrl(url || props.initial?.logo || '');
+    }
+  },
+  { immediate: true },
+);
+
+onBeforeUnmount(() => {
+  if (logoPreview.value.startsWith('blob:')) {
+    URL.revokeObjectURL(logoPreview.value);
+  }
+});
 </script>

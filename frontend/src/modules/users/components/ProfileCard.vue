@@ -13,7 +13,7 @@
           <h2 class="truncate text-xl font-semibold tracking-tight text-slate-900">
             {{ user?.full_name }}
           </h2>
-          <StatusBadge :status="user?.status" />
+          <StatusBadge :status="user?.lifecycle_status || user?.status" />
         </div>
         <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
         <div v-if="roles.length" class="mt-2.5 flex flex-wrap gap-1.5">
@@ -34,7 +34,7 @@
         <h2 class="truncate text-lg font-semibold tracking-tight text-slate-900">
           {{ user?.full_name }}
         </h2>
-        <StatusBadge :status="user?.status" />
+        <StatusBadge :status="user?.lifecycle_status || user?.status" />
       </div>
       <p class="mt-1 truncate text-sm text-slate-500">{{ user?.email }}</p>
       <div v-if="roles.length" class="mt-2.5 flex flex-wrap justify-center gap-1.5">
@@ -93,8 +93,24 @@ const props = defineProps({
 const roles = computed(() => props.user?.roles || []);
 const avatarSrc = computed(() => getUserAvatarUrl(props.user));
 
+function invitationLabel(status) {
+  if (status === 'pending') {
+    return 'Pending Invitation';
+  }
+  if (status === 'accepted') {
+    return 'Accepted';
+  }
+  if (status === 'expired') {
+    return 'Expired';
+  }
+
+  return '—';
+}
+
 const detailItems = computed(() => [
   { label: 'Phone', value: props.user?.phone || '—' },
+  { label: 'Invitation', value: invitationLabel(props.user?.invitation_status) },
+  { label: 'MFA', value: props.user?.two_factor_enabled ? 'Enabled' : 'Not enabled' },
   { label: 'Company', value: props.user?.company_name || '—' },
   { label: 'Department', value: props.user?.department_name || '—' },
   { label: 'Team', value: props.user?.team_name || '—' },

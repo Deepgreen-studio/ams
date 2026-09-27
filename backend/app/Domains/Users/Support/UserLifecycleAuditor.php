@@ -22,10 +22,9 @@ final class UserLifecycleAuditor
             'email' => $user->email,
             'phone' => $user->phone,
             'status' => $user->status?->value ?? $user->status,
-            'gender' => $user->gender?->value ?? $user->gender,
+            'invitation_status' => $user->invitation_status?->value ?? $user->invitation_status,
             'timezone' => $user->timezone,
             'language' => $user->language,
-            'date_of_birth' => optional($user->date_of_birth)?->toDateString(),
             'avatar' => $user->avatar,
         ];
     }

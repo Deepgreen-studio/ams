@@ -2,7 +2,6 @@
 
 namespace App\Domains\Users\Requests;
 
-use App\Domains\Users\Enums\UserStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +19,7 @@ class IndexUserRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'status' => ['nullable', 'string'],
+            'status' => ['nullable', 'string', 'max:255'],
             'created_by' => ['nullable', 'integer', 'exists:users,id'],
             'updated_by' => ['nullable', 'integer', 'exists:users,id'],
             'created_from' => ['nullable', 'date'],
@@ -51,8 +50,9 @@ class IndexUserRequest extends FormRequest
         $validated = $this->validated();
 
         if (! empty($validated['status'])) {
+            $allowed = ['active', 'inactive', 'suspended', 'pending', 'pending_invitation', 'expired'];
             $statuses = array_filter(array_map('trim', explode(',', (string) $validated['status'])));
-            $validated['status'] = array_values(array_intersect($statuses, UserStatus::values()));
+            $validated['status'] = array_values(array_intersect($statuses, $allowed));
         }
 
         return $validated;

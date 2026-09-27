@@ -2,12 +2,15 @@
 
 namespace App\Domains\Users\Services;
 
+use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Companies\Models\Department;
 use App\Domains\Companies\Models\Team;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Roles\Services\RoleService;
+use App\Domains\Users\Enums\InvitationStatus;
 use App\Domains\Users\Enums\UserPermission;
+use App\Domains\Users\Enums\UserStatus;
 use App\Domains\Users\Events\AvatarUpdated;
 use App\Domains\Users\Events\UserCreated;
 use App\Domains\Users\Events\UserDeleted;
@@ -77,6 +80,12 @@ class UserService
             $payload = $this->prepareWritablePayload($data);
             $payload['created_by'] = $actor->id;
             $payload['updated_by'] = $actor->id;
+            $payload['status'] = UserStatus::Inactive->value;
+            $payload['password'] = Str::password(64);
+            $payload['invitation_status'] = InvitationStatus::Pending->value;
+            $payload['invitation_sent_at'] = now();
+            $payload['invitation_expires_at'] = now()->addMinutes($this->invitationTtlMinutes());
+            $payload['email_verified_at'] = null;
 
             $user = $this->userRepository->createUser($payload);
 
@@ -86,6 +95,7 @@ class UserService
 
             if (array_key_exists('company_id', $data)) {
                 $this->syncPrimaryCompany($user, $data['company_id']);
+                $this->inheritCompanyLocale($user, $data);
             }
 
             if (array_key_exists('department_id', $data)) {
@@ -112,6 +122,84 @@ class UserService
         $user->notify(new UserPasswordSetupNotification($token));
     }
 
+    public function resendInvitation(string $identifier, User $actor): User
+    {
+        $user = $this->userRepository->findByIdentifierOrFail($identifier);
+        $invitation = $user->invitation_status;
+
+        if ($user->isProtectedAccount()) {
+            throw new ApiException('The system administrator account cannot receive an invitation.', 422);
+        }
+
+        if ($invitation === InvitationStatus::Accepted) {
+            throw new ApiException('This user has already accepted the invitation.', 422);
+        }
+
+        $user = $this->userRepository->updateUser($user, [
+            'status' => UserStatus::Inactive->value,
+            'invitation_status' => InvitationStatus::Pending->value,
+            'invitation_sent_at' => now(),
+            'invitation_expires_at' => now()->addMinutes($this->invitationTtlMinutes()),
+            'updated_by' => $actor->id,
+        ]);
+
+        $this->sendPasswordSetupEmail($user);
+
+        return $user->load(['creator', 'updater', 'roles', 'companies', 'department.teams:id,uuid,department_id,name', 'team', 'location']);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function loginHistory(User $user): array
+    {
+        return $user->loginHistories()
+            ->latest('logged_in_at')
+            ->limit(10)
+            ->get()
+            ->map(static fn ($entry): array => [
+                'uuid' => $entry->uuid,
+                'status' => $entry->status,
+                'ip_address' => $entry->ip_address,
+                'browser' => $entry->browser,
+                'platform' => $entry->platform,
+                'device' => $entry->device,
+                'logged_in_at' => $entry->logged_in_at,
+                'logout_at' => $entry->logout_at,
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function sessions(User $user, ?User $actor = null): array
+    {
+        $currentId = $actor?->is($user) ? $actor->currentAccessToken()?->id : null;
+
+        return $user->tokens()
+            ->latest('id')
+            ->get()
+            ->map(static fn ($token): array => [
+                'id' => $token->id,
+                'name' => $token->name,
+                'last_used_at' => $token->last_used_at,
+                'created_at' => $token->created_at,
+                'current' => $currentId !== null && (int) $token->id === (int) $currentId,
+            ])
+            ->all();
+    }
+
+    public function revokeSession(string $identifier, int $sessionId, User $actor): void
+    {
+        $user = $this->userRepository->findByIdentifierOrFail($identifier);
+        $deleted = $user->tokens()->whereKey($sessionId)->delete();
+
+        if ($deleted === 0) {
+            throw new ApiException('Session not found.', 404);
+        }
+    }
+
     /**
      * @param array<string, mixed> $data
      */
@@ -122,6 +210,8 @@ class UserService
             $before = UserLifecycleAuditor::snapshot($user);
             $payload = $this->prepareWritablePayload($data, isUpdate: true);
             $payload['updated_by'] = $actor->id;
+            $this->guardProtectedAccount($user, $payload);
+            $this->guardAccountActivation($user, $payload);
 
             $updated = $this->userRepository->updateUser($user, $payload);
 
@@ -131,6 +221,7 @@ class UserService
 
             if (array_key_exists('company_id', $data)) {
                 $this->syncPrimaryCompany($updated, $data['company_id']);
+                $this->inheritCompanyLocale($updated, $data);
             }
 
             if (array_key_exists('department_id', $data)) {
@@ -156,6 +247,10 @@ class UserService
     {
         DB::transaction(function () use ($identifier, $actor): void {
             $user = $this->userRepository->findByIdentifierOrFail($identifier);
+
+            if ($user->isProtectedAccount()) {
+                throw new ApiException('The system administrator account cannot be removed.', 422);
+            }
 
             if ($user->id === $actor->id) {
                 throw new ApiException('You cannot delete your own account.', 422);
@@ -196,6 +291,10 @@ class UserService
     {
         DB::transaction(function () use ($identifier, $actor): void {
             $user = $this->userRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if ($user->isProtectedAccount()) {
+                throw new ApiException('The system administrator account cannot be removed.', 422);
+            }
 
             if ($user->id === $actor->id) {
                 throw new ApiException('You cannot permanently delete your own account.', 422);
@@ -289,17 +388,13 @@ class UserService
             'last_name',
             'email',
             'phone',
-            'gender',
-            'date_of_birth',
             'timezone',
             'language',
-            'password',
             'status',
-            'email_verified_at',
         ];
 
         if ($isProfile) {
-            $allowed = array_values(array_diff($allowed, ['password', 'status', 'email_verified_at']));
+            $allowed = array_values(array_diff($allowed, ['status']));
         }
 
         $payload = array_intersect_key($data, array_flip($allowed));
@@ -308,15 +403,75 @@ class UserService
             $payload['phone'] = PhoneNumber::store($payload['phone']);
         }
 
-        if (array_key_exists('gender', $payload) && blank($payload['gender'])) {
-            $payload['gender'] = null;
-        }
-
-        if (! $isUpdate && empty($payload['status'])) {
-            $payload['status'] = 'active';
-        }
-
         return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function guardProtectedAccount(User $user, array &$payload): void
+    {
+        if (! $user->isProtectedAccount()) {
+            return;
+        }
+
+        if (array_key_exists('status', $payload) && $payload['status'] !== UserStatus::Active->value) {
+            throw new ApiException('The system administrator account must stay active.', 422);
+        }
+
+        unset($payload['status']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    protected function guardAccountActivation(User $user, array $payload): void
+    {
+        if (($payload['status'] ?? null) !== UserStatus::Active->value) {
+            return;
+        }
+
+        $invitation = $user->invitation_status;
+
+        if ($invitation === InvitationStatus::Pending || $invitation === InvitationStatus::Expired) {
+            throw new ApiException('The user must accept the invitation before the account can be activated.', 422);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function inheritCompanyLocale(User $user, array $data): void
+    {
+        $company = $user->companies()->first();
+
+        if (! $company instanceof Company) {
+            return;
+        }
+
+        $changes = [];
+
+        if ((! array_key_exists('timezone', $data) || blank($data['timezone'])) && filled($company->timezone)) {
+            $changes['timezone'] = $company->timezone;
+        }
+
+        if ((! array_key_exists('language', $data) || blank($data['language'])) && filled($company->language)) {
+            $changes['language'] = $company->language;
+        }
+
+        if ($changes !== []) {
+            $user->forceFill($changes)->save();
+        }
+    }
+
+    protected function invitationTtlMinutes(): int
+    {
+        $expire = config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60);
+
+        return max(1, (int) $expire);
     }
 
     protected function syncPrimaryCompany(User $user, mixed $companyUuid): void

@@ -7,6 +7,11 @@ export const authService = {
     return api.post('/auth/login', payload);
   },
 
+  async verifyTwoFactor(payload) {
+    await ensureCsrfCookie();
+    return api.post('/auth/two-factor', payload);
+  },
+
   async logout() {
     return api.post('/auth/logout');
   },

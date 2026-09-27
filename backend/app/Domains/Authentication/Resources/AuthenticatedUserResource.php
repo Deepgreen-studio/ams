@@ -25,6 +25,7 @@ class AuthenticatedUserResource extends JsonResource
             'avatar_url' => $this->avatar_url,
             'status' => $this->status?->value ?? $this->status,
             'is_active' => (bool) $this->is_active,
+            'is_protected' => $this->isProtectedAccount(),
             'timezone' => $this->timezone,
             'language' => $this->language,
             'email_verified' => $this->hasVerifiedEmail(),
@@ -32,6 +33,8 @@ class AuthenticatedUserResource extends JsonResource
             'last_login_at' => $this->last_login_at,
             'roles' => $this->getRoleNames()->values(),
             'permissions' => $this->getAllPermissions()->pluck('name')->values(),
+            'two_factor_enabled' => $this->hasConfirmedTwoFactor(),
+            'mfa_enrollment_required' => $this->requiresMfaEnrollment(),
             'is_portal_customer' => $this->isPortalCustomer(),
             'customer_id' => $this->customer_id,
             'customer' => $this->whenLoaded('customer', function () {

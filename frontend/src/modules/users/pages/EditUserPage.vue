@@ -17,7 +17,8 @@
         :role-options="roleOptions"
         :company-options="companyOptions"
         submit-label="Save Changes"
-        :require-password="false"
+        :show-password="false"
+        :show-status="!usersStore.currentUser?.is_protected"
         @submit="onSubmit"
         @cancel="router.push({ name: 'users.show', params: { id: route.params.id } })"
       />

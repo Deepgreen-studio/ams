@@ -7,7 +7,15 @@
 
     <div>
       <label for="new-password" class="mb-1 block text-sm font-medium text-slate-700">New Password</label>
-      <PasswordInput id="new-password" v-model="form.password" autocomplete="new-password" required :disabled="loading" />
+      <PasswordInput
+        id="new-password"
+        v-model="form.password"
+        autocomplete="new-password"
+        required
+        :disabled="loading"
+        :tone="passwordTone"
+      />
+      <PasswordRequirements :password="form.password" />
     </div>
 
     <div>
@@ -18,13 +26,18 @@
         autocomplete="new-password"
         required
         :disabled="loading"
+        :tone="confirmationTone"
       />
+      <p v-if="confirmationError" class="mt-1.5 text-xs text-rose-600">{{ confirmationError }}</p>
+      <p v-else-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
     </div>
 
     <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
       {{ successMessage }}
     </p>
-    <ErrorState v-if="errorMessage" title="Unable to change password" :message="errorMessage" />
+    <p v-if="errorMessage" class="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+      {{ errorMessage }}
+    </p>
 
     <button
       type="submit"
@@ -37,15 +50,17 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import ErrorState from '@/components/ui/ErrorState.vue';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
+import PasswordRequirements from '@/modules/authentication/components/PasswordRequirements.vue';
+import { passwordIsValid } from '@/modules/authentication/utils/passwordRules';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const loading = ref(false);
+const submitted = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
 
@@ -55,17 +70,59 @@ const form = reactive({
   password_confirmation: '',
 });
 
+const passwordValid = computed(() => passwordIsValid(form.password));
+const showRuleErrors = computed(() => submitted.value || form.password.length > 0);
+const passwordsMatch = computed(
+  () => form.password.length > 0 && form.password === form.password_confirmation,
+);
+const confirmationError = computed(() => {
+  if ((submitted.value || form.password_confirmation.length > 0) && !passwordsMatch.value) {
+    return 'Passwords do not match.';
+  }
+
+  return '';
+});
+const passwordTone = computed(() => {
+  if (passwordValid.value) {
+    return 'valid';
+  }
+
+  if (showRuleErrors.value) {
+    return 'invalid';
+  }
+
+  return 'default';
+});
+const confirmationTone = computed(() => {
+  if (passwordsMatch.value) {
+    return 'valid';
+  }
+
+  if (confirmationError.value) {
+    return 'invalid';
+  }
+
+  return 'default';
+});
+
 async function onSubmit() {
-  loading.value = true;
+  submitted.value = true;
   errorMessage.value = '';
   successMessage.value = '';
+
+  if (!passwordValid.value || form.password !== form.password_confirmation) {
+    return;
+  }
+
+  loading.value = true;
 
   try {
     const data = await authStore.changePassword({ ...form });
     successMessage.value = data.message || 'Password changed successfully. Please sign in again.';
     setTimeout(() => router.push({ name: 'login' }), 1000);
   } catch (err) {
-    errorMessage.value = err.message || 'Unable to change password';
+    const passwordErrors = err.errors?.password;
+    errorMessage.value = passwordErrors?.[0] || err.message || 'Unable to change password';
   } finally {
     loading.value = false;
   }

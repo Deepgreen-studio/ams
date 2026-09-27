@@ -22,7 +22,12 @@
         placeholder=""
         required
         :disabled="loading"
+        :tone="passwordTone"
       />
+      <PasswordRequirements :password="form.password" />
+      <p v-for="message in extraPasswordErrors" :key="message" class="mt-1.5 text-xs text-rose-600">
+        {{ message }}
+      </p>
     </div>
 
     <div>
@@ -34,7 +39,10 @@
         placeholder=""
         required
         :disabled="loading"
+        :tone="confirmationTone"
       />
+      <p v-if="confirmationError" class="mt-1.5 text-xs text-rose-600">{{ confirmationError }}</p>
+      <p v-else-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
     </div>
 
     <p v-if="successMessage" class="rounded-xl bg-emerald-50 px-3.5 py-2.5 text-sm text-emerald-800">
@@ -62,13 +70,17 @@
 import { computed, reactive, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
+import PasswordRequirements from '@/modules/authentication/components/PasswordRequirements.vue';
+import { passwordIsValid } from '@/modules/authentication/utils/passwordRules';
 import { authService } from '@/modules/authentication/services/authService';
 
 const route = useRoute();
 const router = useRouter();
 const loading = ref(false);
+const submitted = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
+const fieldErrors = ref({});
 
 const isSetup = computed(() => route.query.setup === '1');
 const submitLabel = computed(() => (isSetup.value ? 'Set password and continue' : 'Reset password'));
@@ -80,17 +92,70 @@ const form = reactive({
   token: typeof route.query.token === 'string' ? route.query.token : '',
 });
 
+const passwordValid = computed(() => passwordIsValid(form.password));
+const showRuleErrors = computed(() => submitted.value || form.password.length > 0);
+const passwordsMatch = computed(
+  () => form.password.length > 0 && form.password === form.password_confirmation,
+);
+const confirmationError = computed(() => {
+  if (fieldErrors.value.password_confirmation?.[0]) {
+    return fieldErrors.value.password_confirmation[0];
+  }
+
+  if ((submitted.value || form.password_confirmation.length > 0) && !passwordsMatch.value) {
+    return 'Passwords do not match.';
+  }
+
+  return '';
+});
+const extraPasswordErrors = computed(() =>
+  (fieldErrors.value.password || []).filter(
+    (message) => !/uppercase|lowercase|letter|number|symbol|8 characters/i.test(message),
+  ),
+);
+const passwordTone = computed(() => {
+  if (passwordValid.value) {
+    return 'valid';
+  }
+
+  if (showRuleErrors.value) {
+    return 'invalid';
+  }
+
+  return 'default';
+});
+const confirmationTone = computed(() => {
+  if (passwordsMatch.value) {
+    return 'valid';
+  }
+
+  if (confirmationError.value) {
+    return 'invalid';
+  }
+
+  return 'default';
+});
+
 async function onSubmit() {
-  loading.value = true;
+  submitted.value = true;
   errorMessage.value = '';
   successMessage.value = '';
+  fieldErrors.value = {};
+
+  if (!passwordValid.value || form.password !== form.password_confirmation) {
+    return;
+  }
+
+  loading.value = true;
 
   try {
     const { data } = await authService.resetPassword({ ...form });
     successMessage.value = data.message || 'Password updated successfully.';
     setTimeout(() => router.push({ name: 'login' }), 1200);
   } catch (err) {
-    errorMessage.value = err.message || 'Unable to reset password';
+    fieldErrors.value = err.errors || {};
+    const hasFieldErrors = Object.keys(fieldErrors.value).length > 0;
+    errorMessage.value = hasFieldErrors ? '' : err.message || 'Unable to reset password';
   } finally {
     loading.value = false;
   }

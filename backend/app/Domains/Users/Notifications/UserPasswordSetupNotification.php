@@ -30,7 +30,8 @@ class UserPasswordSetupNotification extends Notification
             ->greeting('Hello '.$name.',')
             ->line('An account has been created for you. Set a password, then sign in with your email address.')
             ->action('Set password', $url)
-            ->line('This link expires in '.$expire.' minutes.')
+            ->line('This link expires in '.$expire.' minutes and can be used once.')
+            ->line('After you set a password, sign in at '.rtrim((string) config('app.frontend_url'), '/').'/auth/login.')
             ->line('If you did not expect this email, you can ignore it.');
     }
 }

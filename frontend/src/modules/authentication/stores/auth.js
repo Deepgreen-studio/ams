@@ -135,6 +135,11 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
 
       const { data } = await authService.login(credentials);
+
+      if (data.data?.mfa_required) {
+        return data;
+      }
+
       user.value = data.data?.user ?? null;
       token.value = data.data?.token ?? null;
       persistToken(token.value, remember);
@@ -143,6 +148,27 @@ export const useAuthStore = defineStore('auth', () => {
       return data;
     } catch (err) {
       error.value = err.message || 'Unable to login';
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function verifyTwoFactor(payload) {
+    loading.value = true;
+    error.value = null;
+
+    try {
+      const remember = rememberMe.value;
+      const { data } = await authService.verifyTwoFactor(payload);
+      user.value = data.data?.user ?? null;
+      token.value = data.data?.token ?? null;
+      persistToken(token.value, remember);
+      initialized.value = true;
+      sessionExpired.value = false;
+      return data;
+    } catch (err) {
+      error.value = err.message || 'Unable to verify the code';
       throw err;
     } finally {
       loading.value = false;
@@ -230,6 +256,7 @@ export const useAuthStore = defineStore('auth', () => {
     hasAllPermissions,
     initialize,
     login,
+    verifyTwoFactor,
     logout,
     logoutAll,
     clearSession,

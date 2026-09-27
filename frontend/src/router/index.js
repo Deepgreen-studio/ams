@@ -9,6 +9,10 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      redirect: { name: 'login' },
+    },
+    {
       path: '/auth',
       component: AuthenticationLayout,
       meta: { guest: true },

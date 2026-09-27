@@ -10,11 +10,15 @@ use App\Domains\Authentication\Events\UserLoggedIn;
 use App\Domains\Authentication\Events\UserLoggedOut;
 use App\Domains\Authentication\Repositories\AuthenticationRepository;
 use App\Domains\Audit\Services\LoginHistoryService;
+use App\Domains\Users\Enums\InvitationStatus;
+use App\Domains\Users\Enums\UserStatus;
+use App\Domains\Users\Repositories\UserRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -24,6 +28,8 @@ class AuthenticationService
     public function __construct(
         private readonly AuthenticationRepository $repository,
         private readonly LoginHistoryService $loginHistoryService,
+        private readonly TwoFactorService $twoFactorService,
+        private readonly UserRepository $userRepository,
     ) {}
 
     /**
@@ -41,12 +47,68 @@ class AuthenticationService
             ]);
         }
 
+        $this->userRepository->expireStaleInvitations();
+        $user->refresh();
+
         if (! $user->isAccountActive()) {
             $this->loginHistoryService->recordFailedLogin($user, $request);
 
-            throw new ApiException('Your account is inactive.', 403);
+            throw new ApiException($this->inactiveAccountMessage($user), 403);
         }
 
+        if ($user->hasConfirmedTwoFactor()) {
+            $challenge = Str::random(64);
+            Cache::put($this->challengeKey($challenge), [
+                'user_id' => $user->id,
+                'remember' => $remember,
+            ], now()->addMinutes(5));
+
+            return [
+                'mfa_required' => true,
+                'challenge' => $challenge,
+                'user' => $user,
+                'token' => null,
+            ];
+        }
+
+        return $this->issueSession($user, $remember, $request);
+    }
+
+    /**
+     * @return array{user: User, token: string, mfa_required: bool}
+     */
+    public function verifyTwoFactor(string $challenge, string $code, Request $request): array
+    {
+        $payload = Cache::get($this->challengeKey($challenge));
+
+        if (! is_array($payload) || empty($payload['user_id'])) {
+            throw ValidationException::withMessages([
+                'code' => ['This sign-in challenge has expired. Sign in again.'],
+            ]);
+        }
+
+        $user = User::query()->find($payload['user_id']);
+
+        if (! $user || ! $user->hasConfirmedTwoFactor() || ! $this->twoFactorService->verifyLoginCode($user, $code)) {
+            throw ValidationException::withMessages([
+                'code' => ['The authentication code is invalid.'],
+            ]);
+        }
+
+        Cache::forget($this->challengeKey($challenge));
+
+        if (! $user->isAccountActive()) {
+            throw new ApiException($this->inactiveAccountMessage($user), 403);
+        }
+
+        return $this->issueSession($user, (bool) ($payload['remember'] ?? false), $request);
+    }
+
+    /**
+     * @return array{user: User, token: string, mfa_required: bool}
+     */
+    protected function issueSession(User $user, bool $remember, Request $request): array
+    {
         Auth::guard('web')->login($user, $remember);
 
         if ($request->hasSession()) {
@@ -60,6 +122,8 @@ class AuthenticationService
         event(new UserLoggedIn($user, $request));
 
         return [
+            'mfa_required' => false,
+            'challenge' => null,
             'user' => $this->repository->loadAuthRelations($user),
             'token' => $token,
         ];
@@ -140,6 +204,11 @@ class AuthenticationService
 
     public function forgotPassword(string $email): void
     {
+        $account = User::query()->where('email', $email)->first();
+        if ($account?->isProtectedAccount()) {
+            return;
+        }
+
         event(new PasswordResetRequested($email));
 
         // Always attempt send; response stays generic to prevent user enumeration.
@@ -151,12 +220,28 @@ class AuthenticationService
      */
     public function resetPassword(array $data): void
     {
+        $account = User::query()->where('email', $data['email'])->first();
+        if ($account?->isProtectedAccount()) {
+            throw ValidationException::withMessages([
+                'email' => ['This account password cannot be changed.'],
+            ]);
+        }
+
         $status = Password::broker()->reset(
             $data,
             function (User $user, string $password): void {
                 $this->repository->updatePassword($user, $password);
                 $this->repository->markEmailAsVerified($user);
-                $user->forceFill(['remember_token' => Str::random(60)])->save();
+                $fill = ['remember_token' => Str::random(60)];
+
+                if ($user->invitation_status !== InvitationStatus::Accepted) {
+                    $fill['invitation_status'] = InvitationStatus::Accepted->value;
+                    $fill['status'] = UserStatus::Active->value;
+                    $fill['is_active'] = true;
+                    $fill['invitation_expires_at'] = null;
+                }
+
+                $user->forceFill($fill)->save();
                 $this->repository->revokeAllTokens($user);
 
                 event(new PasswordResetCompleted($user));
@@ -172,6 +257,10 @@ class AuthenticationService
 
     public function changePassword(User $user, string $currentPassword, string $newPassword): User
     {
+        if ($user->isProtectedAccount()) {
+            throw new ApiException('This account password cannot be changed.', 422);
+        }
+
         if (! $this->repository->credentialsAreValid($user, $currentPassword)) {
             throw ValidationException::withMessages([
                 'current_password' => ['The current password is incorrect.'],
@@ -208,5 +297,21 @@ class AuthenticationService
         }
 
         return $this->repository->loadAuthRelations($user->fresh());
+    }
+
+    protected function inactiveAccountMessage(User $user): string
+    {
+        $invitation = $user->invitation_status;
+
+        return match ($invitation) {
+            InvitationStatus::Pending => 'Accept your invitation and set a password before signing in.',
+            InvitationStatus::Expired => 'Your invitation has expired. Ask an administrator to send a new one.',
+            default => 'Your account is inactive.',
+        };
+    }
+
+    protected function challengeKey(string $challenge): string
+    {
+        return 'mfa-challenge:'.$challenge;
     }
 }

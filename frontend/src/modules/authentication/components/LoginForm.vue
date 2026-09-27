@@ -14,7 +14,22 @@
       />
     </div>
 
-    <div>
+    <div v-if="challenge">
+      <label for="login-code" class="mb-1.5 block text-sm font-medium text-zinc-700">Authentication code</label>
+      <input
+        id="login-code"
+        v-model="form.code"
+        type="text"
+        inputmode="numeric"
+        autocomplete="one-time-code"
+        required
+        :disabled="loading"
+        class="h-11 w-full rounded-xl bg-white px-3.5 text-sm text-zinc-900 outline-none ring-1 ring-zinc-200 transition placeholder:text-zinc-400 focus:ring-brand-500 disabled:bg-zinc-50"
+        placeholder="6-digit code or recovery code"
+      />
+    </div>
+
+    <div v-else>
       <label for="login-password" class="mb-1.5 block text-sm font-medium text-zinc-700">Password</label>
       <PasswordInput
         id="login-password"
@@ -64,7 +79,7 @@
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
       </svg>
-      {{ loading ? 'Signing in...' : 'Sign in' }}
+      {{ loading ? 'Signing in...' : challenge ? 'Verify' : 'Sign in' }}
     </button>
   </form>
 </template>
@@ -85,26 +100,48 @@ const sessionExpired = computed(
   () => route.query.reason === 'session' || authStore.sessionExpired
 );
 
+const challenge = ref('');
 const form = reactive({
   email: '',
   password: '',
   remember: true,
+  code: '',
 });
+
+async function finishLogin() {
+  if (authStore.user?.mfa_enrollment_required) {
+    await router.replace({ name: 'profile', query: { mfa: 'required' } });
+    return;
+  }
+
+  const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null;
+  if (redirect) {
+    await router.replace(redirect);
+  } else if (authStore.isPortalCustomer) {
+    await router.replace({ name: 'portal.tickets.index' });
+  } else {
+    await router.replace({ name: 'dashboard' });
+  }
+}
 
 async function onSubmit() {
   errorMessage.value = '';
   loading.value = true;
 
   try {
-    await authStore.login({ ...form });
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : null;
-    if (redirect) {
-      await router.replace(redirect);
-    } else if (authStore.isPortalCustomer) {
-      await router.replace({ name: 'portal.tickets.index' });
-    } else {
-      await router.replace({ name: 'dashboard' });
+    if (challenge.value) {
+      await authStore.verifyTwoFactor({ challenge: challenge.value, code: form.code });
+      await finishLogin();
+      return;
     }
+
+    const result = await authStore.login({ ...form });
+    if (result?.data?.mfa_required) {
+      challenge.value = result.data.challenge;
+      return;
+    }
+
+    await finishLogin();
   } catch (err) {
     errorMessage.value = err.message || 'Invalid credentials.';
   } finally {

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->group(function (): void {
     Route::middleware('throttle:auth-login')->group(function (): void {
         Route::post('/login', [AuthController::class, 'login']);
+        Route::post('/two-factor', [AuthController::class, 'verifyTwoFactor']);
     });
 
     Route::middleware('throttle:auth-password')->group(function (): void {

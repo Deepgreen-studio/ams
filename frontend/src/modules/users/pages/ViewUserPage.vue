@@ -10,7 +10,7 @@
           Edit
         </RouterLink>
         <button
-          v-if="usersStore.currentUser && can('users.delete')"
+          v-if="usersStore.currentUser && can('users.delete') && !usersStore.currentUser.is_protected"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
@@ -84,16 +84,6 @@
               <dd class="text-sm text-slate-900">{{ usersStore.currentUser.last_name || '—' }}</dd>
             </div>
             <div>
-              <dt class="text-xs text-slate-500">Gender</dt>
-              <dd class="text-sm text-slate-900">{{ formatGender(usersStore.currentUser.gender) }}</dd>
-            </div>
-            <div>
-              <dt class="text-xs text-slate-500">Date of birth</dt>
-              <dd class="text-sm text-slate-900">
-                {{ usersStore.currentUser.date_of_birth || '—' }}
-              </dd>
-            </div>
-            <div>
               <dt class="text-xs text-slate-500">Email verified</dt>
               <dd class="text-sm text-slate-900">
                 {{ usersStore.currentUser.email_verified ? 'Yes' : 'No' }}
@@ -148,9 +138,69 @@
           </ul>
         </div>
 
-        <div class="rounded-[12px] bg-slate-50 p-6 text-sm text-slate-500">
-          Login history is architecture-ready and will appear here when authentication session
-          recording is enabled.
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Login history
+          </h3>
+          <ul class="mt-4 space-y-2">
+            <li
+              v-for="entry in usersStore.loginHistory"
+              :key="entry.uuid"
+              class="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600"
+            >
+              <p class="font-medium text-slate-800">
+                {{ entry.status || 'success' }}
+                ·
+                {{ entry.browser || entry.device || 'Unknown device' }}
+              </p>
+              <p class="mt-0.5 text-slate-500">
+                {{ entry.ip_address || 'Unknown IP' }}
+                ·
+                {{ formatDateTime(entry.logged_in_at) || '—' }}
+              </p>
+            </li>
+            <li v-if="!usersStore.loginHistory.length" class="text-sm text-slate-500">
+              No login history yet.
+            </li>
+          </ul>
+        </div>
+
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Sessions
+          </h3>
+          <ul class="mt-4 space-y-2">
+            <li
+              v-for="session in usersStore.sessions"
+              :key="session.id"
+              class="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600"
+            >
+              <div>
+                <p class="font-medium text-slate-800">
+                  {{ session.name || 'Session' }}
+                  <span v-if="session.current"> · current</span>
+                </p>
+                <p class="mt-0.5 text-slate-500">
+                  Last used {{ formatDateTime(session.last_used_at) || 'never' }}
+                </p>
+              </div>
+              <button
+                v-if="can('users.update')"
+                type="button"
+                class="text-sm font-medium text-rose-600 hover:text-rose-700"
+                @click="onRevoke(session)"
+              >
+                Revoke
+              </button>
+            </li>
+            <li v-if="!usersStore.sessions.length" class="text-sm text-slate-500">
+              No active sessions.
+            </li>
+          </ul>
+          <p class="mt-4 text-xs text-slate-500">
+            MFA is {{ usersStore.currentUser.two_factor_enabled ? 'enabled' : 'not enabled' }}.
+            Super Admin accounts are asked to enroll after sign-in.
+          </p>
         </div>
       </div>
     </div>
@@ -203,14 +253,13 @@ onMounted(() => {
   usersStore.fetchUser(route.params.id);
 });
 
-function formatGender(value) {
-  if (!value) {
-    return '—';
+async function onRevoke(session) {
+  try {
+    await usersStore.revokeSession(route.params.id, session.id);
+    toast.success('Session revoked.');
+  } catch {
+    toast.error(usersStore.error || 'Unable to revoke session.');
   }
-
-  return String(value)
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 async function onDelete() {

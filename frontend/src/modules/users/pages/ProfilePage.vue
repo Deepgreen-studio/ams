@@ -25,7 +25,13 @@
         </div>
       </aside>
 
-      <section class="xl:col-span-8">
+      <section class="space-y-6 xl:col-span-8">
+        <TwoFactorPanel
+          :enabled="Boolean(usersStore.profile?.two_factor_enabled)"
+          :required="route.query.mfa === 'required' || Boolean(authStore.user?.mfa_enrollment_required)"
+          :is-super-admin="authStore.isSuperAdmin"
+          @updated="onTwoFactorUpdated"
+        />
         <div class="rounded-[12px] bg-white p-6 sm:p-8">
 
           <UserForm
@@ -55,13 +61,16 @@
 
 <script setup>
 import { onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import AvatarUpload from '@/modules/users/components/AvatarUpload.vue';
+import TwoFactorPanel from '@/modules/users/components/TwoFactorPanel.vue';
 import ProfileCard from '@/modules/users/components/ProfileCard.vue';
 import UserForm from '@/modules/users/components/UserForm.vue';
 import { useToast } from '@/composables/useToast';
 import { useUsersStore } from '@/modules/users/stores/users';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
 
+const route = useRoute();
 const usersStore = useUsersStore();
 const authStore = useAuthStore();
 const toast = useToast();
@@ -87,6 +96,20 @@ watch(
 onMounted(() => {
   usersStore.fetchProfile();
 });
+
+function onTwoFactorUpdated(user) {
+  if (!user) {
+    usersStore.fetchProfile();
+    return;
+  }
+
+  usersStore.profile = user;
+  authStore.user = {
+    ...authStore.user,
+    two_factor_enabled: Boolean(user.two_factor_enabled),
+    mfa_enrollment_required: false,
+  };
+}
 
 async function onSubmit(payload) {
   const profile = await usersStore.updateProfile(payload);

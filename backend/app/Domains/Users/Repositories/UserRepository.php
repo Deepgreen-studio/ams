@@ -2,6 +2,7 @@
 
 namespace App\Domains\Users\Repositories;
 
+use App\Domains\Users\Enums\InvitationStatus;
 use App\Domains\Users\Models\UserLoginHistory;
 use App\Models\User;
 use App\Shared\Repositories\BaseRepository;
@@ -72,8 +73,19 @@ class UserRepository extends BaseRepository
     /**
      * @param array<string, mixed> $filters
      */
+    public function expireStaleInvitations(): void
+    {
+        $this->model->newQuery()
+            ->where('invitation_status', InvitationStatus::Pending->value)
+            ->whereNotNull('invitation_expires_at')
+            ->where('invitation_expires_at', '<=', now())
+            ->update(['invitation_status' => InvitationStatus::Expired->value]);
+    }
+
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
+        $this->expireStaleInvitations();
+
         $perPage = (int) ($filters['per_page'] ?? 15);
         $perPage = max(1, min($perPage, 100));
 
@@ -119,7 +131,17 @@ class UserRepository extends BaseRepository
                 ? $filters['status']
                 : explode(',', (string) $filters['status']);
 
-            $query->whereIn('status', array_filter($statuses));
+            $statuses = array_values(array_filter($statuses));
+
+            if ($statuses !== []) {
+                $query->where(function (Builder $builder) use ($statuses): void {
+                    foreach ($statuses as $status) {
+                        $builder->orWhere(function (Builder $inner) use ($status): void {
+                            $this->applyLifecycleFilter($inner, (string) $status);
+                        });
+                    }
+                });
+            }
         }
 
         if (! empty($filters['created_by'])) {
@@ -204,16 +226,43 @@ class UserRepository extends BaseRepository
      */
     public function statistics(): array
     {
+        $this->expireStaleInvitations();
+
         $base = $this->model->newQuery();
+        $accepted = function (Builder $query): void {
+            $query->where('invitation_status', InvitationStatus::Accepted->value)
+                ->orWhereNull('invitation_status');
+        };
+
+        $pendingInvitation = (clone $base)->where('invitation_status', InvitationStatus::Pending->value)->count();
+        $expired = (clone $base)->where('invitation_status', InvitationStatus::Expired->value)->count();
 
         return [
             'total' => (clone $base)->count(),
-            'active' => (clone $base)->where('status', 'active')->count(),
-            'inactive' => (clone $base)->where('status', 'inactive')->count(),
-            'suspended' => (clone $base)->where('status', 'suspended')->count(),
-            'pending' => (clone $base)->where('status', 'pending')->count(),
+            'active' => (clone $base)->where('status', 'active')->where($accepted)->count(),
+            'inactive' => (clone $base)->where('status', 'inactive')->where($accepted)->count(),
+            'suspended' => (clone $base)->where('status', 'suspended')->where($accepted)->count(),
+            'pending' => $pendingInvitation,
+            'pending_invitation' => $pendingInvitation,
+            'expired' => $expired,
             'trashed' => (clone $base)->onlyTrashed()->count(),
         ];
+    }
+
+    protected function applyLifecycleFilter(Builder $query, string $status): void
+    {
+        $accepted = function (Builder $inner): void {
+            $inner->where('invitation_status', InvitationStatus::Accepted->value)
+                ->orWhereNull('invitation_status');
+        };
+
+        match ($status) {
+            'pending', 'pending_invitation' => $query->where('invitation_status', InvitationStatus::Pending->value),
+            'expired' => $query->where('invitation_status', InvitationStatus::Expired->value),
+            'inactive' => $query->where('status', 'inactive')->where($accepted),
+            'active', 'suspended' => $query->where('status', $status)->where($accepted),
+            default => $query->where('status', $status),
+        };
     }
 
     /**

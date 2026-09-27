@@ -22,6 +22,7 @@ class AdminUserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'status' => UserStatus::Active,
                 'is_active' => true,
+                'is_protected' => true,
                 'timezone' => 'UTC',
                 'language' => 'en',
             ]

@@ -18,10 +18,16 @@ const props = defineProps({
   },
 });
 
-const label = computed(() => {
-  const value = props.status || 'active';
-  return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
-});
+const LABELS = {
+  active: 'Active',
+  inactive: 'Inactive',
+  suspended: 'Suspended',
+  pending: 'Pending Invitation',
+  pending_invitation: 'Pending Invitation',
+  expired: 'Expired',
+};
+
+const label = computed(() => LABELS[props.status] || 'Inactive');
 
 const classes = computed(() => {
   switch (props.status) {
@@ -32,7 +38,10 @@ const classes = computed(() => {
     case 'suspended':
       return 'border-rose-500 text-rose-700';
     case 'pending':
+    case 'pending_invitation':
       return 'border-amber-500 text-amber-700';
+    case 'expired':
+      return 'border-orange-500 text-orange-700';
     default:
       return 'border-slate-400 text-slate-600';
   }
@@ -47,7 +56,10 @@ const dotClass = computed(() => {
     case 'suspended':
       return 'bg-rose-500';
     case 'pending':
+    case 'pending_invitation':
       return 'bg-amber-500';
+    case 'expired':
+      return 'bg-orange-500';
     default:
       return 'bg-slate-400';
   }

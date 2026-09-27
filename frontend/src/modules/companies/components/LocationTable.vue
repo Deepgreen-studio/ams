@@ -13,9 +13,12 @@
       <StatusBadge :status="item.status" />
     </template>
     <template #cell-city="{ item }">
-      <span class="text-slate-600">
-        {{ [item.city, item.country].filter(Boolean).join(', ') || '-' }}
-      </span>
+      <div class="min-w-0 text-slate-600">
+        <p v-if="item.address" class="truncate">{{ item.address }}</p>
+        <p :class="item.address ? 'truncate text-xs text-slate-500' : 'truncate'">
+          {{ locationLine(item) || '—' }}
+        </p>
+      </div>
     </template>
     <template #cell-phone="{ item }">
       <span class="text-slate-600">{{ item.phone || '-' }}</span>
@@ -37,6 +40,10 @@ defineProps({
 });
 
 defineEmits(['edit', 'delete']);
+
+function locationLine(item) {
+  return [item.city, item.state, item.postal_code, item.country].filter(Boolean).join(', ');
+}
 
 const columns = [
   { key: 'branch_name', label: 'Branch' },

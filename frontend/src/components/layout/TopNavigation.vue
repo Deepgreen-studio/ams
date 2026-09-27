@@ -121,6 +121,7 @@
               My profile
             </RouterLink>
             <RouterLink
+              v-if="!authStore.user?.is_protected"
               :to="{ name: 'change-password' }"
               class="block px-4 py-2.5 text-sm text-zinc-700 hover:bg-zinc-50"
               role="menuitem"

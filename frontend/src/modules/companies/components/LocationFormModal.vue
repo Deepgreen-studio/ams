@@ -5,7 +5,7 @@
     @click.self="onCancel"
   >
     <div
-      class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+      class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
       role="dialog"
       aria-modal="true"
       aria-labelledby="location-form-title"
@@ -84,8 +84,7 @@
             for="location-address"
             class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
           >
-            Address
-            <span class="normal-case tracking-normal text-slate-400">(Optional)</span>
+            Street address
           </label>
           <input
             id="location-address"
@@ -97,6 +96,45 @@
             placeholder="Street address"
             :disabled="loading"
           />
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label
+              for="location-state"
+              class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+            >
+              State
+            </label>
+            <input
+              id="location-state"
+              v-model="form.state"
+              type="text"
+              maxlength="120"
+              autocomplete="off"
+              class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-800 shadow-none outline-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              placeholder="State or region"
+              :disabled="loading"
+            />
+          </div>
+          <div>
+            <label
+              for="location-postal-code"
+              class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500"
+            >
+              Postal code
+            </label>
+            <input
+              id="location-postal-code"
+              v-model="form.postal_code"
+              type="text"
+              maxlength="32"
+              autocomplete="off"
+              class="h-12 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-800 shadow-none outline-none placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
+              placeholder="Postal code"
+              :disabled="loading"
+            />
+          </div>
         </div>
 
         <div class="grid gap-4 sm:grid-cols-2">
@@ -197,6 +235,8 @@ const form = reactive({
   branch_name: '',
   address: '',
   city: '',
+  state: '',
+  postal_code: '',
   country: '',
   phone: '',
   email: '',
@@ -222,6 +262,8 @@ watch(
     form.branch_name = props.location?.branch_name || '';
     form.address = props.location?.address || '';
     form.city = props.location?.city || '';
+    form.state = props.location?.state || '';
+    form.postal_code = props.location?.postal_code || '';
     form.country = props.location?.country || '';
     form.phone = props.location?.phone || '';
     form.email = props.location?.email || '';
@@ -245,6 +287,8 @@ function onSubmit() {
     branch_name: branchName,
     address: form.address.trim() ? form.address.trim() : null,
     city: form.city.trim() ? form.city.trim() : null,
+    state: form.state.trim() ? form.state.trim() : null,
+    postal_code: form.postal_code.trim() ? form.postal_code.trim() : null,
     country: form.country.trim() ? form.country.trim() : null,
     phone: form.phone || null,
     email: form.email.trim() ? form.email.trim() : null,

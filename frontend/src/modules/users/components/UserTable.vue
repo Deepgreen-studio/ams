@@ -136,7 +136,7 @@
               {{ user.company_name || '—' }}
             </td>
             <td class="px-5 py-4">
-              <StatusBadge :status="user.status" />
+              <StatusBadge :status="user.lifecycle_status || user.status" />
             </td>
             <td class="px-5 py-4">
               <div v-if="user.roles?.length" class="flex flex-wrap gap-1.5">
@@ -182,7 +182,7 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeUser"
-        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-52 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
@@ -208,7 +208,43 @@
           Edit
         </RouterLink>
         <button
-          v-if="can('users.delete') && !isTrashed(activeUser)"
+          v-if="can('users.update') && !isProtected(activeUser) && !isTrashed(activeUser) && lifecycle(activeUser) === 'active'"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onAction('suspend', activeUser)"
+        >
+          Suspend
+        </button>
+        <button
+          v-if="can('users.update') && !isProtected(activeUser) && !isTrashed(activeUser) && lifecycle(activeUser) === 'active'"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onAction('deactivate', activeUser)"
+        >
+          Deactivate
+        </button>
+        <button
+          v-if="can('users.update') && !isTrashed(activeUser) && ['inactive', 'suspended'].includes(lifecycle(activeUser))"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onAction('activate', activeUser)"
+        >
+          Activate
+        </button>
+        <button
+          v-if="can('users.update') && !isTrashed(activeUser) && ['pending_invitation', 'expired'].includes(lifecycle(activeUser))"
+          type="button"
+          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+          role="menuitem"
+          @click="onAction('resend', activeUser)"
+        >
+          Resend invitation
+        </button>
+        <button
+          v-if="can('users.delete') && !isProtected(activeUser) && !isTrashed(activeUser)"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
@@ -261,7 +297,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'delete', 'action']);
 
 const { can, canAny } = usePermissions();
 const router = useRouter();
@@ -288,6 +324,14 @@ function isTrashed(user) {
   return Boolean(user?.deleted_at);
 }
 
+function lifecycle(user) {
+  return user?.lifecycle_status || user?.status || '';
+}
+
+function isProtected(user) {
+  return Boolean(user?.is_protected);
+}
+
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {
     closeMenu();
@@ -295,11 +339,17 @@ function toggleMenu(id, event) {
   }
 
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
+  const menuWidth = 208;
+  const user = props.users.find((item) => item.uuid === id);
+  const state = lifecycle(user);
   const itemCount = [
     can('users.view'),
-    can('users.update'),
-    can('users.delete'),
+    can('users.update') && user && !isTrashed(user),
+    can('users.update') && !isProtected(user) && state === 'active',
+    can('users.update') && !isProtected(user) && state === 'active',
+    can('users.update') && ['inactive', 'suspended'].includes(state),
+    can('users.update') && ['pending_invitation', 'expired'].includes(state),
+    can('users.delete') && user && !isProtected(user) && !isTrashed(user),
   ].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
@@ -322,6 +372,11 @@ function closeMenu() {
 function onDelete(user) {
   closeMenu();
   emit('delete', user);
+}
+
+function onAction(type, user) {
+  closeMenu();
+  emit('action', { type, user });
 }
 
 function onDocumentClick() {

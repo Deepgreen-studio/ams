@@ -31,7 +31,7 @@
       {{ usersStore.error }}
     </div>
 
-    <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div
         v-for="card in statCards"
         :key="card.label"
@@ -59,6 +59,7 @@
       :empty-description="emptyState.description"
       @sort="onSort"
       @delete="openDelete"
+      @action="openAction"
     >
       <template #toolbar>
         <UserSearchFilter :model-value="usersStore.filters" @submit="onFilter" @reset="onReset" />
@@ -93,13 +94,22 @@
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
     />
+    <DeleteConfirmation
+      :open="Boolean(pendingAction)"
+      :title="actionCopy.title"
+      :message="actionCopy.message"
+      :confirm-label="actionCopy.confirm"
+      :loading="usersStore.saving"
+      @cancel="pendingAction = null"
+      @confirm="confirmAction"
+    />
   </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
-import { CheckCircleIcon, NoSymbolIcon, PauseCircleIcon, PlusIcon, TrashIcon, UsersIcon } from '@heroicons/vue/24/outline';
+import { CheckCircleIcon, ClockIcon, ExclamationTriangleIcon, NoSymbolIcon, PauseCircleIcon, PlusIcon, TrashIcon, UsersIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import UserSearchFilter from '@/modules/users/components/UserSearchFilter.vue';
@@ -110,13 +120,32 @@ import { useUsersStore } from '@/modules/users/stores/users';
 const usersStore = useUsersStore();
 const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
+const pendingAction = ref(null);
 
 const STATUS_LABELS = {
   active: 'Active',
   inactive: 'Inactive',
   suspended: 'Suspended',
-  pending: 'Pending',
+  pending_invitation: 'Pending Invitation',
+  expired: 'Expired',
 };
+
+const actionCopy = computed(() => {
+  const name = pendingAction.value?.user?.full_name || 'this user';
+  const type = pendingAction.value?.type;
+
+  if (type === 'suspend') {
+    return { title: 'Suspend user', message: `Suspend ${name}? They will not be able to sign in.`, confirm: 'Suspend' };
+  }
+  if (type === 'deactivate') {
+    return { title: 'Deactivate user', message: `Deactivate ${name}? They will not be able to sign in.`, confirm: 'Deactivate' };
+  }
+  if (type === 'activate') {
+    return { title: 'Activate user', message: `Activate ${name}? They will be able to sign in.`, confirm: 'Activate' };
+  }
+
+  return { title: 'Resend invitation', message: `Send a new one-time invitation link to ${name}?`, confirm: 'Send invitation' };
+});
 
 const emptyState = computed(() => {
   const filters = usersStore.filters;
@@ -132,11 +161,11 @@ const emptyState = computed(() => {
   }
 
   if (filters.created_from) {
-    parts.push(`start date ${formatFilterDate(filters.created_from)}`);
+    parts.push(`created from ${formatFilterDate(filters.created_from)}`);
   }
 
   if (filters.created_to) {
-    parts.push(`end date ${formatFilterDate(filters.created_to)}`);
+    parts.push(`created to ${formatFilterDate(filters.created_to)}`);
   }
 
   if (!parts.length) {
@@ -170,6 +199,13 @@ const statCards = computed(() => [
     iconColor: 'text-emerald-600',
   },
   {
+    label: 'Pending Invitation',
+    value: usersStore.statistics?.pending_invitation ?? usersStore.statistics?.pending ?? 0,
+    icon: ClockIcon,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+  },
+  {
     label: 'Inactive',
     value: usersStore.statistics?.inactive ?? 0,
     icon: NoSymbolIcon,
@@ -182,6 +218,13 @@ const statCards = computed(() => [
     icon: PauseCircleIcon,
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-600',
+  },
+  {
+    label: 'Expired',
+    value: usersStore.statistics?.expired ?? 0,
+    icon: ExclamationTriangleIcon,
+    iconBg: 'bg-orange-50',
+    iconColor: 'text-orange-600',
   },
   {
     label: 'Trashed',
@@ -202,7 +245,12 @@ function formatFilterDate(value) {
     return value;
   }
 
-  return `${month}/${day}/${year}`;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleDateString();
 }
 
 function joinFilterParts(parts) {
@@ -239,6 +287,30 @@ function onSort(column) {
 
 function openDelete(user) {
   pendingDelete.value = user;
+}
+
+function openAction(payload) {
+  pendingAction.value = payload;
+}
+
+async function confirmAction() {
+  const action = pendingAction.value;
+  if (!action?.user?.uuid) {
+    return;
+  }
+
+  try {
+    if (action.type === 'resend') {
+      await usersStore.resendInvitation(action.user.uuid);
+    } else {
+      const status = { suspend: 'suspended', deactivate: 'inactive', activate: 'active' }[action.type];
+      await usersStore.updateUser(action.user.uuid, { status });
+    }
+    pendingAction.value = null;
+    await usersStore.fetchUsers();
+  } catch {
+    pendingAction.value = null;
+  }
 }
 
 async function confirmDelete() {

@@ -25,8 +25,6 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'avatar' => $this->avatar,
             'avatar_url' => $this->avatar_url,
-            'gender' => $this->gender?->value ?? $this->gender,
-            'date_of_birth' => optional($this->date_of_birth)?->toDateString(),
             'timezone' => $this->timezone,
             'language' => $this->language,
             'company_id' => $this->whenLoaded('companies', fn () => $this->primaryCompany()?->uuid),
@@ -48,6 +46,11 @@ class UserResource extends JsonResource
             ),
             'location_name' => $this->whenLoaded('location', fn () => $this->location?->branch_name),
             'status' => $this->status?->value ?? $this->status,
+            'invitation_status' => $this->invitation_status?->value ?? $this->invitation_status,
+            'invitation_sent_at' => $this->invitation_sent_at,
+            'invitation_expires_at' => $this->invitation_expires_at,
+            'lifecycle_status' => $this->lifecycleStatus(),
+            'two_factor_enabled' => $this->hasConfirmedTwoFactor(),
             'roles' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(static fn ($role) => [
                     'id' => $role->id,
@@ -58,6 +61,7 @@ class UserResource extends JsonResource
                 ])->values();
             }),
             'is_active' => (bool) $this->is_active,
+            'is_protected' => $this->isProtectedAccount(),
             'email_verified' => $this->hasVerifiedEmail(),
             'email_verified_at' => $this->email_verified_at,
             'last_login_at' => $this->last_login_at,

@@ -7,6 +7,7 @@ use App\Domains\Authentication\Requests\ChangePasswordRequest;
 use App\Domains\Authentication\Requests\ForgotPasswordRequest;
 use App\Domains\Authentication\Requests\LoginRequest;
 use App\Domains\Authentication\Requests\ResetPasswordRequest;
+use App\Domains\Authentication\Requests\VerifyTwoFactorRequest;
 use App\Domains\Authentication\Resources\AuthenticatedUserResource;
 use App\Domains\Authentication\Services\AuthenticationService;
 use App\Shared\Exceptions\ApiException;
@@ -30,9 +31,32 @@ class AuthController
             $request
         );
 
+        if (! empty($result['mfa_required'])) {
+            return ApiResponse::success([
+                'mfa_required' => true,
+                'challenge' => $result['challenge'],
+            ], 'Two-factor authentication is required.');
+        }
+
         return ApiResponse::success([
             'user' => new AuthenticatedUserResource($result['user']),
             'token' => $result['token'],
+            'mfa_required' => false,
+        ], 'Login successful.');
+    }
+
+    public function verifyTwoFactor(VerifyTwoFactorRequest $request): JsonResponse
+    {
+        $result = $this->authenticationService->verifyTwoFactor(
+            $request->validated('challenge'),
+            $request->validated('code'),
+            $request
+        );
+
+        return ApiResponse::success([
+            'user' => new AuthenticatedUserResource($result['user']),
+            'token' => $result['token'],
+            'mfa_required' => false,
         ], 'Login successful.');
     }
 

@@ -20,6 +20,8 @@ export const useUsersStore = defineStore('users', () => {
   const statistics = ref(null);
   const currentUser = ref(null);
   const activitySummary = ref(null);
+  const loginHistory = ref([]);
+  const sessions = ref([]);
   const profile = ref(null);
   const filters = ref(defaultFilters());
   const selectedIds = ref([]);
@@ -74,6 +76,8 @@ export const useUsersStore = defineStore('users', () => {
       const { data } = await userService.get(id);
       currentUser.value = data.data?.user ?? null;
       activitySummary.value = data.data?.activity_summary ?? null;
+      loginHistory.value = data.data?.login_history ?? [];
+      sessions.value = data.data?.sessions ?? [];
       return data;
     } catch (err) {
       applyError(err, 'Unable to load user');
@@ -143,6 +147,39 @@ export const useUsersStore = defineStore('users', () => {
       return data.data?.user;
     } catch (err) {
       applyError(err, 'Unable to restore user');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
+  async function resendInvitation(id) {
+    saving.value = true;
+    clearMessages();
+
+    try {
+      const { data } = await userService.resendInvitation(id);
+      successMessage.value = data.message || 'Invitation sent.';
+      return data.data?.user;
+    } catch (err) {
+      applyError(err, 'Unable to send invitation');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
+  async function revokeSession(id, sessionId) {
+    saving.value = true;
+    clearMessages();
+
+    try {
+      const { data } = await userService.revokeSession(id, sessionId);
+      sessions.value = sessions.value.filter((session) => session.id !== sessionId);
+      successMessage.value = data.message || 'Session revoked.';
+      return data;
+    } catch (err) {
+      applyError(err, 'Unable to revoke session');
       throw err;
     } finally {
       saving.value = false;
@@ -248,6 +285,8 @@ export const useUsersStore = defineStore('users', () => {
     statistics,
     currentUser,
     activitySummary,
+    loginHistory,
+    sessions,
     profile,
     filters,
     selectedIds,
@@ -263,6 +302,8 @@ export const useUsersStore = defineStore('users', () => {
     createUser,
     updateUser,
     deleteUser,
+    resendInvitation,
+    revokeSession,
     restoreUser,
     forceDeleteUser,
     fetchProfile,

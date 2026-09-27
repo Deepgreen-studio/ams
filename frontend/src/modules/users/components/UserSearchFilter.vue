@@ -24,7 +24,7 @@
 
       <div>
         <label for="users-filter-start-date" class="mb-1 block text-xs font-medium text-slate-500">
-          Start Date
+          Created From
         </label>
         <input
           id="users-filter-start-date"
@@ -37,7 +37,7 @@
 
       <div>
         <label for="users-filter-end-date" class="mb-1 block text-xs font-medium text-slate-500">
-          End Date
+          Created To
         </label>
         <input
           id="users-filter-end-date"
@@ -63,11 +63,12 @@
         Reset Filter
       </button>
     </div>
+    <p v-if="dateError" class="text-xs text-rose-600">{{ dateError }}</p>
   </div>
 </template>
 
 <script setup>
-import { onBeforeUnmount, reactive, watch } from 'vue';
+import { onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
@@ -85,8 +86,11 @@ const statusOptions = [
   { value: 'active', label: 'Active' },
   { value: 'inactive', label: 'Inactive' },
   { value: 'suspended', label: 'Suspended' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'pending_invitation', label: 'Pending Invitation' },
+  { value: 'expired', label: 'Expired' },
 ];
+
+const dateError = ref('');
 
 const local = reactive({
   search: props.modelValue.search || '',
@@ -121,6 +125,13 @@ function onSearchInput() {
 
 function emitSubmit() {
   window.clearTimeout(searchTimer);
+
+  if (local.created_from && local.created_to && local.created_from > local.created_to) {
+    dateError.value = 'Created From must be on or before Created To.';
+    return;
+  }
+
+  dateError.value = '';
   skipSearchSync = true;
   emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
   emit('submit', { ...local, page: 1 });
@@ -132,6 +143,7 @@ function emitReset() {
   local.status = '';
   local.created_from = '';
   local.created_to = '';
+  dateError.value = '';
   emit('reset');
 }
 

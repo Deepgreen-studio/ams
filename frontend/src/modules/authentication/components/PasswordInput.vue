@@ -7,9 +7,9 @@
       :autocomplete="autocomplete"
       :required="required"
       :disabled="disabled"
-      class="h-11 w-full rounded-xl bg-white px-3.5 pr-11 text-sm text-zinc-900 outline-none ring-1 ring-zinc-200 transition placeholder:text-zinc-400 focus:ring-brand-500 disabled:bg-zinc-50"
+      class="h-11 w-full rounded-xl bg-white px-3.5 pr-11 text-sm text-zinc-900 outline-none ring-1 transition placeholder:text-zinc-400 disabled:bg-zinc-50"
       :placeholder="placeholder"
-      :class="inputClass"
+      :class="[ringClass, inputClass]"
       @input="$emit('update:modelValue', $event.target.value)"
     />
     <button
@@ -25,10 +25,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
 
-defineProps({
+const props = defineProps({
   id: { type: String, required: true },
   modelValue: { type: String, default: '' },
   autocomplete: { type: String, default: 'current-password' },
@@ -36,6 +36,19 @@ defineProps({
   disabled: { type: Boolean, default: false },
   inputClass: { type: [String, Object, Array], default: '' },
   placeholder: { type: String, default: '' },
+  tone: { type: String, default: 'default' },
+});
+
+const ringClass = computed(() => {
+  if (props.tone === 'valid') {
+    return 'ring-emerald-500 focus:ring-emerald-500';
+  }
+
+  if (props.tone === 'invalid') {
+    return 'ring-rose-400 focus:ring-rose-500';
+  }
+
+  return 'ring-zinc-200 focus:ring-brand-500';
 });
 
 defineEmits(['update:modelValue']);

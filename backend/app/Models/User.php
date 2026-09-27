@@ -10,6 +10,7 @@ use App\Domains\Companies\Models\Department;
 use App\Domains\Companies\Models\Team;
 use App\Domains\Customers\Models\Customer;
 use App\Domains\Notifications\Models\DatabaseNotification;
+use App\Domains\Users\Enums\InvitationStatus;
 use App\Domains\Users\Enums\UserGender;
 use App\Domains\Users\Enums\UserStatus;
 use App\Domains\Users\Models\UserLoginHistory;
@@ -64,8 +65,15 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'team_id',
         'location_id',
         'status',
+        'invitation_status',
+        'invitation_sent_at',
+        'invitation_expires_at',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
         'password',
         'is_active',
+        'is_protected',
         'last_login_at',
         'last_login_ip',
         'created_by',
@@ -80,6 +88,8 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     protected $hidden = [
         'password',
         'remember_token',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -112,10 +122,17 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'invitation_sent_at' => 'datetime',
+            'invitation_expires_at' => 'datetime',
+            'two_factor_confirmed_at' => 'datetime',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
             'date_of_birth' => 'date',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_protected' => 'boolean',
             'status' => UserStatus::class,
+            'invitation_status' => InvitationStatus::class,
             'gender' => UserGender::class,
         ];
     }
@@ -131,6 +148,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
                 'email',
                 'phone',
                 'status',
+                'invitation_status',
                 'is_active',
                 'avatar',
                 'timezone',
@@ -193,6 +211,42 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             : UserStatus::tryFrom((string) $this->status);
 
         return ($status?->isLoginAllowed() ?? false) && (bool) $this->is_active;
+    }
+
+    public function hasConfirmedTwoFactor(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
+    }
+
+    public function requiresMfaEnrollment(): bool
+    {
+        return $this->hasRole('super-admin') && ! $this->hasConfirmedTwoFactor();
+    }
+
+    public function isProtectedAccount(): bool
+    {
+        return (bool) $this->is_protected;
+    }
+
+    public function lifecycleStatus(): string
+    {
+        $invitation = $this->invitation_status instanceof InvitationStatus
+            ? $this->invitation_status
+            : InvitationStatus::tryFrom((string) $this->invitation_status);
+
+        if ($invitation === InvitationStatus::Pending) {
+            return 'pending_invitation';
+        }
+
+        if ($invitation === InvitationStatus::Expired) {
+            return 'expired';
+        }
+
+        $status = $this->status instanceof UserStatus
+            ? $this->status
+            : UserStatus::tryFrom((string) $this->status);
+
+        return $status?->value ?? UserStatus::Inactive->value;
     }
 
     public function creator(): BelongsTo
@@ -300,7 +354,11 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
             $this->status = $this->is_active ? UserStatus::Active : UserStatus::Inactive;
         }
 
-        if ($this->status === null) {
+        if ($this->isProtectedAccount()) {
+            $this->status = UserStatus::Active;
+            $this->is_active = true;
+            $this->invitation_status = InvitationStatus::Accepted;
+        } elseif ($this->status === null) {
             $this->status = UserStatus::Active;
             $this->is_active = true;
         }

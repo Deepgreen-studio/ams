@@ -50,7 +50,7 @@ class UserController
         ], 'User created successfully.', 201);
     }
 
-    public function show(string $user): JsonResponse
+    public function show(Request $request, string $user): JsonResponse
     {
         $result = $this->userService->show($user);
         $this->authorize('view', $result['user']);
@@ -58,7 +58,45 @@ class UserController
         return ApiResponse::success([
             'user' => new UserResource($result['user']),
             'activity_summary' => $result['activity_summary'],
+            'login_history' => $this->userService->loginHistory($result['user']),
+            'sessions' => $this->userService->sessions($result['user'], $request->user()),
         ]);
+    }
+
+    public function resendInvitation(Request $request, string $user): JsonResponse
+    {
+        $existing = $this->userRepository->findByIdentifierOrFail($user);
+        $this->authorize('update', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $updated = $this->userService->resendInvitation($user, $actor);
+
+        return ApiResponse::success([
+            'user' => new UserResource($updated),
+        ], 'Invitation sent.');
+    }
+
+    public function sessions(Request $request, string $user): JsonResponse
+    {
+        $existing = $this->userRepository->findByIdentifierOrFail($user);
+        $this->authorize('view', $existing);
+
+        return ApiResponse::success([
+            'sessions' => $this->userService->sessions($existing, $request->user()),
+        ]);
+    }
+
+    public function revokeSession(Request $request, string $user, int $session): JsonResponse
+    {
+        $existing = $this->userRepository->findByIdentifierOrFail($user);
+        $this->authorize('update', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->userService->revokeSession($user, $session, $actor);
+
+        return ApiResponse::success(null, 'Session revoked.');
     }
 
     public function update(UpdateUserRequest $request, string $user): JsonResponse

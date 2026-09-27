@@ -2,14 +2,12 @@
 
 namespace App\Domains\Users\Requests;
 
-use App\Domains\Users\Enums\UserGender;
 use App\Domains\Users\Enums\UserStatus;
 use App\Domains\Users\Repositories\UserRepository;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -38,13 +36,18 @@ class UpdateUserRequest extends FormRequest
                 ...PhoneNumber::inputRules(),
                 Rule::unique('users', 'phone')->ignore($userId)->whereNull('deleted_at'),
             ],
-            'password' => ['nullable', 'confirmed', Password::defaults()],
-            'gender' => ['nullable', Rule::in(UserGender::values())],
-            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'password' => ['prohibited'],
+            'password_confirmation' => ['prohibited'],
+            'gender' => ['prohibited'],
+            'date_of_birth' => ['prohibited'],
             'timezone' => ['nullable', 'timezone:all'],
-            'language' => ['nullable', 'string', 'max:16'],
-            'status' => ['sometimes', 'required', Rule::in(UserStatus::values())],
-            'roles' => ['sometimes', 'required', 'array', 'min:1'],
+            'language' => ['nullable', 'string', 'max:16', 'regex:/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/'],
+            'status' => ['sometimes', 'required', Rule::in([
+                UserStatus::Active->value,
+                UserStatus::Inactive->value,
+                UserStatus::Suspended->value,
+            ])],
+            'roles' => ['sometimes', 'array', 'min:1', 'max:1'],
             'roles.*' => ['required', 'string', 'max:255'],
             'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
             'department_id' => ['nullable', 'string', Rule::exists('departments', 'uuid')->whereNull('deleted_at')],
@@ -60,6 +63,18 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'roles' => 'role',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'password.prohibited' => 'Passwords are not set by an administrator. Send an invitation or password reset link instead.',
+            'roles.min' => 'The role field is required.',
+            'roles.max' => 'A user can have only one role.',
         ];
     }
 }

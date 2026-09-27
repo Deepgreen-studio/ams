@@ -29,6 +29,26 @@ export const userService = {
     return api.delete(`/users/${id}/force-delete`);
   },
 
+  resendInvitation(id) {
+    return api.post(`/users/${id}/invitation`);
+  },
+
+  revokeSession(id, sessionId) {
+    return api.delete(`/users/${id}/sessions/${sessionId}`);
+  },
+
+  beginTwoFactor() {
+    return api.post('/users/profile/two-factor');
+  },
+
+  confirmTwoFactor(payload) {
+    return api.post('/users/profile/two-factor/confirm', payload);
+  },
+
+  disableTwoFactor(payload) {
+    return api.delete('/users/profile/two-factor', { data: payload });
+  },
+
   profile() {
     return api.get('/users/profile');
   },

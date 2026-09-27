@@ -47,22 +47,6 @@
           />
           <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
         </div>
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Gender</label>
-          <SelectBox
-            v-model="form.gender"
-            size="lg"
-            :options="genderOptions"
-          />
-        </div>
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Of Birth</label>
-          <input
-            v-model="form.date_of_birth"
-            type="date"
-            class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
-          />
-        </div>
       </div>
     </section>
 
@@ -155,13 +139,13 @@
         />
       </div>
       <div v-if="layout !== 'profile'">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Department &amp; Team</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Department</label>
         <SearchableSelect
           v-model="form.department_id"
           :options="departmentSelectOptions"
           :disabled="!form.company_id"
-          :placeholder="form.company_id ? 'Select a department and team' : 'Select a company first'"
-          search-placeholder="Search department or team…"
+          :placeholder="form.company_id ? 'Select a department' : 'Select a company first'"
+          search-placeholder="Search department…"
           :button-class="departmentButtonClass"
         />
         <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
@@ -195,37 +179,21 @@
           :options="roleSelectOptions"
           :error="Boolean(fieldError('roles'))"
         />
+        <p class="mt-1 text-xs text-slate-500">Each user has one role. Permissions are enforced on the server.</p>
         <p v-if="fieldError('roles')" class="mt-1 text-xs text-rose-600">{{ fieldError('roles') }}</p>
       </div>
     </div>
 
-    <div v-if="showPassword" class="grid gap-x-10 gap-y-5 md:grid-cols-2">
-      <div>
-        <FormLabel html-for="user-form-password" :required="requirePassword" :optional="!requirePassword">
-          Password
-        </FormLabel>
-        <PasswordInput
-          id="user-form-password"
-          v-model="form.password"
-          autocomplete="new-password"
-          :required="requirePassword"
-          :input-class="fieldClass('password')"
-        />
-        <p v-if="errors.password" class="mt-1 text-xs text-rose-600">{{ errors.password[0] }}</p>
-      </div>
-      <div>
-        <FormLabel html-for="user-form-password-confirmation" :required="requirePassword">
-          Confirm Password
-        </FormLabel>
-        <PasswordInput
-          id="user-form-password-confirmation"
-          v-model="form.password_confirmation"
-          autocomplete="new-password"
-          :required="requirePassword"
-          :input-class="fieldClass('password')"
-        />
-      </div>
-    </div>
+    <p
+      v-if="layout !== 'profile' && !initial.uuid"
+      class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600"
+    >
+      An invitation email is sent with a one-time link. The user sets a password, then signs in at the login page. The account stays Pending Invitation until then.
+    </p>
+
+    <p v-if="invitationNotice" class="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+      {{ invitationNotice }}
+    </p>
 
     <div class="flex items-center justify-end gap-2 border-t border-slate-100 pt-6">
       <button
@@ -248,9 +216,8 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, nextTick, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
-import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -318,20 +285,31 @@ const form = reactive(createForm(props.initial));
 const localErrors = ref({});
 const timezoneOptionsBase = getTimezoneOptions();
 
-const genderOptions = [
-  { value: '', label: 'Prefer not to say / unset' },
-  { value: 'male', label: 'Male' },
-  { value: 'female', label: 'Female' },
-  { value: 'other', label: 'Other' },
-  { value: 'prefer_not_to_say', label: 'Prefer not to say' },
-];
+const invitationNotice = computed(() => {
+  if (props.initial?.invitation_status === 'pending') {
+    return 'This invitation is still pending. The account cannot be activated until the user sets a password from the invitation email.';
+  }
 
-const statusOptions = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
-  { value: 'suspended', label: 'Suspended' },
-  { value: 'pending', label: 'Pending' },
-];
+  if (props.initial?.invitation_status === 'expired') {
+    return 'This invitation has expired. Resend it before the user can sign in.';
+  }
+
+  return '';
+});
+
+const statusOptions = computed(() => {
+  const locked = ['pending', 'expired'].includes(props.initial?.invitation_status);
+  const options = [
+    { value: 'inactive', label: 'Inactive' },
+    { value: 'suspended', label: 'Suspended' },
+  ];
+
+  if (!locked) {
+    options.unshift({ value: 'active', label: 'Active' });
+  }
+
+  return options;
+});
 
 const timezoneOptions = computed(() => {
   const current = form.timezone;
@@ -378,16 +356,10 @@ const departmentItems = ref([]);
 const locationItems = ref([]);
 
 const departmentSelectOptions = computed(() =>
-  departmentItems.value.map((department) => {
-    const teams = (department.teams || []).map((team) => team.name).filter(Boolean);
-
-    return {
-      value: department.uuid,
-      label: department.department_name || department.name,
-      meta: teams.join(', '),
-      metaLabel: 'Team',
-    };
-  }),
+  departmentItems.value.map((department) => ({
+    value: department.uuid,
+    label: department.department_name || department.name,
+  })),
 );
 
 const teamSelectOptions = computed(() =>
@@ -396,6 +368,25 @@ const teamSelectOptions = computed(() =>
     label: team.name,
   })),
 );
+
+async function applyCompanyLocale(companyId) {
+  if (props.layout === 'profile' || !companyId) {
+    return;
+  }
+
+  const company = (props.companyOptions || []).find((item) => item.uuid === companyId);
+  if (!company) {
+    return;
+  }
+
+  if (company.timezone) {
+    form.timezone = company.timezone;
+  }
+  if (company.language) {
+    form.language = company.language;
+  }
+  await nextTick();
+}
 
 function teamsForSelectedDepartment() {
   const department = departmentItems.value.find((item) => item.uuid === form.department_id);
@@ -449,6 +440,10 @@ watch(
       form.department_id = '';
       form.team_id = '';
       form.location_id = '';
+    }
+
+    if (previous !== undefined && companyId && companyId !== previous) {
+      applyCompanyLocale(companyId);
     }
 
     if (!companyId) {
@@ -571,25 +566,23 @@ function onSubmit() {
 
   localErrors.value = {};
 
-  if (!props.showPassword || (!props.requirePassword && !payload.password)) {
-    delete payload.password;
-    delete payload.password_confirmation;
-  }
+  delete payload.password;
+  delete payload.password_confirmation;
+  delete payload.gender;
+  delete payload.date_of_birth;
 
   if (!props.showStatus) {
     delete payload.status;
   }
 
-  if (props.layout !== 'profile') {
-    delete payload.gender;
-    delete payload.date_of_birth;
-    delete payload.timezone;
-    delete payload.language;
-  } else {
+  if (props.layout === 'profile') {
     delete payload.company_id;
     delete payload.department_id;
     delete payload.team_id;
     delete payload.location_id;
+  } else {
+    delete payload.timezone;
+    delete payload.language;
   }
 
   if (props.layout !== 'profile' && !payload.company_id) {
@@ -617,16 +610,8 @@ function onSubmit() {
   }
   delete payload.role;
 
-  if (!payload.gender) {
-    payload.gender = null;
-  }
-
   if (!payload.phone) {
     payload.phone = null;
-  }
-
-  if (!payload.date_of_birth) {
-    payload.date_of_birth = null;
   }
 
   emit('submit', payload);

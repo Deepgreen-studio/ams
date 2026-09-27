@@ -2,7 +2,6 @@
 
 namespace App\Domains\Users\Requests;
 
-use App\Domains\Users\Enums\UserGender;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
@@ -38,10 +37,10 @@ class UpdateProfileRequest extends FormRequest
                 ...PhoneNumber::inputRules(),
                 Rule::unique('users', 'phone')->ignore($userId)->whereNull('deleted_at'),
             ],
-            'gender' => ['nullable', Rule::in(UserGender::values())],
-            'date_of_birth' => ['nullable', 'date', 'before:today'],
+            'gender' => ['prohibited'],
+            'date_of_birth' => ['prohibited'],
             'timezone' => ['nullable', 'timezone:all'],
-            'language' => ['nullable', 'string', 'max:16'],
+            'language' => ['nullable', 'string', 'max:16', 'regex:/^[a-z]{2,3}([_-][A-Za-z0-9]{2,8})*$/'],
         ];
     }
 }

@@ -75,7 +75,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="rounded-[12px] bg-white p-6">
+        <div v-if="orgLinks.length" class="rounded-[12px] bg-white p-6">
           <h3 class="text-base font-semibold text-slate-900">Organization</h3>
           <div class="mt-4 space-y-2.5">
             <RouterLink
@@ -94,7 +94,7 @@
               </div>
               <div class="flex items-center gap-3">
                 <span class="text-lg font-semibold text-slate-900">{{ item.count }}</span>
-                <span class="text-sm font-medium text-brand-600">Manage</span>
+                <span v-if="can(item.manage)" class="text-sm font-medium text-brand-600">Manage</span>
               </div>
             </RouterLink>
           </div>
@@ -257,26 +257,34 @@ const businessItems = computed(() => [
   { label: 'Address', value: fullAddress.value },
 ]);
 
-const orgLinks = computed(() => [
-  {
-    label: 'Departments',
-    to: 'companies.departments',
-    icon: BuildingOffice2Icon,
-    count: company.value?.departments_count ?? company.value?.departments?.length ?? 0,
-  },
-  {
-    label: 'Teams',
-    to: 'companies.teams',
-    icon: UserGroupIcon,
-    count: company.value?.teams_count ?? company.value?.teams?.length ?? 0,
-  },
-  {
-    label: 'Locations',
-    to: 'companies.locations',
-    icon: MapPinIcon,
-    count: company.value?.locations_count ?? company.value?.locations?.length ?? 0,
-  },
-]);
+const orgLinks = computed(() =>
+  [
+    {
+      label: 'Departments',
+      to: 'companies.departments',
+      icon: BuildingOffice2Icon,
+      permission: 'departments.view',
+      manage: 'departments.update',
+      count: company.value?.departments_count ?? company.value?.departments?.length ?? 0,
+    },
+    {
+      label: 'Teams',
+      to: 'companies.teams',
+      icon: UserGroupIcon,
+      permission: 'teams.view',
+      manage: 'teams.update',
+      count: company.value?.teams_count ?? company.value?.teams?.length ?? 0,
+    },
+    {
+      label: 'Locations',
+      to: 'companies.locations',
+      icon: MapPinIcon,
+      permission: 'locations.view',
+      manage: 'locations.update',
+      count: company.value?.locations_count ?? company.value?.locations?.length ?? 0,
+    },
+  ].filter((item) => can(item.permission)),
+);
 
 const visibleActivities = computed(() => {
   const rows = activities.value;

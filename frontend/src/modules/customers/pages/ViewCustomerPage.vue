@@ -54,7 +54,7 @@
       </div>
 
       <div class="space-y-6">
-        <div class="rounded-[12px] bg-white p-6">
+        <div v-if="moduleLinks.length" class="rounded-[12px] bg-white p-6">
           <h3 class="text-base font-semibold text-slate-900">Modules</h3>
           <div class="mt-4 space-y-2.5">
             <RouterLink
@@ -141,6 +141,7 @@ import {
   TrashIcon,
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import { formatDate } from '@/utils/formatters';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CustomerCard from '@/modules/customers/components/CustomerCard.vue';
@@ -153,21 +154,24 @@ import { useCustomersStore } from '@/modules/customers/stores/customers';
 const route = useRoute();
 const router = useRouter();
 const customersStore = useCustomersStore();
+const { can } = usePermissions();
 const showDelete = ref(false);
 const showAnonymize = ref(false);
 const consoleRef = ref(null);
 
 const customer = computed(() => customersStore.currentCustomer);
 
-const moduleLinks = computed(() => [
-  { label: 'Contacts', to: 'customers.contacts', icon: UserGroupIcon },
-  { label: 'Applications', to: 'customers.applications', icon: PuzzlePieceIcon },
-  { label: 'Subscriptions', to: 'customers.subscriptions', icon: CreditCardIcon },
-  { label: 'Licenses', to: 'customers.licenses', icon: KeyIcon },
-  { label: 'Documents', to: 'customers.documents', icon: FolderIcon },
-  { label: 'Communications', to: 'customers.communications', icon: ChatBubbleLeftRightIcon },
-  { label: 'Analytics', to: 'customers.analytics', icon: ChartBarIcon },
-]);
+const moduleLinks = computed(() =>
+  [
+    { label: 'Contacts', to: 'customers.contacts', icon: UserGroupIcon, permission: 'customer-contacts.view' },
+    { label: 'Applications', to: 'customers.applications', icon: PuzzlePieceIcon, permission: 'customer-applications.view' },
+    { label: 'Subscriptions', to: 'customers.subscriptions', icon: CreditCardIcon, permission: 'customer-subscriptions.view' },
+    { label: 'Licenses', to: 'customers.licenses', icon: KeyIcon, permission: 'customer-licenses.view' },
+    { label: 'Documents', to: 'customers.documents', icon: FolderIcon, permission: 'customer-documents.view' },
+    { label: 'Communications', to: 'customers.communications', icon: ChatBubbleLeftRightIcon, permission: 'customer-communications.view' },
+    { label: 'Analytics', to: 'customers.analytics', icon: ChartBarIcon, permission: 'customer-analytics.view' },
+  ].filter((item) => can(item.permission)),
+);
 
 onMounted(() => {
   customersStore.fetchCustomer(route.params.id);

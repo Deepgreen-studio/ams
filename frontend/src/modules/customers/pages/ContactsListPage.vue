@@ -24,6 +24,7 @@
         Export Excel
       </button>
       <button
+        v-if="canImport"
         type="button"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="importInput?.click()"
@@ -38,6 +39,7 @@
         @change="onImport"
       />
       <button
+        v-if="canCreate"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -140,7 +142,9 @@ const pendingArchive = ref(null);
 const editingContact = ref(null);
 const formOpen = ref(false);
 const { can } = usePermissions();
-const canExport = computed(() => can('customers.export'));
+const canExport = computed(() => can('customer-contacts.export'));
+const canImport = computed(() => can('customer-contacts.import'));
+const canCreate = computed(() => can('customer-contacts.create'));
 const importInput = ref(null);
 const importReport = ref(null);
 

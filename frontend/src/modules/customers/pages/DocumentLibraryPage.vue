@@ -8,6 +8,7 @@
         Back
       </RouterLink>
       <button
+        v-if="can('customer-documents.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openUpload"
@@ -142,10 +143,12 @@ import SelectBox from '@/modules/users/components/SelectBox.vue';
 import DocumentFolderSidebar from '@/modules/customers/components/DocumentFolderSidebar.vue';
 import DocumentFormModal from '@/modules/customers/components/DocumentFormModal.vue';
 import DocumentTable from '@/modules/customers/components/DocumentTable.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';
 
 const route = useRoute();
+const { can } = usePermissions();
 const customersStore = useCustomersStore();
 const store = useCustomerDocumentsStore();
 const pendingDelete = ref(null);

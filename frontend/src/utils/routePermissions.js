@@ -4,6 +4,9 @@
  */
 const EXACT = {
   dashboard: 'dashboard.view',
+  'customers.documents.upload': 'customer-documents.create',
+  'departments.index': 'departments.view',
+  'departments.show': 'departments.view',
   'users.trash': ['users.view', 'users.restore', 'users.force-delete'],
   'roles.trash': ['roles.view', 'roles.restore', 'roles.force-delete'],
   'roles.matrix': 'roles.view',
@@ -20,6 +23,16 @@ const EXACT = {
 };
 
 const PREFIX_MODULES = [
+  ['customers.contacts', 'customer-contacts'],
+  ['customers.applications', 'customer-applications'],
+  ['customers.subscriptions', 'customer-subscriptions'],
+  ['customers.licenses', 'customer-licenses'],
+  ['customers.documents', 'customer-documents'],
+  ['customers.communications', 'customer-communications'],
+  ['customers.analytics', 'customer-analytics'],
+  ['companies.departments', 'departments'],
+  ['companies.teams', 'teams'],
+  ['companies.locations', 'locations'],
   ['users.', 'users'],
   ['roles.', 'roles'],
   ['companies.', 'companies'],

@@ -104,7 +104,7 @@ class SubscriptionController
     public function cancel(Request $request, string $subscription): JsonResponse
     {
         $existing = $this->subscriptionService->find($subscription);
-        $this->authorize('updateSubscription', $existing);
+        $this->authorize('cancelSubscription', $existing);
 
         $data = $request->validate([
             'reason' => ['nullable', 'string', 'max:1000'],

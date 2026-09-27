@@ -9,7 +9,7 @@
           Back
         </RouterLink>
         <button
-          v-if="!license.deleted_at"
+          v-if="can('customer-licenses.update') && !license.deleted_at"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openEdit"
@@ -18,7 +18,7 @@
           Edit
         </button>
         <button
-          v-if="license.status !== 'revoked' && !license.deleted_at"
+          v-if="can('customer-licenses.revoke') && license.status !== 'revoked' && !license.deleted_at"
           type="button"
           class="rounded-[12px] border border-amber-300 px-5 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-50"
           :disabled="store.saving"
@@ -27,7 +27,7 @@
           Revoke
         </button>
         <button
-          v-if="license.deleted_at"
+          v-if="license.deleted_at && can('customer-licenses.restore')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
@@ -36,7 +36,7 @@
           Restore
         </button>
         <button
-          v-else
+          v-else-if="!license.deleted_at && can('customer-licenses.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
@@ -203,10 +203,12 @@ import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vu
 import LicenseFormModal from '@/modules/customers/components/LicenseFormModal.vue';
 import LicenseStatusBadge from '@/modules/customers/components/LicenseStatusBadge.vue';
 import PaymentStatusBadge from '@/modules/customers/components/PaymentStatusBadge.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useLicensesStore } from '@/modules/customers/stores/licenses';
 
 const route = useRoute();
 const router = useRouter();
+const { can } = usePermissions();
 const store = useLicensesStore();
 const showDelete = ref(false);
 const formOpen = ref(false);

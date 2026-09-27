@@ -8,6 +8,7 @@
         Back to company
       </RouterLink>
       <button
+        v-if="can('teams.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -68,9 +69,11 @@ import {
   useTeamsStore,
 } from '@/modules/companies/stores/companies';
 import { companyService } from '@/modules/companies/services/companyService';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
+const { can } = usePermissions();
 const toast = useToast();
 const companiesStore = useCompaniesStore();
 const departmentsStore = useDepartmentsStore();

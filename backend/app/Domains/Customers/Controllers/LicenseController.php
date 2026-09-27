@@ -87,7 +87,7 @@ class LicenseController
     public function revoke(RevokeLicenseRequest $request, string $license): JsonResponse
     {
         $existing = $this->licenseService->find($license);
-        $this->authorize('updateLicense', $existing);
+        $this->authorize('revokeLicense', $existing);
 
         /** @var User $actor */
         $actor = $request->user();

@@ -14,6 +14,7 @@
         History
       </RouterLink>
       <button
+        v-if="can('customer-applications.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -95,10 +96,12 @@ import Pagination from '@/modules/users/components/Pagination.vue';
 import AssignmentFormModal from '@/modules/customers/components/AssignmentFormModal.vue';
 import AssignmentSearchFilter from '@/modules/customers/components/AssignmentSearchFilter.vue';
 import AssignmentTable from '@/modules/customers/components/AssignmentTable.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCustomerApplicationsStore } from '@/modules/customers/stores/applications';
 
 const route = useRoute();
+const { can } = usePermissions();
 const customersStore = useCustomersStore();
 const store = useCustomerApplicationsStore();
 const pendingDelete = ref(null);

@@ -9,6 +9,7 @@
           Back
         </RouterLink>
         <button
+          v-if="can('customer-documents.download')"
           type="button"
           class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="store.downloadDocument(document.uuid, document.original_filename || document.name)"
@@ -16,7 +17,7 @@
           Download
         </button>
         <button
-          v-if="!document.deleted_at"
+          v-if="can('customer-documents.update') && !document.deleted_at"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openEdit"
@@ -25,7 +26,7 @@
           Edit
         </button>
         <button
-          v-if="document.deleted_at"
+          v-if="document.deleted_at && can('customer-documents.restore')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
@@ -34,7 +35,7 @@
           Restore
         </button>
         <button
-          v-else
+          v-else-if="!document.deleted_at && can('customer-documents.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
@@ -170,6 +171,7 @@
                 Open
               </RouterLink>
               <button
+                v-if="can('customer-documents.download')"
                 type="button"
                 class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
                 @click="
@@ -235,10 +237,12 @@ import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import DocumentFormModal from '@/modules/customers/components/DocumentFormModal.vue';
 import DocumentStatusBadge from '@/modules/customers/components/DocumentStatusBadge.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';
 
 const route = useRoute();
 const router = useRouter();
+const { can } = usePermissions();
 const store = useCustomerDocumentsStore();
 const showDelete = ref(false);
 const formOpen = ref(false);

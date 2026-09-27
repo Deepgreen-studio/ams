@@ -57,7 +57,7 @@ class CustomerContactController
 
     public function import(Request $request): JsonResponse
     {
-        $this->authorize('manageContacts', Customer::class);
+        $this->authorize('importContacts', Customer::class);
 
         $validated = $request->validate([
             'customer_id' => ['required', 'string'],

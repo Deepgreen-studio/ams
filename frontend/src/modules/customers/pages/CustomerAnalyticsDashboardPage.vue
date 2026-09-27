@@ -8,6 +8,7 @@
         Back to customer
       </RouterLink>
       <button
+        v-if="can('customer-analytics.refresh')"
         type="button"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="store.refreshing || store.loading"
@@ -236,6 +237,7 @@ import {
   PuzzlePieceIcon,
   ShieldExclamationIcon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import MetricCard from '@/components/dashboard/MetricCard.vue';
 import SimpleLineChart from '@/modules/applications/components/SimpleLineChart.vue';
@@ -244,6 +246,7 @@ import SubscriptionStatusBadge from '@/modules/customers/components/Subscription
 import { useCustomerAnalyticsStore } from '@/modules/customers/stores/customerAnalytics';
 
 const route = useRoute();
+const { can } = usePermissions();
 const store = useCustomerAnalyticsStore();
 
 const current = computed(() => store.dashboard?.current ?? null);

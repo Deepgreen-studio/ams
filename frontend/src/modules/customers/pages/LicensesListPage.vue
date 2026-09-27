@@ -2,12 +2,14 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('customer-subscriptions.view')"
         :to="{ name: 'customers.subscriptions', params: { id: route.params.id } }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Subscriptions
       </RouterLink>
       <button
+        v-if="can('customer-licenses.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -100,10 +102,12 @@ import Pagination from '@/modules/users/components/Pagination.vue';
 import LicenseFormModal from '@/modules/customers/components/LicenseFormModal.vue';
 import LicenseSearchFilter from '@/modules/customers/components/LicenseSearchFilter.vue';
 import LicenseTable from '@/modules/customers/components/LicenseTable.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useLicensesStore } from '@/modules/customers/stores/licenses';
 
 const route = useRoute();
+const { can } = usePermissions();
 const customersStore = useCustomersStore();
 const store = useLicensesStore();
 const pendingDelete = ref(null);

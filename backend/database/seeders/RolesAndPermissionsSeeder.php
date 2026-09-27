@@ -86,7 +86,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         Role::findByName('super-admin', $guard)->syncPermissions($allPermissions);
 
-        $this->syncNamedPermissions('company-admin', [
+        $this->syncNamedPermissions('company-admin', array_merge([
             'dashboard.view',
             'users.view', 'users.create', 'users.update', 'users.delete', 'users.restore', 'users.assign-roles',
             'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'roles.restore', 'roles.assign',
@@ -111,9 +111,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view', 'reports.export',
             'settings.view', 'settings.update', 'settings.manage',
             'audit.view', 'audit.export', 'audit.manage',
-        ], $guard);
+        ], $this->customerModuleGrants('full'), $this->organizationGrants('full')), $guard);
 
-        $this->syncNamedPermissions('manager', [
+        $this->syncNamedPermissions('manager', array_merge([
             'dashboard.view',
             'users.view', 'users.update',
             'roles.view',
@@ -125,9 +125,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
             'settings.view',
             'audit.view',
-        ], $guard);
+        ], $this->customerModuleGrants('view'), $this->organizationGrants('view')), $guard);
 
-        $this->syncNamedPermissions('developer', [
+        $this->syncNamedPermissions('developer', array_merge([
             'dashboard.view',
             'applications.view', 'applications.create', 'applications.update',
             'integrations.view', 'integrations.create', 'integrations.update', 'integrations.manage',
@@ -138,18 +138,18 @@ class RolesAndPermissionsSeeder extends Seeder
             'releases.view', 'releases.create', 'releases.update', 'releases.delete',
             'customers.view',
             'settings.view',
-        ], $guard);
+        ], $this->customerModuleGrants('view')), $guard);
 
-        $this->syncNamedPermissions('qa-tester', [
+        $this->syncNamedPermissions('qa-tester', array_merge([
             'dashboard.view',
             'applications.view',
             'releases.view',
             'customers.view',
             'support.view', 'support.create',
             'content.view',
-        ], $guard);
+        ], $this->customerModuleGrants('view')), $guard);
 
-        $this->syncNamedPermissions('support-manager', [
+        $this->syncNamedPermissions('support-manager', array_merge([
             'dashboard.view',
             'customers.view', 'customers.update', 'customers.export',
             'support.view', 'support.create', 'support.update', 'support.delete', 'support.manage',
@@ -158,16 +158,16 @@ class RolesAndPermissionsSeeder extends Seeder
             'workflows.view', 'workflows.approve',
             'ai.view', 'ai.chat',
             'reports.view',
-        ], $guard);
+        ], $this->customerModuleGrants('maintain')), $guard);
 
-        $this->syncNamedPermissions('support-agent', [
+        $this->syncNamedPermissions('support-agent', array_merge([
             'dashboard.view',
             'customers.view',
             'support.view', 'support.create', 'support.update',
             'notifications.view',
             'workflows.view', 'workflows.approve',
             'ai.view', 'ai.chat',
-        ], $guard);
+        ], $this->customerModuleGrants('view')), $guard);
 
         $this->syncNamedPermissions('content-manager', [
             'dashboard.view',
@@ -188,7 +188,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'notifications.view', 'notifications.create',
         ], $guard);
 
-        $this->syncNamedPermissions('compliance-officer', [
+        $this->syncNamedPermissions('compliance-officer', array_merge([
             'dashboard.view',
             'compliance.view', 'compliance.create', 'compliance.update', 'compliance.delete', 'compliance.manage',
             'customers.view', 'customers.export', 'customers.anonymize',
@@ -196,7 +196,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view', 'reports.export',
             'analytics.view',
             'audit.view', 'audit.export',
-        ], $guard);
+        ], $this->customerModuleGrants('export')), $guard);
 
         $this->syncNamedPermissions('customer', [
             'dashboard.view',
@@ -205,7 +205,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'content.view',
         ], $guard);
 
-        $this->syncNamedPermissions('read-only-user', [
+        $this->syncNamedPermissions('read-only-user', array_merge([
             'dashboard.view',
             'users.view',
             'roles.view',
@@ -219,22 +219,20 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
             'settings.view',
             'audit.view',
-        ], $guard);
+        ], $this->customerModuleGrants('view'), $this->organizationGrants('view')), $guard);
 
-        // Backward-compatible alias used by earlier milestones/tests.
-        if (! Role::query()->where('name', 'admin')->exists()) {
-            $alias = Role::findOrCreate('admin', $guard);
-            $alias->fill([
-                'display_name' => 'Admin (Legacy)',
-                'description' => 'Legacy alias mirrored from Company Admin.',
-                'is_system' => true,
-            ]);
-            if (blank($alias->uuid)) {
-                $alias->uuid = (string) Str::uuid();
-            }
-            $alias->save();
-            $alias->syncPermissions(Role::findByName('company-admin', $guard)->permissions);
+        // Legacy alias kept in step with Company Admin.
+        $alias = Role::findOrCreate('admin', $guard);
+        $alias->fill([
+            'display_name' => 'Admin',
+            'description' => 'Company administration, mirrored from Company Admin.',
+            'is_system' => true,
+        ]);
+        if (blank($alias->uuid)) {
+            $alias->uuid = (string) Str::uuid();
         }
+        $alias->save();
+        $alias->syncPermissions(Role::findByName('company-admin', $guard)->permissions);
 
         app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
@@ -245,5 +243,107 @@ class RolesAndPermissionsSeeder extends Seeder
     private function syncNamedPermissions(string $roleName, array $permissions, string $guard): void
     {
         Role::findByName($roleName, $guard)->syncPermissions($permissions);
+    }
+
+    /**
+     * Fine-grained customer module permissions derived from the parent customer grant.
+     *
+     * @return list<string>
+     */
+    private function customerModuleGrants(string $access): array
+    {
+        $view = [
+            'customer-contacts.view',
+            'customer-applications.view',
+            'customer-subscriptions.view',
+            'customer-licenses.view',
+            'customer-documents.view',
+            'customer-documents.download',
+            'customer-communications.view',
+            'customer-analytics.view',
+        ];
+
+        $maintain = [
+            'customer-contacts.update',
+            'customer-contacts.import',
+            'customer-contacts.export',
+            'customer-applications.update',
+            'customer-subscriptions.update',
+            'customer-subscriptions.cancel',
+            'customer-licenses.update',
+            'customer-licenses.revoke',
+            'customer-documents.update',
+            'customer-communications.update',
+            'customer-analytics.refresh',
+        ];
+
+        $full = [
+            'customer-contacts.create',
+            'customer-contacts.update',
+            'customer-contacts.delete',
+            'customer-contacts.restore',
+            'customer-contacts.export',
+            'customer-contacts.import',
+            'customer-applications.create',
+            'customer-applications.update',
+            'customer-applications.delete',
+            'customer-applications.restore',
+            'customer-subscriptions.create',
+            'customer-subscriptions.update',
+            'customer-subscriptions.delete',
+            'customer-subscriptions.restore',
+            'customer-subscriptions.cancel',
+            'customer-licenses.create',
+            'customer-licenses.update',
+            'customer-licenses.delete',
+            'customer-licenses.restore',
+            'customer-licenses.revoke',
+            'customer-documents.create',
+            'customer-documents.update',
+            'customer-documents.delete',
+            'customer-documents.restore',
+            'customer-communications.create',
+            'customer-communications.update',
+            'customer-communications.delete',
+            'customer-communications.restore',
+            'customer-analytics.refresh',
+        ];
+
+        return match ($access) {
+            'full' => array_merge($view, $full),
+            'maintain' => array_merge($view, $maintain),
+            'export' => array_merge($view, ['customer-contacts.export']),
+            default => $view,
+        };
+    }
+
+    /**
+     * Department, team, and location permissions derived from the parent company grant.
+     *
+     * @return list<string>
+     */
+    private function organizationGrants(string $access): array
+    {
+        $view = [
+            'departments.view',
+            'teams.view',
+            'locations.view',
+        ];
+
+        if ($access !== 'full') {
+            return $view;
+        }
+
+        return array_merge($view, [
+            'departments.create',
+            'departments.update',
+            'departments.delete',
+            'teams.create',
+            'teams.update',
+            'teams.delete',
+            'locations.create',
+            'locations.update',
+            'locations.delete',
+        ]);
     }
 }

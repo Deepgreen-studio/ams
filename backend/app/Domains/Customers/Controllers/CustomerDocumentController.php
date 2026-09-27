@@ -138,7 +138,7 @@ class CustomerDocumentController
     public function download(string $document): StreamedResponse
     {
         $existing = $this->documentService->find($document);
-        $this->authorize('viewDocument', $existing);
+        $this->authorize('downloadDocument', $existing);
 
         return $this->documentService->download($document);
     }

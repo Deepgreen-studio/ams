@@ -121,6 +121,7 @@
           </button>
         </div>
         <button
+          v-if="can('customer-communications.create')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           @click="openCreateNote"
@@ -195,6 +196,7 @@
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-4">
         <h3 class="text-base font-semibold text-slate-900">Tasks</h3>
         <button
+          v-if="can('customer-communications.create')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           @click="openCreateTask"
@@ -340,6 +342,7 @@
           </button>
         </div>
         <button
+          v-if="can('customer-communications.create')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
           @click="openCreateCommunication"
@@ -489,10 +492,12 @@ import NoteFormModal from '@/modules/customers/components/NoteFormModal.vue';
 import TaskFormModal from '@/modules/customers/components/TaskFormModal.vue';
 import TaskPriorityBadge from '@/modules/customers/components/TaskPriorityBadge.vue';
 import TaskStatusBadge from '@/modules/customers/components/TaskStatusBadge.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCommunicationStore } from '@/modules/customers/stores/communication';
 
 const route = useRoute();
+const { can } = usePermissions();
 const customersStore = useCustomersStore();
 const store = useCommunicationStore();
 
@@ -537,6 +542,9 @@ const anyFormOpen = computed(
 );
 
 const primaryAction = computed(() => {
+  if (!can('customer-communications.create')) {
+    return null;
+  }
   if (activeTab.value === 'notes') {
     return { label: 'Add note', onClick: openCreateNote };
   }

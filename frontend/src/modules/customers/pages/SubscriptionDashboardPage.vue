@@ -8,12 +8,14 @@
         Back
       </RouterLink>
       <RouterLink
+        v-if="can('customer-licenses.view')"
         :to="{ name: 'customers.licenses', params: { id: route.params.id } }"
         class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Licenses
       </RouterLink>
       <button
+        v-if="can('customer-subscriptions.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -111,10 +113,12 @@ import RenewalReminderList from '@/modules/customers/components/RenewalReminderL
 import SubscriptionFormModal from '@/modules/customers/components/SubscriptionFormModal.vue';
 import SubscriptionSearchFilter from '@/modules/customers/components/SubscriptionSearchFilter.vue';
 import SubscriptionTable from '@/modules/customers/components/SubscriptionTable.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useSubscriptionsStore } from '@/modules/customers/stores/subscriptions';
 
 const route = useRoute();
+const { can } = usePermissions();
 const customersStore = useCustomersStore();
 const store = useSubscriptionsStore();
 const pendingDelete = ref(null);

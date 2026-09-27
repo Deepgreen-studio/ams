@@ -8,6 +8,7 @@
         Back to company
       </RouterLink>
       <button
+        v-if="can('departments.create')"
         type="button"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -70,10 +71,12 @@ import DepartmentFormModal from '@/modules/companies/components/DepartmentFormMo
 import DepartmentTable from '@/modules/companies/components/DepartmentTable.vue';
 import { useCompaniesStore, useDepartmentsStore } from '@/modules/companies/stores/companies';
 import { companyService } from '@/modules/companies/services/companyService';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const router = useRouter();
+const { can } = usePermissions();
 const toast = useToast();
 const companiesStore = useCompaniesStore();
 const departmentsStore = useDepartmentsStore();

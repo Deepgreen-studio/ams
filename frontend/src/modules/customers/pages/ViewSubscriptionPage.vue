@@ -9,6 +9,7 @@
           Back
         </RouterLink>
         <button
+          v-if="can('customer-subscriptions.update')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openEdit"
@@ -17,7 +18,7 @@
           Edit
         </button>
         <button
-          v-if="subscription.status !== 'cancelled' && !subscription.deleted_at"
+          v-if="can('customer-subscriptions.cancel') && subscription.status !== 'cancelled' && !subscription.deleted_at"
           type="button"
           class="rounded-[12px] border border-amber-300 px-5 py-2.5 text-sm font-medium text-amber-800 hover:bg-amber-50"
           :disabled="store.saving"
@@ -26,7 +27,7 @@
           Cancel Plan
         </button>
         <button
-          v-if="subscription.deleted_at"
+          v-if="subscription.deleted_at && can('customer-subscriptions.restore')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="store.saving"
@@ -35,7 +36,7 @@
           Restore
         </button>
         <button
-          v-else
+          v-else-if="!subscription.deleted_at && can('customer-subscriptions.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
@@ -264,10 +265,12 @@ import LicenseStatusBadge from '@/modules/customers/components/LicenseStatusBadg
 import PaymentStatusBadge from '@/modules/customers/components/PaymentStatusBadge.vue';
 import SubscriptionFormModal from '@/modules/customers/components/SubscriptionFormModal.vue';
 import SubscriptionStatusBadge from '@/modules/customers/components/SubscriptionStatusBadge.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useSubscriptionsStore } from '@/modules/customers/stores/subscriptions';
 
 const route = useRoute();
 const router = useRouter();
+const { can } = usePermissions();
 const store = useSubscriptionsStore();
 const showDelete = ref(false);
 const formOpen = ref(false);

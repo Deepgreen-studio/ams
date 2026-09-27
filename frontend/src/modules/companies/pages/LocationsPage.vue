@@ -8,6 +8,7 @@
         Back to company
       </RouterLink>
       <button
+        v-if="can('locations.create')"
         type="button"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
@@ -63,9 +64,11 @@ import LocationFormModal from '@/modules/companies/components/LocationFormModal.
 import LocationTable from '@/modules/companies/components/LocationTable.vue';
 import { useCompaniesStore, useLocationsStore } from '@/modules/companies/stores/companies';
 import { companyService } from '@/modules/companies/services/companyService';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
+const { can } = usePermissions();
 const toast = useToast();
 const companiesStore = useCompaniesStore();
 const locationsStore = useLocationsStore();

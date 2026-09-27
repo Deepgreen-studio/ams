@@ -3,6 +3,9 @@
 namespace App\Domains\Companies\Policies;
 
 use App\Domains\Companies\Enums\CompanyPermission;
+use App\Domains\Companies\Enums\DepartmentPermission;
+use App\Domains\Companies\Enums\LocationPermission;
+use App\Domains\Companies\Enums\TeamPermission;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Companies\Models\Department;
@@ -48,12 +51,12 @@ class CompanyPolicy
 
     public function manageDepartments(User $user): bool
     {
-        return $user->can(CompanyPermission::UPDATE);
+        return $user->can(DepartmentPermission::CREATE);
     }
 
     public function viewDepartments(User $user): bool
     {
-        return $user->can(CompanyPermission::VIEW);
+        return $user->can(DepartmentPermission::VIEW);
     }
 
     public function viewDepartment(User $user, Department $department): bool
@@ -63,51 +66,51 @@ class CompanyPolicy
 
     public function manageTeams(User $user): bool
     {
-        return $user->can(CompanyPermission::UPDATE);
+        return $user->can(TeamPermission::CREATE);
     }
 
     public function viewTeams(User $user): bool
     {
-        return $user->can(CompanyPermission::VIEW);
+        return $user->can(TeamPermission::VIEW);
     }
 
     public function manageLocations(User $user): bool
     {
-        return $user->can(CompanyPermission::UPDATE);
+        return $user->can(LocationPermission::CREATE);
     }
 
     public function viewLocations(User $user): bool
     {
-        return $user->can(CompanyPermission::VIEW);
+        return $user->can(LocationPermission::VIEW);
     }
 
     public function updateDepartment(User $user, Department $department): bool
     {
-        return $this->manageDepartments($user);
+        return $user->can(DepartmentPermission::UPDATE);
     }
 
     public function deleteDepartment(User $user, Department $department): bool
     {
-        return $user->can(CompanyPermission::DELETE) || $user->can(CompanyPermission::UPDATE);
+        return $user->can(DepartmentPermission::DELETE);
     }
 
     public function updateTeam(User $user, Team $team): bool
     {
-        return $this->manageTeams($user);
+        return $user->can(TeamPermission::UPDATE);
     }
 
     public function deleteTeam(User $user, Team $team): bool
     {
-        return $user->can(CompanyPermission::DELETE) || $user->can(CompanyPermission::UPDATE);
+        return $user->can(TeamPermission::DELETE);
     }
 
     public function updateLocation(User $user, CompanyLocation $location): bool
     {
-        return $this->manageLocations($user);
+        return $user->can(LocationPermission::UPDATE);
     }
 
     public function deleteLocation(User $user, CompanyLocation $location): bool
     {
-        return $user->can(CompanyPermission::DELETE) || $user->can(CompanyPermission::UPDATE);
+        return $user->can(LocationPermission::DELETE);
     }
 }

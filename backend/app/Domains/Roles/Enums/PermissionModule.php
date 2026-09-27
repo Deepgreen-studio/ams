@@ -35,6 +35,18 @@ final class PermissionModule
                 'label' => 'Companies',
                 'actions' => array_merge($crud, ['restore', 'manage']),
             ],
+            'departments' => [
+                'label' => 'Departments',
+                'actions' => $crud,
+            ],
+            'teams' => [
+                'label' => 'Teams',
+                'actions' => $crud,
+            ],
+            'locations' => [
+                'label' => 'Locations',
+                'actions' => $crud,
+            ],
             'applications' => [
                 'label' => 'Applications',
                 'actions' => $crud,
@@ -42,6 +54,34 @@ final class PermissionModule
             'customers' => [
                 'label' => 'Customers',
                 'actions' => array_merge($crud, ['restore', 'export', 'anonymize']),
+            ],
+            'customer-contacts' => [
+                'label' => 'Customer Contacts',
+                'actions' => array_merge($crud, ['restore', 'export', 'import']),
+            ],
+            'customer-applications' => [
+                'label' => 'Customer Applications',
+                'actions' => array_merge($crud, ['restore']),
+            ],
+            'customer-subscriptions' => [
+                'label' => 'Customer Subscriptions',
+                'actions' => array_merge($crud, ['restore', 'cancel']),
+            ],
+            'customer-licenses' => [
+                'label' => 'Customer Licenses',
+                'actions' => array_merge($crud, ['restore', 'revoke']),
+            ],
+            'customer-documents' => [
+                'label' => 'Customer Documents',
+                'actions' => array_merge($crud, ['restore', 'download']),
+            ],
+            'customer-communications' => [
+                'label' => 'Customer Communications',
+                'actions' => array_merge($crud, ['restore']),
+            ],
+            'customer-analytics' => [
+                'label' => 'Customer Analytics',
+                'actions' => ['view', 'refresh'],
             ],
             'integrations' => [
                 'label' => 'Integrations',

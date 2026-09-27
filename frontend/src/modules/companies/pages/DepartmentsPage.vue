@@ -3,15 +3,16 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'companies.show', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back to company
       </RouterLink>
       <button
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
       >
+        <PlusIcon class="h-4 w-4" />
         Add Department
       </button>
     </Teleport>
@@ -20,7 +21,11 @@
       <DepartmentTable
         :departments="departmentsStore.departments"
         :loading="departmentsStore.loading"
+        :columns="columns"
+        :sort-by="sortBy"
+        :sort-dir="sortDir"
         embedded
+        @sort="onSort"
         @view="openView"
         @edit="openEdit"
         @delete="openDelete"
@@ -57,6 +62,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue';
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -76,6 +82,15 @@ const editingDepartment = ref(null);
 const formOpen = ref(false);
 const saving = ref(false);
 const perPage = ref(10);
+const sortBy = ref('name');
+const sortDir = ref('asc');
+
+const columns = [
+  { key: 'name', label: 'Department name', sortable: true },
+  { key: 'team', label: 'Team name' },
+  { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Created at', sortable: true },
+];
 
 onMounted(async () => {
   await companiesStore.fetchCompany(route.params.id);
@@ -87,7 +102,15 @@ async function load(page = 1) {
     company: route.params.id,
     page,
     per_page: perPage.value,
+    sort_by: sortBy.value,
+    sort_dir: sortDir.value,
   });
+}
+
+function onSort(column) {
+  sortDir.value = sortBy.value === column && sortDir.value === 'asc' ? 'desc' : 'asc';
+  sortBy.value = column;
+  load(1);
 }
 
 function onPageChange(page) {

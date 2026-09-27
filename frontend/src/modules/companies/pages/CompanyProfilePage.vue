@@ -4,7 +4,7 @@
       <RouterLink
         v-if="company"
         :to="{ name: 'companies.show', params: { id: company.uuid } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back to company
       </RouterLink>
@@ -15,41 +15,47 @@
       class="h-48 animate-pulse rounded-[12px] bg-slate-100"
     />
 
-    <div v-else-if="company" class="grid gap-6 xl:grid-cols-12">
-      <aside class="space-y-6 xl:col-span-4">
-        <div class="rounded-[12px] bg-white p-6">
+    <div v-else-if="company" class="space-y-6">
+    <div class="grid gap-6 xl:grid-cols-12">
+      <aside class="xl:col-span-6">
+        <div class="h-full rounded-[12px] bg-white p-6">
           <CompanyLogoUpload
             :company="company"
             :loading="companiesStore.saving"
             @upload="onLogoUpload"
           />
 
-          <div class="mt-6 border-t border-slate-100 pt-5">
+          <div class="mt-6 border-t border-slate-100 pt-5 text-center">
             <div class="flex flex-wrap items-center justify-center gap-2">
-              <h2 class="truncate text-lg font-semibold tracking-tight text-slate-900">
+              <h2 class="text-lg font-semibold tracking-tight text-slate-900">
                 {{ company.company_name }}
               </h2>
               <StatusBadge :status="company.status || 'active'" />
             </div>
-            <p class="mt-1 truncate text-center text-sm text-slate-500">
+            <p class="mt-1 break-words text-sm text-slate-500">
               {{ company.email || company.legal_name || '-' }}
             </p>
+          </div>
 
-            <dl class="mt-5 divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
+          <div class="mt-6">
+            <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+              Business information
+            </p>
+            <dl class="divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
               <div
-                v-for="item in summaryItems"
+                v-for="item in businessItems"
                 :key="item.label"
-                class="grid grid-cols-[6.5rem_1fr] gap-3 px-3.5 py-3"
+                class="grid grid-cols-[8.5rem_1fr] gap-3 px-3.5 py-3"
               >
                 <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
-                <dd class="truncate text-sm font-medium text-slate-900">{{ item.value }}</dd>
+                <dd class="break-words text-sm font-medium text-slate-900">{{ item.value }}</dd>
               </div>
             </dl>
           </div>
         </div>
       </aside>
 
-      <section class="xl:col-span-8">
+      <section class="xl:col-span-6">
         <div class="rounded-[12px] bg-white p-6 sm:p-8">
           <form class="space-y-8" @submit.prevent="onBrandingSubmit">
             <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
@@ -138,6 +144,29 @@
         </div>
       </section>
     </div>
+
+      <section class="grid gap-6 lg:grid-cols-2">
+        <div
+          v-for="section in detailSections"
+          :key="section.title"
+          class="rounded-[12px] bg-white p-6"
+        >
+          <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+            {{ section.title }}
+          </p>
+          <dl class="divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
+            <div
+              v-for="item in section.items"
+              :key="item.label"
+              class="grid grid-cols-[8.5rem_1fr] gap-3 px-3.5 py-3"
+            >
+              <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
+              <dd class="break-words text-sm font-medium text-slate-900">{{ item.value }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </div>
   </div>
 </template>
 
@@ -150,6 +179,7 @@ import CompanyLogoUpload from '@/modules/companies/components/CompanyLogoUpload.
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 import { useToast } from '@/composables/useToast';
+import { formatDate } from '@/utils/formatters';
 import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 
 const route = useRoute();
@@ -208,12 +238,53 @@ const currencyOptions = computed(() => withCurrentOption(currencyOptionsBase, br
 const dateFormatOptions = computed(() => withCurrentOption(dateFormatOptionsBase, branding.date_format));
 const timeFormatOptions = computed(() => withCurrentOption(timeFormatOptionsBase, branding.time_format));
 
-const summaryItems = computed(() => [
-  { label: 'Country', value: company.value?.country || '-' },
-  { label: 'Timezone', value: company.value?.timezone || '-' },
-  { label: 'Currency', value: company.value?.currency || '-' },
-  { label: 'Language', value: company.value?.language || '-' },
+const businessItems = computed(() => [
+  { label: 'Legal name', value: company.value?.legal_name || '-' },
+  { label: 'Company Code', value: company.value?.registration_number || '-' },
+  { label: 'Tax number', value: company.value?.tax_number || '-' },
 ]);
+
+const detailSections = computed(() => {
+  const current = company.value;
+
+  return [
+    {
+      title: 'Contact',
+      items: [
+        { label: 'Email', value: current?.email || '-' },
+        { label: 'Phone', value: current?.phone || '-' },
+        { label: 'Website', value: current?.website || '-' },
+      ],
+    },
+    {
+      title: 'Address',
+      items: [
+        { label: 'Country', value: current?.country || '-' },
+        { label: 'State', value: current?.state || '-' },
+        { label: 'City', value: current?.city || '-' },
+        { label: 'Address', value: current?.address || '-' },
+        { label: 'Postal Code', value: current?.postal_code || '-' },
+      ],
+    },
+    {
+      title: 'Regional',
+      items: [
+        { label: 'Timezone', value: current?.timezone || '-' },
+        { label: 'Language', value: current?.language || '-' },
+        { label: 'Currency', value: current?.currency || '-' },
+        { label: 'Date format', value: current?.date_format || '-' },
+        { label: 'Time format', value: current?.time_format || '-' },
+      ],
+    },
+    {
+      title: 'Record',
+      items: [
+        { label: 'Created', value: formatDate(current?.created_at) || '-' },
+        { label: 'Updated', value: formatDate(current?.updated_at) || '-' },
+      ],
+    },
+  ];
+});
 
 function applyBranding(value) {
   if (!value) return;

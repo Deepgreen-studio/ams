@@ -4,14 +4,14 @@
       <RouterLink
         v-if="company"
         :to="{ name: 'companies.profile', params: { id: company.uuid } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Profile
       </RouterLink>
       <RouterLink
         v-if="company && can('companies.update')"
         :to="{ name: 'companies.edit', params: { id: company.uuid } }"
-        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         <PencilSquareIcon class="h-4 w-4 text-slate-500" />
         Edit

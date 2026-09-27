@@ -49,7 +49,8 @@
           <tr
             v-for="contact in contacts"
             :key="contact.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="openDetails(contact)"
           >
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
@@ -146,7 +147,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   ArchiveBoxIcon,
   EllipsisVerticalIcon,
@@ -173,6 +174,18 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'archive']);
+const router = useRouter();
+
+function openDetails(contact) {
+  if (!contact?.uuid || !props.customerId) {
+    return;
+  }
+
+  router.push({
+    name: 'customers.contacts.show',
+    params: { id: props.customerId, contactId: contact.uuid },
+  });
+}
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

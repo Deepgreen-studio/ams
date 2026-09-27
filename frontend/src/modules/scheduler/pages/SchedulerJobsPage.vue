@@ -92,7 +92,8 @@
               <tr
                 v-for="job in store.jobs"
                 :key="job.uuid"
-                class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+                class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+                @click="openDetails(job)"
               >
                 <td class="px-5 py-4">
                   <p class="font-medium text-slate-900">{{ job.name }}</p>
@@ -203,7 +204,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { EllipsisVerticalIcon, MagnifyingGlassIcon, PencilSquareIcon, PlayIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -214,6 +215,15 @@ import SchedulerSubnav from '@/modules/scheduler/components/SchedulerSubnav.vue'
 import { useSchedulerStore } from '@/modules/scheduler/stores/scheduler';
 
 const store = useSchedulerStore();
+const router = useRouter();
+
+function openDetails(job) {
+  if (!job?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'scheduler.jobs.edit', params: { id: job.uuid } });
+}
 const toast = useToast();
 const openMenuId = ref(null);
 const menuStyle = ref({});

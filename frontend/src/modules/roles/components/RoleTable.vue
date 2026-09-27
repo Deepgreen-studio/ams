@@ -68,6 +68,8 @@
             v-for="role in roles"
             :key="role.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('roles.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(role)"
           >
             <td class="px-5 py-4">
               <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
@@ -156,7 +158,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -198,6 +200,15 @@ const props = defineProps({
 const emit = defineEmits(['sort', 'delete']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(role) {
+  if (!role?.uuid || !can('roles.view')) {
+    return;
+  }
+
+  router.push({ name: 'roles.show', params: { id: role.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('roles.view', 'roles.update', 'roles.assign', 'roles.delete'),
 );

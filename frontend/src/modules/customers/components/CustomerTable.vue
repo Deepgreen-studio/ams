@@ -98,6 +98,8 @@
             v-for="customer in customers"
             :key="customer.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('customers.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(customer)"
           >
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
@@ -206,7 +208,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
@@ -241,6 +243,15 @@ const props = defineProps({
 const emit = defineEmits(['sort', 'delete', 'restore']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(customer) {
+  if (!customer?.uuid || !can('customers.view')) {
+    return;
+  }
+
+  router.push({ name: 'customers.show', params: { id: customer.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('customers.view', 'customers.update', 'customers.delete', 'customers.restore'),
 );

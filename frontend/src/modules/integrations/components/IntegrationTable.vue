@@ -107,6 +107,8 @@
             v-for="item in integrations"
             :key="item.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('integrations.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
@@ -271,6 +273,14 @@ function toggleMenu(id, event) {
 
 function closeMenu() {
   openMenuId.value = null;
+}
+
+function openDetails(integration) {
+  if (!integration?.uuid || !can('integrations.view')) {
+    return;
+  }
+
+  router.push({ name: 'integrations.show', params: { id: integration.uuid } });
 }
 
 function goTo(name, integration) {

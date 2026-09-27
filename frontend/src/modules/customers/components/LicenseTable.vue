@@ -49,7 +49,8 @@
           <tr
             v-for="item in licenses"
             :key="item.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <div class="min-w-0">
@@ -140,7 +141,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -157,6 +158,18 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['edit', 'delete']);
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid || !props.customerId) {
+    return;
+  }
+
+  router.push({
+    name: 'customers.licenses.show',
+    params: { id: props.customerId, licenseId: item.uuid },
+  });
+}
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

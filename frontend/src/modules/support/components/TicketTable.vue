@@ -55,6 +55,8 @@
             v-for="ticket in tickets"
             :key="ticket.uuid"
             class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            :class="can('support.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(ticket)"
           >
             <td class="px-5 py-4">
               <div class="flex flex-wrap items-center gap-2">
@@ -154,7 +156,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { ArchiveBoxIcon, EllipsisVerticalIcon, EyeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
@@ -171,6 +173,15 @@ const props = defineProps({
 const emit = defineEmits(['archive']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(ticket) {
+  if (!ticket?.uuid || !can('support.view')) {
+    return;
+  }
+
+  router.push({ name: 'support.tickets.show', params: { id: ticket.uuid } });
+}
 const hasAnyAction = computed(() => canAny('support.view', 'support.update', 'support.delete'));
 const openMenuId = ref(null);
 const menuStyle = ref({});

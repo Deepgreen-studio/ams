@@ -49,7 +49,13 @@
         </tbody>
 
         <tbody v-else>
-          <tr v-for="item in requests" :key="item.uuid" class="hover:bg-slate-50/80">
+          <tr
+            v-for="item in requests"
+            :key="item.uuid"
+            class="hover:bg-slate-50/80"
+            :class="can('compliance.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
+          >
             <td class="px-4 py-3">
               <p class="font-medium text-slate-900">{{ item.requester_name }}</p>
               <p class="text-xs text-slate-500">
@@ -101,7 +107,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
@@ -114,6 +120,15 @@ defineProps({
 defineEmits(['delete']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid || !can('compliance.view')) {
+    return;
+  }
+
+  router.push({ name: 'compliance.privacy.show', params: { id: item.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('compliance.view', 'compliance.update', 'compliance.delete'),
 );

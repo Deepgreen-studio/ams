@@ -105,7 +105,8 @@
             <tr
               v-for="item in store.dashboards"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="px-5 py-4">
                 <RouterLink
@@ -291,6 +292,14 @@ import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const store = useEnterpriseAnalyticsStore();
 const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'analytics.dashboards.show', params: { uuid: item.uuid } });
+}
 const toast = useToast();
 const showCreate = ref(false);
 const pendingDelete = ref(null);

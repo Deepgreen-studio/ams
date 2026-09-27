@@ -92,6 +92,8 @@
               v-for="log in store.logs"
               :key="log.uuid"
               class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              :class="log.instance?.uuid ? 'cursor-pointer' : ''"
+              @click="openDetails(log)"
             >
               <td class="whitespace-nowrap px-5 py-4 text-slate-600">{{ formatDate(log.created_at) }}</td>
               <td class="px-5 py-4 text-slate-800">
@@ -126,6 +128,7 @@
 
 <script setup>
 import {onMounted, reactive, watch, onBeforeUnmount } from 'vue';
+import { useRouter } from 'vue-router';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { useToast } from '@/composables/useToast';
@@ -135,6 +138,16 @@ import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
+const router = useRouter();
+
+function openDetails(log) {
+  const instanceId = log?.instance?.uuid;
+  if (!instanceId) {
+    return;
+  }
+
+  router.push({ name: 'workflows.instances.show', params: { id: instanceId } });
+}
 const toast = useToast();
 const filters = reactive({
   action: '',

@@ -56,7 +56,8 @@
             <tr
               v-for="item in store.queue"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="px-5 py-4">
                 <p class="font-medium text-slate-900">{{ item.subject_label || 'Untitled' }}</p>
@@ -101,13 +102,22 @@
 
 <script setup>
 import { onMounted, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { useToast } from '@/composables/useToast';
 import WorkflowsSubnav from '@/modules/workflows/components/WorkflowsSubnav.vue';
 import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'workflows.instances.show', params: { id: item.uuid } });
+}
 const toast = useToast();
 
 watch(

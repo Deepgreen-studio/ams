@@ -46,7 +46,8 @@
           <tr
             v-for="item in releases"
             :key="item.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <p class="font-semibold text-slate-900">{{ item.name }}</p>
@@ -121,7 +122,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   CheckBadgeIcon,
   EllipsisVerticalIcon,
@@ -135,6 +136,19 @@ const props = defineProps({
   releases: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
 });
+
+const router = useRouter();
+
+function openDetails(release) {
+  if (!release?.uuid || !props.applicationId) {
+    return;
+  }
+
+  router.push({
+    name: 'applications.releases.show',
+    params: { id: props.applicationId, releaseId: release.uuid },
+  });
+}
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

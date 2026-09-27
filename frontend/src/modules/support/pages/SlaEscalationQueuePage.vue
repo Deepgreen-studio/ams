@@ -92,7 +92,8 @@
             <tr
               v-for="item in store.escalations"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="px-5 py-4">
                 <RouterLink
@@ -173,7 +174,7 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { ArrowPathIcon, ClockIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { useToast } from '@/composables/useToast';
@@ -183,6 +184,16 @@ import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';
 
 const store = useSupportSlaStore();
+const router = useRouter();
+
+function openDetails(item) {
+  const ticketId = item?.ticket?.uuid;
+  if (!ticketId) {
+    return;
+  }
+
+  router.push({ name: 'support.tickets.show', params: { id: ticketId } });
+}
 const toast = useToast();
 const level = ref('');
 const status = ref('');

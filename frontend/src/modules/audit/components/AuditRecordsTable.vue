@@ -40,7 +40,8 @@
           <tr
             v-for="item in items"
             :key="itemKey(item)"
-            class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            @click="$emit('select', item)"
           >
             <td v-for="column in columns" :key="column.key" :class="cellClass(column)">
               <template v-if="column.type === 'primary'">

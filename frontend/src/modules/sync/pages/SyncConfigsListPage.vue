@@ -106,7 +106,8 @@
             <tr
               v-for="item in store.configs"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="px-5 py-4">
                 <p class="font-medium text-slate-900">{{ item.name }}</p>
@@ -213,7 +214,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -231,6 +232,15 @@ import SyncSubnav from '@/modules/sync/components/SyncSubnav.vue';
 import { useSyncStore } from '@/modules/sync/stores/sync';
 
 const store = useSyncStore();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'sync.configs.show', params: { id: item.uuid } });
+}
 const toast = useToast();
 const openMenuId = ref(null);
 const menuStyle = ref({});

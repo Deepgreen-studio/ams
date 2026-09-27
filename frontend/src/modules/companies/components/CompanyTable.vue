@@ -110,6 +110,8 @@
             v-for="company in companies"
             :key="company.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('companies.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(company)"
           >
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
@@ -231,7 +233,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
@@ -267,6 +269,15 @@ const props = defineProps({
 const emit = defineEmits(['sort', 'delete', 'restore']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(company) {
+  if (!company?.uuid || !can('companies.view')) {
+    return;
+  }
+
+  router.push({ name: 'companies.show', params: { id: company.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('companies.view', 'companies.update', 'companies.delete', 'companies.restore'),
 );

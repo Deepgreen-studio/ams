@@ -49,7 +49,8 @@
           <tr
             v-for="item in events"
             :key="item.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="onView(item)"
           >
             <td class="px-5 py-4">
               <p class="font-semibold text-slate-900">{{ item.label }}</p>

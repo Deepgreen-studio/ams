@@ -52,7 +52,8 @@
           <tr
             v-for="item in versions"
             :key="item.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <p class="font-semibold text-slate-900">{{ item.version_number }}</p>
@@ -131,7 +132,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   PencilSquareIcon,
@@ -148,6 +149,18 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['delete']);
+const router = useRouter();
+
+function openDetails(version) {
+  if (!version?.uuid || !props.applicationId) {
+    return;
+  }
+
+  router.push({
+    name: 'applications.versions.edit',
+    params: { id: props.applicationId, versionId: version.uuid },
+  });
+}
 
 const openMenuId = ref(null);
 const menuStyle = ref({});

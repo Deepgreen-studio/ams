@@ -107,7 +107,8 @@
             <tr
               v-for="ticket in store.violations"
               :key="ticket.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(ticket)"
             >
               <td class="px-5 py-4">
                 <div class="flex flex-wrap items-center gap-2">
@@ -157,7 +158,7 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   ArrowPathIcon,
   ChatBubbleLeftRightIcon,
@@ -174,6 +175,15 @@ import SupportSubnav from '@/modules/support/components/SupportSubnav.vue';
 import { useSupportSlaStore } from '@/modules/support/stores/supportSla';
 
 const store = useSupportSlaStore();
+const router = useRouter();
+
+function openDetails(ticket) {
+  if (!ticket?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'support.tickets.show', params: { id: ticket.uuid } });
+}
 const toast = useToast();
 const metric = ref('');
 const perPage = ref(10);

@@ -107,7 +107,8 @@
             <tr
               v-for="rule in store.rules"
               :key="rule.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(rule)"
             >
               <td class="max-w-md px-5 py-4">
                 <p class="font-medium text-slate-900">{{ rule.name }}</p>
@@ -200,7 +201,7 @@
 
 <script setup>
 import {computed, onMounted, reactive, ref, watch, onBeforeUnmount } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { MagnifyingGlassIcon, PencilSquareIcon, PlusIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import Tooltip from '@/components/ui/Tooltip.vue';
@@ -212,6 +213,15 @@ import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.v
 import { useAutomationStore } from '@/modules/automation/stores/automation';
 
 const store = useAutomationStore();
+const router = useRouter();
+
+function openDetails(rule) {
+  if (!rule?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'automation.rules.edit', params: { id: rule.uuid } });
+}
 const toast = useToast();
 const pendingDelete = ref(null);
 const deleting = ref(false);

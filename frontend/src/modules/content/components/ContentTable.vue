@@ -58,6 +58,8 @@
             v-for="item in contents"
             :key="item.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('content.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <p class="font-semibold text-slate-900">{{ item.title }}</p>
@@ -143,7 +145,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -162,6 +164,15 @@ const props = defineProps({
 const emit = defineEmits(['delete']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid || !can('content.view')) {
+    return;
+  }
+
+  router.push({ name: 'content.show', params: { id: item.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('content.view', 'content.update', 'content.delete'),
 );

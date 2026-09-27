@@ -94,7 +94,12 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
-          <tr v-for="item in store.mappings" :key="item.uuid" class="hover:bg-slate-50/80">
+          <tr
+            v-for="item in store.mappings"
+            :key="item.uuid"
+            class="cursor-pointer hover:bg-slate-50/80"
+            @click="openDetails(item)"
+          >
             <td class="px-4 py-3">
               <p class="font-medium text-slate-900">{{ item.name }}</p>
               <p class="text-xs text-slate-500">
@@ -137,13 +142,22 @@
 <script setup>
 import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, reactive } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import MappingSubnav from '@/modules/mappings/components/MappingSubnav.vue';
 import { useMappingsStore } from '@/modules/mappings/stores/mappings';
 
 const store = useMappingsStore();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'mappings.show', params: { id: item.uuid } });
+}
 const filters = reactive({ search: '', direction: '', status: '' });
 
 onMounted(() => store.fetchMappings());

@@ -107,6 +107,8 @@
             v-for="item in applications"
             :key="item.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('applications.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <div class="flex items-center gap-3">
@@ -210,7 +212,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
   EyeIcon,
@@ -232,6 +234,15 @@ const props = defineProps({
 const emit = defineEmits(['sort', 'delete']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(application) {
+  if (!application?.uuid || !can('applications.view')) {
+    return;
+  }
+
+  router.push({ name: 'applications.show', params: { id: application.uuid } });
+}
 const hasAnyAction = computed(() =>
   canAny('applications.view', 'applications.update', 'applications.delete'),
 );

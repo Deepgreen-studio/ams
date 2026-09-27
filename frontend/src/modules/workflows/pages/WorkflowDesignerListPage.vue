@@ -107,7 +107,8 @@
             <tr
               v-for="item in store.workflows"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="max-w-md px-5 py-4">
                 <p class="font-medium text-slate-900">{{ item.name }}</p>
@@ -223,6 +224,14 @@ import { useWorkflowStore } from '@/modules/workflows/stores/workflow';
 
 const store = useWorkflowStore();
 const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'workflows.designer.edit', params: { id: item.uuid } });
+}
 const toast = useToast();
 const openMenuId = ref(null);
 const pendingDelete = ref(null);

@@ -155,13 +155,13 @@
         />
       </div>
       <div v-if="layout !== 'profile'">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Department</label>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Department &amp; Team</label>
         <SearchableSelect
           v-model="form.department_id"
           :options="departmentSelectOptions"
           :disabled="!form.company_id"
-          :placeholder="form.company_id ? 'Select a department' : 'Select a company first'"
-          search-placeholder="Search department…"
+          :placeholder="form.company_id ? 'Select a department and team' : 'Select a company first'"
+          search-placeholder="Search department or team…"
           :button-class="departmentButtonClass"
         />
         <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
@@ -357,10 +357,16 @@ const companyButtonClass = computed(() => {
 const departmentItems = ref([]);
 
 const departmentSelectOptions = computed(() =>
-  departmentItems.value.map((department) => ({
-    value: department.uuid,
-    label: department.department_name || department.name,
-  })),
+  departmentItems.value.map((department) => {
+    const teams = (department.teams || []).map((team) => team.name).filter(Boolean);
+
+    return {
+      value: department.uuid,
+      label: department.department_name || department.name,
+      meta: teams.join(', '),
+      metaLabel: 'Team',
+    };
+  }),
 );
 
 const departmentButtonClass = computed(() => {

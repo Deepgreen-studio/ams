@@ -60,7 +60,13 @@
           @mousedown.prevent="select(option.value)"
           @mouseenter="highlightedIndex = index"
         >
-          {{ option.label }}
+          <span class="flex min-w-0 items-center justify-between gap-3">
+            <span class="truncate">{{ option.label }}</span>
+            <span v-if="option.meta" class="shrink-0 text-xs font-normal text-slate-500">
+              <span class="font-medium text-slate-400">{{ option.metaLabel || 'Team' }}:</span>
+              {{ option.meta }}
+            </span>
+          </span>
         </li>
       </ul>
     </div>
@@ -108,7 +114,16 @@ const highlightedIndex = ref(0);
 
 const selectedLabel = computed(() => {
   const match = props.options.find((option) => option.value === props.modelValue);
-  return match?.label || (props.modelValue ? String(props.modelValue) : '');
+  if (!match) {
+    return props.modelValue ? String(props.modelValue) : '';
+  }
+
+  if (match.meta) {
+    const caption = match.metaLabel || 'Team';
+    return `${match.label} · ${caption}: ${match.meta}`;
+  }
+
+  return match.label || '';
 });
 
 const filteredOptions = computed(() => {
@@ -120,7 +135,8 @@ const filteredOptions = computed(() => {
   return props.options.filter((option) => {
     const label = String(option.label || '').toLowerCase();
     const value = String(option.value || '').toLowerCase();
-    return label.includes(term) || value.includes(term);
+    const meta = String(option.meta || '').toLowerCase();
+    return label.includes(term) || value.includes(term) || meta.includes(term);
   });
 });
 

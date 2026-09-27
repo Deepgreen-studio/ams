@@ -52,6 +52,8 @@
             v-for="item in notifications"
             :key="item.uuid"
             class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            :class="can('compliance.view') && item.data_breach?.uuid ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <RouterLink
@@ -129,7 +131,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { EllipsisVerticalIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
@@ -142,6 +144,16 @@ const props = defineProps({
 });
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(item) {
+  const breachId = item?.data_breach?.uuid;
+  if (!breachId || !can('compliance.view')) {
+    return;
+  }
+
+  router.push({ name: 'compliance.breaches.show', params: { id: breachId } });
+}
 const hasAnyAction = computed(() => canAny('compliance.view'));
 const openMenuId = ref(null);
 const menuStyle = ref({});

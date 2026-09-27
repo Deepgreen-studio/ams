@@ -47,7 +47,8 @@
           <tr
             v-for="item in logs"
             :key="item.uuid"
-            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            @click="onView(item)"
           >
             <td class="whitespace-nowrap px-5 py-4 text-slate-600">
               {{ formatDate(item.created_at) }}

@@ -54,6 +54,8 @@
             v-for="item in consents"
             :key="item.uuid"
             class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            :class="can('compliance.view') ? 'cursor-pointer' : ''"
+            @click="openDetails(item)"
           >
             <td class="px-5 py-4">
               <RouterLink
@@ -132,7 +134,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import { EllipsisVerticalIcon, EyeIcon, NoSymbolIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
@@ -147,6 +149,15 @@ const props = defineProps({
 const emit = defineEmits(['withdraw']);
 
 const { can, canAny } = usePermissions();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid || !can('compliance.view')) {
+    return;
+  }
+
+  router.push({ name: 'compliance.consents.show', params: { id: item.uuid } });
+}
 const hasAnyAction = computed(() => canAny('compliance.view', 'compliance.update'));
 const openMenuId = ref(null);
 const menuStyle = ref({});

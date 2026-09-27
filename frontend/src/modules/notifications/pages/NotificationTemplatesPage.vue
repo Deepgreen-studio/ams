@@ -133,7 +133,8 @@
             <tr
               v-for="item in store.templates"
               :key="item.uuid"
-              class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+              @click="openDetails(item)"
             >
               <td class="px-5 py-4">
                 <p class="font-medium text-slate-900">{{ item.name }}</p>
@@ -228,7 +229,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 import {
   ClockIcon,
   EllipsisVerticalIcon,
@@ -244,6 +245,15 @@ import { usePermissions } from '@/composables/usePermissions';
 import { useNotificationsStore } from '@/modules/notifications/stores/notifications';
 
 const store = useNotificationsStore();
+const router = useRouter();
+
+function openDetails(item) {
+  if (!item?.uuid) {
+    return;
+  }
+
+  router.push({ name: 'notifications.templates.preview', params: { id: item.uuid } });
+}
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
   canAny('notifications.view', 'notifications.update'),

@@ -47,7 +47,8 @@
           <tr
             v-for="event in events"
             :key="event.uuid"
-            class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            class="cursor-pointer border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
+            @click="$emit('select', event)"
           >
             <td class="px-5 py-4">
               <button

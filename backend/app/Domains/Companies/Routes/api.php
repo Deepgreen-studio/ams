@@ -13,6 +13,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.CompanyPermission::VIEW);
         Route::post('/', [CompanyController::class, 'store'])
             ->middleware('permission:'.CompanyPermission::CREATE);
+        Route::get('/{company}/activity', [CompanyController::class, 'activity'])
+            ->middleware('permission:'.CompanyPermission::VIEW);
         Route::get('/{company}', [CompanyController::class, 'show'])
             ->middleware('permission:'.CompanyPermission::VIEW);
         Route::put('/{company}', [CompanyController::class, 'update'])

@@ -29,6 +29,20 @@ class ActivityRepository extends BaseRepository
         return null;
     }
 
+    /**
+     * @return Collection<int, ActivityLog>
+     */
+    public function forSubject(string $subjectType, int|string $subjectId, int $limit = 30): Collection
+    {
+        return $this->model->newQuery()
+            ->where('subject_type', $subjectType)
+            ->where('subject_id', $subjectId)
+            ->with('causer:id,uuid,full_name,email')
+            ->latest('id')
+            ->limit(max(1, min($limit, 100)))
+            ->get();
+    }
+
     public function findByIdentifierOrFail(string $identifier): ActivityLog
     {
         $activity = $this->findByIdentifier($identifier);

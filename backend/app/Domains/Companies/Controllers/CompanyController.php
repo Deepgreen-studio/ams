@@ -2,6 +2,8 @@
 
 namespace App\Domains\Companies\Controllers;
 
+use App\Domains\Audit\Resources\ActivityLogResource;
+use App\Domains\Audit\Resources\SystemEventResource;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Requests\StoreCompanyRequest;
 use App\Domains\Companies\Requests\UpdateCompanyRequest;
@@ -56,6 +58,19 @@ class CompanyController
 
         return ApiResponse::success([
             'company' => new CompanyResource($model),
+        ]);
+    }
+
+    public function activity(string $company): JsonResponse
+    {
+        $model = $this->companyService->find($company);
+        $this->authorize('view', $model);
+
+        $history = $this->companyService->activityHistory($model);
+
+        return ApiResponse::success([
+            'activities' => ActivityLogResource::collection($history['activities'])->resolve(),
+            'important_events' => SystemEventResource::collection($history['important_events'])->resolve(),
         ]);
     }
 

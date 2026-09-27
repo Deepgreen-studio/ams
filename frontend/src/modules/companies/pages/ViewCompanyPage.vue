@@ -118,6 +118,56 @@
             </div>
           </dl>
         </div>
+
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-base font-semibold text-slate-900">Audit log</h3>
+          <p v-if="logsLoading" class="mt-4 text-sm text-slate-500">Loading audit log…</p>
+          <p v-else-if="!activities.length" class="mt-4 text-sm text-slate-500">No audit entries yet.</p>
+          <ul
+            v-else
+            class="mt-4 max-h-80 divide-y divide-slate-100 overflow-y-auto overscroll-contain rounded-[12px] bg-slate-50/60"
+          >
+            <li v-for="entry in visibleActivities" :key="entry.id" class="px-3.5 py-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  v-if="entry.action === 'status_changed'"
+                  class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 ring-1 ring-amber-200"
+                >
+                  Status change
+                </span>
+                <p class="text-sm font-medium text-slate-900">{{ entry.description }}</p>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">
+                {{ entry.user?.full_name || 'System' }}
+                <span class="px-1">·</span>
+                {{ formatDateTime(entry.created_at) || '-' }}
+              </p>
+            </li>
+          </ul>
+        </div>
+
+        <div class="rounded-[12px] bg-white p-6">
+          <h3 class="text-base font-semibold text-slate-900">Important log</h3>
+          <p v-if="logsLoading" class="mt-4 text-sm text-slate-500">Loading important log…</p>
+          <p v-else-if="!importantEvents.length" class="mt-4 text-sm text-slate-500">No important events yet.</p>
+          <ul
+            v-else
+            class="mt-4 max-h-64 divide-y divide-slate-100 overflow-y-auto overscroll-contain rounded-[12px] bg-slate-50/60"
+          >
+            <li v-for="entry in importantEvents" :key="entry.uuid || entry.id" class="px-3.5 py-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <span
+                  class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ring-1"
+                  :class="importantTone(entry.level)"
+                >
+                  {{ importantLabel(entry.level) }}
+                </span>
+                <p class="text-sm font-medium text-slate-900">{{ importantText(entry) }}</p>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">{{ formatDateTime(entry.created_at) || '-' }}</p>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
 
@@ -143,11 +193,12 @@ import {
   TrashIcon,
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
-import { formatDate } from '@/utils/formatters';
+import { formatDate, formatDateTime } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CompanyCard from '@/modules/companies/components/CompanyCard.vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
+import { companyService } from '@/modules/companies/services/companyService';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 
 const route = useRoute();
@@ -155,6 +206,16 @@ const router = useRouter();
 const companiesStore = useCompaniesStore();
 const { can } = usePermissions();
 const showDelete = ref(false);
+const logsLoading = ref(false);
+const activities = ref([]);
+const importantEvents = ref([]);
+
+const STATUS_LABELS = {
+  active: 'Active',
+  inactive: 'Inactive',
+  suspended: 'Suspended',
+  pending: 'Pending',
+};
 
 const company = computed(() => companiesStore.currentCompany);
 
@@ -204,6 +265,32 @@ const orgLinks = computed(() => [
   },
 ]);
 
+const visibleActivities = computed(() => {
+  const rows = activities.value;
+  const statusTimes = new Set(
+    rows.filter((entry) => statusDiff(entry)).map((entry) => entry.created_at),
+  );
+
+  return rows.flatMap((entry) => {
+    const diff = statusDiff(entry);
+    if (diff) {
+      return [{
+        ...entry,
+        action: 'status_changed',
+        description: statusUpdateText(diff.from, diff.to),
+      }];
+    }
+
+    const genericUpdate = entry.description === 'Company updated'
+      || entry.properties?.event === 'company_updated';
+    if (genericUpdate && statusTimes.has(entry.created_at)) {
+      return [];
+    }
+
+    return [entry];
+  });
+});
+
 const deleteMessage = computed(() => {
   const name = company.value?.company_name || 'this company';
   return `Soft delete ${name}?`;
@@ -211,7 +298,102 @@ const deleteMessage = computed(() => {
 
 onMounted(() => {
   companiesStore.fetchCompany(route.params.id);
+  loadLogs();
 });
+
+async function loadLogs() {
+  logsLoading.value = true;
+  try {
+    const { data } = await companyService.activity(route.params.id);
+    activities.value = data.data?.activities ?? [];
+    importantEvents.value = data.data?.important_events ?? [];
+  } catch {
+    activities.value = [];
+    importantEvents.value = [];
+  } finally {
+    logsLoading.value = false;
+  }
+}
+
+function statusName(value) {
+  if (!value) {
+    return '';
+  }
+
+  return STATUS_LABELS[value] || `${String(value).charAt(0).toUpperCase()}${String(value).slice(1)}`;
+}
+
+function statusDiff(entry) {
+  const props = entry.properties || {};
+  const from = props.old_status || props.old?.status || null;
+  const to = props.new_status || props.attributes?.status || null;
+  const changedKeys = [...new Set([
+    ...Object.keys(props.old || {}),
+    ...Object.keys(props.attributes || {}),
+  ])];
+  const statusOnly = changedKeys.length === 0 || (changedKeys.length === 1 && changedKeys[0] === 'status');
+  const markedStatus = entry.action === 'status_changed' || props.event === 'status_changed';
+
+  if (from && to && from !== to && (statusOnly || markedStatus)) {
+    return { from, to };
+  }
+
+  if (markedStatus && (from || to)) {
+    return { from, to };
+  }
+
+  return null;
+}
+
+function statusUpdateText(from, to) {
+  const previous = statusName(from);
+  const next = statusName(to);
+
+  if (previous && next) {
+    return `Status updated from ${previous} to ${next}`;
+  }
+
+  return `Status updated to ${next || previous}`;
+}
+
+function importantLabel(level) {
+  return ['warning', 'warn', 'error', 'critical', 'alert', 'emergency'].includes(level)
+    ? 'Important'
+    : 'Notice';
+}
+
+function importantTone(level) {
+  return ['warning', 'warn', 'error', 'critical', 'alert', 'emergency'].includes(level)
+    ? 'bg-rose-50 text-rose-700 ring-rose-200'
+    : 'bg-sky-50 text-sky-700 ring-sky-200';
+}
+
+function importantText(entry) {
+  const payload = entry.payload || {};
+  const from = statusLabel(payload.old_status);
+  const to = statusLabel(payload.new_status);
+
+  if (entry.event === 'company.status_changed' && from && to) {
+    return `Status updated from ${from} to ${to}`;
+  }
+
+  const labels = {
+    'company.created': 'Company created',
+    'company.deleted': 'Company deleted',
+    'company.restored': 'Company restored',
+    'company.status_changed': 'Company status changed',
+  };
+
+  return labels[entry.event] || entry.event;
+}
+
+function statusLabel(status) {
+  if (!status) {
+    return '';
+  }
+
+  return String(status).charAt(0).toUpperCase() + String(status).slice(1);
+}
 
 async function confirmDelete() {
   await companiesStore.deleteCompany(route.params.id);
@@ -222,5 +404,6 @@ async function confirmDelete() {
 async function restore() {
   await companiesStore.restoreCompany(route.params.id);
   await companiesStore.fetchCompany(route.params.id);
+  await loadLogs();
 }
 </script>

@@ -7,6 +7,9 @@ export const companyService = {
   get(id) {
     return api.get(`/companies/${id}`);
   },
+  activity(id) {
+    return api.get(`/companies/${id}/activity`);
+  },
   create(payload) {
     return api.post('/companies', payload);
   },

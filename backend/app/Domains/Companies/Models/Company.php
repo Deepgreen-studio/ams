@@ -88,6 +88,16 @@ class Company extends Model
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
+            ->setDescriptionForEvent(function (string $eventName): string {
+                if ($eventName === 'updated' && $this->wasChanged('status')) {
+                    $from = $this->statusLabel($this->getOriginal('status'));
+                    $to = $this->statusLabel($this->status);
+
+                    return "Status updated from {$from} to {$to}";
+                }
+
+                return $eventName;
+            })
             ->logOnly([
                 'company_name',
                 'legal_name',
@@ -104,6 +114,13 @@ class Company extends Model
             ])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
+    }
+
+    private function statusLabel(mixed $status): string
+    {
+        $value = $status instanceof CompanyStatus ? $status->value : (string) $status;
+
+        return ucfirst(str_replace('_', ' ', $value));
     }
 
     public function getRouteKeyName(): string

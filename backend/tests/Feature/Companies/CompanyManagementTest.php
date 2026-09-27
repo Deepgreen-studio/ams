@@ -105,6 +105,21 @@ class CompanyManagementTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.company.company_name', 'Updated Inc');
 
+        $this->assertDatabaseHas('activity_log', [
+            'event' => 'status_changed',
+            'subject_id' => $company->id,
+        ]);
+        $this->assertDatabaseHas('system_events', [
+            'event' => 'company.status_changed',
+            'level' => 'warning',
+            'module' => 'companies',
+        ]);
+
+        $this->getJson('/api/v1/companies/'.$company->uuid.'/activity')
+            ->assertOk()
+            ->assertJsonFragment(['action' => 'status_changed'])
+            ->assertJsonFragment(['event' => 'company.status_changed', 'level' => 'warning']);
+
         $department = Department::query()->create([
             'company_id' => $company->id,
             'name' => 'Engineering',

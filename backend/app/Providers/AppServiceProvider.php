@@ -78,6 +78,8 @@ use App\Domains\Content\Policies\ContentPolicy;
 use App\Domains\Companies\Events\BrandingUpdated;
 use App\Domains\Companies\Events\CompanyCreated;
 use App\Domains\Companies\Events\CompanyDeleted;
+use App\Domains\Companies\Events\CompanyRestored;
+use App\Domains\Companies\Events\CompanyStatusChanged;
 use App\Domains\Companies\Events\CompanyUpdated;
 use App\Domains\Companies\Events\DepartmentCreated;
 use App\Domains\Companies\Events\DepartmentUpdated;
@@ -520,6 +522,8 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(CompanyCreated::class, [$activity, 'handleCompanyCreated']);
         Event::listen(CompanyUpdated::class, [$activity, 'handleCompanyUpdated']);
         Event::listen(CompanyDeleted::class, [$activity, 'handleCompanyDeleted']);
+        Event::listen(CompanyStatusChanged::class, [$activity, 'handleCompanyStatusChanged']);
+        Event::listen(CompanyRestored::class, [$activity, 'handleCompanyRestored']);
         Event::listen(BrandingUpdated::class, [$activity, 'handleBrandingUpdated']);
         Event::listen(DepartmentCreated::class, [$activity, 'handleDepartmentCreated']);
         Event::listen(DepartmentUpdated::class, [$activity, 'handleDepartmentUpdated']);

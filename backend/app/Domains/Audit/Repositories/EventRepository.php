@@ -6,6 +6,7 @@ use App\Domains\Audit\Models\SystemEvent;
 use App\Shared\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class EventRepository extends BaseRepository
 {
@@ -30,6 +31,19 @@ class EventRepository extends BaseRepository
         }
 
         return $event;
+    }
+
+    /**
+     * @return Collection<int, SystemEvent>
+     */
+    public function forCompany(string $companyUuid, int $limit = 30): Collection
+    {
+        return $this->model->newQuery()
+            ->where('module', 'companies')
+            ->where('payload->company_uuid', $companyUuid)
+            ->latest('id')
+            ->limit(max(1, min($limit, 100)))
+            ->get();
     }
 
     /**

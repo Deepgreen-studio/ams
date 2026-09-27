@@ -4,7 +4,13 @@ namespace App\Domains\Companies\Services;
 
 use App\Domains\Companies\Events\BrandingUpdated;
 use App\Domains\Companies\Events\CompanyCreated;
+use App\Domains\Audit\Models\ActivityLog;
+use App\Domains\Audit\Models\SystemEvent;
+use App\Domains\Audit\Repositories\ActivityRepository;
+use App\Domains\Audit\Repositories\EventRepository;
 use App\Domains\Companies\Events\CompanyDeleted;
+use App\Domains\Companies\Events\CompanyRestored;
+use App\Domains\Companies\Events\CompanyStatusChanged;
 use App\Domains\Companies\Events\CompanyUpdated;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Repositories\CompanyRepository;
@@ -12,6 +18,7 @@ use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +27,9 @@ use Illuminate\Support\Str;
 class CompanyService
 {
     public function __construct(
-        private readonly CompanyRepository $companyRepository
+        private readonly CompanyRepository $companyRepository,
+        private readonly ActivityRepository $activityRepository,
+        private readonly EventRepository $eventRepository,
     ) {}
 
     /**
@@ -51,6 +60,17 @@ class CompanyService
     }
 
     /**
+     * @return array{activities: Collection<int, ActivityLog>, important_events: Collection<int, SystemEvent>}
+     */
+    public function activityHistory(Company $company, int $limit = 30): array
+    {
+        return [
+            'activities' => $this->activityRepository->forSubject($company->getMorphClass(), $company->getKey(), $limit),
+            'important_events' => $this->eventRepository->forCompany((string) $company->uuid, $limit),
+        ];
+    }
+
+    /**
      * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): Company
@@ -75,11 +95,25 @@ class CompanyService
     {
         return DB::transaction(function () use ($identifier, $data, $actor): Company {
             $company = $this->companyRepository->findByIdentifierOrFail($identifier);
+            $previousStatus = $company->status?->value ?? (string) $company->status;
             $payload = $this->preparePayload($data, isUpdate: true);
             $payload['updated_by'] = $actor->id;
 
-            $updated = $this->companyRepository->updateCompany($company, $payload);
-            event(new CompanyUpdated($updated, $actor));
+            $changedKeys = array_values(array_diff(array_keys($payload), ['updated_by']));
+            $statusOnly = $changedKeys === ['status'];
+            $updated = $statusOnly
+                ? activity()->withoutLogs(fn () => $this->companyRepository->updateCompany($company, $payload))
+                : $this->companyRepository->updateCompany($company, $payload);
+            $nextStatus = $updated->status?->value ?? (string) $updated->status;
+            $statusChanged = $previousStatus !== $nextStatus;
+
+            if ($statusChanged) {
+                event(new CompanyStatusChanged($updated, $actor, $previousStatus, $nextStatus));
+            }
+
+            if (! $statusChanged || $changedKeys !== ['status']) {
+                event(new CompanyUpdated($updated, $actor));
+            }
 
             return $updated;
         });
@@ -122,7 +156,7 @@ class CompanyService
             }
 
             $restored = $this->companyRepository->updateCompany($company, ['updated_by' => $actor->id]);
-            event(new CompanyUpdated($restored, $actor));
+            event(new CompanyRestored($restored, $actor));
 
             return $restored;
         });

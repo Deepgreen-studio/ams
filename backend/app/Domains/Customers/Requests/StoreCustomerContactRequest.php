@@ -26,6 +26,8 @@ class StoreCustomerContactRequest extends FormRequest
         return [
             'customer_id' => ['required', 'string'],
             'contact_type' => ['required', Rule::in(CustomerContactType::values())],
+            'responsibilities' => ['nullable', 'array'],
+            'responsibilities.*' => ['string', Rule::in(CustomerContactType::values())],
             'name' => ['required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => PhoneNumber::inputRules(),

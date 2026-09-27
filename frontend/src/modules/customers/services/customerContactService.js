@@ -28,4 +28,14 @@ export const customerContactService = {
   timeline(id, params = {}) {
     return api.get(`/customer-contacts/${id}/timeline`, { params });
   },
+
+  exportContacts(params = {}) {
+    return api.get('/customer-contacts/export', { params, responseType: 'blob' });
+  },
+
+  importContacts(formData) {
+    return api.post('/customer-contacts/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
 };

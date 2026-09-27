@@ -9,6 +9,18 @@ export const customerService = {
     return api.get('/customers/statistics', { params });
   },
 
+  industries() {
+    return api.get('/customers/industries');
+  },
+
+  console(id) {
+    return api.get(`/customers/${id}/console`);
+  },
+
+  anonymize(id) {
+    return api.post(`/customers/${id}/anonymize`);
+  },
+
   get(id) {
     return api.get(`/customers/${id}`);
   },

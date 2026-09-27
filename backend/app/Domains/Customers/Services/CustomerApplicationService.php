@@ -2,8 +2,11 @@
 
 namespace App\Domains\Customers\Services;
 
+use App\Domains\Applications\Enums\ApplicationPlatform;
 use App\Domains\Applications\Repositories\ApplicationEnvironmentRepository;
+use App\Domains\Applications\Repositories\ApplicationReleaseRepository;
 use App\Domains\Applications\Repositories\ApplicationRepository;
+use App\Domains\Applications\Repositories\ApplicationVersionRepository;
 use App\Domains\Customers\Enums\CustomerApplicationOwnershipType;
 use App\Domains\Customers\Enums\CustomerApplicationStatus;
 use App\Domains\Customers\Events\CustomerApplicationAssigned;
@@ -14,7 +17,10 @@ use App\Domains\Customers\Models\CustomerApplication;
 use App\Domains\Customers\Repositories\CustomerApplicationRepository;
 use App\Domains\Customers\Repositories\CustomerContactRepository;
 use App\Domains\Customers\Repositories\CustomerRepository;
+use App\Domains\Customers\Repositories\LicenseRepository;
+use App\Domains\Customers\Repositories\SubscriptionRepository;
 use App\Domains\Integrations\Repositories\IntegrationRepository;
+use App\Domains\Support\Repositories\SupportSlaPolicyRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -30,11 +36,16 @@ class CustomerApplicationService
         private readonly CustomerContactRepository $customerContactRepository,
         private readonly ApplicationRepository $applicationRepository,
         private readonly ApplicationEnvironmentRepository $applicationEnvironmentRepository,
-        private readonly IntegrationRepository $integrationRepository
+        private readonly ApplicationVersionRepository $applicationVersionRepository,
+        private readonly ApplicationReleaseRepository $applicationReleaseRepository,
+        private readonly IntegrationRepository $integrationRepository,
+        private readonly SubscriptionRepository $subscriptionRepository,
+        private readonly LicenseRepository $licenseRepository,
+        private readonly SupportSlaPolicyRepository $supportSlaPolicyRepository,
     ) {}
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function list(array $filters = []): LengthAwarePaginator
     {
@@ -46,7 +57,7 @@ class CustomerApplicationService
     /**
      * History includes archived assignments for audit/review.
      *
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function history(array $filters = []): LengthAwarePaginator
     {
@@ -66,20 +77,11 @@ class CustomerApplicationService
     {
         $assignment = $this->find($identifier);
 
-        return $assignment->load([
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status,company_id',
-            'customer.company:id,uuid,company_name',
-            'application:id,uuid,name,slug,platform,status,visibility,company_id,integration_id',
-            'environment:id,uuid,name,slug,type,status,application_id',
-            'integration:id,uuid,name,slug,status,type',
-            'ownerContact:id,uuid,name,email,contact_type,status,phone',
-            'creator:id,uuid,full_name,email',
-            'updater:id,uuid,full_name,email',
-        ]);
+        return $assignment->load($this->customerApplicationRepository->assignmentRelations());
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function create(array $data, User $actor): CustomerApplication
     {
@@ -110,6 +112,7 @@ class CustomerApplicationService
                 $customer->id,
                 $data['owner_contact_id'] ?? null
             );
+            $payload = array_merge($payload, $this->resolveTraceability($application->id, $customer->company_id, $data, $application->platform?->value ?? $application->platform));
             $payload['ownership_type'] = $payload['ownership_type']
                 ?? CustomerApplicationOwnershipType::CustomerOwned->value;
             $payload['status'] = $payload['status'] ?? CustomerApplicationStatus::Pending->value;
@@ -118,6 +121,8 @@ class CustomerApplicationService
             $payload['updated_by'] = $actor->id;
 
             $assignment = $this->customerApplicationRepository->createAssignment($payload);
+            $this->linkCommercialRecords($assignment, $data);
+            $assignment->load($this->customerApplicationRepository->assignmentRelations());
             event(new CustomerApplicationAssigned($assignment, $actor));
 
             return $assignment;
@@ -125,7 +130,7 @@ class CustomerApplicationService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function update(string $identifier, array $data, User $actor): CustomerApplication
     {
@@ -156,8 +161,20 @@ class CustomerApplicationService
                 );
             }
 
+            $assignment->loadMissing('application', 'customer');
+            $traceability = $this->resolveTraceability(
+                $assignment->application_id,
+                (int) $assignment->customer->company_id,
+                $data,
+                $assignment->application?->platform?->value ?? $assignment->application?->platform,
+                partial: true
+            );
+            $payload = array_merge($payload, $traceability);
+
             $payload = $this->normalizeActivationDates($payload, $assignment);
             $updated = $this->customerApplicationRepository->updateAssignment($assignment, $payload);
+            $this->linkCommercialRecords($updated, $data);
+            $updated->load($this->customerApplicationRepository->assignmentRelations());
             event(new CustomerApplicationUpdated($updated, $actor));
 
             return $updated;
@@ -210,7 +227,7 @@ class CustomerApplicationService
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      * @return array<string, mixed>
      */
     protected function resolveFilters(array $filters): array
@@ -271,7 +288,7 @@ class CustomerApplicationService
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, mixed>
      */
     protected function preparePayload(array $data, bool $isUpdate = false): array
@@ -282,12 +299,22 @@ class CustomerApplicationService
             'activated_at',
             'expires_at',
             'notes',
+            'platform',
+            'build_label',
         ];
 
         $payload = array_intersect_key($data, array_flip($allowed));
 
         if (array_key_exists('notes', $payload) && blank($payload['notes'])) {
             $payload['notes'] = null;
+        }
+
+        if (array_key_exists('build_label', $payload) && blank($payload['build_label'])) {
+            $payload['build_label'] = null;
+        }
+
+        if (array_key_exists('platform', $payload) && blank($payload['platform'])) {
+            unset($payload['platform']);
         }
 
         if (! $isUpdate && empty($payload['ownership_type'])) {
@@ -302,7 +329,7 @@ class CustomerApplicationService
     }
 
     /**
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
     protected function normalizeActivationDates(array $payload, ?CustomerApplication $existing = null): array
@@ -335,5 +362,146 @@ class CustomerApplicationService
         }
 
         return $payload;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected function resolveTraceability(
+        int $applicationId,
+        int $companyId,
+        array $data,
+        mixed $applicationPlatform,
+        bool $partial = false
+    ): array {
+        $resolved = [];
+
+        if (! $partial || array_key_exists('application_version_id', $data) || array_key_exists('version_id', $data)) {
+            $resolved['application_version_id'] = $this->resolveVersionId(
+                $applicationId,
+                $data['application_version_id'] ?? $data['version_id'] ?? null
+            );
+        }
+
+        if (! $partial || array_key_exists('application_release_id', $data) || array_key_exists('release_id', $data)) {
+            $versionId = $resolved['application_version_id'] ?? null;
+            $resolved['application_release_id'] = $this->resolveReleaseId(
+                $applicationId,
+                $data['application_release_id'] ?? $data['release_id'] ?? null,
+                $versionId
+            );
+        }
+
+        if (! $partial || array_key_exists('support_sla_policy_id', $data) || array_key_exists('sla_policy_id', $data)) {
+            $resolved['support_sla_policy_id'] = $this->resolveSlaPolicyId(
+                $companyId,
+                $data['support_sla_policy_id'] ?? $data['sla_policy_id'] ?? null
+            );
+        }
+
+        if (! $partial || array_key_exists('platform', $data)) {
+            $platform = $data['platform'] ?? null;
+
+            if (blank($platform)) {
+                $platform = $applicationPlatform;
+            }
+
+            if (filled($platform) && ! in_array((string) $platform, ApplicationPlatform::values(), true)) {
+                throw new ApiException('Platform must be a supported application platform.', 422);
+            }
+
+            $resolved['platform'] = filled($platform) ? (string) $platform : null;
+        }
+
+        if (
+            blank($data['build_label'] ?? null)
+            && isset($resolved['application_version_id'])
+            && $resolved['application_version_id']
+        ) {
+            $version = $this->applicationVersionRepository->findByIdentifier((string) $resolved['application_version_id']);
+            if ($version?->build_number && ! $partial) {
+                $resolved['build_label'] = $version->build_number;
+            }
+        }
+
+        return $resolved;
+    }
+
+    protected function resolveVersionId(int $applicationId, mixed $identifier): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        $version = $this->applicationVersionRepository->findForApplication($applicationId, (string) $identifier);
+
+        return $version->id;
+    }
+
+    protected function resolveReleaseId(int $applicationId, mixed $identifier, ?int $versionId): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        $release = $this->applicationReleaseRepository->findForApplication($applicationId, (string) $identifier);
+
+        if ($versionId !== null && (int) $release->application_version_id !== $versionId) {
+            throw new ApiException('Release must belong to the selected version.', 422);
+        }
+
+        return $release->id;
+    }
+
+    protected function resolveSlaPolicyId(int $companyId, mixed $identifier): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        $policy = $this->supportSlaPolicyRepository->findByIdentifierOrFail((string) $identifier);
+
+        if ($policy->company_id !== null && (int) $policy->company_id !== $companyId) {
+            throw new ApiException('SLA policy must belong to the customer company.', 422);
+        }
+
+        return $policy->id;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    protected function linkCommercialRecords(CustomerApplication $assignment, array $data): void
+    {
+        if (array_key_exists('subscription_id', $data)) {
+            if (blank($data['subscription_id'])) {
+                $this->subscriptionRepository->detachFromAssignment($assignment->id);
+            } else {
+                $subscription = $this->subscriptionRepository->findByIdentifierOrFail((string) $data['subscription_id']);
+
+                if ((int) $subscription->customer_id !== (int) $assignment->customer_id) {
+                    throw new ApiException('Subscription must belong to the same customer.', 422);
+                }
+
+                $this->subscriptionRepository->detachFromAssignment($assignment->id);
+                $this->subscriptionRepository->linkToAssignment($subscription->id, $assignment->id);
+            }
+        }
+
+        if (array_key_exists('license_id', $data)) {
+            if (blank($data['license_id'])) {
+                $this->licenseRepository->detachFromAssignment($assignment->id);
+            } else {
+                $license = $this->licenseRepository->findByIdentifierOrFail((string) $data['license_id']);
+
+                if ((int) $license->customer_id !== (int) $assignment->customer_id) {
+                    throw new ApiException('License must belong to the same customer.', 422);
+                }
+
+                $this->licenseRepository->detachFromAssignment($assignment->id);
+                $this->licenseRepository->linkToAssignment($license->id, $assignment->id);
+            }
+        }
     }
 }

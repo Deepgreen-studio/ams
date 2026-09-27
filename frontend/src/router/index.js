@@ -1550,6 +1550,12 @@ const router = createRouter({
           meta: { title: 'API Documentation', requiresAuth: true },
         },
         {
+          path: 'integrations/connectors',
+          name: 'integrations.connectors',
+          component: () => import('@/modules/integrations/pages/ConnectorsPage.vue'),
+          meta: { title: 'Connectors', requiresAuth: true },
+        },
+        {
           path: 'integrations/:id',
           name: 'integrations.show',
           component: () => import('@/modules/integrations/pages/IntegrationDetailsPage.vue'),

@@ -46,6 +46,18 @@ export const integrationService = {
     }
     return api.post(`/integrations/${id}/execute`, payload);
   },
+  connectors() {
+    return api.get('/integrations/connectors');
+  },
+  connector(id) {
+    return api.get(`/integrations/${id}/connector`);
+  },
+  refreshOAuth(id) {
+    return api.post(`/integrations/${id}/connector/oauth/refresh`);
+  },
+  updateConnectorCredentials(id, credentials) {
+    return api.put(`/integrations/${id}/connector/credentials`, { credentials });
+  },
   history(id, params = {}) {
     return api.get(`/integrations/${id}/history`, { params });
   },

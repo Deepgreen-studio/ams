@@ -6,7 +6,6 @@ use App\Domains\Customers\Models\Subscription;
 use App\Shared\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class SubscriptionRepository extends BaseRepository
@@ -47,7 +46,7 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -67,7 +66,7 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -178,7 +177,7 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createSubscription(array $data): Subscription
     {
@@ -195,7 +194,7 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateSubscription(Subscription $subscription, array $data): Subscription
     {
@@ -240,5 +239,19 @@ class SubscriptionRepository extends BaseRepository
                     ] : null,
                 ];
             });
+    }
+
+    public function linkToAssignment(int $subscriptionId, int $assignmentId): void
+    {
+        $this->model->newQuery()->whereKey($subscriptionId)->update([
+            'customer_application_id' => $assignmentId,
+        ]);
+    }
+
+    public function detachFromAssignment(int $assignmentId): void
+    {
+        $this->model->newQuery()->where('customer_application_id', $assignmentId)->update([
+            'customer_application_id' => null,
+        ]);
     }
 }

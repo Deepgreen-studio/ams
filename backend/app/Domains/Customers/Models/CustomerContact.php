@@ -24,6 +24,7 @@ class CustomerContact extends Model
         'uuid',
         'customer_id',
         'contact_type',
+        'responsibilities',
         'name',
         'email',
         'phone',
@@ -56,6 +57,7 @@ class CustomerContact extends Model
     {
         return [
             'contact_type' => CustomerContactType::class,
+            'responsibilities' => 'array',
             'status' => CustomerContactStatus::class,
         ];
     }

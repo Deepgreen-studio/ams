@@ -3,6 +3,8 @@
 namespace App\Domains\Customers\Models;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
 use App\Models\User;
@@ -28,18 +30,33 @@ class Customer extends Model
      */
     protected $fillable = [
         'uuid',
+        'customer_number',
+        'reference',
         'company_id',
         'customer_type',
         'first_name',
         'last_name',
         'company_name',
+        'legal_name',
+        'registration_number',
         'email',
         'phone',
+        'primary_contact_name',
+        'primary_contact_email',
+        'primary_contact_phone',
+        'primary_contact_title',
         'website',
         'industry',
+        'industry_id',
+        'sub_industry_id',
+        'industry_other',
         'country',
         'timezone',
         'language',
+        'legal_basis',
+        'processing_purpose',
+        'retention_until',
+        'anonymized_at',
         'status',
         'notes',
         'created_by',
@@ -60,6 +77,14 @@ class Customer extends Model
                 $customer->uuid = (string) Str::uuid();
             }
         });
+
+        static::created(function (Customer $customer): void {
+            if (blank($customer->customer_number)) {
+                $customer->forceFill([
+                    'customer_number' => sprintf('CUS-%08d', $customer->id),
+                ])->saveQuietly();
+            }
+        });
     }
 
     protected static function newFactory(): CustomerFactory
@@ -75,6 +100,9 @@ class Customer extends Model
         return [
             'customer_type' => CustomerType::class,
             'status' => CustomerStatus::class,
+            'legal_basis' => CustomerLegalBasis::class,
+            'retention_until' => 'date',
+            'anonymized_at' => 'datetime',
         ];
     }
 
@@ -86,14 +114,25 @@ class Customer extends Model
                 'customer_type',
                 'first_name',
                 'last_name',
+                'reference',
                 'company_name',
+                'legal_name',
+                'registration_number',
                 'email',
                 'phone',
+                'primary_contact_name',
+                'primary_contact_email',
                 'website',
                 'industry',
+                'industry_id',
+                'sub_industry_id',
+                'industry_other',
                 'country',
                 'timezone',
                 'language',
+                'legal_basis',
+                'processing_purpose',
+                'retention_until',
                 'status',
                 'notes',
             ])
@@ -122,6 +161,21 @@ class Customer extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function industryMaster(): BelongsTo
+    {
+        return $this->belongsTo(Industry::class, 'industry_id');
+    }
+
+    public function subIndustry(): BelongsTo
+    {
+        return $this->belongsTo(Industry::class, 'sub_industry_id');
+    }
+
+    public function privacyRequests(): HasMany
+    {
+        return $this->hasMany(PrivacyRequest::class);
     }
 
     public function contacts(): HasMany

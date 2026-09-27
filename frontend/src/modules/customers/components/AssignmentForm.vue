@@ -76,6 +76,39 @@
           :options="ownershipOptions"
           :disabled="loading"
         />
+        <p class="mt-1 text-xs text-slate-500">{{ ownershipDescription }}</p>
+        <p class="mt-1 text-xs text-slate-500">
+          This is operational responsibility. The company remains the application owner.
+        </p>
+      </div>
+
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Platform</label>
+        <SelectBox v-model="form.platform" wrapper-class="w-full" size="lg" :options="platformOptions" :disabled="loading" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Version</label>
+        <SelectBox v-model="form.application_version_id" wrapper-class="w-full" size="lg" :options="versionOptions" :disabled="loading || !form.application_id" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Build</label>
+        <input v-model="form.build_label" type="text" class="input" :disabled="loading" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Release</label>
+        <SelectBox v-model="form.application_release_id" wrapper-class="w-full" size="lg" :options="releaseOptions" :disabled="loading || !form.application_id" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">Subscription</label>
+        <SelectBox v-model="form.subscription_id" wrapper-class="w-full" size="lg" :options="subscriptionOptions" :disabled="loading" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">License</label>
+        <SelectBox v-model="form.license_id" wrapper-class="w-full" size="lg" :options="licenseOptions" :disabled="loading" />
+      </div>
+      <div>
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">SLA</label>
+        <SelectBox v-model="form.support_sla_policy_id" wrapper-class="w-full" size="lg" :options="slaOptions" :disabled="loading" />
       </div>
 
       <div>
@@ -151,8 +184,14 @@ import { computed, onMounted, reactive, ref, watch } from 'vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { applicationService } from '@/modules/applications/services/applicationService';
 import { environmentService } from '@/modules/applications/services/environmentService';
+import { versionService } from '@/modules/applications/services/versionService';
+import { releaseService } from '@/modules/applications/services/releaseService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
 import { customerContactService } from '@/modules/customers/services/customerContactService';
+import { subscriptionService } from '@/modules/customers/services/subscriptionService';
+import { licenseService } from '@/modules/customers/services/licenseService';
+import { supportSlaService } from '@/modules/support/services/supportSlaService';
+import { OWNERSHIP_OPTIONS } from '@/modules/customers/constants/customerModel';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -169,14 +208,26 @@ const emit = defineEmits(['submit', 'cancel']);
 
 const applications = ref([]);
 const environments = ref([]);
+const versions = ref([]);
+const releases = ref([]);
 const integrations = ref([]);
 const contacts = ref([]);
+const subscriptions = ref([]);
+const licenses = ref([]);
+const slaPolicies = ref([]);
 const form = reactive(createForm(props.initial));
 
-const ownershipOptions = [
-  { value: 'customer_owned', label: 'Customer owned' },
-  { value: 'platform_managed', label: 'Platform managed' },
-  { value: 'shared', label: 'Shared' },
+const ownershipOptions = OWNERSHIP_OPTIONS.map((option) => ({ value: option.value, label: option.label }));
+const ownershipDescription = computed(
+  () => OWNERSHIP_OPTIONS.find((option) => option.value === form.ownership_type)?.description || '',
+);
+
+const platformOptions = [
+  { value: '', label: 'Use application platform' },
+  { value: 'android', label: 'Android' },
+  { value: 'ios', label: 'iOS' },
+  { value: 'web', label: 'Web' },
+  { value: 'desktop', label: 'Desktop' },
 ];
 
 const statusOptions = [
@@ -218,21 +269,61 @@ const contactOptions = computed(() => [
   })),
 ]);
 
+const versionOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...versions.value.map((version) => ({
+    value: version.uuid,
+    label: version.version_number,
+  })),
+]);
+
+const releaseOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...releases.value.map((release) => ({
+    value: release.uuid,
+    label: release.name || release.version_label,
+  })),
+]);
+
+const subscriptionOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...subscriptions.value.map((subscription) => ({
+    value: subscription.uuid,
+    label: subscription.plan_name,
+  })),
+]);
+
+const licenseOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...licenses.value.map((license) => ({
+    value: license.uuid,
+    label: license.status,
+  })),
+]);
+
+const slaOptions = computed(() => [
+  { value: '', label: 'None' },
+  ...slaPolicies.value.map((policy) => ({
+    value: policy.uuid,
+    label: policy.name,
+  })),
+]);
+
 watch(
   () => props.initial,
   async (value) => {
     Object.assign(form, createForm(value));
     if (form.application_id) {
-      await loadEnvironments(form.application_id);
+      await loadApplicationContext(form.application_id);
     }
   },
   { deep: true },
 );
 
 onMounted(async () => {
-  await Promise.all([loadApplications(), loadIntegrations(), loadContacts()]);
+  await Promise.all([loadApplications(), loadIntegrations(), loadContacts(), loadCommercial(), loadSla()]);
   if (form.application_id) {
-    await loadEnvironments(form.application_id);
+    await loadApplicationContext(form.application_id);
   }
 });
 
@@ -289,9 +380,66 @@ async function loadEnvironments(applicationId) {
   }
 }
 
+async function loadApplicationContext(applicationId) {
+  await Promise.all([loadEnvironments(applicationId), loadVersions(applicationId), loadReleases(applicationId)]);
+}
+
+async function loadVersions(applicationId) {
+  if (!applicationId) {
+    versions.value = [];
+    return;
+  }
+  try {
+    const { data } = await versionService.list(applicationId, { per_page: 100 });
+    versions.value = data.data?.versions?.items ?? data.data?.versions ?? [];
+  } catch {
+    versions.value = [];
+  }
+}
+
+async function loadReleases(applicationId) {
+  if (!applicationId) {
+    releases.value = [];
+    return;
+  }
+  try {
+    const { data } = await releaseService.list(applicationId, { per_page: 100 });
+    releases.value = data.data?.releases?.items ?? data.data?.releases ?? [];
+  } catch {
+    releases.value = [];
+  }
+}
+
+async function loadCommercial() {
+  try {
+    const [subscriptionResponse, licenseResponse] = await Promise.all([
+      subscriptionService.list({ customer: props.customerId, per_page: 100 }),
+      licenseService.list({ customer: props.customerId, per_page: 100 }),
+    ]);
+    subscriptions.value = subscriptionResponse.data.data?.subscriptions?.items ?? [];
+    licenses.value = licenseResponse.data.data?.licenses?.items ?? [];
+  } catch {
+    subscriptions.value = [];
+    licenses.value = [];
+  }
+}
+
+async function loadSla() {
+  try {
+    const params = { per_page: 100 };
+    if (props.companyId) params.company = props.companyId;
+    const { data } = await supportSlaService.policies(params);
+    slaPolicies.value = data.data?.policies?.items ?? [];
+  } catch {
+    slaPolicies.value = [];
+  }
+}
+
 async function onApplicationChange() {
   form.application_environment_id = '';
-  await loadEnvironments(form.application_id);
+  form.application_version_id = '';
+  form.application_release_id = '';
+  await loadApplicationContext(form.application_id);
 }
 
 function toLocalInput(value) {
@@ -308,6 +456,13 @@ function createForm(value = {}) {
     application_environment_id: value.environment?.uuid || value.application_environment_id || '',
     integration_id: value.integration?.uuid || value.integration_id || '',
     owner_contact_id: value.owner_contact?.uuid || value.owner_contact_id || '',
+    platform: value.platform || '',
+    application_version_id: value.version?.uuid || value.application_version_id || '',
+    build_label: value.build_label || '',
+    application_release_id: value.release?.uuid || value.application_release_id || '',
+    subscription_id: value.subscriptions?.[0]?.uuid || value.subscription_id || '',
+    license_id: value.licenses?.[0]?.uuid || value.license_id || '',
+    support_sla_policy_id: value.sla_policy?.uuid || value.support_sla_policy_id || '',
     ownership_type: value.ownership_type || 'customer_owned',
     status: value.status || 'pending',
     activated_at: toLocalInput(value.activated_at),

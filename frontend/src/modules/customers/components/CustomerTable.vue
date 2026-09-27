@@ -33,7 +33,7 @@
               </button>
             </th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
-              Company
+              Owning company
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
@@ -110,6 +110,9 @@
                 </div>
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-slate-900">{{ customer.display_name }}</p>
+                  <p v-if="customer.customer_number" class="truncate text-xs text-slate-500">
+                    {{ customer.customer_number }}
+                  </p>
                   <p class="truncate text-xs text-slate-500">{{ customer.email || '—' }}</p>
                 </div>
               </div>

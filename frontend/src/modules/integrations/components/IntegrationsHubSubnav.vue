@@ -40,6 +40,12 @@ const items = [
     ],
   },
   {
+    name: 'integrations.connectors',
+    label: 'Connectors',
+    to: { name: 'integrations.connectors' },
+    match: ['integrations.connectors'],
+  },
+  {
     name: 'integrations.docs',
     label: 'API Docs',
     to: { name: 'integrations.docs' },

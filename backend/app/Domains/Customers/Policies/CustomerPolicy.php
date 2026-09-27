@@ -47,6 +47,16 @@ class CustomerPolicy
         return $user->can(CustomerPermission::RESTORE) || $user->can(CustomerPermission::DELETE);
     }
 
+    public function anonymize(User $user, Customer $customer): bool
+    {
+        return $user->can(CustomerPermission::ANONYMIZE);
+    }
+
+    public function exportContacts(User $user): bool
+    {
+        return $user->can(CustomerPermission::EXPORT);
+    }
+
     public function viewContacts(User $user): bool
     {
         return $user->can(CustomerPermission::VIEW);

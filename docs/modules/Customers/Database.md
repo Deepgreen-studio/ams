@@ -9,14 +9,19 @@
 companies
   └── customers
         ├── customer_contacts
-        ├── customer_applications ──► applications / environments / integrations
+        ├── customer_applications ──► applications / environments / versions / releases
+        │         └── support_tickets.customer_application_id
         ├── subscriptions ──► licenses
         ├── customer_documents (versioned via document_group_uuid)
         ├── customer_notes
         ├── customer_tasks
         ├── customer_communications
         └── customer_analytics_snapshots (daily unique per customer)
+
+industries (parent/child master data) ──► customers.industry_id / sub_industry_id
 ```
+
+Company owns applications. A customer belongs to one company and is entitled to applications through `customer_applications`. Business and Enterprise are organization customers.
 
 ## Tables
 
@@ -24,13 +29,17 @@ companies
 
 | Column | Notes |
 |--------|--------|
-| uuid | Unique public identifier |
-| company_id | FK → companies CASCADE |
-| customer_type | individual / business / enterprise |
-| first_name, last_name, company_name | Profile |
-| email | Unique per company (app rule) |
-| phone, website, industry, country | Optional |
-| timezone, language | Defaults UTC / en |
+| uuid | Immutable internal identifier |
+| customer_number | Immutable public id, `CUS-########` |
+| reference | Optional business reference, unique per company |
+| company_id | Owning company. The company owns applications |
+| customer_type | individual, or organization via business / enterprise |
+| company_name | Organization name for business and enterprise customers |
+| legal_name, registration_number | Organization identity |
+| industry_id, sub_industry_id, industry_other | Industry master data. `industry` stores the display label |
+| primary_contact_* | Organization primary contact |
+| legal_basis, processing_purpose, retention_until, anonymized_at | Privacy handling |
+| timezone | IANA timezone. Defaults from the owning company |
 | status | active / inactive / etc. |
 | notes | Free text |
 | created_by, updated_by | FK → users nullOnDelete |
@@ -40,11 +49,11 @@ Indexes: company+email/status/type, country, creators.
 
 ### `customer_contacts`
 
-FK `customer_id` CASCADE. Types: primary, technical, billing, support, emergency. Soft deletes. Only one primary contact enforced in service layer.
+FK `customer_id` CASCADE. Types: primary, technical, support, billing, security, compliance, business, emergency. `responsibilities` stores additional tags. Soft deletes. Only one primary contact enforced in service layer.
 
 ### `customer_applications`
 
-FKs: `customer_id`, `application_id`, optional `application_environment_id`, `integration_id`, `owner_contact_id`. Ownership type + status + activate/expire dates. Soft deletes. Duplicate assignment rejected at service layer. Cross-company application assignment rejected.
+Entitlement record. The company owns the application; this row assigns it to the customer. FKs: `customer_id`, `application_id`, optional environment, version, release, integration, SLA policy, owner contact. `assignment_number` is `ASN-########`. `ownership_type` is operational responsibility: customer owned, platform managed, or shared. Soft deletes. Duplicate assignment rejected at service layer. Cross-company application assignment rejected.
 
 ### `subscriptions`
 

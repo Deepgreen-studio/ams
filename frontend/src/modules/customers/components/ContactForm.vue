@@ -23,6 +23,22 @@
           {{ errors.contact_type[0] }}
         </p>
       </div>
+      <div class="md:col-span-2">
+        <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
+          Responsibilities
+        </label>
+        <div class="flex flex-wrap gap-2">
+          <label
+            v-for="option in typeOptions"
+            :key="option.value"
+            class="inline-flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5 text-xs text-slate-700"
+          >
+            <input v-model="form.responsibilities" type="checkbox" :value="option.value" :disabled="loading" />
+            {{ option.label }}
+          </label>
+        </div>
+        <p class="mt-1 text-xs text-slate-500">A contact can carry more than one responsibility. The contact type is the primary one.</p>
+      </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
           Status
@@ -115,6 +131,7 @@ import { nextTick, onMounted, reactive, ref, watch } from 'vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
+import { CONTACT_TYPE_OPTIONS } from '@/modules/customers/constants/customerModel';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -130,13 +147,7 @@ const nameInput = ref(null);
 const phoneError = ref('');
 const form = reactive(createForm(props.initial));
 
-const typeOptions = [
-  { value: 'primary', label: 'Primary' },
-  { value: 'technical', label: 'Technical' },
-  { value: 'billing', label: 'Billing' },
-  { value: 'support', label: 'Support' },
-  { value: 'emergency', label: 'Emergency' },
-];
+const typeOptions = CONTACT_TYPE_OPTIONS;
 
 const statusOptions = [
   { value: 'active', label: 'Active' },
@@ -161,6 +172,9 @@ onMounted(async () => {
 function createForm(value = {}) {
   return {
     contact_type: value.contact_type || 'support',
+    responsibilities: Array.isArray(value.responsibilities) && value.responsibilities.length
+      ? [...value.responsibilities]
+      : [value.contact_type || 'support'],
     name: value.name || '',
     email: value.email || '',
     phone: value.phone || '',
@@ -178,7 +192,8 @@ function onSubmit() {
     return;
   }
 
-  emit('submit', { ...form, phone: form.phone || null });
+  const responsibilities = [...new Set([form.contact_type, ...(form.responsibilities || [])].filter(Boolean))];
+  emit('submit', { ...form, responsibilities, phone: form.phone || null });
 }
 </script>
 

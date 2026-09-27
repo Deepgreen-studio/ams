@@ -2,9 +2,13 @@
 
 namespace App\Domains\Customers\Requests;
 
+use App\Domains\Applications\Enums\ApplicationPlatform;
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Customers\Enums\CustomerApplicationOwnershipType;
+use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
+use App\Domains\Customers\Repositories\IndustryRepository;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,6 +25,35 @@ class StoreCustomerRequest extends FormRequest
     }
 
     /**
+     * @return list<string>
+     */
+    protected function phoneFields(): array
+    {
+        return ['phone', 'primary_contact_phone'];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $merged = [];
+
+        foreach ($this->phoneFields() as $field) {
+            if (! $this->exists($field)) {
+                continue;
+            }
+
+            $merged[$field] = PhoneNumber::canonicalize($this->input($field));
+        }
+
+        if ($this->filled('organization_name') && blank($this->input('company_name'))) {
+            $merged['company_name'] = $this->input('organization_name');
+        }
+
+        if ($merged !== []) {
+            $this->merge($merged);
+        }
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function rules(): array
@@ -30,9 +63,20 @@ class StoreCustomerRequest extends FormRequest
         return [
             'company_id' => ['required', 'string'],
             'customer_type' => ['required', Rule::in(CustomerType::values())],
+            'reference' => [
+                'nullable',
+                'string',
+                'max:64',
+                'regex:/^[A-Za-z0-9][A-Za-z0-9._-]*$/',
+                Rule::unique('customers', 'reference')
+                    ->where(fn ($query) => $query->where('company_id', $companyId)->whereNull('deleted_at')),
+            ],
             'first_name' => ['nullable', 'string', 'max:120'],
             'last_name' => ['nullable', 'string', 'max:120'],
             'company_name' => ['nullable', 'string', 'max:255'],
+            'organization_name' => ['nullable', 'string', 'max:255'],
+            'legal_name' => ['nullable', 'string', 'max:255'],
+            'registration_number' => ['nullable', 'string', 'max:64'],
             'email' => [
                 'required',
                 'email',
@@ -41,13 +85,31 @@ class StoreCustomerRequest extends FormRequest
                     ->where(fn ($query) => $query->where('company_id', $companyId)->whereNull('deleted_at')),
             ],
             'phone' => PhoneNumber::inputRules(),
-            'website' => ['nullable', 'url', 'max:255'],
+            'primary_contact_name' => ['nullable', 'string', 'max:255'],
+            'primary_contact_email' => ['nullable', 'email', 'max:255'],
+            'primary_contact_phone' => PhoneNumber::inputRules(),
+            'primary_contact_title' => ['nullable', 'string', 'max:120'],
+            'website' => ['nullable', 'url:http,https', 'max:255'],
             'industry' => ['nullable', 'string', 'max:120'],
+            'industry_id' => ['nullable', 'string'],
+            'sub_industry_id' => ['nullable', 'string'],
+            'industry_other' => ['nullable', 'string', 'max:120'],
             'country' => ['nullable', 'string', 'max:100'],
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
+            'legal_basis' => ['nullable', Rule::in(CustomerLegalBasis::values())],
+            'processing_purpose' => ['nullable', 'string', 'max:500'],
+            'retention_until' => ['nullable', 'date'],
             'status' => ['nullable', Rule::in(CustomerStatus::values())],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'application' => ['nullable', 'array'],
+            'application.application_id' => ['required_with:application', 'string'],
+            'application.application_environment_id' => ['nullable', 'string'],
+            'application.environment_id' => ['nullable', 'string'],
+            'application.ownership_type' => ['nullable', Rule::in(CustomerApplicationOwnershipType::values())],
+            'application.platform' => ['nullable', Rule::in(ApplicationPlatform::values())],
+            'application.status' => ['nullable', 'string', 'max:32'],
+            'application.notes' => ['nullable', 'string', 'max:5000'],
         ];
     }
 
@@ -71,9 +133,38 @@ class StoreCustomerRequest extends FormRequest
             }
 
             if ($type->requiresCompanyName() && blank($this->input('company_name'))) {
-                $validator->errors()->add('company_name', 'Company name is required for business and enterprise customers.');
+                $validator->errors()->add('company_name', 'Organization name is required for business and enterprise customers.');
             }
+
+            $this->validateIndustrySelection($validator);
         });
+    }
+
+    protected function validateIndustrySelection(Validator $validator): void
+    {
+        $industries = app(IndustryRepository::class);
+        $industry = filled($this->input('industry_id'))
+            ? $industries->findByIdentifier((string) $this->input('industry_id'))
+            : null;
+        $subIndustry = filled($this->input('sub_industry_id'))
+            ? $industries->findByIdentifier((string) $this->input('sub_industry_id'))
+            : null;
+
+        if (filled($this->input('industry_id')) && ! $industry) {
+            $validator->errors()->add('industry_id', 'Selected industry is not available.');
+        }
+
+        if (filled($this->input('sub_industry_id')) && ! $subIndustry) {
+            $validator->errors()->add('sub_industry_id', 'Selected sub-industry is not available.');
+        }
+
+        if ($industry && $subIndustry && (int) $subIndustry->parent_id !== (int) $industry->id) {
+            $validator->errors()->add('sub_industry_id', 'Sub-industry must belong to the selected industry.');
+        }
+
+        if ($industry?->is_other && blank($this->input('industry_other'))) {
+            $validator->errors()->add('industry_other', 'Describe the industry when Other is selected.');
+        }
     }
 
     protected function resolveCompanyId(): ?int

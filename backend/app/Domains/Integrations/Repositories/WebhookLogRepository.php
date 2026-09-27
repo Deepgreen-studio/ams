@@ -2,10 +2,13 @@
 
 namespace App\Domains\Integrations\Repositories;
 
+use App\Domains\Integrations\Enums\WebhookDirection;
+use App\Domains\Integrations\Enums\WebhookLogStatus;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Shared\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class WebhookLogRepository extends BaseRepository
 {
@@ -26,7 +29,7 @@ class WebhookLogRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -43,7 +46,7 @@ class WebhookLogRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -93,7 +96,7 @@ class WebhookLogRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createLog(array $data): WebhookLog
     {
@@ -104,7 +107,7 @@ class WebhookLogRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateLog(WebhookLog $log, array $data): WebhookLog
     {
@@ -112,5 +115,20 @@ class WebhookLogRepository extends BaseRepository
         $log->save();
 
         return $log->refresh()->load(['webhook', 'event', 'actor']);
+    }
+
+    /**
+     * @return Collection<int, WebhookLog>
+     */
+    public function dueOutgoingRetries(int $limit = 100): Collection
+    {
+        return $this->model->newQuery()
+            ->where('direction', WebhookDirection::Outgoing->value)
+            ->where('status', WebhookLogStatus::Retrying->value)
+            ->whereNotNull('next_retry_at')
+            ->where('next_retry_at', '<=', now())
+            ->orderBy('next_retry_at')
+            ->limit($limit)
+            ->get();
     }
 }

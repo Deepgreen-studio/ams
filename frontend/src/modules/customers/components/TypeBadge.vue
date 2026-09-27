@@ -19,8 +19,16 @@ const props = defineProps({
 });
 
 const label = computed(() => {
-  const value = props.type || 'individual';
-  return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  switch (props.type) {
+    case 'business':
+      return 'Organization — Business';
+    case 'enterprise':
+      return 'Organization — Enterprise';
+    case 'individual':
+      return 'Individual';
+    default:
+      return (props.type || 'individual').replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  }
 });
 
 const classes = computed(() => {

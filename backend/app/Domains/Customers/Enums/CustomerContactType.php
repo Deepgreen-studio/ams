@@ -6,8 +6,11 @@ enum CustomerContactType: string
 {
     case Primary = 'primary';
     case Technical = 'technical';
-    case Billing = 'billing';
     case Support = 'support';
+    case Billing = 'billing';
+    case Security = 'security';
+    case Compliance = 'compliance';
+    case Business = 'business';
     case Emergency = 'emergency';
 
     /**
@@ -23,8 +26,11 @@ enum CustomerContactType: string
         return match ($this) {
             self::Primary => 'Primary',
             self::Technical => 'Technical',
-            self::Billing => 'Billing',
             self::Support => 'Support',
+            self::Billing => 'Billing',
+            self::Security => 'Security',
+            self::Compliance => 'Compliance / Privacy',
+            self::Business => 'Business',
             self::Emergency => 'Emergency',
         };
     }

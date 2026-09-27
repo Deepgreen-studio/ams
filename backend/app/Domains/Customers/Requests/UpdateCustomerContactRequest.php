@@ -25,6 +25,8 @@ class UpdateCustomerContactRequest extends FormRequest
     {
         return [
             'contact_type' => ['sometimes', 'required', Rule::in(CustomerContactType::values())],
+            'responsibilities' => ['nullable', 'array'],
+            'responsibilities.*' => ['string', Rule::in(CustomerContactType::values())],
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => PhoneNumber::inputRules(),

@@ -6,14 +6,16 @@ use App\Domains\Applications\Models\Application;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\Department;
 use App\Domains\Companies\Models\Team;
+use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerApplication;
+use App\Domains\Support\Enums\SupportSlaEscalationLevel;
+use App\Domains\Support\Enums\SupportSlaStatus;
 use App\Domains\Support\Enums\SupportTicketAssignmentType;
 use App\Domains\Support\Enums\SupportTicketCategory;
 use App\Domains\Support\Enums\SupportTicketPriority;
 use App\Domains\Support\Enums\SupportTicketSource;
 use App\Domains\Support\Enums\SupportTicketStatus;
-use App\Domains\Support\Enums\SupportSlaEscalationLevel;
-use App\Domains\Support\Enums\SupportSlaStatus;
 use App\Models\User;
 use Database\Factories\SupportTicketFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +41,7 @@ class SupportTicket extends Model
         'company_id',
         'customer_id',
         'application_id',
+        'customer_application_id',
         'department_id',
         'team_id',
         'ticket_number',
@@ -149,12 +152,17 @@ class SupportTicket extends Model
 
     public function privacyRequest(): BelongsTo
     {
-        return $this->belongsTo(\App\Domains\Compliance\Models\PrivacyRequest::class, 'privacy_request_id');
+        return $this->belongsTo(PrivacyRequest::class, 'privacy_request_id');
     }
 
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class);
+    }
+
+    public function customerApplication(): BelongsTo
+    {
+        return $this->belongsTo(CustomerApplication::class, 'customer_application_id');
     }
 
     public function department(): BelongsTo

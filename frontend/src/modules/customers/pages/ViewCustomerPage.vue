@@ -45,22 +45,12 @@
     <div v-else-if="customer" class="grid gap-6 lg:grid-cols-3">
       <div class="space-y-6 lg:col-span-2">
         <CustomerCard :customer="customer" />
-
-        <div class="rounded-[12px] bg-white p-6 sm:p-8">
-          <h3 class="text-base font-semibold text-slate-900">Profile details</h3>
-          <dl class="mt-5 divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
-            <div
-              v-for="item in profileItems"
-              :key="item.label"
-              class="grid grid-cols-[8.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[10rem_1fr]"
-            >
-              <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
-              <dd class="text-sm font-medium text-slate-900 whitespace-pre-wrap">
-                {{ item.value }}
-              </dd>
-            </div>
-          </dl>
-        </div>
+        <CustomerConsole
+          ref="consoleRef"
+          :customer-id="customer.uuid"
+          :customer="customer"
+          @anonymize="showAnonymize = true"
+        />
       </div>
 
       <div class="space-y-6">
@@ -115,6 +105,16 @@
     </div>
 
     <DeleteConfirmation
+      :open="showAnonymize"
+      title="Anonymize customer"
+      message="This removes personal data from the customer and contacts. Assignments stay for operational history."
+      confirm-label="Anonymize"
+      :loading="customersStore.saving"
+      @cancel="showAnonymize = false"
+      @confirm="confirmAnonymize"
+    />
+
+    <DeleteConfirmation
       :open="showDelete"
       title="Delete customer"
       :message="`Soft delete ${customer?.display_name || 'this customer'}?`"
@@ -144,25 +144,20 @@ import {
 import { formatDate } from '@/utils/formatters';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CustomerCard from '@/modules/customers/components/CustomerCard.vue';
+import CustomerConsole from '@/modules/customers/components/CustomerConsole.vue';
 import StatusBadge from '@/modules/customers/components/StatusBadge.vue';
 import TypeBadge from '@/modules/customers/components/TypeBadge.vue';
+import { customerService } from '@/modules/customers/services/customerService';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const route = useRoute();
 const router = useRouter();
 const customersStore = useCustomersStore();
 const showDelete = ref(false);
+const showAnonymize = ref(false);
+const consoleRef = ref(null);
 
 const customer = computed(() => customersStore.currentCustomer);
-
-const profileItems = computed(() => [
-  { label: 'First name', value: customer.value?.first_name || '—' },
-  { label: 'Last name', value: customer.value?.last_name || '—' },
-  { label: 'Company name', value: customer.value?.company_name || '—' },
-  { label: 'Created by', value: customer.value?.creator?.full_name || '—' },
-  { label: 'Updated by', value: customer.value?.updater?.full_name || '—' },
-  { label: 'Notes', value: customer.value?.notes || '—' },
-]);
 
 const moduleLinks = computed(() => [
   { label: 'Contacts', to: 'customers.contacts', icon: UserGroupIcon },
@@ -182,6 +177,13 @@ async function confirmDelete() {
   await customersStore.archiveCustomer(route.params.id);
   showDelete.value = false;
   await router.push({ name: 'customers.index' });
+}
+
+async function confirmAnonymize() {
+  await customerService.anonymize(route.params.id);
+  showAnonymize.value = false;
+  await customersStore.fetchCustomer(route.params.id);
+  await consoleRef.value?.reload?.();
 }
 
 async function restore() {

@@ -4,8 +4,6 @@ namespace App\Domains\Integrations\Services;
 
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Contracts\IncomingWebhookHandlerInterface;
-use App\Domains\Integrations\Handlers\EasyCareIncomingWebhookHandler;
-use App\Domains\Integrations\Handlers\GenericSupportIncomingWebhookHandler;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Domains\Integrations\Repositories\WebhookLogRepository;
@@ -19,8 +17,7 @@ class IncomingWebhookIngestService
     public function __construct(
         private readonly WebhookRepository $webhookRepository,
         private readonly WebhookLogRepository $webhookLogRepository,
-        private readonly EasyCareIncomingWebhookHandler $easyCareHandler,
-        private readonly GenericSupportIncomingWebhookHandler $genericSupportHandler,
+        private readonly ConnectorRegistry $connectorRegistry,
     ) {}
 
     /**
@@ -87,7 +84,7 @@ class IncomingWebhookIngestService
     }
 
     /**
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $payload
      * @return array<string, mixed>
      */
     private function runHandlers(Webhook $webhook, WebhookLog $log, array $payload, User $actor): array
@@ -125,16 +122,13 @@ class IncomingWebhookIngestService
     }
 
     /**
-     * App-specific handlers first, then generic Support SMS/message ingest.
+     * Product connectors first (higher priority), then generic Support ingest.
      *
      * @return list<IncomingWebhookHandlerInterface>
      */
     private function handlers(): array
     {
-        return [
-            $this->easyCareHandler,
-            $this->genericSupportHandler,
-        ];
+        return $this->connectorRegistry->webhookHandlers();
     }
 
     private function resolveSystemActor(Webhook $webhook): ?User
@@ -191,7 +185,7 @@ class IncomingWebhookIngestService
     }
 
     /**
-     * @param  array<string, mixed>  $result
+     * @param array<string, mixed> $result
      */
     private function persistIngestResult(WebhookLog $log, array $result, bool $failed = false): void
     {

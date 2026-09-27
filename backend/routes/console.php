@@ -9,6 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('sync:dispatch-scheduled')->everyMinute()->withoutOverlapping();
+Schedule::command('integrations:maintain')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('monitoring:capture')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('support:evaluate-sla')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('automation:process')->everyMinute()->withoutOverlapping();

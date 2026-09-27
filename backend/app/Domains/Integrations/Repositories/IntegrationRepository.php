@@ -2,10 +2,13 @@
 
 namespace App\Domains\Integrations\Repositories;
 
+use App\Domains\Integrations\Enums\IntegrationAuthenticationType;
+use App\Domains\Integrations\Enums\IntegrationStatus;
 use App\Domains\Integrations\Models\Integration;
 use App\Shared\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class IntegrationRepository extends BaseRepository
 {
@@ -45,7 +48,7 @@ class IntegrationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -62,7 +65,7 @@ class IntegrationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -116,7 +119,7 @@ class IntegrationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createIntegration(array $data): Integration
     {
@@ -127,7 +130,7 @@ class IntegrationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateIntegration(Integration $integration, array $data): Integration
     {
@@ -149,5 +152,46 @@ class IntegrationRepository extends BaseRepository
         }
 
         return $query->exists();
+    }
+
+    /**
+     * @param array<string, mixed> $credentials
+     */
+    public function updateCredentials(Integration $integration, array $credentials, ?int $updatedBy = null): Integration
+    {
+        $integration->credentials = $credentials;
+        if ($updatedBy !== null) {
+            $integration->updated_by = $updatedBy;
+        }
+        $integration->save();
+
+        return $integration->refresh();
+    }
+
+    /**
+     * @return Collection<int, Integration>
+     */
+    public function activeOAuth(): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', IntegrationStatus::Active->value)
+            ->where('authentication_type', IntegrationAuthenticationType::OAuth2->value)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Integration>
+     */
+    public function dueForHealthCheck(int $intervalMinutes): Collection
+    {
+        return $this->model->newQuery()
+            ->where('status', IntegrationStatus::Active->value)
+            ->whereNotNull('base_url')
+            ->whereIn('type', ['rest_api', 'graphql', 'webhook'])
+            ->where(function (Builder $query) use ($intervalMinutes): void {
+                $query->whereNull('last_health_check')
+                    ->orWhere('last_health_check', '<=', now()->subMinutes($intervalMinutes));
+            })
+            ->get();
     }
 }

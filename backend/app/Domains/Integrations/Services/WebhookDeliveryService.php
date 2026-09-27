@@ -5,6 +5,7 @@ namespace App\Domains\Integrations\Services;
 use App\Domains\Integrations\Enums\WebhookLogStatus;
 use App\Domains\Integrations\Events\WebhookDelivered;
 use App\Domains\Integrations\Events\WebhookFailed;
+use App\Domains\Integrations\Jobs\DeliverOutgoingWebhookJob;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Domains\Integrations\Repositories\WebhookLogRepository;
@@ -19,6 +20,23 @@ class WebhookDeliveryService
         private readonly WebhookLogRepository $webhookLogRepository,
         private readonly WebhookEngine $webhookEngine,
     ) {}
+
+    public function dispatchDueRetries(int $limit = 100): int
+    {
+        $dispatched = 0;
+
+        foreach ($this->webhookLogRepository->dueOutgoingRetries($limit) as $log) {
+            $this->webhookLogRepository->updateLog($log, [
+                'status' => WebhookLogStatus::Pending->value,
+                'next_retry_at' => null,
+            ]);
+
+            DeliverOutgoingWebhookJob::dispatch($log->id, $log->company_id, $log->triggered_by);
+            $dispatched++;
+        }
+
+        return $dispatched;
+    }
 
     public function processQueuedDelivery(int $webhookLogId): WebhookLog
     {
@@ -92,7 +110,7 @@ class WebhookDeliveryService
     }
 
     /**
-     * @param  array<string, mixed>  $result
+     * @param array<string, mixed> $result
      */
     protected function markFailure(
         WebhookLog $log,
@@ -136,6 +154,6 @@ class WebhookDeliveryService
             return null;
         }
 
-        return strlen($value) <= $limit ? $value : substr($value, 0, $limit).'...[truncated]';
+        return strlen($value) <= $limit ? $value : substr($value, 0, $limit) . '...[truncated]';
     }
 }

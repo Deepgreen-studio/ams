@@ -24,4 +24,17 @@ enum CustomerApplicationOwnershipType: string
             self::Shared => 'Shared',
         };
     }
+
+    /**
+     * Operational responsibility for the entitlement. The company remains the
+     * owner of the application record.
+     */
+    public function description(): string
+    {
+        return match ($this) {
+            self::CustomerOwned => 'The customer operates this entitlement. The company still owns the application.',
+            self::PlatformManaged => 'The company operates the application for the customer.',
+            self::Shared => 'The company and the customer share operational responsibility.',
+        };
+    }
 }

@@ -195,6 +195,39 @@ class CustomerContactService
             $payload['status'] = CustomerContactStatus::Active->value;
         }
 
+        if (array_key_exists('responsibilities', $data) || isset($payload['contact_type'])) {
+            $payload['responsibilities'] = $this->normalizeResponsibilities(
+                $data['responsibilities'] ?? [],
+                $payload['contact_type'] ?? null
+            );
+        }
+
         return $payload;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function normalizeResponsibilities(mixed $values, mixed $primary): array
+    {
+        $items = is_array($values) ? $values : [];
+
+        if ($primary instanceof CustomerContactType) {
+            $items[] = $primary->value;
+        } elseif (filled($primary)) {
+            $items[] = (string) $primary;
+        }
+
+        $clean = [];
+
+        foreach ($items as $item) {
+            $value = $item instanceof CustomerContactType ? $item->value : (string) $item;
+
+            if (in_array($value, CustomerContactType::values(), true) && ! in_array($value, $clean, true)) {
+                $clean[] = $value;
+            }
+        }
+
+        return $clean;
     }
 }

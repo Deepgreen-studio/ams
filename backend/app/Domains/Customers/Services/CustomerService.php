@@ -10,7 +10,9 @@ use App\Domains\Customers\Events\CustomerDeleted;
 use App\Domains\Customers\Events\CustomerRestored;
 use App\Domains\Customers\Events\CustomerUpdated;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\Industry;
 use App\Domains\Customers\Repositories\CustomerRepository;
+use App\Domains\Customers\Repositories\IndustryRepository;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
@@ -21,7 +23,9 @@ class CustomerService
 {
     public function __construct(
         private readonly CustomerRepository $customerRepository,
-        private readonly CompanyRepository $companyRepository
+        private readonly CompanyRepository $companyRepository,
+        private readonly IndustryRepository $industryRepository,
+        private readonly CustomerApplicationService $customerApplicationService,
     ) {}
 
     /**
@@ -49,7 +53,9 @@ class CustomerService
         $customer = $this->find($identifier);
 
         return $customer->load([
-            'company:id,uuid,company_name,status',
+            'company:id,uuid,company_name,status,country,timezone',
+            'industryMaster:id,uuid,code,name,is_other',
+            'subIndustry:id,uuid,code,name,parent_id',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
         ]);
@@ -62,18 +68,34 @@ class CustomerService
     {
         return DB::transaction(function () use ($data, $actor): Customer {
             $company = $this->companyRepository->findByIdentifierOrFail((string) $data['company_id']);
+            $application = is_array($data['application'] ?? null) ? $data['application'] : null;
             $payload = $this->preparePayload($data);
+            $payload = $this->applyIndustry($payload, $data);
             $payload['company_id'] = $company->id;
             $payload['status'] = $payload['status'] ?? CustomerStatus::Active->value;
-            $payload['timezone'] = $payload['timezone'] ?? 'UTC';
+            $payload['country'] = $payload['country'] ?? $company->country;
+            $payload['timezone'] = $payload['timezone'] ?? ($company->timezone ?: 'UTC');
             $payload['language'] = $payload['language'] ?? 'en';
             $payload['created_by'] = $actor->id;
             $payload['updated_by'] = $actor->id;
 
             $customer = $this->customerRepository->createCustomer($payload);
+
+            if (is_array($application) && filled($application['application_id'] ?? null)) {
+                $this->customerApplicationService->create([
+                    'customer_id' => $customer->uuid,
+                    'application_id' => $application['application_id'],
+                    'application_environment_id' => $application['application_environment_id'] ?? $application['environment_id'] ?? null,
+                    'ownership_type' => $application['ownership_type'] ?? null,
+                    'platform' => $application['platform'] ?? null,
+                    'status' => $application['status'] ?? null,
+                    'notes' => $application['notes'] ?? null,
+                ], $actor);
+            }
+
             event(new CustomerCreated($customer, $actor));
 
-            return $customer;
+            return $this->show($customer->uuid);
         });
     }
 
@@ -84,7 +106,13 @@ class CustomerService
     {
         return DB::transaction(function () use ($identifier, $data, $actor): Customer {
             $customer = $this->customerRepository->findByIdentifierOrFail($identifier);
+
+            if ($customer->anonymized_at !== null) {
+                throw new ApiException('Anonymized customers cannot be edited.', 422);
+            }
+
             $payload = $this->preparePayload($data, isUpdate: true);
+            $payload = $this->applyIndustry($payload, $data, $customer);
             $payload['updated_by'] = $actor->id;
 
             if (array_key_exists('company_id', $data) && ! blank($data['company_id'])) {
@@ -95,7 +123,68 @@ class CustomerService
             $updated = $this->customerRepository->updateCustomer($customer, $payload);
             event(new CustomerUpdated($updated, $actor));
 
-            return $updated;
+            return $this->show($updated->uuid);
+        });
+    }
+
+    public function anonymize(string $identifier, User $actor): Customer
+    {
+        return DB::transaction(function () use ($identifier, $actor): Customer {
+            $customer = $this->customerRepository->findByIdentifierOrFail($identifier);
+
+            if ($customer->anonymized_at !== null) {
+                throw new ApiException('Customer is already anonymized.', 422);
+            }
+
+            activity()->disableLogging();
+
+            try {
+                $customer->contacts()->update([
+                    'name' => 'Anonymized contact',
+                    'email' => null,
+                    'phone' => null,
+                    'notes' => null,
+                    'updated_by' => $actor->id,
+                ]);
+
+                $this->customerRepository->updateCustomer($customer, [
+                    'first_name' => null,
+                    'last_name' => null,
+                    'company_name' => $customer->customer_type?->isOrganization() ? 'Anonymized organization' : null,
+                    'legal_name' => null,
+                    'registration_number' => null,
+                    'reference' => null,
+                    'email' => 'anonymized-' . $customer->id . '@invalid.example',
+                    'phone' => null,
+                    'primary_contact_name' => null,
+                    'primary_contact_email' => null,
+                    'primary_contact_phone' => null,
+                    'primary_contact_title' => null,
+                    'website' => null,
+                    'industry_other' => null,
+                    'notes' => null,
+                    'status' => CustomerStatus::Inactive->value,
+                    'anonymized_at' => now(),
+                    'updated_by' => $actor->id,
+                ]);
+            } finally {
+                activity()->enableLogging();
+            }
+
+            $customer = $this->show($customer->uuid);
+            activity()
+                ->performedOn($customer)
+                ->causedBy($actor)
+                ->withProperties([
+                    'customer_number' => $customer->customer_number,
+                    'anonymized_at' => $customer->anonymized_at?->toIso8601String(),
+                ])
+                ->event('anonymized')
+                ->log('Customer personal data anonymized');
+
+            event(new CustomerUpdated($customer, $actor));
+
+            return $customer;
         });
     }
 
@@ -165,38 +254,73 @@ class CustomerService
     {
         $allowed = [
             'customer_type',
+            'reference',
             'first_name',
             'last_name',
             'company_name',
+            'legal_name',
+            'registration_number',
             'email',
             'phone',
+            'primary_contact_name',
+            'primary_contact_email',
+            'primary_contact_phone',
+            'primary_contact_title',
             'website',
             'industry',
+            'industry_other',
             'country',
             'timezone',
             'language',
+            'legal_basis',
+            'processing_purpose',
+            'retention_until',
             'status',
             'notes',
         ];
 
         $payload = array_intersect_key($data, array_flip($allowed));
 
-        foreach (['first_name', 'last_name', 'company_name', 'phone', 'website', 'industry', 'country', 'notes'] as $nullable) {
+        foreach ([
+            'reference',
+            'first_name',
+            'last_name',
+            'company_name',
+            'legal_name',
+            'registration_number',
+            'phone',
+            'primary_contact_name',
+            'primary_contact_email',
+            'primary_contact_phone',
+            'primary_contact_title',
+            'website',
+            'industry',
+            'industry_other',
+            'country',
+            'notes',
+            'legal_basis',
+            'processing_purpose',
+            'retention_until',
+        ] as $nullable) {
             if (array_key_exists($nullable, $payload) && blank($payload[$nullable])) {
                 $payload[$nullable] = null;
             }
         }
 
-        if (array_key_exists('phone', $payload) && $payload['phone'] !== null) {
-            $payload['phone'] = PhoneNumber::store($payload['phone']);
+        foreach (['phone', 'primary_contact_phone'] as $phoneField) {
+            if (array_key_exists($phoneField, $payload) && $payload[$phoneField] !== null) {
+                $payload[$phoneField] = PhoneNumber::store($payload[$phoneField]);
+            }
         }
 
-        if (array_key_exists('email', $payload) && is_string($payload['email'])) {
-            $payload['email'] = strtolower(trim($payload['email']));
+        foreach (['email', 'primary_contact_email'] as $emailField) {
+            if (array_key_exists($emailField, $payload) && is_string($payload[$emailField])) {
+                $payload[$emailField] = strtolower(trim($payload[$emailField]));
+            }
         }
 
-        if (! $isUpdate && empty($payload['timezone'])) {
-            $payload['timezone'] = 'UTC';
+        if ($isUpdate && array_key_exists('timezone', $payload) && blank($payload['timezone'])) {
+            unset($payload['timezone']);
         }
 
         if (! $isUpdate && empty($payload['language'])) {
@@ -209,10 +333,72 @@ class CustomerService
                 : CustomerType::tryFrom((string) $payload['customer_type']);
 
             if ($type?->requiresPersonName()) {
-                $payload['company_name'] = $payload['company_name'] ?? null;
+                $payload['company_name'] = null;
+                $payload['legal_name'] = null;
+                $payload['registration_number'] = null;
             }
         }
 
         return $payload;
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected function applyIndustry(array $payload, array $data, ?Customer $existing = null): array
+    {
+        $industrySelected = array_key_exists('industry_id', $data) || array_key_exists('sub_industry_id', $data);
+
+        if (! $industrySelected && $existing === null) {
+            return $payload;
+        }
+
+        if (! $industrySelected) {
+            return $payload;
+        }
+
+        $industry = $this->resolveIndustry($data['industry_id'] ?? null);
+        $subIndustry = $this->resolveIndustry($data['sub_industry_id'] ?? null);
+
+        if ($subIndustry && $industry && (int) $subIndustry->parent_id !== (int) $industry->id) {
+            throw new ApiException('Sub-industry must belong to the selected industry.', 422);
+        }
+
+        if ($subIndustry && ! $industry) {
+            throw new ApiException('Select an industry before choosing a sub-industry.', 422);
+        }
+
+        $payload['industry_id'] = $industry?->id;
+        $payload['sub_industry_id'] = $subIndustry?->id;
+
+        if ($industry?->is_other) {
+            $payload['industry'] = $payload['industry_other'] ?? $existing?->industry_other;
+            $payload['sub_industry_id'] = null;
+        } elseif ($subIndustry) {
+            $payload['industry'] = $industry->name . ' / ' . $subIndustry->name;
+            $payload['industry_other'] = null;
+        } elseif ($industry) {
+            $payload['industry'] = $industry->name;
+            $payload['industry_other'] = null;
+        }
+
+        return $payload;
+    }
+
+    protected function resolveIndustry(mixed $identifier): ?Industry
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        $industry = $this->industryRepository->findByIdentifier((string) $identifier);
+
+        if (! $industry || ! $industry->is_active) {
+            throw new ApiException('Selected industry is not available.', 422);
+        }
+
+        return $industry;
     }
 }

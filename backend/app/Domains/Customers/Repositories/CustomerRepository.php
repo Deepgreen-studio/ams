@@ -24,7 +24,8 @@ class CustomerRepository extends BaseRepository
 
         /** @var Customer|null $customer */
         $customer = $query->where(function (Builder $builder) use ($identifier): void {
-            $builder->where('uuid', $identifier);
+            $builder->where('uuid', $identifier)
+                ->orWhere('customer_number', $identifier);
             if (ctype_digit($identifier)) {
                 $builder->orWhere('id', (int) $identifier);
             }
@@ -45,7 +46,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -53,7 +54,9 @@ class CustomerRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'company:id,uuid,company_name,status',
+                'company:id,uuid,company_name,status,country,timezone',
+                'industryMaster:id,uuid,code,name,is_other',
+                'subIndustry:id,uuid,code,name,parent_id',
                 'creator:id,uuid,full_name,email',
                 'updater:id,uuid,full_name,email',
             ])
@@ -62,7 +65,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -87,7 +90,10 @@ class CustomerRepository extends BaseRepository
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('industry', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%");
+                    ->orWhere('country', 'like', "%{$search}%")
+                    ->orWhere('customer_number', 'like', "%{$search}%")
+                    ->orWhere('reference', 'like', "%{$search}%")
+                    ->orWhere('registration_number', 'like', "%{$search}%");
             });
         }
 
@@ -154,7 +160,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createCustomer(array $data): Customer
     {
@@ -165,7 +171,7 @@ class CustomerRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateCustomer(Customer $customer, array $data): Customer
     {

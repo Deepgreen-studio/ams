@@ -26,10 +26,10 @@ class ScheduledJobHandlerExecutor
     {
         $handler = ScheduledJobHandler::tryFrom((string) $job->handler_key);
         if (! $handler) {
-            return ['status' => 'failed', 'message' => 'Unknown handler: '.$job->handler_key];
+            return ['status' => 'failed', 'message' => 'Unknown handler: ' . $job->handler_key];
         }
 
-        $this->log($run, 'info', 'Executing handler '.$handler->value);
+        $this->log($run, 'info', 'Executing handler ' . $handler->value);
 
         try {
             return match ($handler) {
@@ -125,7 +125,7 @@ class ScheduledJobHandlerExecutor
             'status' => 'success',
             'message' => 'Weekly backup job completed.',
             'data' => [
-                'backup_window' => now()->startOfWeek()->toDateString().' → '.now()->toDateString(),
+                'backup_window' => now()->startOfWeek()->toDateString() . ' → ' . now()->toDateString(),
             ],
         ];
     }
@@ -161,7 +161,7 @@ class ScheduledJobHandlerExecutor
         if ($exit !== 0) {
             return [
                 'status' => 'failed',
-                'message' => 'Health check command failed with exit code '.$exit,
+                'message' => 'Health check command failed with exit code ' . $exit,
                 'data' => ['output' => $output],
             ];
         }
@@ -233,7 +233,7 @@ class ScheduledJobHandlerExecutor
             return ['status' => 'failed', 'message' => 'Custom command is required in payload.command.'];
         }
 
-        $allowed = ['monitoring:capture', 'automation:process', 'workflows:process-timeouts', 'support:evaluate-sla', 'sync:dispatch-scheduled'];
+        $allowed = ['monitoring:capture', 'automation:process', 'workflows:process-timeouts', 'support:evaluate-sla', 'sync:dispatch-scheduled', 'integrations:maintain'];
         if (! in_array($command, $allowed, true)) {
             return ['status' => 'failed', 'message' => "Command [{$command}] is not in the allow-list."];
         }
@@ -251,7 +251,7 @@ class ScheduledJobHandlerExecutor
     }
 
     /**
-     * @param  array<string, mixed>  $context
+     * @param array<string, mixed> $context
      */
     private function log(ScheduledJobRun $run, string $level, string $message, array $context = []): void
     {

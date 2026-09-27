@@ -26,6 +26,14 @@ Enterprise Customer Relationship Management for AMS (Phases 4.1–4.8).
 | 4.7 | Customer analytics |
 | 4.8 | Module review + documentation (this milestone) |
 
+## Customer model
+
+The owning **company** owns applications. A **customer** belongs to that company and is assigned to applications through an entitlement record (`customer_applications`). Customers are either an **individual** or an **organization**. Business and Enterprise are organization categories and share organization fields (organization name, legal name, registration/tax ID, primary contact).
+
+Assignment ownership (`customer owned`, `platform managed`, `shared`) is operational responsibility. It does not transfer ownership of the application record.
+
+`customer_number` is the immutable public id. `uuid` remains the internal identifier. `reference` is an optional business reference.
+
 ## Quick test
 
 ```bash

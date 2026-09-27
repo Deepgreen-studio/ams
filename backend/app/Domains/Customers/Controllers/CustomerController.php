@@ -3,11 +3,14 @@
 namespace App\Domains\Customers\Controllers;
 
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Repositories\IndustryRepository;
 use App\Domains\Customers\Requests\IndexCustomerRequest;
 use App\Domains\Customers\Requests\StoreCustomerRequest;
 use App\Domains\Customers\Requests\UpdateCustomerRequest;
 use App\Domains\Customers\Resources\CustomerCollection;
 use App\Domains\Customers\Resources\CustomerResource;
+use App\Domains\Customers\Resources\IndustryResource;
+use App\Domains\Customers\Services\CustomerConsoleService;
 use App\Domains\Customers\Services\CustomerService;
 use App\Models\User;
 use App\Shared\Responses\ApiResponse;
@@ -20,7 +23,9 @@ class CustomerController
     use AuthorizesRequests;
 
     public function __construct(
-        private readonly CustomerService $customerService
+        private readonly CustomerService $customerService,
+        private readonly CustomerConsoleService $customerConsoleService,
+        private readonly IndustryRepository $industryRepository,
     ) {}
 
     public function index(IndexCustomerRequest $request): JsonResponse
@@ -96,6 +101,40 @@ class CustomerController
         return ApiResponse::success([
             'customer' => new CustomerResource($restored),
         ], 'Customer restored successfully.');
+    }
+
+    public function industries(): JsonResponse
+    {
+        $this->authorize('viewAny', Customer::class);
+
+        return ApiResponse::success([
+            'industries' => IndustryResource::collection($this->industryRepository->tree())->resolve(),
+        ]);
+    }
+
+    public function console(string $customer): JsonResponse
+    {
+        $model = $this->customerService->show($customer);
+        $this->authorize('view', $model);
+
+        return ApiResponse::success([
+            'customer' => new CustomerResource($model),
+            'console' => $this->customerConsoleService->show($model),
+        ]);
+    }
+
+    public function anonymize(Request $request, string $customer): JsonResponse
+    {
+        $existing = $this->customerService->find($customer);
+        $this->authorize('anonymize', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $updated = $this->customerService->anonymize($customer, $actor);
+
+        return ApiResponse::success([
+            'customer' => new CustomerResource($updated),
+        ], 'Customer personal data anonymized.');
     }
 
     public function statistics(Request $request): JsonResponse

@@ -47,7 +47,7 @@ class LicenseRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -67,7 +67,7 @@ class LicenseRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -133,7 +133,7 @@ class LicenseRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createLicense(array $data): License
     {
@@ -150,7 +150,7 @@ class LicenseRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateLicense(License $license, array $data): License
     {
@@ -195,5 +195,19 @@ class LicenseRepository extends BaseRepository
                     ] : null,
                 ];
             });
+    }
+
+    public function linkToAssignment(int $licenseId, int $assignmentId): void
+    {
+        $this->model->newQuery()->whereKey($licenseId)->update([
+            'customer_application_id' => $assignmentId,
+        ]);
+    }
+
+    public function detachFromAssignment(int $assignmentId): void
+    {
+        $this->model->newQuery()->where('customer_application_id', $assignmentId)->update([
+            'customer_application_id' => null,
+        ]);
     }
 }

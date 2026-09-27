@@ -14,6 +14,10 @@ final class CustomerPermission
 
     public const RESTORE = 'customers.restore';
 
+    public const EXPORT = 'customers.export';
+
+    public const ANONYMIZE = 'customers.anonymize';
+
     /**
      * @return list<string>
      */
@@ -25,6 +29,8 @@ final class CustomerPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::EXPORT,
+            self::ANONYMIZE,
         ];
     }
 }

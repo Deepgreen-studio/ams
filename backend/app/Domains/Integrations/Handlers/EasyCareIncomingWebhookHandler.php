@@ -4,6 +4,9 @@ namespace App\Domains\Integrations\Handlers;
 
 use App\Domains\Applications\Models\Application;
 use App\Domains\Integrations\Contracts\IncomingWebhookHandlerInterface;
+use App\Domains\Integrations\Contracts\IntegrationConnectorInterface;
+use App\Domains\Integrations\Enums\ConnectorCapability;
+use App\Domains\Integrations\Models\Integration;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Domains\Support\Enums\SupportTicketCategory;
@@ -12,12 +15,13 @@ use App\Domains\Support\Enums\SupportTicketSource;
 use App\Domains\Support\Models\SupportTicket;
 use App\Domains\Support\Services\SupportTicketService;
 use App\Models\User;
+
 /**
  * Maps EasyCare domain webhooks into AMS Support tickets.
  * Personal-health events set involves_personal_data so SupportComplianceRouting
  * auto-creates a Compliance privacy request.
  */
-class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
+class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface, IntegrationConnectorInterface
 {
     public const SLUG = 'easycare';
 
@@ -55,6 +59,41 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
         private readonly SupportTicketService $supportTicketService,
     ) {}
 
+    public function key(): string
+    {
+        return 'easycare';
+    }
+
+    public function label(): string
+    {
+        return 'EasyCare';
+    }
+
+    public function description(): string
+    {
+        return 'EasyCare webhooks are ingested through the shared webhook engine and mapped into Support.';
+    }
+
+    public function capabilities(): array
+    {
+        return [
+            ConnectorCapability::Webhook->value,
+            ConnectorCapability::Api->value,
+            ConnectorCapability::ScheduledSync->value,
+        ];
+    }
+
+    public function priority(): int
+    {
+        return 100;
+    }
+
+    public function matchesIntegration(?Integration $integration): bool
+    {
+        return $integration !== null
+            && str_contains(strtolower((string) $integration->slug), 'easycare');
+    }
+
     public function supports(Webhook $webhook): bool
     {
         return $webhook->slug === self::SLUG;
@@ -69,7 +108,7 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
             return [
                 'handled' => false,
                 'skipped' => true,
-                'reason' => 'Event not mapped for EasyCare auto-ingest: '.$eventName,
+                'reason' => 'Event not mapped for EasyCare auto-ingest: ' . $eventName,
                 'actions' => [],
             ];
         }
@@ -124,7 +163,7 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveExternalId(array $data, WebhookLog $log): string
     {
@@ -134,19 +173,19 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
             return (string) $id;
         }
 
-        return 'log-'.$log->uuid;
+        return 'log-' . $log->uuid;
     }
 
     private function idempotencyTag(string $eventName, string $externalId): string
     {
-        return '[easycare-ingest:'.$eventName.':'.$externalId.']';
+        return '[easycare-ingest:' . $eventName . ':' . $externalId . ']';
     }
 
     private function findExistingTicket(int $companyId, string $idempotencyTag): ?SupportTicket
     {
         return SupportTicket::query()
             ->where('company_id', $companyId)
-            ->where('description', 'like', '%'.$idempotencyTag.'%')
+            ->where('description', 'like', '%' . $idempotencyTag . '%')
             ->with(['privacyRequest'])
             ->first();
     }
@@ -160,26 +199,26 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function buildSubject(string $eventName, array $data): string
     {
         return match ($eventName) {
-            'user.created' => 'EasyCare: New user '.($data['email'] ?? $data['name'] ?? $data['uuid'] ?? ''),
-            'user.updated' => 'EasyCare: User updated '.($data['email'] ?? $data['name'] ?? $data['uuid'] ?? ''),
-            'patient.created' => 'EasyCare: Patient registered '.($data['medical_record_number'] ?? $data['uuid'] ?? ''),
-            'patient.updated' => 'EasyCare: Patient updated '.($data['medical_record_number'] ?? $data['uuid'] ?? ''),
-            'appointment.created' => 'EasyCare: Appointment scheduled '.($data['uuid'] ?? ''),
-            'blood_sugar.created' => 'EasyCare: Blood sugar reading '.($data['value_mg_dl'] ?? '').' '.($data['unit'] ?? 'mg/dL'),
-            'medicine.updated' => 'EasyCare: Medicine updated '.($data['name'] ?? $data['uuid'] ?? ''),
+            'user.created' => 'EasyCare: New user ' . ($data['email'] ?? $data['name'] ?? $data['uuid'] ?? ''),
+            'user.updated' => 'EasyCare: User updated ' . ($data['email'] ?? $data['name'] ?? $data['uuid'] ?? ''),
+            'patient.created' => 'EasyCare: Patient registered ' . ($data['medical_record_number'] ?? $data['uuid'] ?? ''),
+            'patient.updated' => 'EasyCare: Patient updated ' . ($data['medical_record_number'] ?? $data['uuid'] ?? ''),
+            'appointment.created' => 'EasyCare: Appointment scheduled ' . ($data['uuid'] ?? ''),
+            'blood_sugar.created' => 'EasyCare: Blood sugar reading ' . ($data['value_mg_dl'] ?? '') . ' ' . ($data['unit'] ?? 'mg/dL'),
+            'medicine.updated' => 'EasyCare: Medicine updated ' . ($data['name'] ?? $data['uuid'] ?? ''),
             'easycare.test' => 'EasyCare: Test webhook',
-            default => 'EasyCare event: '.$eventName,
+            default => 'EasyCare event: ' . $eventName,
         };
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $payload
      */
     private function buildDescription(
         string $eventName,
@@ -190,9 +229,9 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
     ): string {
         $lines = [
             'Auto-ingested from EasyCare incoming webhook.',
-            'Event: '.$eventName,
-            'Webhook log: '.$log->uuid,
-            'Received at: '.($payload['timestamp'] ?? now()->toIso8601String()),
+            'Event: ' . $eventName,
+            'Webhook log: ' . $log->uuid,
+            'Received at: ' . ($payload['timestamp'] ?? now()->toIso8601String()),
             '',
             'Payload summary:',
         ];
@@ -201,11 +240,11 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
             if ($value === null || $value === '') {
                 continue;
             }
-            $lines[] = '- '.$label.': '.$value;
+            $lines[] = '- ' . $label . ': ' . $value;
         }
 
         if ($eventName === 'easycare.test') {
-            $lines[] = '- message: '.(string) ($data['message'] ?? 'Test webhook from EasyCare');
+            $lines[] = '- message: ' . (string) ($data['message'] ?? 'Test webhook from EasyCare');
         }
 
         $lines[] = '';
@@ -220,14 +259,14 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      * @return array<string, string|null>
      */
     private function summaryFields(string $eventName, array $data): array
     {
         return match ($eventName) {
             'user.created', 'user.updated' => [
-                'name' => (string) ($data['name'] ?? trim(($data['first_name'] ?? '').' '.($data['last_name'] ?? ''))),
+                'name' => (string) ($data['name'] ?? trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''))),
                 'email' => isset($data['email']) ? (string) $data['email'] : null,
                 'phone' => isset($data['phone']) ? (string) $data['phone'] : null,
                 'role' => isset($data['role']) ? (string) $data['role'] : null,
@@ -282,7 +321,7 @@ class EasyCareIncomingWebhookHandler implements IncomingWebhookHandlerInterface
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolvePriority(string $eventName, array $data): SupportTicketPriority
     {

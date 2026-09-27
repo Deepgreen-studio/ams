@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Http;
 class RequestBuilder
 {
     /**
-     * @param  array<string, string>  $headers
-     * @param  array<string, mixed>  $query
-     * @param  array<string, mixed>|string|null  $body
-     * @param  array<string, mixed>  $files
+     * @param array<string, string> $headers
+     * @param array<string, mixed> $query
+     * @param array<string, mixed>|string|null $body
+     * @param array<string, mixed> $files
      */
     public function build(
         string $method,
@@ -28,6 +28,26 @@ class RequestBuilder
         $options = [
             'query' => $query,
         ];
+
+        $contentType = '';
+        foreach ($headers as $name => $value) {
+            if (strtolower((string) $name) === 'content-type') {
+                $contentType = strtolower((string) $value);
+            }
+        }
+
+        if (is_array($body) && str_contains($contentType, 'application/x-www-form-urlencoded')) {
+            $encoded = http_build_query($body);
+
+            return [
+                'pending' => $pending->withBody($encoded, 'application/x-www-form-urlencoded'),
+                'method' => strtoupper($method),
+                'url' => $url,
+                'options' => $options,
+                'payload' => $encoded,
+                'multipart' => false,
+            ];
+        }
 
         $hasFiles = $files !== [] || $asMultipart;
 
@@ -71,7 +91,7 @@ class RequestBuilder
     }
 
     /**
-     * @param  array<string, mixed>  $files
+     * @param array<string, mixed> $files
      */
     protected function attachFiles(PendingRequest $pending, array $files): PendingRequest
     {

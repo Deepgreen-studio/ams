@@ -4,8 +4,11 @@ namespace App\Domains\Integrations\Handlers;
 
 use App\Domains\Applications\Models\Application;
 use App\Domains\Integrations\Contracts\IncomingWebhookHandlerInterface;
+use App\Domains\Integrations\Contracts\IntegrationConnectorInterface;
+use App\Domains\Integrations\Enums\ConnectorCapability;
 use App\Domains\Integrations\Enums\WebsiteFormDestination;
 use App\Domains\Integrations\Enums\WebsiteFormIntent;
+use App\Domains\Integrations\Models\Integration;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Domains\Integrations\Services\WebsiteFormIngestService;
@@ -32,7 +35,7 @@ use App\Models\User;
  * - Follow-ups with ticket_uuid (or matching open SMS phone thread) append
  *   to the same ticket Conversation instead of opening a new ticket.
  */
-class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInterface
+class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInterface, IntegrationConnectorInterface
 {
     /**
      * @var list<string>
@@ -49,6 +52,48 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         private readonly WebsiteFormIngestService $websiteFormIngestService,
     ) {}
 
+    public function key(): string
+    {
+        return 'generic-support';
+    }
+
+    public function label(): string
+    {
+        return 'Generic Support';
+    }
+
+    public function description(): string
+    {
+        return 'Standard Support webhook events for any connected app. Product-specific connectors run first.';
+    }
+
+    public function capabilities(): array
+    {
+        return [
+            ConnectorCapability::Webhook->value,
+        ];
+    }
+
+    public function priority(): int
+    {
+        return 10;
+    }
+
+    public function matchesIntegration(?Integration $integration): bool
+    {
+        if ($integration === null) {
+            return false;
+        }
+
+        if (str_contains(strtolower((string) $integration->slug), 'easycare')) {
+            return false;
+        }
+
+        $type = $integration->type?->value ?? (string) $integration->type;
+
+        return $type === 'webhook';
+    }
+
     public function supports(Webhook $webhook): bool
     {
         return $webhook->direction?->value === 'incoming'
@@ -64,7 +109,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             return [
                 'handled' => false,
                 'skipped' => true,
-                'reason' => 'Event not in generic Support ingest catalog: '.$eventName,
+                'reason' => 'Event not in generic Support ingest catalog: ' . $eventName,
                 'actions' => [],
             ];
         }
@@ -189,7 +234,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveFormIntent(array $data, string $eventName): ?WebsiteFormIntent
     {
@@ -208,7 +253,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveInvolvesPersonalData(array $data, ?WebsiteFormIntent $formIntent): bool
     {
@@ -231,14 +276,14 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
                 WebsiteFormIntent::Privacy => 'Privacy / GDPR request',
                 WebsiteFormIntent::AccountDisable => 'Disable account request',
                 WebsiteFormIntent::Chat => 'Live chat message',
-                WebsiteFormIntent::Sms => 'SMS support'.($from !== '' ? ' from '.$from : ''),
-                default => 'Support message from '.($webhook->name ?: ($webhook->slug ?? 'connected app')),
+                WebsiteFormIntent::Sms => 'SMS support' . ($from !== '' ? ' from ' . $from : ''),
+                default => 'Support message from ' . ($webhook->name ?: ($webhook->slug ?? 'connected app')),
             };
         }
 
         return $source === SupportTicketSource::Sms
-            ? 'SMS support'.($from !== '' ? ' from '.$from : '')
-            : 'Support message from '.($webhook->name ?: ($webhook->slug ?? 'connected app'));
+            ? 'SMS support' . ($from !== '' ? ' from ' . $from : '')
+            : 'Support message from ' . ($webhook->name ?: ($webhook->slug ?? 'connected app'));
     }
 
     private function appendCustomerMessage(SupportTicket $ticket, string $body, User $actor): void
@@ -246,7 +291,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         $this->conversationService->createMessage(
             $ticket->uuid,
             [
-                'body' => '<p>'.e($body).'</p>',
+                'body' => '<p>' . e($body) . '</p>',
                 'body_format' => 'html',
                 'visibility' => SupportTicketMessageVisibility::Public->value,
                 'author_type' => SupportTicketMessageAuthorType::Customer->value,
@@ -263,12 +308,12 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
         }
 
         $ticket->forceFill([
-            'description' => rtrim($description)."\n".$idempotencyTag,
+            'description' => rtrim($description) . "\n" . $idempotencyTag,
         ])->save();
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveThreadTicket(int $companyId, array $data, SupportTicketSource $source): ?SupportTicket
     {
@@ -317,8 +362,8 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             ->where('source', SupportTicketSource::Sms->value)
             ->whereNotIn('status', $closed)
             ->where(function ($query) use ($from): void {
-                $query->where('description', 'like', '%from: '.$from.'%')
-                    ->orWhere('description', 'like', '%customer_phone: '.$from.'%');
+                $query->where('description', 'like', '%from: ' . $from . '%')
+                    ->orWhere('description', 'like', '%customer_phone: ' . $from . '%');
             })
             ->with(['privacyRequest'])
             ->latest('id')
@@ -326,7 +371,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveExternalId(array $data, WebhookLog $log): string
     {
@@ -336,21 +381,21 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             }
         }
 
-        return 'log-'.$log->uuid;
+        return 'log-' . $log->uuid;
     }
 
     private function idempotencyTag(Webhook $webhook, string $eventName, string $externalId): string
     {
-        $slug = $webhook->slug ?: 'webhook-'.$webhook->id;
+        $slug = $webhook->slug ?: 'webhook-' . $webhook->id;
 
-        return '[ams-support-ingest:'.$slug.':'.$eventName.':'.$externalId.']';
+        return '[ams-support-ingest:' . $slug . ':' . $eventName . ':' . $externalId . ']';
     }
 
     private function findExistingByIdempotencyTag(int $companyId, string $idempotencyTag): ?SupportTicket
     {
         $byDescription = SupportTicket::query()
             ->where('company_id', $companyId)
-            ->where('description', 'like', '%'.$idempotencyTag.'%')
+            ->where('description', 'like', '%' . $idempotencyTag . '%')
             ->with(['privacyRequest'])
             ->first();
 
@@ -360,7 +405,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
 
         $message = SupportTicketMessage::query()
             ->where('company_id', $companyId)
-            ->where('body', 'like', '%'.$idempotencyTag.'%')
+            ->where('body', 'like', '%' . $idempotencyTag . '%')
             ->with(['ticket.privacyRequest'])
             ->first();
 
@@ -368,7 +413,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveApplication(Webhook $webhook, array $data): ?Application
     {
@@ -400,7 +445,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveSource(string $eventName, array $data): SupportTicketSource
     {
@@ -421,7 +466,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolveCategory(array $data): SupportTicketCategory
     {
@@ -431,7 +476,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function resolvePriority(array $data): SupportTicketPriority
     {
@@ -441,8 +486,8 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
     }
 
     /**
-     * @param  array<string, mixed>  $data
-     * @param  array<string, mixed>  $payload
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $payload
      */
     private function buildDescription(
         string $eventName,
@@ -459,15 +504,15 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             '',
             '---',
             'Auto-ingested from connected app webhook.',
-            'App / webhook: '.($webhook->name ?: ($webhook->slug ?? 'n/a')),
-            'Event: '.$eventName,
-            'Webhook log: '.$log->uuid,
-            'Received at: '.($payload['timestamp'] ?? now()->toIso8601String()),
+            'App / webhook: ' . ($webhook->name ?: ($webhook->slug ?? 'n/a')),
+            'Event: ' . $eventName,
+            'Webhook log: ' . $log->uuid,
+            'Received at: ' . ($payload['timestamp'] ?? now()->toIso8601String()),
         ];
 
         if ($formIntent !== null) {
-            $lines[] = 'form_type: '.$formIntent->value;
-            $lines[] = 'destination: '.$formIntent->destination()->value;
+            $lines[] = 'form_type: ' . $formIntent->value;
+            $lines[] = 'destination: ' . $formIntent->destination()->value;
         }
 
         foreach ([
@@ -481,7 +526,7 @@ class GenericSupportIncomingWebhookHandler implements IncomingWebhookHandlerInte
             if ($value === null || $value === '') {
                 continue;
             }
-            $lines[] = $label.': '.$value;
+            $lines[] = $label . ': ' . $value;
         }
 
         $lines[] = '';

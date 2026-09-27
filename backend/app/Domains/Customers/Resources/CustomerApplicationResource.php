@@ -15,8 +15,11 @@ class CustomerApplicationResource extends JsonResource
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
+            'assignment_number' => $this->assignment_number,
             'customer_id' => $this->customer_id,
             'application_id' => $this->application_id,
+            'platform' => $this->platform,
+            'build_label' => $this->build_label,
             'application_environment_id' => $this->application_environment_id,
             'integration_id' => $this->integration_id,
             'owner_contact_id' => $this->owner_contact_id,
@@ -56,6 +59,21 @@ class CustomerApplicationResource extends JsonResource
                     'status' => $this->environment->status?->value ?? $this->environment->status,
                 ] : null;
             }),
+            'version' => $this->whenLoaded('version', function () {
+                return $this->version ? [
+                    'uuid' => $this->version->uuid,
+                    'version_number' => $this->version->version_number,
+                    'build_number' => $this->version->build_number,
+                ] : null;
+            }),
+            'release' => $this->whenLoaded('release', function () {
+                return $this->release ? [
+                    'uuid' => $this->release->uuid,
+                    'name' => $this->release->name,
+                    'version_label' => $this->release->version_label,
+                    'status' => $this->release->status?->value ?? $this->release->status,
+                ] : null;
+            }),
             'integration' => $this->whenLoaded('integration', function () {
                 return $this->integration ? [
                     'id' => $this->integration->id,
@@ -66,6 +84,22 @@ class CustomerApplicationResource extends JsonResource
                     'status' => $this->integration->status?->value ?? $this->integration->status,
                 ] : null;
             }),
+            'sla_policy' => $this->whenLoaded('slaPolicy', function () {
+                return $this->slaPolicy ? [
+                    'uuid' => $this->slaPolicy->uuid,
+                    'name' => $this->slaPolicy->name,
+                    'code' => $this->slaPolicy->code,
+                ] : null;
+            }),
+            'subscriptions' => $this->whenLoaded('subscriptions', fn () => $this->subscriptions->map(fn ($subscription) => [
+                'uuid' => $subscription->uuid,
+                'plan_name' => $subscription->plan_name,
+                'status' => $subscription->status?->value ?? $subscription->status,
+            ])->values()),
+            'licenses' => $this->whenLoaded('licenses', fn () => $this->licenses->map(fn ($license) => [
+                'uuid' => $license->uuid,
+                'status' => $license->status?->value ?? $license->status,
+            ])->values()),
             'owner_contact' => $this->whenLoaded('ownerContact', function () {
                 return $this->ownerContact ? [
                     'id' => $this->ownerContact->id,
@@ -77,6 +111,8 @@ class CustomerApplicationResource extends JsonResource
                 ] : null;
             }),
             'ownership_type' => $this->ownership_type?->value ?? $this->ownership_type,
+            'ownership_label' => $this->ownership_type?->label(),
+            'ownership_description' => $this->ownership_type?->description(),
             'status' => $this->status?->value ?? $this->status,
             'activated_at' => $this->activated_at,
             'expires_at' => $this->expires_at,

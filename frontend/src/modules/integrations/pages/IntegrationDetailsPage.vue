@@ -43,7 +43,10 @@
       v-if="integrationsStore.loading && !integration"
       class="h-48 animate-pulse rounded-[12px] bg-slate-100"
     />
-    <IntegrationCard v-else-if="integration" :integration="integration" />
+    <template v-else-if="integration">
+      <IntegrationCard :integration="integration" />
+      <ConnectorPanel :integration-id="integration.uuid" />
+    </template>
 
     <DeleteConfirmation
       :open="showDelete"
@@ -62,6 +65,7 @@ import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import ConnectorPanel from '@/modules/integrations/components/ConnectorPanel.vue';
 import IntegrationCard from '@/modules/integrations/components/IntegrationCard.vue';
 import IntegrationSubnav from '@/modules/integrations/components/IntegrationSubnav.vue';
 import { useIntegrationsStore } from '@/modules/integrations/stores/integrations';

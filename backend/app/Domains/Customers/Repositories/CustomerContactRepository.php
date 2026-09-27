@@ -46,7 +46,7 @@ class CustomerContactRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -63,7 +63,7 @@ class CustomerContactRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -124,7 +124,7 @@ class CustomerContactRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function createContact(array $data): CustomerContact
     {
@@ -135,7 +135,7 @@ class CustomerContactRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateContact(CustomerContact $contact, array $data): CustomerContact
     {
@@ -156,6 +156,23 @@ class CustomerContactRepository extends BaseRepository
         }
 
         $query->update(['contact_type' => 'support']);
+    }
+
+    public function findActiveDuplicate(int $customerId, ?string $email, string $name): ?CustomerContact
+    {
+        $query = $this->model->newQuery()->where('customer_id', $customerId);
+
+        if (filled($email)) {
+            $query->whereRaw('LOWER(email) = ?', [strtolower($email)]);
+        } else {
+            $query->whereRaw('LOWER(name) = ?', [strtolower(trim($name))])
+                ->whereNull('email');
+        }
+
+        /** @var CustomerContact|null $contact */
+        $contact = $query->first();
+
+        return $contact;
     }
 
     /**

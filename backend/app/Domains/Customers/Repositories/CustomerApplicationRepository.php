@@ -25,7 +25,8 @@ class CustomerApplicationRepository extends BaseRepository
 
         /** @var CustomerApplication|null $assignment */
         $assignment = $query->where(function (Builder $builder) use ($identifier): void {
-            $builder->where('uuid', $identifier);
+            $builder->where('uuid', $identifier)
+                ->orWhere('assignment_number', $identifier);
             if (ctype_digit($identifier)) {
                 $builder->orWhere('id', (int) $identifier);
             }
@@ -62,7 +63,7 @@ class CustomerApplicationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
@@ -83,7 +84,7 @@ class CustomerApplicationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $filters
+     * @param array<string, mixed> $filters
      */
     public function filteredQuery(array $filters = []): Builder
     {
@@ -146,7 +147,28 @@ class CustomerApplicationRepository extends BaseRepository
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @return list<string>
+     */
+    public function assignmentRelations(): array
+    {
+        return [
+            'customer.company:id,uuid,company_name',
+            'application:id,uuid,name,slug,platform,status,company_id',
+            'environment:id,uuid,name,slug,type,status,application_id',
+            'version:id,uuid,application_id,version_number,build_number,status',
+            'release:id,uuid,application_id,application_version_id,name,version_label,status',
+            'integration:id,uuid,name,slug,status,type',
+            'slaPolicy:id,uuid,name,code,is_active',
+            'ownerContact:id,uuid,name,email,contact_type,status,phone',
+            'subscriptions:id,uuid,plan_name,status,customer_application_id,customer_id',
+            'licenses:id,uuid,status,customer_application_id,customer_id',
+            'creator:id,uuid,full_name,email',
+            'updater:id,uuid,full_name,email',
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $data
      */
     public function createAssignment(array $data): CustomerApplication
     {
@@ -154,33 +176,19 @@ class CustomerApplicationRepository extends BaseRepository
         $assignment = $this->model->newQuery()->create($data);
 
         return $assignment->fresh([
-            'customer',
-            'application',
-            'environment',
-            'integration',
-            'ownerContact',
-            'creator',
-            'updater',
+            ...$this->assignmentRelations(),
         ]) ?? $assignment;
     }
 
     /**
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     public function updateAssignment(CustomerApplication $assignment, array $data): CustomerApplication
     {
         $assignment->fill($data);
         $assignment->save();
 
-        return $assignment->refresh()->load([
-            'customer',
-            'application',
-            'environment',
-            'integration',
-            'ownerContact',
-            'creator',
-            'updater',
-        ]);
+        return $assignment->refresh()->load($this->assignmentRelations());
     }
 
     /**

@@ -34,6 +34,9 @@ class CustomerContactResource extends JsonResource
                 ];
             }),
             'contact_type' => $this->contact_type?->value ?? $this->contact_type,
+            'responsibilities' => $this->responsibilities ?: array_values(array_filter([
+                $this->contact_type?->value ?? $this->contact_type,
+            ])),
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,

@@ -29,7 +29,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'uuid' => (string) Str::uuid(),
                     'name' => $meta['label'],
                     'module' => $module,
-                    'description' => $meta['label'].' module permissions.',
+                    'description' => $meta['label'] . ' module permissions.',
                     'sort_order' => $sort,
                     'is_active' => true,
                 ]
@@ -38,7 +38,7 @@ class RolesAndPermissionsSeeder extends Seeder
             $group->fill([
                 'name' => $meta['label'],
                 'module' => $module,
-                'description' => $meta['label'].' module permissions.',
+                'description' => $meta['label'] . ' module permissions.',
                 'sort_order' => $sort,
                 'is_active' => true,
             ]);
@@ -59,7 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     ->where('name', $name)
                     ->where('guard_name', $guard)
                     ->update([
-                        'display_name' => Str::of($action)->replace('-', ' ')->title().' '.$meta['label'],
+                        'display_name' => Str::of($action)->replace('-', ' ')->title() . ' ' . $meta['label'],
                         'module' => $module,
                         'description' => "Allows {$action} access in {$meta['label']}.",
                         'permission_group_id' => $group->id,
@@ -92,7 +92,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'roles.restore', 'roles.assign',
             'companies.view', 'companies.create', 'companies.update', 'companies.delete', 'companies.restore', 'companies.manage',
             'applications.view', 'applications.create', 'applications.update', 'applications.delete',
-            'customers.view', 'customers.create', 'customers.update', 'customers.delete', 'customers.restore',
+            'customers.view', 'customers.create', 'customers.update', 'customers.delete', 'customers.restore', 'customers.export', 'customers.anonymize',
             'integrations.view', 'integrations.create', 'integrations.update',
             'queue.view', 'queue.retry',
             'monitoring.view',
@@ -151,7 +151,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $this->syncNamedPermissions('support-manager', [
             'dashboard.view',
-            'customers.view', 'customers.update',
+            'customers.view', 'customers.update', 'customers.export',
             'support.view', 'support.create', 'support.update', 'support.delete', 'support.manage',
             'notifications.view', 'notifications.create',
             'automation.view', 'automation.create', 'automation.update',
@@ -191,6 +191,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $this->syncNamedPermissions('compliance-officer', [
             'dashboard.view',
             'compliance.view', 'compliance.create', 'compliance.update', 'compliance.delete', 'compliance.manage',
+            'customers.view', 'customers.export', 'customers.anonymize',
             'users.view',
             'reports.view', 'reports.export',
             'analytics.view',
@@ -239,7 +240,7 @@ class RolesAndPermissionsSeeder extends Seeder
     }
 
     /**
-     * @param  list<string>  $permissions
+     * @param list<string> $permissions
      */
     private function syncNamedPermissions(string $roleName, array $permissions, string $guard): void
     {

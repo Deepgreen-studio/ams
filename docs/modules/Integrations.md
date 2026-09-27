@@ -111,12 +111,33 @@ Outbound request history: method, URL, masked headers, truncated bodies, status,
 php artisan migrate
 php artisan test --filter=IntegrationConnectionEngineTest
 php artisan test --filter=IntegrationManagementTest
+php artisan test --filter=ConnectorFrameworkTest
 ```
+
+## Connector framework
+
+Registered connectors live in `IntegrationServiceProvider` and are resolved by `ConnectorRegistry`. Product handlers such as EasyCare implement `IntegrationConnectorInterface` together with `IncomingWebhookHandlerInterface`, so incoming ingest uses the registry instead of a hard-wired handler list.
+
+| Capability | Engine |
+|------------|--------|
+| API | `ApiClientService` |
+| OAuth 2.0 refresh | `OAuthTokenService` via `ApiClientService` |
+| API key | `AuthenticationManager` |
+| Webhooks | `WebhookEngine` |
+| Scheduled sync | `IntegrationSyncService` (`integrations:maintain --sync`, plus `sync:dispatch-scheduled`) |
+| Queues and retries | `RunIntegrationSyncJob`, `DeliverOutgoingWebhookJob` |
+| Monitoring | `IntegrationConnectionService` health checks |
+| Credentials | `CredentialVault` (encrypted; API returns key names only) |
+
+```bash
+php artisan integrations:maintain
+php artisan integrations:maintain --sync
+```
+
+Endpoints: `GET /api/v1/integrations/connectors`, `GET /api/v1/integrations/{integration}/connector`, `PUT .../connector/credentials`, `POST .../connector/oauth/refresh`.
 
 ## Remaining (future)
 
-- OAuth2 token refresh workers
-- Scheduled health checks
-- Full credentials vault separation
+- SSRF hardening for outbound URLs
+- External secret-store separation for the credential vault
 - Domain event auto-dispatch adapters (wire Users/Companies create/update → WebhookService::dispatchEvent)
-- Scheduled retry worker for `next_retry_at` backlog

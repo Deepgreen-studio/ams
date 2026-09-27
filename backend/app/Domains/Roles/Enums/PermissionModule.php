@@ -41,7 +41,7 @@ final class PermissionModule
             ],
             'customers' => [
                 'label' => 'Customers',
-                'actions' => array_merge($crud, ['restore']),
+                'actions' => array_merge($crud, ['restore', 'export', 'anonymize']),
             ],
             'integrations' => [
                 'label' => 'Integrations',

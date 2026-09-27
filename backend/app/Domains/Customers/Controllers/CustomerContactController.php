@@ -3,25 +3,27 @@
 namespace App\Domains\Customers\Controllers;
 
 use App\Domains\Customers\Models\Customer;
-use App\Domains\Customers\Models\CustomerContact;
 use App\Domains\Customers\Requests\IndexCustomerContactRequest;
 use App\Domains\Customers\Requests\StoreCustomerContactRequest;
 use App\Domains\Customers\Requests\UpdateCustomerContactRequest;
 use App\Domains\Customers\Resources\CustomerContactCollection;
 use App\Domains\Customers\Resources\CustomerContactResource;
+use App\Domains\Customers\Services\CustomerContactImportService;
 use App\Domains\Customers\Services\CustomerContactService;
 use App\Models\User;
 use App\Shared\Responses\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerContactController
 {
     use AuthorizesRequests;
 
     public function __construct(
-        private readonly CustomerContactService $customerContactService
+        private readonly CustomerContactService $customerContactService,
+        private readonly CustomerContactImportService $customerContactImportService,
     ) {}
 
     public function index(IndexCustomerContactRequest $request): JsonResponse
@@ -33,6 +35,48 @@ class CustomerContactController
         return ApiResponse::success([
             'contacts' => (new CustomerContactCollection($contacts))->resolve(),
         ]);
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        $this->authorize('exportContacts', Customer::class);
+
+        $customer = (string) $request->query('customer', '');
+        $format = (string) $request->query('format', 'csv');
+
+        if ($customer === '') {
+            abort(422, 'A customer is required to export contacts.');
+        }
+
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            abort(422, 'Export format must be csv or xlsx.');
+        }
+
+        return $this->customerContactImportService->export($customer, $format);
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        $this->authorize('manageContacts', Customer::class);
+
+        $validated = $request->validate([
+            'customer_id' => ['required', 'string'],
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:5120'],
+            'update_existing' => ['nullable', 'boolean'],
+        ]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $report = $this->customerContactImportService->import(
+            $request->file('file'),
+            $validated['customer_id'],
+            $request->boolean('update_existing'),
+            $actor
+        );
+
+        return ApiResponse::success([
+            'import' => $report,
+        ], 'Contact import completed.');
     }
 
     public function store(StoreCustomerContactRequest $request): JsonResponse

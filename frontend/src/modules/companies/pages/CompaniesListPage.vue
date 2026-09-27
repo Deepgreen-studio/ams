@@ -18,19 +18,6 @@
       </RouterLink>
     </Teleport>
 
-    <div
-      v-if="companiesStore.successMessage"
-      class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
-    >
-      {{ companiesStore.successMessage }}
-    </div>
-    <div
-      v-if="companiesStore.error"
-      class="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
-    >
-      {{ companiesStore.error }}
-    </div>
-
     <CompanyTable
       :companies="companiesStore.companies"
       :loading="companiesStore.loading"
@@ -39,6 +26,7 @@
       @sort="onSort"
       @delete="openDelete"
       @restore="confirmRestore"
+      @status-change="onStatusChange"
     >
       <template #toolbar>
         <SearchFilters :model-value="companiesStore.filters" @submit="onFilter" @reset="onReset" />
@@ -78,9 +66,10 @@
 
 <script setup>
 import { PlusIcon } from '@heroicons/vue/24/outline';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
+import { useToast } from '@/composables/useToast';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CompanyTable from '@/modules/companies/components/CompanyTable.vue';
@@ -89,7 +78,28 @@ import { useCompaniesStore } from '@/modules/companies/stores/companies';
 
 const companiesStore = useCompaniesStore();
 const { can, canAny } = usePermissions();
+const toast = useToast();
 const pendingDelete = ref(null);
+
+watch(
+  () => companiesStore.successMessage,
+  (message) => {
+    if (message) {
+      toast.success(message);
+      companiesStore.successMessage = null;
+    }
+  },
+);
+
+watch(
+  () => companiesStore.error,
+  (message) => {
+    if (message) {
+      toast.error(message);
+      companiesStore.error = null;
+    }
+  },
+);
 
 onMounted(() => {
   companiesStore.fetchCompanies();
@@ -135,5 +145,13 @@ async function confirmDelete() {
 async function confirmRestore(company) {
   await companiesStore.restoreCompany(company.uuid);
   await companiesStore.fetchCompanies();
+}
+
+async function onStatusChange(company, status) {
+  if (!company?.uuid || company.status === status) {
+    return;
+  }
+
+  await companiesStore.updateCompany(company.uuid, { status });
 }
 </script>

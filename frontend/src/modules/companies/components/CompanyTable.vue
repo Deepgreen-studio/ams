@@ -142,7 +142,21 @@
               {{ company.country || '—' }}
             </td>
             <td class="px-5 py-4">
-              <StatusBadge :status="company.status" />
+              <button
+                v-if="canChangeStatus(company)"
+                type="button"
+                class="inline-flex items-center gap-1.5 rounded-full border bg-white px-2.5 py-1 text-xs font-medium"
+                :class="statusTone(company.status).text"
+                :aria-expanded="statusMenuId === company.uuid"
+                aria-haspopup="menu"
+                aria-label="Change status"
+                @click.stop="toggleStatusMenu(company.uuid, $event)"
+              >
+                <span class="h-1.5 w-1.5 rounded-full" :class="statusTone(company.status).dot" />
+                {{ statusLabel(company.status) }}
+                <ChevronDownIcon class="h-3.5 w-3.5 opacity-70" />
+              </button>
+              <StatusBadge v-else :status="company.status" />
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ company.departments_count || 0 }} dept · {{ company.teams_count || 0 }} teams ·
@@ -173,6 +187,29 @@
     <div v-if="$slots.footer" class="border-t border-zinc-100 px-8 py-5">
       <slot name="footer" />
     </div>
+
+    <Teleport to="body">
+      <div
+        v-if="statusMenuId && statusCompany"
+        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        role="menu"
+        :style="statusMenuStyle"
+        @click.stop
+      >
+        <button
+          v-for="option in statusOptions"
+          :key="option.value"
+          type="button"
+          class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-zinc-50"
+          :class="option.value === statusCompany.status ? 'bg-zinc-50 font-medium text-slate-900' : 'text-slate-700'"
+          role="menuitem"
+          @click="onStatusChange(statusCompany, option.value)"
+        >
+          <span class="h-1.5 w-1.5 rounded-full" :class="statusTone(option.value).dot" />
+          {{ option.label }}
+        </button>
+      </div>
+    </Teleport>
 
     <Teleport to="body">
       <div
@@ -236,6 +273,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
+  ChevronDownIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
@@ -266,7 +304,14 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['sort', 'delete', 'restore']);
+const emit = defineEmits(['sort', 'delete', 'restore', 'status-change']);
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'suspended', label: 'Suspended' },
+  { value: 'pending', label: 'Pending' },
+];
 
 const { can, canAny } = usePermissions();
 const router = useRouter();
@@ -285,6 +330,71 @@ const hasAnyAction = computed(() =>
 const failedLogos = ref({});
 const openMenuId = ref(null);
 const menuStyle = ref({});
+const statusMenuId = ref(null);
+const statusMenuStyle = ref({});
+
+const statusCompany = computed(
+  () => props.companies.find((company) => company.uuid === statusMenuId.value) || null,
+);
+
+function canChangeStatus(company) {
+  return can('companies.update') && !isTrashed(company);
+}
+
+function statusLabel(status) {
+  const value = status || 'active';
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function statusTone(status) {
+  switch (status) {
+    case 'inactive':
+      return { text: 'border-slate-300 text-slate-600', dot: 'bg-slate-400' };
+    case 'suspended':
+      return { text: 'border-rose-300 text-rose-700', dot: 'bg-rose-500' };
+    case 'pending':
+      return { text: 'border-amber-300 text-amber-700', dot: 'bg-amber-500' };
+    default:
+      return { text: 'border-emerald-300 text-emerald-700', dot: 'bg-emerald-500' };
+  }
+}
+
+function toggleStatusMenu(id, event) {
+  closeMenu();
+
+  if (statusMenuId.value === id) {
+    closeStatusMenu();
+    return;
+  }
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuWidth = 160;
+  const menuHeight = 8 + statusOptions.length * 36;
+  const gap = 8;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < menuHeight + gap;
+  const top = openUp ? rect.top - menuHeight - gap : rect.bottom + gap;
+  const left = Math.min(Math.max(8, rect.left), window.innerWidth - menuWidth - 8);
+
+  statusMenuStyle.value = {
+    top: `${Math.max(8, top)}px`,
+    left: `${left}px`,
+  };
+  statusMenuId.value = id;
+}
+
+function closeStatusMenu() {
+  statusMenuId.value = null;
+}
+
+function onStatusChange(company, status) {
+  closeStatusMenu();
+  if (!company || company.status === status) {
+    return;
+  }
+
+  emit('status-change', company, status);
+}
 
 const activeCompany = computed(
   () => props.companies.find((company) => company.uuid === openMenuId.value) || null,
@@ -306,6 +416,8 @@ function initials(name) {
 }
 
 function toggleMenu(id, event) {
+  closeStatusMenu();
+
   if (openMenuId.value === id) {
     closeMenu();
     return;
@@ -348,10 +460,12 @@ function onRestore(company) {
 
 function onDocumentClick() {
   closeMenu();
+  closeStatusMenu();
 }
 
 function onScrollOrResize() {
   closeMenu();
+  closeStatusMenu();
 }
 
 onMounted(() => {

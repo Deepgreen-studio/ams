@@ -90,9 +90,16 @@ export const useCompaniesStore = defineStore('companies', () => {
     state.clearMessages();
     try {
       const { data } = await companyService.update(id, payload);
-      currentCompany.value = data.data?.company ?? currentCompany.value;
+      const updated = data.data?.company ?? null;
+      currentCompany.value = updated ?? currentCompany.value;
+      if (updated) {
+        const index = companies.value.findIndex((item) => item.uuid === updated.uuid);
+        if (index >= 0) {
+          companies.value[index] = { ...companies.value[index], ...updated };
+        }
+      }
       state.successMessage.value = data.message;
-      return data.data?.company;
+      return updated;
     } catch (err) {
       state.applyError(err, 'Unable to update company');
       throw err;

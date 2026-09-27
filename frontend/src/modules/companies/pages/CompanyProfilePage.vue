@@ -112,6 +112,7 @@
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-700">Currency</label>
                 <SelectBox v-model="branding.currency" size="lg" :options="currencyOptions" />
+                <p class="mt-1 text-xs text-slate-500">Company currency is saved on its own and is not inferred from the country.</p>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Format</label>
@@ -218,7 +219,7 @@ const timeFormatOptionsBase = [
 const branding = reactive({
   primary_color: '#2563EB',
   secondary_color: '#0F172A',
-  timezone: 'UTC',
+  timezone: 'Asia/Kolkata',
   language: 'en',
   currency: 'USD',
   date_format: 'Y-m-d',
@@ -290,7 +291,7 @@ function applyBranding(value) {
   if (!value) return;
   branding.primary_color = value.branding?.primary_color || value.primary_color || '#2563EB';
   branding.secondary_color = value.branding?.secondary_color || value.secondary_color || '#0F172A';
-  branding.timezone = value.timezone || 'UTC';
+  branding.timezone = value.timezone || 'Asia/Kolkata';
   branding.language = value.language || 'en';
   branding.currency = value.currency || 'USD';
   branding.date_format = value.date_format || 'Y-m-d';

@@ -165,6 +165,12 @@ const router = createRouter({
           meta: { title: 'Company Profile', requiresAuth: true },
         },
         {
+          path: 'companies/:id/console',
+          name: 'companies.console',
+          component: () => import('@/modules/companies/pages/CompanyConsolePage.vue'),
+          meta: { title: 'Company Console', requiresAuth: true },
+        },
+        {
           path: 'departments',
           name: 'departments.index',
           component: () => import('@/modules/companies/pages/DepartmentsIndexPage.vue'),

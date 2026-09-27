@@ -2,8 +2,15 @@
 
 namespace Tests\Feature\Companies;
 
+use App\Domains\Applications\Models\Application;
+use App\Domains\Applications\Models\ApplicationEnvironment;
+use App\Domains\Applications\Models\ApplicationRelease;
+use App\Domains\Applications\Models\ApplicationVersion;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\Department;
+use App\Domains\Integrations\Models\Integration;
+use App\Domains\Notifications\Models\Notification;
+use App\Domains\Support\Models\SupportTicket;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -282,5 +289,139 @@ class CompanyManagementTest extends TestCase
             'currency' => 'USD',
         ])->assertStatus(422)
             ->assertJsonPath('errors.registration_number.0', 'The company code has already been taken.');
+    }
+
+    public function test_company_console_summarizes_operations(): void
+    {
+        Sanctum::actingAs($this->admin);
+        $company = Company::query()->create([
+            'company_name' => 'Console Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        $application = Application::factory()->forCompany($company)->create([
+            'name' => 'Console App',
+            'platform' => 'android',
+            'status' => 'active',
+            'current_version' => '2.1.0',
+        ]);
+        ApplicationEnvironment::factory()->forApplication($application)->create([
+            'name' => 'Production',
+            'type' => 'production',
+            'status' => 'active',
+            'health_status' => 'healthy',
+        ]);
+        $version = ApplicationVersion::factory()->forApplication($application)->production()->create([
+            'version_number' => '2.1.0',
+        ]);
+        ApplicationRelease::factory()->forVersion($version)->create([
+            'name' => 'September release',
+            'status' => 'deployed',
+        ]);
+        SupportTicket::factory()->forApplication($application)->open()->create([
+            'subject' => 'Login fails on Android',
+            'priority' => 'high',
+        ]);
+        Integration::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Billing API',
+            'slug' => 'billing-api',
+            'type' => 'rest_api',
+            'status' => 'active',
+            'authentication_type' => 'api_key',
+            'health_status' => 'healthy',
+        ]);
+        Notification::factory()->create([
+            'company_id' => $company->id,
+            'user_id' => $this->admin->id,
+            'title' => 'Release deployed',
+            'status' => 'sent',
+        ]);
+
+        $this->getJson('/api/v1/companies/'.$company->uuid.'/console')
+            ->assertOk()
+            ->assertJsonPath('data.console.company.name', 'Console Co')
+            ->assertJsonPath('data.console.kpis.0.value', 1)
+            ->assertJsonPath('data.console.applications.0.name', 'Console App')
+            ->assertJsonPath('data.console.environments.0.health_status', 'healthy')
+            ->assertJsonPath('data.console.versions.0.version_number', '2.1.0')
+            ->assertJsonPath('data.console.releases.0.name', 'September release')
+            ->assertJsonPath('data.console.support_issues.0.subject', 'Login fails on Android')
+            ->assertJsonPath('data.console.integrations.0.name', 'Billing API')
+            ->assertJsonPath('data.console.notifications.0.title', 'Release deployed')
+            ->assertJsonPath('data.console.platforms.0.platform', 'android')
+            ->assertJsonPath('data.console.platforms.0.active', 1)
+            ->assertJsonPath('data.console.profile.display_name', 'Console Co')
+            ->assertJsonPath('data.console.profile.timezone', 'UTC')
+            ->assertJsonPath('data.console.sections.1.key', 'applications');
+    }
+
+    public function test_inactive_company_cascades_to_children_and_isolates_non_members(): void
+    {
+        Sanctum::actingAs($this->admin);
+        $company = Company::query()->create([
+            'company_name' => 'Hold Co',
+            'status' => 'active',
+            'timezone' => 'Asia/Kolkata',
+            'language' => 'en',
+            'currency' => 'INR',
+        ]);
+        $application = Application::factory()->forCompany($company)->create([
+            'status' => 'active',
+            'platform' => 'web',
+        ]);
+        $user = User::factory()->create();
+        $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+        SupportTicket::factory()->forApplication($application)->open()->create();
+        Integration::query()->create([
+            'company_id' => $company->id,
+            'name' => 'Hold API',
+            'slug' => 'hold-api',
+            'type' => 'rest_api',
+            'status' => 'active',
+            'authentication_type' => 'api_key',
+            'health_status' => 'healthy',
+        ]);
+
+        $this->putJson('/api/v1/companies/'.$company->uuid, ['status' => 'suspended'])->assertOk();
+
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'status' => 'inactive',
+            'company_status_hold' => true,
+            'held_status' => 'active',
+        ]);
+        $this->assertDatabaseHas('integrations', [
+            'company_id' => $company->id,
+            'status' => 'inactive',
+            'company_status_hold' => true,
+        ]);
+        $this->assertDatabaseHas('company_user', [
+            'company_id' => $company->id,
+            'user_id' => $user->id,
+            'status' => 'suspended',
+            'company_status_hold' => true,
+        ]);
+        $this->assertDatabaseHas('support_tickets', [
+            'company_id' => $company->id,
+            'status' => 'pending',
+            'company_status_hold' => true,
+            'held_status' => 'open',
+        ]);
+
+        $this->putJson('/api/v1/companies/'.$company->uuid, ['status' => 'active'])->assertOk();
+        $this->assertDatabaseHas('applications', [
+            'id' => $application->id,
+            'status' => 'active',
+            'company_status_hold' => false,
+        ]);
+
+        $outsider = User::factory()->create();
+        $outsider->assignRole('manager');
+        Sanctum::actingAs($outsider);
+        $this->getJson('/api/v1/companies/'.$company->uuid.'/console')->assertNotFound();
     }
 }

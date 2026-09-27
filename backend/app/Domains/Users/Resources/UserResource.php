@@ -33,6 +33,11 @@ class UserResource extends JsonResource
                 return $company?->uuid;
             }),
             'department_id' => $this->whenLoaded('department', fn () => $this->department?->uuid),
+            'team_id' => $this->whenLoaded('team', fn () => $this->team?->uuid),
+            'location_id' => $this->whenLoaded('location', fn () => $this->location?->uuid),
+            'department_name' => $this->whenLoaded('department', fn () => $this->department?->name),
+            'team_name' => $this->whenLoaded('team', fn () => $this->team?->name),
+            'location_name' => $this->whenLoaded('location', fn () => $this->location?->branch_name),
             'status' => $this->status?->value ?? $this->status,
             'roles' => $this->whenLoaded('roles', function () {
                 return $this->roles->map(static fn ($role) => [

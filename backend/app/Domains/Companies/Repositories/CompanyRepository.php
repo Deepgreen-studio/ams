@@ -91,6 +91,11 @@ class CompanyRepository extends BaseRepository
             $query->where('country', $filters['country']);
         }
 
+        if (array_key_exists('accessible_ids', $filters)) {
+            $ids = array_values(array_filter((array) $filters['accessible_ids'], fn ($id): bool => $id !== null && $id !== ''));
+            $query->whereIn('id', $ids === [] ? [0] : $ids);
+        }
+
         $sortBy = (string) ($filters['sort_by'] ?? 'created_at');
         $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
         $allowed = ['id', 'company_name', 'registration_number', 'status', 'country', 'created_at', 'updated_at', 'deleted_at'];

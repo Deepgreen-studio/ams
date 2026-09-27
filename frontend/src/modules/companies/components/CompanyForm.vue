@@ -75,6 +75,7 @@
       <div>
         <FormLabel required>Currency</FormLabel>
         <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
+        <p class="mt-1 text-xs text-slate-500">Set explicitly for this company. It is not taken from the country.</p>
         <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.currency[0] }}
         </p>
@@ -315,7 +316,7 @@ function createForm(value = {}) {
     state: value.state || '',
     postal_code: value.postal_code || '',
     country: value.country || '',
-    timezone: value.timezone || 'UTC',
+    timezone: value.timezone || 'Asia/Kolkata',
     language: value.language || 'en',
     currency: value.currency || 'USD',
     date_format: value.date_format || 'Y-m-d',

@@ -166,6 +166,26 @@
         />
         <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
       </div>
+      <div v-if="layout !== 'profile'">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Team</label>
+        <SearchableSelect
+          v-model="form.team_id"
+          :options="teamSelectOptions"
+          :disabled="!form.department_id"
+          :placeholder="form.department_id ? 'Select a team' : 'Select a department first'"
+          search-placeholder="Search team…"
+        />
+      </div>
+      <div v-if="layout !== 'profile'">
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Location</label>
+        <SearchableSelect
+          v-model="form.location_id"
+          :options="locationSelectOptions"
+          :disabled="!form.company_id"
+          :placeholder="form.company_id ? 'Select a location' : 'Select a company first'"
+          search-placeholder="Search location…"
+        />
+      </div>
       <div v-if="showRole">
         <FormLabel required>Role</FormLabel>
         <SelectBox
@@ -355,6 +375,7 @@ const companyButtonClass = computed(() => {
 });
 
 const departmentItems = ref([]);
+const locationItems = ref([]);
 
 const departmentSelectOptions = computed(() =>
   departmentItems.value.map((department) => {
@@ -367,6 +388,21 @@ const departmentSelectOptions = computed(() =>
       metaLabel: 'Team',
     };
   }),
+);
+
+const teamSelectOptions = computed(() => {
+  const department = departmentItems.value.find((item) => item.uuid === form.department_id);
+  return (department?.teams || []).map((team) => ({
+    value: team.uuid,
+    label: team.name,
+  }));
+});
+
+const locationSelectOptions = computed(() =>
+  locationItems.value.map((location) => ({
+    value: location.uuid,
+    label: location.branch_name || location.name || location.uuid,
+  })),
 );
 
 const departmentButtonClass = computed(() => {
@@ -389,26 +425,41 @@ watch(
   async (companyId, previous) => {
     if (previous && companyId !== previous) {
       form.department_id = '';
+      form.team_id = '';
+      form.location_id = '';
     }
 
     if (!companyId) {
       departmentItems.value = [];
+      locationItems.value = [];
       form.department_id = '';
+      form.team_id = '';
+      form.location_id = '';
       return;
     }
 
     try {
-      const { data } = await companyService.listDepartments({
-        company: companyId,
-        per_page: 100,
-        page: 1,
-      });
-      departmentItems.value = data.data?.departments?.items ?? [];
+      const [departments, locations] = await Promise.all([
+        companyService.listDepartments({ company: companyId, per_page: 100, page: 1 }),
+        companyService.listLocations({ company: companyId, per_page: 100, page: 1 }),
+      ]);
+      departmentItems.value = departments.data.data?.departments?.items ?? [];
+      locationItems.value = locations.data.data?.locations?.items ?? [];
     } catch {
       departmentItems.value = [];
+      locationItems.value = [];
     }
   },
   { immediate: true },
+);
+
+watch(
+  () => form.department_id,
+  (departmentId, previous) => {
+    if (previous && departmentId !== previous) {
+      form.team_id = '';
+    }
+  },
 );
 
 watch(
@@ -462,10 +513,12 @@ function createForm(value = {}) {
     phone: value.phone || '',
     gender: value.gender || '',
     date_of_birth: value.date_of_birth || '',
-    timezone: value.timezone || 'UTC',
+    timezone: value.timezone || 'Asia/Kolkata',
     language: value.language || 'en',
     company_id: value.company_id || '',
     department_id: value.department_id || '',
+    team_id: value.team_id || '',
+    location_id: value.location_id || '',
     status: value.status || 'active',
     role: resolveInitialRole(value),
     password: '',
@@ -514,15 +567,28 @@ function onSubmit() {
   } else {
     delete payload.company_id;
     delete payload.department_id;
+    delete payload.team_id;
+    delete payload.location_id;
   }
 
   if (props.layout !== 'profile' && !payload.company_id) {
     payload.company_id = null;
     payload.department_id = null;
+    payload.team_id = null;
+    payload.location_id = null;
   }
 
   if (props.layout !== 'profile' && !payload.department_id) {
     payload.department_id = null;
+    payload.team_id = null;
+  }
+
+  if (props.layout !== 'profile' && !payload.team_id) {
+    payload.team_id = null;
+  }
+
+  if (props.layout !== 'profile' && !payload.location_id) {
+    payload.location_id = null;
   }
 
   if (props.showRole) {

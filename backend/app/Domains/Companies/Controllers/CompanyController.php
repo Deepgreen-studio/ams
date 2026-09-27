@@ -10,6 +10,8 @@ use App\Domains\Companies\Requests\UpdateCompanyRequest;
 use App\Domains\Companies\Requests\UploadCompanyMediaRequest;
 use App\Domains\Companies\Resources\CompanyCollection;
 use App\Domains\Companies\Resources\CompanyResource;
+use App\Domains\Companies\Services\CompanyAccess;
+use App\Domains\Companies\Services\CompanyConsoleService;
 use App\Domains\Companies\Services\CompanyService;
 use App\Models\User;
 use App\Shared\Responses\ApiResponse;
@@ -22,16 +24,26 @@ class CompanyController
     use AuthorizesRequests;
 
     public function __construct(
-        private readonly CompanyService $companyService
+        private readonly CompanyService $companyService,
+        private readonly CompanyConsoleService $companyConsoleService,
+        private readonly CompanyAccess $companyAccess,
     ) {}
 
     public function index(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Company::class);
 
-        $companies = $this->companyService->list($request->only([
+        /** @var User $actor */
+        $actor = $request->user();
+        $filters = $request->only([
             'search', 'status', 'country', 'sort_by', 'sort_dir', 'per_page', 'page', 'trashed',
-        ]));
+        ]);
+        $accessibleIds = $this->companyAccess->accessibleIds($actor);
+        if ($accessibleIds !== null) {
+            $filters['accessible_ids'] = $accessibleIds;
+        }
+
+        $companies = $this->companyService->list($filters);
 
         return ApiResponse::success([
             'companies' => (new CompanyCollection($companies))->resolve(),
@@ -51,9 +63,10 @@ class CompanyController
         ], 'Company created successfully.', 201);
     }
 
-    public function show(string $company): JsonResponse
+    public function show(Request $request, string $company): JsonResponse
     {
         $model = $this->companyService->show($company);
+        $this->companyAccess->assert($request->user(), $model);
         $this->authorize('view', $model);
 
         return ApiResponse::success([
@@ -61,9 +74,23 @@ class CompanyController
         ]);
     }
 
-    public function activity(string $company): JsonResponse
+    public function console(Request $request, string $company): JsonResponse
     {
         $model = $this->companyService->find($company);
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->companyAccess->assert($actor, $model);
+        $this->authorize('view', $model);
+
+        return ApiResponse::success([
+            'console' => $this->companyConsoleService->console($model, $actor),
+        ]);
+    }
+
+    public function activity(Request $request, string $company): JsonResponse
+    {
+        $model = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $model);
         $this->authorize('view', $model);
 
         $history = $this->companyService->activityHistory($model);
@@ -77,6 +104,7 @@ class CompanyController
     public function update(UpdateCompanyRequest $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('update', $existing);
 
         /** @var User $actor */
@@ -91,6 +119,7 @@ class CompanyController
     public function destroy(Request $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('delete', $existing);
 
         /** @var User $actor */
@@ -103,6 +132,7 @@ class CompanyController
     public function restore(Request $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company, withTrashed: true);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('restore', $existing);
 
         /** @var User $actor */
@@ -117,6 +147,7 @@ class CompanyController
     public function uploadLogo(UploadCompanyMediaRequest $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('manageBranding', $existing);
 
         /** @var User $actor */
@@ -131,6 +162,7 @@ class CompanyController
     public function uploadFavicon(UploadCompanyMediaRequest $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('manageBranding', $existing);
 
         /** @var User $actor */
@@ -145,6 +177,7 @@ class CompanyController
     public function updateBranding(Request $request, string $company): JsonResponse
     {
         $existing = $this->companyService->find($company);
+        $this->companyAccess->assert($request->user(), $existing);
         $this->authorize('manageBranding', $existing);
 
         $data = $request->validate([

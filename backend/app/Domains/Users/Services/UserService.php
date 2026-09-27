@@ -2,7 +2,9 @@
 
 namespace App\Domains\Users\Services;
 
+use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Companies\Models\Department;
+use App\Domains\Companies\Models\Team;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Roles\Services\RoleService;
 use App\Domains\Users\Enums\UserPermission;
@@ -56,6 +58,8 @@ class UserService
             'roles',
             'companies',
             'department',
+            'team',
+            'location',
         ]);
 
         return [
@@ -88,7 +92,9 @@ class UserService
                 $this->syncDepartment($user, $data['department_id'], $data['company_id'] ?? null);
             }
 
-            $created = $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department']);
+            $this->syncAssignment($user, $data);
+
+            $created = $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department', 'team', 'location']);
 
             DB::afterCommit(function () use ($created): void {
                 $this->sendPasswordSetupEmail($created);
@@ -131,7 +137,9 @@ class UserService
                 $this->syncDepartment($updated, $data['department_id'], $data['company_id'] ?? null);
             }
 
-            $updated = $updated->load(['roles', 'companies', 'department']);
+            $this->syncAssignment($updated, $data);
+
+            $updated = $updated->load(['roles', 'companies', 'department', 'team', 'location']);
             event(new UserUpdated(
                 $updated,
                 $actor,
@@ -346,6 +354,52 @@ class UserService
         }
 
         $user->forceFill(['department_id' => $department->id])->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function syncAssignment(User $user, array $data): void
+    {
+        $changes = [];
+
+        if (array_key_exists('team_id', $data)) {
+            $changes['team_id'] = $this->assignmentId(Team::class, $data['team_id'], $user, 'team');
+        }
+
+        if (array_key_exists('location_id', $data)) {
+            $changes['location_id'] = $this->assignmentId(CompanyLocation::class, $data['location_id'], $user, 'location');
+        }
+
+        if ($changes !== []) {
+            $user->forceFill($changes)->save();
+        }
+    }
+
+    /**
+     * @param  class-string<Team|CompanyLocation>  $model
+     */
+    protected function assignmentId(string $model, mixed $uuid, User $user, string $label): ?int
+    {
+        if (blank($uuid)) {
+            return null;
+        }
+
+        $record = $model::query()->where('uuid', (string) $uuid)->first();
+        if (! $record) {
+            throw new ApiException(ucfirst($label).' not found.', 422);
+        }
+
+        $companyId = $user->companies()->value('companies.id');
+        if ($companyId && (int) $record->company_id !== (int) $companyId) {
+            throw new ApiException('The selected '.$label.' does not belong to the selected company.', 422);
+        }
+
+        if ($label === 'team' && $user->department_id && (int) $record->department_id !== (int) $user->department_id) {
+            throw new ApiException('The selected team does not belong to the selected department.', 422);
+        }
+
+        return $record->id;
     }
 
     /**

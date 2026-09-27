@@ -10,6 +10,9 @@ export const companyService = {
   activity(id) {
     return api.get(`/companies/${id}/activity`);
   },
+  console(id) {
+    return api.get(`/companies/${id}/console`);
+  },
   create(payload) {
     return api.post('/companies', payload);
   },

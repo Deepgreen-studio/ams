@@ -14,6 +14,7 @@ use App\Domains\Companies\Events\CompanyStatusChanged;
 use App\Domains\Companies\Events\CompanyUpdated;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Companies\Services\CompanyStatusCascade;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
@@ -30,6 +31,7 @@ class CompanyService
         private readonly CompanyRepository $companyRepository,
         private readonly ActivityRepository $activityRepository,
         private readonly EventRepository $eventRepository,
+        private readonly CompanyStatusCascade $statusCascade,
     ) {}
 
     /**
@@ -106,6 +108,14 @@ class CompanyService
                 : $this->companyRepository->updateCompany($company, $payload);
             $nextStatus = $updated->status?->value ?? (string) $updated->status;
             $statusChanged = $previousStatus !== $nextStatus;
+
+            if ($statusChanged && in_array($nextStatus, $this->statusCascade->holdingStatuses(), true)) {
+                $this->statusCascade->hold($updated, $nextStatus, $actor);
+            }
+
+            if ($statusChanged && $nextStatus === 'active' && in_array($previousStatus, $this->statusCascade->holdingStatuses(), true)) {
+                $this->statusCascade->release($updated, $actor);
+            }
 
             if ($statusChanged) {
                 event(new CompanyStatusChanged($updated, $actor, $previousStatus, $nextStatus));
@@ -274,7 +284,7 @@ class CompanyService
         }
 
         if (! $isUpdate && empty($payload['timezone'])) {
-            $payload['timezone'] = 'UTC';
+            $payload['timezone'] = 'Asia/Kolkata';
         }
 
         return $payload;

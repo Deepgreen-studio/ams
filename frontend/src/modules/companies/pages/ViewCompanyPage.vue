@@ -3,6 +3,13 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         v-if="company"
+        :to="{ name: 'companies.console', params: { id: company.uuid } }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Console
+      </RouterLink>
+      <RouterLink
+        v-if="company"
         :to="{ name: 'companies.profile', params: { id: company.uuid } }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >

@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Domains\Authentication\Notifications\EmailVerificationNotification;
 use App\Domains\Authentication\Notifications\PasswordResetNotification;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Companies\Models\Department;
+use App\Domains\Companies\Models\Team;
 use App\Domains\Customers\Models\Customer;
 use App\Domains\Notifications\Models\DatabaseNotification;
 use App\Domains\Users\Enums\UserGender;
@@ -59,6 +61,8 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         'timezone',
         'language',
         'department_id',
+        'team_id',
+        'location_id',
         'status',
         'password',
         'is_active',
@@ -214,6 +218,16 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(CompanyLocation::class, 'location_id');
     }
 
     public function companies(): BelongsToMany

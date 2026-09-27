@@ -57,7 +57,7 @@ class UserService
             'deleter:id,uuid,full_name,email',
             'roles',
             'companies',
-            'department',
+            'department.teams:id,uuid,department_id,name',
             'team',
             'location',
         ]);
@@ -94,7 +94,7 @@ class UserService
 
             $this->syncAssignment($user, $data);
 
-            $created = $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department', 'team', 'location']);
+            $created = $user->load(['creator', 'updater', 'deleter', 'roles', 'companies', 'department.teams:id,uuid,department_id,name', 'team', 'location']);
 
             DB::afterCommit(function () use ($created): void {
                 $this->sendPasswordSetupEmail($created);
@@ -139,7 +139,7 @@ class UserService
 
             $this->syncAssignment($updated, $data);
 
-            $updated = $updated->load(['roles', 'companies', 'department', 'team', 'location']);
+            $updated = $updated->load(['roles', 'companies', 'department.teams:id,uuid,department_id,name', 'team', 'location']);
             event(new UserUpdated(
                 $updated,
                 $actor,
@@ -214,6 +214,9 @@ class UserService
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
             'deleter:id,uuid,full_name,email',
+            'companies',
+            'department.teams:id,uuid,department_id,name',
+            'team',
         ]);
     }
 

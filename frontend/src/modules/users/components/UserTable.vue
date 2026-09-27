@@ -33,6 +33,9 @@
               </button>
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              Company
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
@@ -129,6 +132,9 @@
               </div>
             </td>
             <td class="px-5 py-4 text-slate-600">{{ user.email }}</td>
+            <td class="max-w-[12rem] truncate px-5 py-4 text-slate-600">
+              {{ user.company_name || '—' }}
+            </td>
             <td class="px-5 py-4">
               <StatusBadge :status="user.status" />
             </td>

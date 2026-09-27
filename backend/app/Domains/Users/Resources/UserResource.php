@@ -2,6 +2,8 @@
 
 namespace App\Domains\Users\Resources;
 
+use App\Domains\Companies\Models\Company;
+use App\Domains\Companies\Models\Team;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,16 +29,23 @@ class UserResource extends JsonResource
             'date_of_birth' => optional($this->date_of_birth)?->toDateString(),
             'timezone' => $this->timezone,
             'language' => $this->language,
-            'company_id' => $this->whenLoaded('companies', function () {
-                $company = $this->companies->firstWhere('pivot.is_primary', true) ?? $this->companies->first();
+            'company_id' => $this->whenLoaded('companies', fn () => $this->primaryCompany()?->uuid),
+            'company_name' => $this->whenLoaded('companies', function () {
+                $company = $this->primaryCompany();
 
-                return $company?->uuid;
+                return $company?->company_name ?: $company?->legal_name;
             }),
             'department_id' => $this->whenLoaded('department', fn () => $this->department?->uuid),
-            'team_id' => $this->whenLoaded('team', fn () => $this->team?->uuid),
+            'team_id' => $this->when(
+                $this->relationLoaded('team') || $this->departmentTeamsLoaded(),
+                fn () => $this->resolvedTeam()?->uuid
+            ),
             'location_id' => $this->whenLoaded('location', fn () => $this->location?->uuid),
             'department_name' => $this->whenLoaded('department', fn () => $this->department?->name),
-            'team_name' => $this->whenLoaded('team', fn () => $this->team?->name),
+            'team_name' => $this->when(
+                $this->relationLoaded('team') || $this->departmentTeamsLoaded(),
+                fn () => $this->resolvedTeam()?->name
+            ),
             'location_name' => $this->whenLoaded('location', fn () => $this->location?->branch_name),
             'status' => $this->status?->value ?? $this->status,
             'roles' => $this->whenLoaded('roles', function () {
@@ -64,6 +73,38 @@ class UserResource extends JsonResource
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
         ];
+    }
+
+    private function resolvedTeam(): ?Team
+    {
+        if ($this->relationLoaded('team') && $this->team) {
+            return $this->team;
+        }
+
+        if (! $this->departmentTeamsLoaded()) {
+            return null;
+        }
+
+        $teams = $this->department->teams;
+
+        return $teams->count() === 1 ? $teams->first() : null;
+    }
+
+    private function departmentTeamsLoaded(): bool
+    {
+        return $this->relationLoaded('department')
+            && $this->department?->relationLoaded('teams');
+    }
+
+    private function primaryCompany(): ?Company
+    {
+        if (! $this->relationLoaded('companies')) {
+            return null;
+        }
+
+        return $this->companies->firstWhere('pivot.is_primary', true)
+            ?? $this->companies->firstWhere('pivot.is_primary', 1)
+            ?? $this->companies->first();
     }
 
     /**

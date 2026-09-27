@@ -390,13 +390,35 @@ const departmentSelectOptions = computed(() =>
   }),
 );
 
-const teamSelectOptions = computed(() => {
-  const department = departmentItems.value.find((item) => item.uuid === form.department_id);
-  return (department?.teams || []).map((team) => ({
+const teamSelectOptions = computed(() =>
+  teamsForSelectedDepartment().map((team) => ({
     value: team.uuid,
     label: team.name,
-  }));
-});
+  })),
+);
+
+function teamsForSelectedDepartment() {
+  const department = departmentItems.value.find((item) => item.uuid === form.department_id);
+  return department?.teams || [];
+}
+
+function applyDepartmentTeam() {
+  if (!form.department_id || !departmentItems.value.length) {
+    return;
+  }
+
+  const department = departmentItems.value.find((item) => item.uuid === form.department_id);
+  if (!department) {
+    return;
+  }
+
+  const teams = department.teams || [];
+  if (teams.some((team) => team.uuid === form.team_id)) {
+    return;
+  }
+
+  form.team_id = teams.length === 1 ? teams[0].uuid : '';
+}
 
 const locationSelectOptions = computed(() =>
   locationItems.value.map((location) => ({
@@ -454,11 +476,9 @@ watch(
 );
 
 watch(
-  () => form.department_id,
-  (departmentId, previous) => {
-    if (previous && departmentId !== previous) {
-      form.team_id = '';
-    }
+  () => [form.department_id, departmentItems.value],
+  () => {
+    applyDepartmentTeam();
   },
 );
 
@@ -466,6 +486,7 @@ watch(
   () => props.initial,
   (value) => {
     Object.assign(form, createForm(value));
+    applyDepartmentTeam();
   },
   { deep: true }
 );

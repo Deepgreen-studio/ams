@@ -83,6 +83,7 @@ class UserRepository extends BaseRepository
                 'updater:id,uuid,full_name,name,email',
                 'deleter:id,uuid,full_name,name,email',
                 'roles',
+                'companies',
             ]);
 
         return $query->paginate($perPage)->withQueryString();

@@ -57,7 +57,7 @@
         <div
           v-for="item in detailItems"
           :key="item.label"
-          class="grid grid-cols-[7.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[8.5rem_1fr]"
+          class="grid grid-cols-[8.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[9.5rem_1fr]"
         >
           <dt class="text-xs font-medium text-slate-500">{{ item.label }}</dt>
           <dd class="truncate text-sm font-medium text-slate-900">{{ item.value }}</dd>
@@ -95,8 +95,9 @@ const avatarSrc = computed(() => getUserAvatarUrl(props.user));
 
 const detailItems = computed(() => [
   { label: 'Phone', value: props.user?.phone || '—' },
-  { label: 'Timezone', value: props.user?.timezone || '—' },
-  { label: 'Language', value: props.user?.language || '—' },
+  { label: 'Company', value: props.user?.company_name || '—' },
+  { label: 'Department', value: props.user?.department_name || '—' },
+  { label: 'Team', value: props.user?.team_name || '—' },
   { label: 'Last login', value: formatDateTime(props.user?.last_login_at) || '—' },
   { label: 'Created', value: formatDateTime(props.user?.created_at) || '—' },
   { label: 'Created by', value: props.user?.created_by?.full_name || '—' },

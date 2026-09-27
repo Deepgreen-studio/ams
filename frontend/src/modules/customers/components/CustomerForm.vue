@@ -1,10 +1,5 @@
 <template>
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
-    <div class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-      The owning company owns applications. This customer is a person or an organization
-      entitled to those applications. Business and Enterprise are both organization customers.
-    </div>
-
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
         <FormLabel required>Owning Company</FormLabel>

@@ -6,6 +6,7 @@ use App\Domains\Applications\Enums\ApplicationCategory;
 use App\Domains\Applications\Enums\ApplicationPlatform;
 use App\Domains\Applications\Enums\ApplicationStatus;
 use App\Domains\Applications\Enums\ApplicationVisibility;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Models\Integration;
 use App\Models\User;
@@ -21,6 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Application extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

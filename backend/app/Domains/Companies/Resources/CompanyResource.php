@@ -2,6 +2,7 @@
 
 namespace App\Domains\Companies\Resources;
 
+use App\Shared\Support\CountryCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -9,13 +10,16 @@ class CompanyResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $legal = $this->canViewLegal($request);
+
         return [
             'id' => $this->id,
             'uuid' => $this->uuid,
             'company_name' => $this->company_name,
-            'legal_name' => $this->legal_name,
-            'registration_number' => $this->registration_number,
-            'tax_number' => $this->tax_number,
+            'company_code' => $this->company_code,
+            'legal_name' => $this->when($legal, $this->legal_name),
+            'registration_number' => $this->when($legal, $this->registration_number),
+            'tax_number' => $this->when($legal, $this->tax_number),
             'email' => $this->email,
             'phone' => $this->phone,
             'website' => $this->website,
@@ -30,6 +34,7 @@ class CompanyResource extends JsonResource
             'state' => $this->state,
             'postal_code' => $this->postal_code,
             'country' => $this->country,
+            'country_name' => CountryCatalog::name($this->country),
             'timezone' => $this->timezone,
             'language' => $this->language,
             'currency' => $this->currency,
@@ -47,10 +52,25 @@ class CompanyResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'deleted_at' => $this->deleted_at,
+            'creator' => $this->whenLoaded('creator', fn () => [
+                'uuid' => $this->creator?->uuid,
+                'full_name' => $this->creator?->full_name,
+            ]),
             'updater' => $this->whenLoaded('updater', fn () => [
                 'uuid' => $this->updater->uuid,
                 'full_name' => $this->updater->full_name,
             ]),
         ];
+    }
+
+    private function canViewLegal(Request $request): bool
+    {
+        $user = $request->user();
+
+        return $user !== null && (
+            $user->hasRole('super-admin')
+            || $user->can('companies.update')
+            || $user->can('companies.manage')
+        );
     }
 }

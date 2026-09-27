@@ -2,9 +2,11 @@
 
 namespace App\Domains\Companies\Models;
 
-use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
+use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Integrations\Models\Integration;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +21,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Company extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
@@ -29,6 +32,7 @@ class Company extends Model
     protected $fillable = [
         'uuid',
         'company_name',
+        'company_code',
         'legal_name',
         'registration_number',
         'tax_number',
@@ -70,6 +74,12 @@ class Company extends Model
             if (blank($company->uuid)) {
                 $company->uuid = (string) Str::uuid();
             }
+
+            if (blank($company->company_code)) {
+                $company->company_code = $company->registration_number ?: 'CO-'.strtoupper(substr((string) $company->uuid, 0, 8));
+            }
+
+            $company->company_code = strtoupper(trim((string) $company->company_code));
         });
     }
 
@@ -100,6 +110,7 @@ class Company extends Model
             })
             ->logOnly([
                 'company_name',
+                'company_code',
                 'legal_name',
                 'email',
                 'phone',
@@ -126,6 +137,11 @@ class Company extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function companyTenantColumn(): string
+    {
+        return 'id';
     }
 
     public function getLogoUrlAttribute(): ?string
@@ -161,6 +177,11 @@ class Company extends Model
     public function customers(): HasMany
     {
         return $this->hasMany(Customer::class);
+    }
+
+    public function integrations(): HasMany
+    {
+        return $this->hasMany(Integration::class);
     }
 
     public function users(): BelongsToMany

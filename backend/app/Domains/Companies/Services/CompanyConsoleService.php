@@ -89,6 +89,9 @@ class CompanyConsoleService
                 'status' => $this->value($application->status),
                 'status_label' => $this->label($application->status),
                 'current_version' => $application->current_version,
+                'environment' => $application->environment_name,
+                'health' => $application->environment_health,
+                'last_release' => $application->last_release_name,
                 'operational_status' => $this->operationalStatus($application),
                 'environments_count' => (int) $application->environments_count,
                 'versions_count' => (int) $application->versions_count,
@@ -241,6 +244,10 @@ class CompanyConsoleService
             unset($payload['applications'], $payload['platforms'], $payload['environments'], $payload['versions'], $payload['releases']);
         }
 
+        if (! $actor->can('companies.update') && ! $actor->can('companies.manage') && ! $actor->hasRole('super-admin')) {
+            unset($payload['profile']['legal_name'], $payload['profile']['registration_number']);
+        }
+
         $payload['kpis'] = array_values(array_filter(
             $payload['kpis'],
             fn (array $kpi): bool => $actor->can($kpi['permission']),
@@ -267,7 +274,8 @@ class CompanyConsoleService
         return [
             'display_name' => $company->company_name,
             'legal_name' => $company->legal_name,
-            'company_code' => $company->registration_number,
+            'company_code' => $company->company_code,
+            'registration_number' => $company->registration_number,
             'address' => $address !== '' ? $address : null,
             'website' => $company->website,
             'primary_contact' => $company->email,

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Companies\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Enums\CompanyStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Illuminate\Support\Str;
 
 class Department extends Model
 {
+    use BelongsToCompanyTenant;
     use SoftDeletes;
 
     /**

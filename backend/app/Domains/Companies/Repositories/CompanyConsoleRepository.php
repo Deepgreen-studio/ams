@@ -267,6 +267,21 @@ class CompanyConsoleRepository
                     ->whereColumn('support_tickets.application_id', 'applications.id')
                     ->where('company_id', $companyId)
                     ->whereIn('status', $this->openTicketStatuses()),
+                'environment_name' => ApplicationEnvironment::query()
+                    ->select('name')
+                    ->whereColumn('application_environments.application_id', 'applications.id')
+                    ->latest('updated_at')
+                    ->limit(1),
+                'environment_health' => ApplicationEnvironment::query()
+                    ->select('health_status')
+                    ->whereColumn('application_environments.application_id', 'applications.id')
+                    ->latest('updated_at')
+                    ->limit(1),
+                'last_release_name' => ApplicationRelease::query()
+                    ->select('name')
+                    ->whereColumn('application_releases.application_id', 'applications.id')
+                    ->latest('id')
+                    ->limit(1),
             ])
             ->latest('updated_at')
             ->limit($limit)

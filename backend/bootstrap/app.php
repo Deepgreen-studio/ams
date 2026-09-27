@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Audit\Middleware\LogApiRequests;
+use App\Domains\Companies\Middleware\SetCompanyTenant;
 use App\Domains\Content\Middleware\EnsureCmsPrivateAccess;
 use App\Shared\Exceptions\Handler as ApiExceptionHandler;
 use Illuminate\Foundation\Application;
@@ -39,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api(append: [
+            SetCompanyTenant::class,
             LogApiRequests::class,
         ]);
 

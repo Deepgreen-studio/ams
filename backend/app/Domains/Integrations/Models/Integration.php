@@ -3,6 +3,7 @@
 namespace App\Domains\Integrations\Models;
 
 use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Enums\IntegrationAuthenticationType;
 use App\Domains\Integrations\Enums\IntegrationHealthStatus;
@@ -20,6 +21,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Integration extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

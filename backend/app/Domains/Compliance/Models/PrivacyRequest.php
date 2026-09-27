@@ -2,6 +2,7 @@
 
 namespace App\Domains\Compliance\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Compliance\Enums\PrivacyIdentityVerificationStatus;
 use App\Domains\Compliance\Enums\PrivacyRequestDecision;
@@ -21,6 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class PrivacyRequest extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

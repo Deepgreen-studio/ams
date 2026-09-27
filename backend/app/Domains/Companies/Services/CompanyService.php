@@ -15,8 +15,11 @@ use App\Domains\Companies\Events\CompanyUpdated;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Companies\Services\CompanyStatusCascade;
+use App\Domains\Support\Enums\SupportTicketStatus;
+use App\Domains\Support\Models\SupportTicket;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Shared\Support\CountryCatalog;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
@@ -97,6 +100,7 @@ class CompanyService
     {
         return DB::transaction(function () use ($identifier, $data, $actor): Company {
             $company = $this->companyRepository->findByIdentifierOrFail($identifier);
+            $this->guardCompanyCode($company, $data, $actor);
             $previousStatus = $company->status?->value ?? (string) $company->status;
             $payload = $this->preparePayload($data, isUpdate: true);
             $payload['updated_by'] = $actor->id;
@@ -133,6 +137,14 @@ class CompanyService
     {
         DB::transaction(function () use ($identifier, $actor): void {
             $company = $this->companyRepository->findByIdentifierOrFail($identifier);
+            $blockers = $this->activeDependencyCounts($company);
+            if ($blockers !== []) {
+                throw new ApiException(
+                    'Archive this company after its active applications, customers, integrations, users, and support tickets are resolved.',
+                    422,
+                    $blockers,
+                );
+            }
             $this->companyRepository->updateCompany($company, ['updated_by' => $actor->id]);
             $company->delete();
 
@@ -248,6 +260,7 @@ class CompanyService
     {
         $allowed = [
             'company_name',
+            'company_code',
             'legal_name',
             'registration_number',
             'tax_number',
@@ -283,11 +296,59 @@ class CompanyService
             $payload['phone'] = PhoneNumber::store($payload['phone']);
         }
 
+        if (array_key_exists('company_code', $payload) && is_string($payload['company_code'])) {
+            $payload['company_code'] = strtoupper(trim($payload['company_code']));
+        }
+
+        if (array_key_exists('country', $payload)) {
+            $payload['country'] = CountryCatalog::code($payload['country']) ?? $payload['country'];
+        }
+
         if (! $isUpdate && empty($payload['timezone'])) {
             $payload['timezone'] = 'Asia/Kolkata';
         }
 
         return $payload;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function guardCompanyCode(Company $company, array $data, User $actor): void
+    {
+        if (! array_key_exists('company_code', $data)) {
+            return;
+        }
+
+        $incoming = strtoupper(trim((string) $data['company_code']));
+        $current = strtoupper(trim((string) $company->company_code));
+
+        if ($incoming !== $current && ! $actor->hasRole('super-admin')) {
+            throw new ApiException('Company code cannot be changed.', 422);
+        }
+    }
+
+    /**
+     * @return array<string, int>
+     */
+    private function activeDependencyCounts(Company $company): array
+    {
+        $counts = [
+            'applications' => $company->applications()->withoutGlobalScope('company_tenant')->count(),
+            'customers' => $company->customers()->withoutGlobalScope('company_tenant')->count(),
+            'integrations' => $company->integrations()->withoutGlobalScope('company_tenant')->count(),
+            'users' => $company->users()->count(),
+            'support_tickets' => SupportTicket::query()
+                ->withoutGlobalScope('company_tenant')
+                ->where('company_id', $company->id)
+                ->whereNotIn('status', [
+                    SupportTicketStatus::Closed->value,
+                    SupportTicketStatus::Cancelled->value,
+                ])
+                ->count(),
+        ];
+
+        return array_filter($counts, fn (int $count): bool => $count > 0);
     }
 
     protected function deleteMediaFile(?string $path): void

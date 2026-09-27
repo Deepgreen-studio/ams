@@ -30,9 +30,26 @@
       <div>
         <FormLabel required>Company Code</FormLabel>
         <input
-          v-model="form.registration_number"
+          v-model="form.company_code"
           type="text"
           placeholder="ACME-001"
+          :disabled="codeLocked"
+          class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0 disabled:bg-slate-50 disabled:text-slate-500"
+          :class="fieldClass('company_code')"
+        />
+        <p class="mt-1 text-xs text-slate-500">
+          {{ codeLocked ? 'Company code cannot be changed.' : 'Used for internal references, integrations, and support. It stays the same after creation.' }}
+        </p>
+        <p v-if="displayErrors.company_code" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.company_code[0] }}
+        </p>
+      </div>
+      <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration Number</label>
+        <input
+          v-model="form.registration_number"
+          type="text"
+          placeholder="REG-1001"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('registration_number')"
         />
@@ -217,6 +234,7 @@ import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
+import { useAuthStore } from '@/modules/authentication/stores/auth';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 import { getPhoneCountries, isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
@@ -230,6 +248,8 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
+const auth = useAuthStore();
+const codeLocked = computed(() => Boolean(props.initial?.uuid || props.initial?.id) && !auth.isSuperAdmin);
 const localErrors = ref({});
 const logoFile = ref(null);
 const logoPreview = ref('');
@@ -306,6 +326,7 @@ function createForm(value = {}) {
   return {
     company_name: value.company_name || '',
     legal_name: value.legal_name || '',
+    company_code: value.company_code || '',
     registration_number: value.registration_number || '',
     tax_number: value.tax_number || '',
     email: value.email || '',
@@ -336,8 +357,8 @@ function validate() {
     next.company_name = ['The display name field is required.'];
   }
 
-  if (!String(form.registration_number || '').trim()) {
-    next.registration_number = ['The company code field is required.'];
+  if (!String(form.company_code || '').trim()) {
+    next.company_code = ['The company code field is required.'];
   }
 
   if (!String(form.email || '').trim()) {

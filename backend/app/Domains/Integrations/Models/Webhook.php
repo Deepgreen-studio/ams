@@ -2,6 +2,7 @@
 
 namespace App\Domains\Integrations\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Enums\WebhookDirection;
 use App\Domains\Integrations\Enums\WebhookSignatureAlgorithm;
@@ -17,6 +18,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Webhook extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 

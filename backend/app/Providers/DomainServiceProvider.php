@@ -41,7 +41,7 @@ class DomainServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        //
+        $this->app->singleton(\App\Domains\Companies\Services\CompanyTenant::class);
     }
 
     public function boot(): void

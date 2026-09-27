@@ -94,7 +94,7 @@
                 </div>
               </div>
             </td>
-            <td class="px-5 py-4 text-slate-600">{{ company.registration_number || '—' }}</td>
+            <td class="px-5 py-4 text-slate-600">{{ company.company_code || company.registration_number || '—' }}</td>
             <td class="hidden px-5 py-4 md:table-cell">
               <StatusBadge :status="company.status" />
             </td>

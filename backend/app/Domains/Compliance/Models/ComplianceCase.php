@@ -2,6 +2,7 @@
 
 namespace App\Domains\Compliance\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Compliance\Enums\ComplianceCasePriority;
 use App\Domains\Compliance\Enums\ComplianceCaseStatus;
@@ -18,6 +19,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class ComplianceCase extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

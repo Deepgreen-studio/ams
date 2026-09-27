@@ -5,6 +5,7 @@ namespace App\Domains\Companies\Requests;
 use App\Domains\Companies\Enums\CompanyStatus;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
+use App\Shared\Support\CountryCatalog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,7 +25,8 @@ class StoreCompanyRequest extends FormRequest
     {
         return [
             'company_name' => 'display name',
-            'registration_number' => 'company code',
+            'company_code' => 'company code',
+            'registration_number' => 'registration number',
         ];
     }
 
@@ -32,8 +34,9 @@ class StoreCompanyRequest extends FormRequest
     {
         return [
             'company_name' => ['required', 'string', 'max:255'],
+            'company_code' => ['required', 'string', 'max:100', Rule::unique('companies', 'company_code')->whereNull('deleted_at')],
             'legal_name' => ['nullable', 'string', 'max:255'],
-            'registration_number' => ['required', 'string', 'max:100', Rule::unique('companies', 'registration_number')->whereNull('deleted_at')],
+            'registration_number' => ['nullable', 'string', 'max:100', Rule::unique('companies', 'registration_number')->whereNull('deleted_at')],
             'tax_number' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => $this->requiredPhoneRules(),
@@ -42,7 +45,7 @@ class StoreCompanyRequest extends FormRequest
             'city' => ['required', 'string', 'max:120'],
             'state' => ['required', 'string', 'max:120'],
             'postal_code' => ['required', 'string', 'max:32'],
-            'country' => ['required', 'string', 'max:100'],
+            'country' => ['required', 'string', 'max:100', CountryCatalog::rule()],
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'currency' => ['required', 'string', 'size:3'],

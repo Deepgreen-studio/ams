@@ -112,6 +112,10 @@
               <dd class="text-sm font-medium text-slate-900">{{ company.language || '-' }}</dd>
             </div>
             <div class="flex items-center justify-between gap-3">
+              <dt class="text-sm text-zinc-500">Created by</dt>
+              <dd class="text-sm font-medium text-slate-900">{{ company.creator?.full_name || '—' }}</dd>
+            </div>
+            <div class="flex items-center justify-between gap-3">
               <dt class="text-sm text-zinc-500">Created</dt>
               <dd class="text-sm font-medium text-slate-900">
                 {{ formatDate(company.created_at) || '-' }}
@@ -201,6 +205,7 @@ import {
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { formatDate, formatDateTime } from '@/utils/formatters';
+import { countryName } from '@/utils/phone';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CompanyCard from '@/modules/companies/components/CompanyCard.vue';
@@ -236,7 +241,7 @@ const fullAddress = computed(() => {
     company.value.city,
     company.value.state,
     company.value.postal_code,
-    company.value.country,
+    company.value.country_name || countryName(company.value.country) || company.value.country,
   ].filter(Boolean);
 
   return parts.length ? parts.join(', ') : '-';
@@ -244,7 +249,8 @@ const fullAddress = computed(() => {
 
 const businessItems = computed(() => [
   { label: 'Legal name', value: company.value?.legal_name || '-' },
-  { label: 'Company Code', value: company.value?.registration_number || '-' },
+  { label: 'Company Code', value: company.value?.company_code || '-' },
+  { label: 'Registration Number', value: company.value?.registration_number || '-' },
   { label: 'Tax number', value: company.value?.tax_number || '-' },
   { label: 'Date format', value: company.value?.date_format || '-' },
   { label: 'Time format', value: company.value?.time_format || '-' },

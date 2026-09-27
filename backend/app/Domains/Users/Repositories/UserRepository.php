@@ -2,6 +2,7 @@
 
 namespace App\Domains\Users\Repositories;
 
+use App\Domains\Companies\Services\CompanyTenant;
 use App\Domains\Users\Enums\InvitationStatus;
 use App\Domains\Users\Models\UserLoginHistory;
 use App\Models\User;
@@ -40,6 +41,7 @@ class UserRepository extends BaseRepository
     public function findByIdentifier(string $identifier, bool $withTrashed = false): ?User
     {
         $query = $this->model->newQuery();
+        app(CompanyTenant::class)->constrainUsers($query);
 
         if ($withTrashed) {
             $query->withTrashed();
@@ -107,6 +109,7 @@ class UserRepository extends BaseRepository
     public function filteredQuery(array $filters = []): Builder
     {
         $query = $this->model->newQuery();
+        app(CompanyTenant::class)->constrainUsers($query);
 
         if (! empty($filters['trashed']) && $filters['trashed'] === 'only') {
             $query->onlyTrashed();
@@ -229,6 +232,7 @@ class UserRepository extends BaseRepository
         $this->expireStaleInvitations();
 
         $base = $this->model->newQuery();
+        app(CompanyTenant::class)->constrainUsers($base);
         $accepted = function (Builder $query): void {
             $query->where('invitation_status', InvitationStatus::Accepted->value)
                 ->orWhereNull('invitation_status');

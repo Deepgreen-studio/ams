@@ -2,6 +2,7 @@
 
 namespace App\Domains\Notifications\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Notifications\Enums\NotificationChannel;
 use App\Domains\Notifications\Enums\NotificationPriority;
@@ -20,9 +21,15 @@ use Spatie\Activitylog\Traits\LogsActivity;
 class Notification extends Model
 {
     /** @use HasFactory<NotificationFactory> */
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
+
+    public function companyTenantSharesUnassigned(): bool
+    {
+        return true;
+    }
 
     protected $table = 'notifications';
 

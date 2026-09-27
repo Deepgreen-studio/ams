@@ -6,6 +6,7 @@ use App\Domains\Analytics\Enums\AnalyticsCategory;
 use App\Domains\Analytics\Enums\AnalyticsDashboardKind;
 use App\Domains\Analytics\Enums\AnalyticsDashboardStatus;
 use App\Domains\Analytics\Enums\AnalyticsDashboardVisibility;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Database\Factories\AnalyticsDashboardFactory;
@@ -20,6 +21,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class AnalyticsDashboard extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

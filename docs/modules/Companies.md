@@ -80,6 +80,22 @@ frontend/src/modules/companies/
 - TeamCreated, LocationCreated
 - BrandingUpdated
 
+## Status effects
+
+- `active` — company operations continue.
+- `inactive` and `suspended` — active applications, integrations, company memberships, and open support tickets are held, then restored to their previous status when the company becomes active again. Records are not hard-deleted.
+- Archive is a soft delete. It is refused while applications, customers, integrations, users, or open support tickets still exist. Departments, teams, and locations are archived with the company.
+
+## Tenant scope
+
+Authenticated API requests limit company members to their own companies. Super Admin is unrestricted. This applies to companies, users, applications, customers, support tickets, integrations, content, compliance cases, and analytics. Platform content with no company remains visible. Company-owned content is visible only to that company.
+
+## Identity
+
+- `company_code` is the unique organization identifier. It cannot be changed except by Super Admin.
+- `registration_number` is the legal registration number and is separate from the company code.
+- `country` is stored as an ISO code. API responses include `country_name`.
+
 ## Testing Notes
 
 ```bash

@@ -24,11 +24,11 @@
               <button
                 type="button"
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'registration_number')"
+                @click="$emit('sort', 'company_code')"
               >
                 Company Code
                 <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'registration_number' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                  {{ sortBy === 'company_code' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>
               </button>
             </th>
@@ -130,16 +130,16 @@
                 <div class="min-w-0">
                   <p class="truncate font-semibold text-slate-900">{{ company.company_name }}</p>
                   <p class="truncate text-xs text-slate-500">
-                    {{ company.email || company.registration_number || '—' }}
+                    {{ company.email || company.company_code || '—' }}
                   </p>
                 </div>
               </div>
             </td>
             <td class="px-5 py-4 text-slate-600">
-              {{ company.registration_number || '—' }}
+              {{ company.company_code || '—' }}
             </td>
             <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
-              {{ company.country || '—' }}
+              {{ countryName(company.country) || company.country_name || company.country || '—' }}
             </td>
             <td class="px-5 py-4">
               <button
@@ -284,6 +284,7 @@ import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
 import { formatDate } from '@/utils/formatters';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
+import { countryName } from '@/utils/phone';
 
 const props = defineProps({
   companies: {

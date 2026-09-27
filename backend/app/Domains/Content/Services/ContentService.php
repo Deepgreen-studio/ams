@@ -97,6 +97,8 @@ class ContentService
             );
             $payload['created_by'] = $actor->id;
             $payload['updated_by'] = $actor->id;
+            $payload['company_id'] = app(\App\Domains\Companies\Services\CompanyTenant::class)
+                ->contentCompanyId($actor, $data['company_id'] ?? null);
             $payload['version'] = 1;
 
             if ($status->slug === ContentStatusSlug::Published->value) {

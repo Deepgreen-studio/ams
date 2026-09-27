@@ -2,6 +2,7 @@
 
 namespace App\Domains\Compliance\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Compliance\Enums\DataBreachSeverity;
 use App\Domains\Compliance\Enums\DataBreachStatus;
@@ -19,6 +20,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class DataBreach extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

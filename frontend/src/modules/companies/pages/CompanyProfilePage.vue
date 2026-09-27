@@ -241,7 +241,7 @@ const timeFormatOptions = computed(() => withCurrentOption(timeFormatOptionsBase
 
 const businessItems = computed(() => [
   { label: 'Legal name', value: company.value?.legal_name || '-' },
-  { label: 'Company Code', value: company.value?.registration_number || '-' },
+  { label: 'Company Code', value: company.value?.company_code || '-' },
   { label: 'Tax number', value: company.value?.tax_number || '-' },
 ]);
 

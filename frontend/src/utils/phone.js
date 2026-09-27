@@ -122,6 +122,19 @@ export function toE164(country, nationalNumber) {
   }
 }
 
+export function countryName(iso) {
+  if (!iso) {
+    return '';
+  }
+
+  const code = String(iso).trim().toUpperCase();
+  if (code.length !== 2) {
+    return String(iso);
+  }
+
+  return regionNames?.of(code) || String(iso);
+}
+
 export function isValidE164(value) {
   if (value == null || value === '') {
     return true;

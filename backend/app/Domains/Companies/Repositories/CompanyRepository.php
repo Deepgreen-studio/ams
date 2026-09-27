@@ -75,6 +75,7 @@ class CompanyRepository extends BaseRepository
             $search = trim((string) $filters['search']);
             $query->where(function (Builder $builder) use ($search): void {
                 $builder->where('company_name', 'like', "%{$search}%")
+                    ->orWhere('company_code', 'like', "%{$search}%")
                     ->orWhere('legal_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('registration_number', 'like', "%{$search}%")
@@ -98,7 +99,7 @@ class CompanyRepository extends BaseRepository
 
         $sortBy = (string) ($filters['sort_by'] ?? 'created_at');
         $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowed = ['id', 'company_name', 'registration_number', 'status', 'country', 'created_at', 'updated_at', 'deleted_at'];
+        $allowed = ['id', 'company_name', 'company_code', 'registration_number', 'status', 'country', 'created_at', 'updated_at', 'deleted_at'];
 
         if (! in_array($sortBy, $allowed, true)) {
             $sortBy = 'created_at';

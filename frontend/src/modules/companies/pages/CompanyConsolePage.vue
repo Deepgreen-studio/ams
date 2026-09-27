@@ -63,7 +63,10 @@
                   <span class="rounded-full px-2 py-0.5 text-[11px] font-medium ring-1" :class="tone(app.status)">{{ app.status_label }}</span>
                 </div>
                 <p class="mt-1 text-xs text-slate-500">
-                  {{ app.platform_label }} · v{{ app.current_version || '-' }} · {{ app.operational_status }}
+                  {{ app.platform_label }} · v{{ app.current_version || '-' }}
+                  · {{ app.environment || 'No environment' }}
+                  · {{ app.health || 'No health check' }}
+                  · {{ app.last_release || 'No release' }}
                 </p>
               </RouterLink>
             </li>
@@ -103,6 +106,7 @@
       </section>
 
       <section v-else-if="activeSection === 'users'" class="space-y-6">
+        <p class="text-sm text-slate-500">Company, then department, team, location, and the users assigned inside that company.</p>
         <div v-for="department in consoleData.organization?.departments || []" :key="department.uuid" class="rounded-[12px] bg-white p-6">
           <h3 class="text-base font-semibold text-slate-900">{{ department.name }}</h3>
           <div v-for="team in department.teams" :key="team.uuid" class="mt-4 rounded-[12px] bg-slate-50/70 p-4">
@@ -206,14 +210,16 @@ const ProfileCard = defineComponent({
       const profile = props.profile || {};
       const rows = [
         ['Display name', profile.display_name],
+        ['Legal name', profile.legal_name],
         ['Company code', profile.company_code],
+        ['Registration number', profile.registration_number],
         ['Address', profile.address],
         ['Website', profile.website],
         ['Primary contact', profile.primary_contact],
         ['Support contact', profile.support_contact],
         ['Timezone', profile.timezone],
         ['Currency', profile.currency],
-      ];
+      ].filter(([, value]) => value !== undefined);
       return h('div', { class: 'rounded-[12px] bg-white p-6' }, [
         h('div', { class: 'flex items-start justify-between gap-4' }, [
           h('div', [

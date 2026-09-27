@@ -6,6 +6,7 @@ use App\Domains\Analytics\Enums\AnalyticsCategory;
 use App\Domains\Analytics\Enums\AnalyticsReportStatus;
 use App\Domains\Analytics\Enums\AnalyticsReportType;
 use App\Domains\Analytics\Enums\AnalyticsReportVisibility;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Scheduler\Models\ScheduledJob;
 use App\Models\User;
@@ -21,6 +22,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class AnalyticsReport extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

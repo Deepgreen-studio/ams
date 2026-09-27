@@ -2,6 +2,7 @@
 
 namespace App\Domains\Integrations\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Enums\DataMappingDirection;
 use App\Domains\Integrations\Enums\DataMappingStatus;
@@ -14,6 +15,7 @@ use Illuminate\Support\Str;
 
 class DataMapping extends Model
 {
+    use BelongsToCompanyTenant;
     use SoftDeletes;
 
     protected $fillable = [

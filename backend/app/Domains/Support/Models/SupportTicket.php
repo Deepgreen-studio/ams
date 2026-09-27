@@ -3,6 +3,7 @@
 namespace App\Domains\Support\Models;
 
 use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\Department;
 use App\Domains\Companies\Models\Team;
@@ -29,6 +30,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class SupportTicket extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;

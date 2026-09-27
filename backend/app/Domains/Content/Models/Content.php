@@ -2,6 +2,8 @@
 
 namespace App\Domains\Content\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
+use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Database\Factories\ContentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,15 +18,22 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Content extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
     use LogsActivity;
     use SoftDeletes;
+
+    public function companyTenantSharesUnassigned(): bool
+    {
+        return true;
+    }
 
     /**
      * @var list<string>
      */
     protected $fillable = [
         'uuid',
+        'company_id',
         'content_type_id',
         'content_status_id',
         'content_category_id',
@@ -182,6 +191,11 @@ class Content extends Model
     public function rejector(): BelongsTo
     {
         return $this->belongsTo(User::class, 'rejected_by');
+    }
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function creator(): BelongsTo

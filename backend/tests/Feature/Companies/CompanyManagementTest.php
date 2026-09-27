@@ -50,6 +50,7 @@ class CompanyManagementTest extends TestCase
         $create = $this->postJson('/api/v1/companies', [
             'company_name' => 'Acme Corp',
             'legal_name' => 'Acme Corporation Ltd',
+            'company_code' => 'ACME-001',
             'registration_number' => 'REG-1001',
             'email' => 'hello@acme.test',
             'phone' => '+12025550123',
@@ -66,11 +67,17 @@ class CompanyManagementTest extends TestCase
 
         $create->assertCreated()
             ->assertJsonPath('data.company.company_name', 'Acme Corp')
+            ->assertJsonPath('data.company.company_code', 'ACME-001')
+            ->assertJsonPath('data.company.country_name', \App\Shared\Support\CountryCatalog::name('US'))
             ->assertJsonPath('success', true);
 
         $uuid = $create->json('data.company.uuid');
 
-        $this->getJson('/api/v1/companies?search=Acme')
+        $this->getJson('/api/v1/companies?search=ACME-001')
+            ->assertOk()
+            ->assertJsonPath('data.companies.meta.total', 1);
+
+        $this->getJson('/api/v1/companies?search=REG-1001')
             ->assertOk()
             ->assertJsonPath('data.companies.meta.total', 1);
 
@@ -91,7 +98,7 @@ class CompanyManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
-            ->assertJsonStructure(['errors' => ['company_name', 'registration_number', 'email', 'phone', 'address', 'city', 'state', 'postal_code', 'country', 'website', 'currency']]);
+            ->assertJsonStructure(['errors' => ['company_name', 'company_code', 'email', 'phone', 'address', 'city', 'state', 'postal_code', 'country', 'website', 'currency']]);
     }
 
     public function test_admin_can_update_soft_delete_and_restore_company(): void
@@ -264,12 +271,13 @@ class CompanyManagementTest extends TestCase
         ])->assertForbidden();
     }
 
-    public function test_registration_number_must_be_unique(): void
+    public function test_company_code_must_be_unique_and_registration_number_is_separate(): void
     {
         Sanctum::actingAs($this->admin);
         Company::query()->create([
             'company_name' => 'First',
-            'registration_number' => 'DUP-1',
+            'company_code' => 'DUP-1',
+            'registration_number' => 'REG-1',
             'status' => 'active',
             'timezone' => 'UTC',
             'language' => 'en',
@@ -278,7 +286,8 @@ class CompanyManagementTest extends TestCase
 
         $this->postJson('/api/v1/companies', [
             'company_name' => 'Second',
-            'registration_number' => 'DUP-1',
+            'company_code' => 'DUP-1',
+            'registration_number' => 'REG-2',
             'email' => 'second@example.test',
             'phone' => '+12025550199',
             'address' => '2 Main Street',
@@ -288,7 +297,7 @@ class CompanyManagementTest extends TestCase
             'country' => 'US',
             'currency' => 'USD',
         ])->assertStatus(422)
-            ->assertJsonPath('errors.registration_number.0', 'The company code has already been taken.');
+            ->assertJsonPath('errors.company_code.0', 'The company code has already been taken.');
     }
 
     public function test_company_console_summarizes_operations(): void
@@ -423,5 +432,102 @@ class CompanyManagementTest extends TestCase
         $outsider->assignRole('manager');
         Sanctum::actingAs($outsider);
         $this->getJson('/api/v1/companies/'.$company->uuid.'/console')->assertNotFound();
+    }
+
+    public function test_company_code_is_immutable_unless_super_admin(): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Locked Co',
+            'company_code' => 'LOCK-1',
+            'status' => 'active',
+            'timezone' => 'Asia/Kolkata',
+            'language' => 'en',
+            'currency' => 'INR',
+        ]);
+        $editor = User::factory()->create();
+        $editor->assignRole('manager');
+        $editor->givePermissionTo('companies.update');
+        $company->users()->attach($editor->id, ['is_primary' => true, 'status' => 'active']);
+
+        Sanctum::actingAs($editor);
+        $this->putJson('/api/v1/companies/'.$company->uuid, [
+            'company_code' => 'LOCK-2',
+        ])->assertStatus(422);
+
+        Sanctum::actingAs($this->admin);
+        $this->putJson('/api/v1/companies/'.$company->uuid, [
+            'company_code' => 'LOCK-2',
+        ])->assertOk()
+            ->assertJsonPath('data.company.company_code', 'LOCK-2');
+    }
+
+    public function test_company_with_active_dependencies_cannot_be_archived(): void
+    {
+        Sanctum::actingAs($this->admin);
+        $company = Company::query()->create([
+            'company_name' => 'Busy Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+        Application::factory()->forCompany($company)->create();
+
+        $this->deleteJson('/api/v1/companies/'.$company->uuid)
+            ->assertStatus(422)
+            ->assertJsonPath('errors.applications', 1);
+
+        $this->assertNotSoftDeleted('companies', ['id' => $company->id]);
+    }
+
+    public function test_company_member_cannot_read_another_companys_records(): void
+    {
+        $member = User::factory()->create();
+        $member->assignRole('manager');
+        $member->givePermissionTo(['applications.view', 'users.view', 'companies.view']);
+
+        $own = Company::query()->create([
+            'company_name' => 'Own Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+        $other = Company::query()->create([
+            'company_name' => 'Other Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+        $own->users()->attach($member->id, ['is_primary' => true, 'status' => 'active']);
+        $hidden = User::factory()->create(['full_name' => 'Hidden Person', 'email' => 'hidden-person@example.test']);
+        $other->users()->attach($hidden->id, ['is_primary' => true, 'status' => 'active']);
+        Application::factory()->forCompany($other)->create(['name' => 'Secret App']);
+        Application::factory()->forCompany($own)->create(['name' => 'Own App']);
+        Department::query()->create([
+            'company_id' => $other->id,
+            'name' => 'Secret Dept',
+            'status' => 'active',
+        ]);
+        Department::query()->create([
+            'company_id' => $own->id,
+            'name' => 'Own Dept',
+            'status' => 'active',
+        ]);
+
+        Sanctum::actingAs($member);
+        $this->getJson('/api/v1/applications')
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Own App'])
+            ->assertJsonMissing(['name' => 'Secret App']);
+        $this->getJson('/api/v1/departments')
+            ->assertOk()
+            ->assertJsonFragment(['name' => 'Own Dept'])
+            ->assertJsonMissing(['name' => 'Secret Dept']);
+        $this->getJson('/api/v1/users')
+            ->assertOk()
+            ->assertJsonMissing(['email' => 'hidden-person@example.test']);
+        $this->getJson('/api/v1/companies/'.$other->uuid)->assertNotFound();
     }
 }

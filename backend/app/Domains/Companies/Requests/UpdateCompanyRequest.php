@@ -6,6 +6,7 @@ use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
+use App\Shared\Support\CountryCatalog;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,7 +26,8 @@ class UpdateCompanyRequest extends FormRequest
     {
         return [
             'company_name' => 'display name',
-            'registration_number' => 'company code',
+            'company_code' => 'company code',
+            'registration_number' => 'registration number',
         ];
     }
 
@@ -35,10 +37,16 @@ class UpdateCompanyRequest extends FormRequest
 
         return [
             'company_name' => ['sometimes', 'required', 'string', 'max:255'],
-            'legal_name' => ['nullable', 'string', 'max:255'],
-            'registration_number' => [
+            'company_code' => [
                 'sometimes',
                 'required',
+                'string',
+                'max:100',
+                Rule::unique('companies', 'company_code')->ignore($company?->id)->whereNull('deleted_at'),
+            ],
+            'legal_name' => ['nullable', 'string', 'max:255'],
+            'registration_number' => [
+                'nullable',
                 'string',
                 'max:100',
                 Rule::unique('companies', 'registration_number')->ignore($company?->id)->whereNull('deleted_at'),
@@ -51,7 +59,7 @@ class UpdateCompanyRequest extends FormRequest
             'city' => ['sometimes', 'required', 'string', 'max:120'],
             'state' => ['sometimes', 'required', 'string', 'max:120'],
             'postal_code' => ['sometimes', 'required', 'string', 'max:32'],
-            'country' => ['sometimes', 'required', 'string', 'max:100'],
+            'country' => ['sometimes', 'required', 'string', 'max:100', CountryCatalog::rule()],
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'currency' => ['sometimes', 'required', 'string', 'size:3'],

@@ -4,6 +4,7 @@ namespace App\Domains\Analytics\Models;
 
 use App\Domains\Analytics\Enums\AnalyticsCategory;
 use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Customers\Models\Customer;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class AnalyticsEvent extends Model
 {
+    use BelongsToCompanyTenant;
     use HasFactory;
 
     /**

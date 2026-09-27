@@ -3,13 +3,13 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'customers.show', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back to customer
       </RouterLink>
       <button
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
         :disabled="store.refreshing || store.loading"
         @click="refresh"
       >

@@ -3,7 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'notifications.templates' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back
       </RouterLink>
@@ -142,28 +142,28 @@
           <template v-if="isEdit">
             <button
               type="button"
-              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              class="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="goPreview"
             >
               Preview
             </button>
             <button
               type="button"
-              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              class="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="submitReview"
             >
               Submit For Review
             </button>
             <button
               type="button"
-              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              class="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="publish"
             >
               Publish
             </button>
             <button
               type="button"
-              class="w-full rounded-[12px] border border-zinc-200 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              class="w-full rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="goVersions"
             >
               Version History

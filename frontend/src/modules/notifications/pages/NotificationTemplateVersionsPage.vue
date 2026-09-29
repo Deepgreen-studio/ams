@@ -3,13 +3,13 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'notifications.templates.compare', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Compare
       </RouterLink>
       <RouterLink
         :to="{ name: 'notifications.templates.edit', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Edit
       </RouterLink>
@@ -82,7 +82,7 @@
               </div>
               <button
                 type="button"
-                class="rounded-[12px] border border-zinc-200 px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
+                class="rounded-[12px] border border-zinc-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
                 @click="restore(item)"
               >
                 Restore

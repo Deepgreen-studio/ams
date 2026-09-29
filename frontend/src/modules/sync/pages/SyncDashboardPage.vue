@@ -12,8 +12,8 @@
 
     <SyncSubnav />
 
-    <div v-if="store.loading && !totals" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <div v-for="n in 10" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
+    <div v-if="store.loading && !totals" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div v-for="n in 10" :key="n" class="h-[88px] animate-pulse rounded-[12px] bg-zinc-100" />
     </div>
 
     <div
@@ -41,7 +41,7 @@
         <p>{{ healthMessage }}</p>
       </div>
 
-      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div
           v-for="card in cards"
           :key="card.label"
@@ -50,7 +50,6 @@
           <div class="min-w-0">
             <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
             <p class="mt-1 text-2xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
-            <p v-if="card.hint" class="mt-1 text-xs text-slate-400">{{ card.hint }}</p>
           </div>
           <div
             class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px]"
@@ -211,7 +210,6 @@ const cards = computed(() => {
     {
       label: 'Total runs',
       value: t.total_runs ?? 0,
-      hint: 'All sync executions',
       icon: ArrowPathIcon,
       iconBg: 'bg-brand-50',
       iconColor: 'text-brand-500',
@@ -219,7 +217,6 @@ const cards = computed(() => {
     {
       label: 'Pending',
       value: pending,
-      hint: pending ? 'Waiting to start' : 'Nothing waiting',
       icon: ClockIcon,
       iconBg: pending ? 'bg-amber-50' : 'bg-zinc-100',
       iconColor: pending ? 'text-amber-500' : 'text-slate-500',
@@ -227,7 +224,6 @@ const cards = computed(() => {
     {
       label: 'Queued',
       value: queued,
-      hint: 'In the background queue',
       icon: QueueListIcon,
       iconBg: queued ? 'bg-sky-50' : 'bg-zinc-100',
       iconColor: queued ? 'text-sky-500' : 'text-slate-500',
@@ -235,7 +231,6 @@ const cards = computed(() => {
     {
       label: 'Running',
       value: running,
-      hint: 'Currently executing',
       icon: PlayCircleIcon,
       iconBg: running ? 'bg-brand-50' : 'bg-zinc-100',
       iconColor: running ? 'text-brand-500' : 'text-slate-500',
@@ -250,7 +245,6 @@ const cards = computed(() => {
     {
       label: 'Failed',
       value: failed,
-      hint: failed ? 'Needs review' : 'No failures',
       icon: ExclamationCircleIcon,
       iconBg: failed ? 'bg-rose-50' : 'bg-emerald-50',
       iconColor: failed ? 'text-rose-500' : 'text-emerald-500',

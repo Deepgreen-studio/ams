@@ -4,7 +4,7 @@
       <RouterLink
         v-if="can('notifications.approve')"
         :to="{ name: 'notifications.templates.approvals' }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Approvals
       </RouterLink>
@@ -71,7 +71,7 @@
             </button>
             <button
               type="button"
-              class="h-10 rounded-[12px] border border-zinc-200 px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+              class="h-10 rounded-[12px] border border-zinc-200 bg-white px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
               @click="resetFilters"
             >
               Reset Filter
@@ -116,7 +116,7 @@
                 <template #action>
                 <button
                 type="button"
-                class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+                class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
                 @click="resetFilters"
                 >
                 Reset Filter

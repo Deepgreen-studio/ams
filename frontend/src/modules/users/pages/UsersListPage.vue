@@ -31,22 +31,27 @@
       {{ usersStore.error }}
     </div>
 
-    <div v-if="usersStore.statistics" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div v-if="usersStore.statistics" class="mb-4 flex flex-wrap gap-3">
       <div
         v-for="card in statCards"
-        :key="card.label"
-        class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-8 py-7 text-left ring-1 ring-zinc-100"
+        :key="card.key"
+        class="flex min-w-[8.75rem] flex-1 flex-col rounded-[12px] bg-white px-4 py-3.5 text-left ring-1 ring-zinc-100"
       >
-        <div class="min-w-0">
-          <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ card.label }}</p>
-          <p class="mt-1 text-3xl font-bold tracking-tight text-slate-900">{{ card.value }}</p>
-        </div>
-        <div
-          class="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-[12px] p-3"
-          :class="card.iconBg"
-        >
-          <component :is="card.icon" class="h-5 w-5" :class="card.iconColor" />
-        </div>
+        <span class="flex items-center justify-between gap-3">
+          <span
+            class="text-2xl font-semibold tabular-nums leading-none"
+            :class="Number(card.value) > 0 ? 'text-slate-900' : 'text-slate-400'"
+          >
+            {{ card.value }}
+          </span>
+          <span
+            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            :class="card.iconBg"
+          >
+            <component :is="card.icon" class="h-4 w-4" :class="card.iconColor" />
+          </span>
+        </span>
+        <span class="mt-2 text-xs font-medium text-slate-500">{{ card.label }}</span>
       </div>
     </div>
 
@@ -185,6 +190,7 @@ const emptyState = computed(() => {
 
 const statCards = computed(() => [
   {
+    key: 'total',
     label: 'Total',
     value: usersStore.statistics?.total ?? 0,
     icon: UsersIcon,
@@ -192,6 +198,7 @@ const statCards = computed(() => [
     iconColor: 'text-brand-500',
   },
   {
+    key: 'active',
     label: 'Active',
     value: usersStore.statistics?.active ?? 0,
     icon: CheckCircleIcon,
@@ -199,13 +206,15 @@ const statCards = computed(() => [
     iconColor: 'text-emerald-600',
   },
   {
-    label: 'Pending Invitation',
+    key: 'pending_invitation',
+    label: 'Pending',
     value: usersStore.statistics?.pending_invitation ?? usersStore.statistics?.pending ?? 0,
     icon: ClockIcon,
     iconBg: 'bg-amber-50',
     iconColor: 'text-amber-600',
   },
   {
+    key: 'inactive',
     label: 'Inactive',
     value: usersStore.statistics?.inactive ?? 0,
     icon: NoSymbolIcon,
@@ -213,6 +222,7 @@ const statCards = computed(() => [
     iconColor: 'text-slate-500',
   },
   {
+    key: 'suspended',
     label: 'Suspended',
     value: usersStore.statistics?.suspended ?? 0,
     icon: PauseCircleIcon,
@@ -220,6 +230,7 @@ const statCards = computed(() => [
     iconColor: 'text-amber-600',
   },
   {
+    key: 'expired',
     label: 'Expired',
     value: usersStore.statistics?.expired ?? 0,
     icon: ExclamationTriangleIcon,
@@ -227,6 +238,7 @@ const statCards = computed(() => [
     iconColor: 'text-orange-600',
   },
   {
+    key: 'trashed',
     label: 'Trashed',
     value: usersStore.statistics?.trashed ?? 0,
     icon: TrashIcon,

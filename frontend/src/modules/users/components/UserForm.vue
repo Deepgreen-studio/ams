@@ -50,33 +50,6 @@
       </div>
     </section>
 
-    <section v-if="layout === 'profile'" class="space-y-4 border-t border-slate-100 pt-8">
-      <div>
-        <h3 class="text-base font-semibold text-slate-900">Preferences</h3>
-        <p class="mt-0.5 text-xs text-slate-500">Regional defaults used for dates, times, and content.</p>
-      </div>
-      <div class="grid gap-4 md:grid-cols-2">
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-          <SearchableSelect
-            v-model="form.timezone"
-            :options="timezoneOptions"
-            placeholder="Select timezone"
-            search-placeholder="Search timezone…"
-          />
-        </div>
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-          <SearchableSelect
-            v-model="form.language"
-            :options="languageOptions"
-            placeholder="Select language"
-            search-placeholder="Search language…"
-          />
-        </div>
-      </div>
-    </section>
-
     <div v-else class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div>
         <FormLabel required>First Name</FormLabel>
@@ -216,14 +189,13 @@
 </template>
 
 <script setup>
-import { computed, nextTick, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { useToast } from '@/composables/useToast';
-import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
@@ -283,7 +255,6 @@ const toast = useToast();
 
 const form = reactive(createForm(props.initial));
 const localErrors = ref({});
-const timezoneOptionsBase = getTimezoneOptions();
 
 const invitationNotice = computed(() => {
   if (props.initial?.invitation_status === 'pending') {
@@ -309,22 +280,6 @@ const statusOptions = computed(() => {
   }
 
   return options;
-});
-
-const timezoneOptions = computed(() => {
-  const current = form.timezone;
-  if (current && !timezoneOptionsBase.some((option) => option.value === current)) {
-    return [{ value: current, label: current }, ...timezoneOptionsBase];
-  }
-  return timezoneOptionsBase;
-});
-
-const languageOptions = computed(() => {
-  const current = form.language;
-  if (current && !LANGUAGE_OPTIONS.some((option) => option.value === current)) {
-    return [{ value: current, label: current }, ...LANGUAGE_OPTIONS];
-  }
-  return LANGUAGE_OPTIONS;
 });
 
 const roleSelectOptions = computed(() =>
@@ -368,25 +323,6 @@ const teamSelectOptions = computed(() =>
     label: team.name,
   })),
 );
-
-async function applyCompanyLocale(companyId) {
-  if (props.layout === 'profile' || !companyId) {
-    return;
-  }
-
-  const company = (props.companyOptions || []).find((item) => item.uuid === companyId);
-  if (!company) {
-    return;
-  }
-
-  if (company.timezone) {
-    form.timezone = company.timezone;
-  }
-  if (company.language) {
-    form.language = company.language;
-  }
-  await nextTick();
-}
 
 function teamsForSelectedDepartment() {
   const department = departmentItems.value.find((item) => item.uuid === form.department_id);
@@ -440,10 +376,6 @@ watch(
       form.department_id = '';
       form.team_id = '';
       form.location_id = '';
-    }
-
-    if (previous !== undefined && companyId && companyId !== previous) {
-      applyCompanyLocale(companyId);
     }
 
     if (!companyId) {
@@ -529,8 +461,6 @@ function createForm(value = {}) {
     phone: value.phone || '',
     gender: value.gender || '',
     date_of_birth: value.date_of_birth || '',
-    timezone: value.timezone || 'Asia/Kolkata',
-    language: value.language || 'en',
     company_id: value.company_id || '',
     department_id: value.department_id || '',
     team_id: value.team_id || '',
@@ -580,9 +510,6 @@ function onSubmit() {
     delete payload.department_id;
     delete payload.team_id;
     delete payload.location_id;
-  } else {
-    delete payload.timezone;
-    delete payload.language;
   }
 
   if (props.layout !== 'profile' && !payload.company_id) {

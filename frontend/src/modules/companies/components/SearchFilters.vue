@@ -22,13 +22,6 @@
         @change="emitSubmit"
       />
 
-      <SelectBox
-        v-model="local.trashed"
-        wrapper-class="min-w-[10rem]"
-        :options="trashedOptions"
-        @change="emitSubmit"
-      />
-
       <button
         type="button"
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
@@ -69,16 +62,9 @@ const statusOptions = [
   { value: 'pending', label: 'Pending' },
 ];
 
-const trashedOptions = [
-  { value: '', label: 'Deleted: Exclude' },
-  { value: 'with', label: 'Include deleted' },
-  { value: 'only', label: 'Only deleted' },
-];
-
 const local = reactive({
   search: props.modelValue.search || '',
   status: props.modelValue.status || '',
-  trashed: props.modelValue.trashed || '',
 });
 
 watch(
@@ -86,20 +72,19 @@ watch(
   (value) => {
     local.search = value.search || '';
     local.status = value.status || '';
-    local.trashed = value.trashed || '';
   },
   { deep: true },
 );
 
 function emitSubmit() {
-  emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
-  emit('submit', { ...local, page: 1 });
+  const filters = { ...local, trashed: '', page: 1 };
+  emit('update:modelValue', { ...props.modelValue, ...filters });
+  emit('submit', filters);
 }
 
 function emitReset() {
   local.search = '';
   local.status = '';
-  local.trashed = '';
   emit('reset');
 }
 

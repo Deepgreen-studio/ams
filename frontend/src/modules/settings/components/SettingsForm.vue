@@ -88,6 +88,29 @@
             />
           </label>
         </div>
+        <div v-else-if="field.type === 'password'" class="relative">
+          <input
+            v-model="model[field.key]"
+            :type="passwordVisible[field.key] ? 'text' : 'password'"
+            autocomplete="new-password"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+            :class="{
+              'border-rose-400 focus:border-rose-500': Boolean(errors[field.key]),
+            }"
+            :placeholder="field.placeholder || ''"
+            :disabled="loading"
+          />
+          <button
+            type="button"
+            class="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-slate-700 disabled:opacity-60"
+            :aria-label="passwordVisible[field.key] ? 'Hide password' : 'Show password'"
+            :disabled="loading"
+            @click="passwordVisible[field.key] = !passwordVisible[field.key]"
+          >
+            <EyeSlashIcon v-if="passwordVisible[field.key]" class="h-4 w-4" />
+            <EyeIcon v-else class="h-4 w-4" />
+          </button>
+        </div>
         <input
           v-else
           v-model="model[field.key]"
@@ -121,7 +144,7 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
-import { PhotoIcon } from '@heroicons/vue/24/outline';
+import { EyeIcon, EyeSlashIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
@@ -144,6 +167,7 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 const model = reactive({});
+const passwordVisible = reactive({});
 const imagePreview = reactive({});
 const imageNames = reactive({});
 const pendingFiles = reactive({});
@@ -153,7 +177,12 @@ watch(
   () => props.initial,
   (value) => {
     props.fields.forEach((field) => {
-      model[field.key] = value?.[field.key] ?? (field.type === 'boolean' ? false : '');
+      const incoming = value?.[field.key];
+      if (field.type === 'password' && (incoming === '********' || incoming == null)) {
+        model[field.key] = '';
+      } else {
+        model[field.key] = incoming ?? (field.type === 'boolean' ? false : '');
+      }
       if (field.type === 'image') {
         resetImageSelection(field.key);
       }

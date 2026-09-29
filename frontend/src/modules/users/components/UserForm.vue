@@ -313,10 +313,12 @@ const departmentItems = ref([]);
 const locationItems = ref([]);
 
 const departmentSelectOptions = computed(() =>
-  departmentItems.value.map((department) => ({
-    value: department.uuid,
-    label: department.department_name || department.name,
-  })),
+  departmentItems.value
+    .filter((department) => department.status === 'active' || department.uuid === form.department_id)
+    .map((department) => ({
+      value: department.uuid,
+      label: department.department_name || department.name,
+    })),
 );
 
 const teamSelectOptions = computed(() =>
@@ -328,7 +330,7 @@ const teamSelectOptions = computed(() =>
 
 function teamsForSelectedDepartment() {
   const department = departmentItems.value.find((item) => item.uuid === form.department_id);
-  return department?.teams || [];
+  return (department?.teams || []).filter((team) => team.status === 'active' || team.uuid === form.team_id);
 }
 
 function applyDepartmentTeam() {
@@ -341,7 +343,7 @@ function applyDepartmentTeam() {
     return;
   }
 
-  const teams = department.teams || [];
+  const teams = teamsForSelectedDepartment();
   if (teams.some((team) => team.uuid === form.team_id)) {
     return;
   }
@@ -350,10 +352,12 @@ function applyDepartmentTeam() {
 }
 
 const locationSelectOptions = computed(() =>
-  locationItems.value.map((location) => ({
-    value: location.uuid,
-    label: location.branch_name || location.name || location.uuid,
-  })),
+  locationItems.value
+    .filter((location) => location.status === 'active' || location.uuid === form.location_id)
+    .map((location) => ({
+      value: location.uuid,
+      label: location.branch_name || location.name || location.uuid,
+    })),
 );
 
 const departmentButtonClass = computed(() => {
@@ -391,11 +395,14 @@ watch(
 
     try {
       const [departments, locations] = await Promise.all([
-        companyService.listDepartments({ company: companyId, per_page: 100, page: 1 }),
-        companyService.listLocations({ company: companyId, per_page: 100, page: 1 }),
+        companyService.listDepartments({ company: companyId, status: 'active', per_page: 100, page: 1 }),
+        companyService.listLocations({ company: companyId, status: 'active', per_page: 100, page: 1 }),
       ]);
-      departmentItems.value = departments.data.data?.departments?.items ?? [];
-      locationItems.value = locations.data.data?.locations?.items ?? [];
+      const departmentList = departments.data.data?.departments?.items ?? [];
+      const locationList = locations.data.data?.locations?.items ?? [];
+      keepCurrentAssignments(departmentList, locationList);
+      departmentItems.value = departmentList;
+      locationItems.value = locationList;
     } catch {
       departmentItems.value = [];
       locationItems.value = [];
@@ -436,6 +443,44 @@ watch(
   },
   { deep: true }
 );
+
+function keepCurrentAssignments(departments, locations) {
+  const assigned = props.initial || {};
+
+  if (form.department_id && !departments.some((department) => department.uuid === form.department_id)) {
+    departments.push({
+      uuid: form.department_id,
+      name: assigned.department_name || 'Assigned department',
+      department_name: assigned.department_name || 'Assigned department',
+      status: 'inactive',
+      teams: [],
+    });
+  }
+
+  if (form.team_id) {
+    const department = departments.find((item) => item.uuid === form.department_id);
+    const teams = department?.teams || [];
+
+    if (department && !teams.some((team) => team.uuid === form.team_id)) {
+      department.teams = [
+        ...teams,
+        {
+          uuid: form.team_id,
+          name: assigned.team_name || 'Assigned team',
+          status: 'inactive',
+        },
+      ];
+    }
+  }
+
+  if (form.location_id && !locations.some((location) => location.uuid === form.location_id)) {
+    locations.push({
+      uuid: form.location_id,
+      branch_name: assigned.location_name || 'Assigned location',
+      status: 'inactive',
+    });
+  }
+}
 
 function fieldError(field) {
   return localErrors.value?.[field]?.[0] || props.errors?.[field]?.[0] || '';

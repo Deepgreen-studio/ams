@@ -3,16 +3,17 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'companies.show', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back to company
       </RouterLink>
       <button
         v-if="can('locations.create')"
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
         @click="openCreate"
       >
+        <PlusIcon class="h-4 w-4" />
         Add Location
       </button>
     </Teleport>
@@ -56,6 +57,7 @@
 </template>
 
 <script setup>
+import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';

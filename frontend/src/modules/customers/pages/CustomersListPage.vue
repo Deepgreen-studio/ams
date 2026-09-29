@@ -28,10 +28,23 @@
       <div
         v-for="card in statCards"
         :key="card.label"
-        class="rounded-[12px] bg-white px-4 py-3 ring-1 ring-zinc-100"
+        class="flex flex-col rounded-[12px] bg-white px-4 py-3.5 ring-1 ring-zinc-100"
       >
-        <p class="text-xs font-medium uppercase tracking-wide text-zinc-500">{{ card.label }}</p>
-        <p class="mt-1 text-2xl font-semibold text-slate-900">{{ card.value }}</p>
+        <span class="flex items-center justify-between gap-3">
+          <span
+            class="text-2xl font-semibold tabular-nums leading-none"
+            :class="Number(card.value) > 0 ? 'text-slate-900' : 'text-slate-400'"
+          >
+            {{ card.value }}
+          </span>
+          <span
+            class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+            :class="card.iconBg"
+          >
+            <component :is="card.icon" class="h-4 w-4" :class="card.iconColor" />
+          </span>
+        </span>
+        <span class="mt-2 text-xs font-medium text-slate-500">{{ card.label }}</span>
       </div>
     </div>
 
@@ -85,7 +98,14 @@
 </template>
 
 <script setup>
-import { PlusIcon } from '@heroicons/vue/24/outline';
+import {
+  BuildingLibraryIcon,
+  BuildingOffice2Icon,
+  CheckCircleIcon,
+  PlusIcon,
+  UserIcon,
+  UsersIcon,
+} from '@heroicons/vue/24/outline';
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
@@ -100,11 +120,41 @@ const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
-  { label: 'Total', value: customersStore.statistics?.total ?? 0 },
-  { label: 'Active', value: customersStore.statistics?.active ?? 0 },
-  { label: 'Individual', value: customersStore.statistics?.individual ?? 0 },
-  { label: 'Business', value: customersStore.statistics?.business ?? 0 },
-  { label: 'Enterprise', value: customersStore.statistics?.enterprise ?? 0 },
+  {
+    label: 'Total',
+    value: customersStore.statistics?.total ?? 0,
+    icon: UsersIcon,
+    iconBg: 'bg-brand-50',
+    iconColor: 'text-brand-500',
+  },
+  {
+    label: 'Active',
+    value: customersStore.statistics?.active ?? 0,
+    icon: CheckCircleIcon,
+    iconBg: 'bg-emerald-50',
+    iconColor: 'text-emerald-600',
+  },
+  {
+    label: 'Individual',
+    value: customersStore.statistics?.individual ?? 0,
+    icon: UserIcon,
+    iconBg: 'bg-sky-50',
+    iconColor: 'text-sky-600',
+  },
+  {
+    label: 'Business',
+    value: customersStore.statistics?.business ?? 0,
+    icon: BuildingOffice2Icon,
+    iconBg: 'bg-violet-50',
+    iconColor: 'text-violet-600',
+  },
+  {
+    label: 'Enterprise',
+    value: customersStore.statistics?.enterprise ?? 0,
+    icon: BuildingLibraryIcon,
+    iconBg: 'bg-amber-50',
+    iconColor: 'text-amber-600',
+  },
 ]);
 
 onMounted(() => {

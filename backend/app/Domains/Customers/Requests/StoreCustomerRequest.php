@@ -3,6 +3,7 @@
 namespace App\Domains\Customers\Requests;
 
 use App\Domains\Applications\Enums\ApplicationPlatform;
+use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Customers\Enums\CustomerApplicationOwnershipType;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
@@ -137,6 +138,7 @@ class StoreCustomerRequest extends FormRequest
             }
 
             $this->validateIndustrySelection($validator);
+            $this->validateActiveCompany($validator);
         });
     }
 
@@ -164,6 +166,22 @@ class StoreCustomerRequest extends FormRequest
 
         if ($industry?->is_other && blank($this->input('industry_other'))) {
             $validator->errors()->add('industry_other', 'Describe the industry when Other is selected.');
+        }
+    }
+
+    protected function validateActiveCompany(Validator $validator): void
+    {
+        if (blank($this->input('company_id'))) {
+            return;
+        }
+
+        $company = app(CompanyRepository::class)->findByIdentifier((string) $this->input('company_id'));
+        $status = $company?->status instanceof CompanyStatus
+            ? $company->status
+            : CompanyStatus::tryFrom((string) $company?->status);
+
+        if ($status !== CompanyStatus::Active) {
+            $validator->errors()->add('company_id', 'Select an active company.');
         }
     }
 

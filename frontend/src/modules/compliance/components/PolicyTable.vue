@@ -12,6 +12,7 @@
               Version
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Status</th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th
               v-if="hasAnyAction"
               class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
@@ -74,6 +75,9 @@
             <td class="px-5 py-4">
               <PolicyStatusBadge :status="item.status" :label="item.status_label" />
             </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
+            </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
@@ -131,6 +135,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { ClockIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import PolicyStatusBadge from '@/modules/compliance/components/PolicyStatusBadge.vue';
 

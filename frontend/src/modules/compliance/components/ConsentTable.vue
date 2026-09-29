@@ -15,6 +15,7 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Source
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th
               v-if="hasAnyAction"
               class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
@@ -80,6 +81,9 @@
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ item.source_label || item.source || '—' }}
             </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
+            </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
@@ -137,6 +141,7 @@ import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { EllipsisVerticalIcon, EyeIcon, NoSymbolIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import ConsentStatusBadge from '@/modules/compliance/components/ConsentStatusBadge.vue';
 

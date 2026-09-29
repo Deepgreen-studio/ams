@@ -131,6 +131,7 @@ onMounted(async () => {
   try {
     const { data } = await companyService.list({
       per_page: 100,
+      status: 'active',
       sort_by: 'company_name',
       sort_dir: 'asc',
     });

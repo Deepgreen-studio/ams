@@ -16,6 +16,7 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Payment
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
@@ -81,6 +82,9 @@
             </td>
             <td class="hidden px-5 py-4 lg:table-cell">
               <PaymentStatusBadge :status="item.payment_status" />
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
             </td>
             <td class="px-5 py-4">
               <div class="flex justify-end">
@@ -159,6 +163,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import PaymentStatusBadge from '@/modules/customers/components/PaymentStatusBadge.vue';
 import SubscriptionStatusBadge from '@/modules/customers/components/SubscriptionStatusBadge.vue';
 

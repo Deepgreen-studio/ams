@@ -10,13 +10,13 @@
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Type</label>
-        <select v-model="form.type" class="input" required :disabled="Boolean(initial.uuid)">
-          <option value="development">Development</option>
-          <option value="testing">Testing</option>
-          <option value="staging">Staging</option>
-          <option value="production">Production</option>
-          <option value="sandbox">Sandbox</option>
-        </select>
+        <SelectBox
+          v-model="form.type"
+          size="lg"
+          :options="typeOptions"
+          :disabled="Boolean(initial.uuid)"
+          :error="Boolean(errors.type)"
+        />
         <p v-if="errors.type" class="mt-1 text-xs text-rose-600">{{ errors.type[0] }}</p>
       </div>
       <div>
@@ -25,11 +25,7 @@
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select v-model="form.status" class="input">
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="maintenance">Maintenance</option>
-        </select>
+        <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">API URL</label>
@@ -76,6 +72,21 @@
 
 <script setup>
 import { reactive, watch } from 'vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
+
+const typeOptions = [
+  { value: 'development', label: 'Development' },
+  { value: 'testing', label: 'Testing' },
+  { value: 'staging', label: 'Staging' },
+  { value: 'production', label: 'Production' },
+  { value: 'sandbox', label: 'Sandbox' },
+];
+
+const statusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'inactive', label: 'Inactive' },
+  { value: 'maintenance', label: 'Maintenance' },
+];
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -148,7 +159,7 @@ function onSubmit() {
   outline: none;
 }
 .input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  border-color: var(--color-brand-500);
+  box-shadow: none;
 }
 </style>

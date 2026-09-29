@@ -151,10 +151,10 @@
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Country</label>
-        <SelectBox
+        <SearchableSelect
           v-model="form.country"
-          size="lg"
           placeholder="Select country"
+          search-placeholder="Search country…"
           :options="countryOptions"
           @change="countryOverridden = true"
         />
@@ -255,6 +255,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
+import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -304,10 +305,12 @@ const ownershipOptions = OWNERSHIP_OPTIONS.map((option) => ({ value: option.valu
 const isIndividual = computed(() => form.customer_type === 'individual');
 
 const companyOptions = computed(() =>
-  companies.value.map((company) => ({
-    value: company.uuid,
-    label: company.company_name,
-  })),
+  companies.value
+    .filter((company) => company.status === 'active' || company.uuid === form.company_id)
+    .map((company) => ({
+      value: company.uuid,
+      label: company.company_name,
+    })),
 );
 
 const industryOptions = computed(() => [
@@ -422,10 +425,20 @@ async function loadCompanies() {
   try {
     const { data } = await companyService.list({
       per_page: 100,
+      status: 'active',
       sort_by: 'company_name',
       sort_dir: 'asc',
     });
-    companies.value = data.data?.companies?.items ?? [];
+    const items = data.data?.companies?.items ?? [];
+    const currentId = props.initial?.company?.uuid || props.initial?.company_id;
+    if (currentId && !items.some((company) => company.uuid === currentId)) {
+      items.push({
+        uuid: currentId,
+        company_name: props.initial?.company?.company_name || props.initial?.company_name || 'Assigned company',
+        status: 'inactive',
+      });
+    }
+    companies.value = items;
   } catch {
     companies.value = [];
   }

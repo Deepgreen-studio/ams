@@ -104,7 +104,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'change']);
 
 const rootRef = ref(null);
 const searchRef = ref(null);
@@ -170,6 +170,7 @@ function close() {
 
 function select(value) {
   emit('update:modelValue', value);
+  emit('change', value);
   close();
 }
 

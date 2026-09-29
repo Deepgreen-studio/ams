@@ -154,7 +154,7 @@ const columns = [
   { key: 'company', label: 'Company', sortable: true },
   { key: 'team', label: 'Team name' },
   { key: 'status', label: 'Status' },
-  { key: 'created_at', label: 'Created at', sortable: true },
+  { key: 'created_at', label: 'Created At', sortable: true },
 ];
 
 const toast = useToast();
@@ -213,6 +213,7 @@ async function loadCompanies() {
   try {
     const { data } = await companyService.list({
       per_page: 100,
+      status: 'active',
       sort_by: 'company_name',
       sort_dir: 'asc',
       page: 1,

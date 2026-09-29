@@ -21,6 +21,7 @@
               </button>
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Permissions</th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
@@ -79,6 +80,9 @@
               <p class="truncate font-semibold text-slate-900">{{ role.display_name }}</p>
             </td>
             <td class="px-5 py-4 text-slate-600">{{ role.permissions_count ?? 0 }}</td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(role.created_at) || '—' }}
+            </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ formatDate(role.deleted_at) }}
             </td>

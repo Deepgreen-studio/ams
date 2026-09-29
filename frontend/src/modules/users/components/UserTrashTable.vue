@@ -27,6 +27,7 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Deleted By
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               <button
                 type="button"
@@ -98,6 +99,9 @@
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ deletedByName(user) }}
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(user.created_at) || '—' }}
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ formatDate(user.deleted_at) }}

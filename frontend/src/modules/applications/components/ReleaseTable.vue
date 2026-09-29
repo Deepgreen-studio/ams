@@ -13,6 +13,7 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
               Schedule
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
@@ -62,6 +63,9 @@
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ formatDate(item.scheduled_at || item.deployment_date) }}
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
             </td>
             <td class="px-5 py-4">
               <div class="relative flex justify-end">

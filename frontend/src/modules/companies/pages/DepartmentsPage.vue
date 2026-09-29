@@ -92,7 +92,7 @@ const columns = [
   { key: 'name', label: 'Department name', sortable: true },
   { key: 'team', label: 'Team name' },
   { key: 'status', label: 'Status' },
-  { key: 'created_at', label: 'Created at', sortable: true },
+  { key: 'created_at', label: 'Created At', sortable: true },
 ];
 
 onMounted(async () => {

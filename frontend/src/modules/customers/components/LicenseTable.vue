@@ -16,6 +16,7 @@
               Expires
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Status</th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th class="px-5 py-3 text-right text-sm font-semibold text-zinc-500">Actions</th>
           </tr>
         </thead>
@@ -70,6 +71,9 @@
             </td>
             <td class="px-5 py-4">
               <LicenseStatusBadge :status="item.status" />
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
             </td>
             <td class="px-5 py-4">
               <div class="flex justify-end">
@@ -149,6 +153,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import LicenseStatusBadge from '@/modules/customers/components/LicenseStatusBadge.vue';
 
 const props = defineProps({

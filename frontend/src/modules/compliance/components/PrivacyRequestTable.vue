@@ -9,6 +9,7 @@
             <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Identity</th>
             <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Due</th>
+            <th class="px-4 py-3 text-left font-semibold text-slate-600">Created At</th>
             <th
               v-if="hasAnyAction"
               class="px-4 py-3 text-right font-semibold text-slate-600"
@@ -72,6 +73,9 @@
               {{ item.identity_verification_status_label || item.identity_verification_status }}
             </td>
             <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">{{ item.due_date || '—' }}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-slate-600">
+              {{ formatDate(item.created_at) || '—' }}
+            </td>
             <td v-if="hasAnyAction" class="px-4 py-3">
               <div class="flex justify-end gap-2">
                 <RouterLink
@@ -109,6 +113,7 @@
 import { computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
 

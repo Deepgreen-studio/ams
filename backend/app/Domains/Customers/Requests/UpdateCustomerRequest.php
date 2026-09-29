@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Requests;
 
+use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Repositories\CompanyRepository;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
@@ -146,6 +147,18 @@ class UpdateCustomerRequest extends FormRequest
 
             if ($type->requiresCompanyName() && blank($companyName)) {
                 $validator->errors()->add('company_name', 'Organization name is required for business and enterprise customers.');
+            }
+
+            if ($this->filled('company_id')) {
+                $company = app(CompanyRepository::class)->findByIdentifier((string) $this->input('company_id'));
+                $status = $company?->status instanceof CompanyStatus
+                    ? $company->status
+                    : CompanyStatus::tryFrom((string) $company?->status);
+                $sameCompany = $customer && $company && (int) $company->id === (int) $customer->company_id;
+
+                if (! $sameCompany && $status !== CompanyStatus::Active) {
+                    $validator->errors()->add('company_id', 'Select an active company.');
+                }
             }
 
             if ($this->exists('industry_id') || $this->exists('sub_industry_id') || $this->exists('industry_other')) {

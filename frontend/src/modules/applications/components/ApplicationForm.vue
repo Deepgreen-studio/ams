@@ -233,10 +233,12 @@ const visibilityOptions = [
 ];
 
 const companyOptions = computed(() =>
-  companies.value.map((company) => ({
-    value: company.uuid,
-    label: company.company_name,
-  })),
+  companies.value
+    .filter((company) => company.status === 'active')
+    .map((company) => ({
+      value: company.uuid,
+      label: company.company_name,
+    })),
 );
 
 const integrationOptions = computed(() => [

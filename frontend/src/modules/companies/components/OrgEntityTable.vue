@@ -76,7 +76,7 @@
                       : ''
                   "
                 >
-                  {{ item[column.key] || '-' }}
+                  {{ displayCell(item, column.key) }}
                 </span>
               </slot>
             </td>
@@ -148,6 +148,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { EllipsisVerticalIcon, EyeIcon, PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
@@ -169,6 +170,14 @@ const menuStyle = ref({});
 const activeItem = computed(
   () => props.items.find((item) => item.uuid === openMenuId.value) || null,
 );
+
+function displayCell(item, key) {
+  if (key === 'created_at') {
+    return formatDate(item.created_at) || '—';
+  }
+
+  return item[key] || '-';
+}
 
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {

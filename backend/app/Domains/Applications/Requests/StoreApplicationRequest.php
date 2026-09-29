@@ -6,6 +6,7 @@ use App\Domains\Applications\Enums\ApplicationCategory;
 use App\Domains\Applications\Enums\ApplicationPlatform;
 use App\Domains\Applications\Enums\ApplicationStatus;
 use App\Domains\Applications\Enums\ApplicationVisibility;
+use App\Domains\Companies\Enums\CompanyStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -19,7 +20,7 @@ class StoreApplicationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company_id' => ['required', 'string'],
+            'company_id' => ['required', 'string', Rule::exists('companies', 'uuid')->where('status', CompanyStatus::Active->value)->whereNull('deleted_at')],
             'integration_id' => ['nullable', 'string'],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', 'alpha_dash:ascii'],

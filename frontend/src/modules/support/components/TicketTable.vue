@@ -16,6 +16,7 @@
             <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 xl:table-cell">
               Company
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th
               v-if="hasAnyAction"
               class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
@@ -92,6 +93,9 @@
             <td class="hidden px-5 py-4 text-slate-600 xl:table-cell">
               {{ ticket.company?.company_name || '—' }}
             </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(ticket.created_at) || '—' }}
+            </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
@@ -160,6 +164,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import { ArchiveBoxIcon, EllipsisVerticalIcon, EyeIcon, PencilSquareIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
+import { formatDate } from '@/utils/formatters';
 import TicketCategoryBadge from '@/modules/support/components/TicketCategoryBadge.vue';
 import PriorityIndicator from '@/modules/support/components/PriorityIndicator.vue';
 import TicketStatusBadge from '@/modules/support/components/TicketStatusBadge.vue';

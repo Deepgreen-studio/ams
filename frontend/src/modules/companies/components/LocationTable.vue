@@ -9,6 +9,9 @@
     @edit="$emit('edit', $event)"
     @delete="$emit('delete', $event)"
   >
+    <template #cell-created_at="{ item }">
+      <span class="text-slate-600">{{ formatDate(item.created_at) || '—' }}</span>
+    </template>
     <template #cell-status="{ item }">
       <StatusBadge :status="item.status" />
     </template>
@@ -30,6 +33,7 @@
 </template>
 
 <script setup>
+import { formatDate } from '@/utils/formatters';
 import OrgEntityTable from '@/modules/companies/components/OrgEntityTable.vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
 
@@ -51,5 +55,6 @@ const columns = [
   { key: 'phone', label: 'Phone' },
   { key: 'email', label: 'Email' },
   { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Created At' },
 ];
 </script>

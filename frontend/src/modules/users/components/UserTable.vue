@@ -68,7 +68,7 @@
                 class="inline-flex items-center gap-1.5 hover:text-zinc-700"
                 @click="$emit('sort', 'created_at')"
               >
-                Created
+                Created At
                 <span class="text-base leading-none text-zinc-400">
                   {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
                 </span>

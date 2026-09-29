@@ -59,6 +59,18 @@
                 </span>
               </button>
             </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
+              <button
+                type="button"
+                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
+                @click="$emit('sort', 'created_at')"
+              >
+                Created At
+                <span class="text-base leading-none text-zinc-400">
+                  {{ sortBy === 'created_at' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
+                </span>
+              </button>
+            </th>
             <th
               v-if="hasAnyAction"
               class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
@@ -128,6 +140,9 @@
             </td>
             <td class="hidden px-5 py-4 text-slate-600 xl:table-cell">
               {{ customer.country || '—' }}
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+              {{ formatDate(customer.created_at) || '—' }}
             </td>
             <td v-if="hasAnyAction" class="px-5 py-4">
               <div class="flex justify-end">
@@ -220,6 +235,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/customers/components/StatusBadge.vue';
 import TypeBadge from '@/modules/customers/components/TypeBadge.vue';

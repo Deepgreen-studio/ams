@@ -4,6 +4,7 @@ namespace App\Domains\Customers\Models;
 
 use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
@@ -35,6 +36,7 @@ class Customer extends Model
         'customer_number',
         'reference',
         'company_id',
+        'location_id',
         'customer_type',
         'first_name',
         'last_name',
@@ -113,6 +115,7 @@ class Customer extends Model
         return LogOptions::defaults()
             ->logOnly([
                 'company_id',
+                'location_id',
                 'customer_type',
                 'first_name',
                 'last_name',
@@ -163,6 +166,11 @@ class Customer extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(CompanyLocation::class, 'location_id');
     }
 
     public function industryMaster(): BelongsTo

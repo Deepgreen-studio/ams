@@ -3,6 +3,7 @@
 namespace Tests\Feature\Authentication;
 
 use App\Domains\Authentication\Notifications\PasswordResetNotification;
+use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
@@ -82,6 +83,109 @@ class AuthenticationTest extends TestCase
             ->assertJsonPath('success', false)
             ->assertJsonPath('message', 'Validation Failed')
             ->assertJsonStructure(['errors' => ['email', 'password']]);
+    }
+
+    public function test_user_cannot_login_when_assigned_company_is_inactive(): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Dormant Co',
+            'status' => 'inactive',
+            'timezone' => 'Asia/Dhaka',
+            'language' => 'en',
+            'currency' => 'BDT',
+        ]);
+        $user = User::factory()->create([
+            'email' => 'member@example.com',
+            'password' => Hash::make('Password@123'),
+            'is_active' => true,
+        ]);
+        $user->assignRole('manager');
+        $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+
+        $response = $this->postJson('/api/v1/auth/login', [
+            'email' => 'member@example.com',
+            'password' => 'Password@123',
+        ]);
+
+        $response->assertStatus(403)
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('code', 'COMPANY_INACTIVE')
+            ->assertJsonPath('message', 'Your company Dormant Co is inactive. You cannot sign in.');
+
+        $this->assertGuest('web');
+    }
+
+    public function test_user_can_login_when_assigned_company_is_active(): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Active Co',
+            'status' => 'active',
+            'timezone' => 'Asia/Dhaka',
+            'language' => 'en',
+            'currency' => 'BDT',
+        ]);
+        $user = User::factory()->create([
+            'email' => 'active-member@example.com',
+            'password' => Hash::make('Password@123'),
+            'is_active' => true,
+        ]);
+        $user->assignRole('manager');
+        $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'active-member@example.com',
+            'password' => 'Password@123',
+        ])->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.user.email', 'active-member@example.com');
+    }
+
+    public function test_super_admin_can_login_when_assigned_company_is_inactive(): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Paused Co',
+            'status' => 'suspended',
+            'timezone' => 'Asia/Dhaka',
+            'language' => 'en',
+            'currency' => 'BDT',
+        ]);
+        $user = User::factory()->create([
+            'email' => 'owner@example.com',
+            'password' => Hash::make('Password@123'),
+            'is_active' => true,
+        ]);
+        $user->assignRole('super-admin');
+        $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+
+        $this->postJson('/api/v1/auth/login', [
+            'email' => 'owner@example.com',
+            'password' => 'Password@123',
+        ])->assertOk()
+            ->assertJsonPath('success', true);
+    }
+
+    public function test_authenticated_user_is_blocked_when_company_becomes_inactive(): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Hold Co',
+            'status' => 'active',
+            'timezone' => 'Asia/Dhaka',
+            'language' => 'en',
+            'currency' => 'BDT',
+        ]);
+        $user = User::factory()->create(['is_active' => true]);
+        $user->assignRole('manager');
+        $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+
+        $this->actingAs($user);
+        $this->getJson('/api/v1/auth/me')->assertOk();
+
+        $company->forceFill(['status' => 'suspended'])->save();
+
+        $this->getJson('/api/v1/auth/me')
+            ->assertStatus(403)
+            ->assertJsonPath('code', 'COMPANY_INACTIVE')
+            ->assertJsonPath('message', 'Your company Hold Co is suspended. You cannot sign in.');
     }
 
     public function test_inactive_user_cannot_login(): void

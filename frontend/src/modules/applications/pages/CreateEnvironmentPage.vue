@@ -1,7 +1,7 @@
 <template>
   <div>
     <ApplicationSubnav :application-id="route.params.id" />
-    <div class="rounded-xl border border-slate-200 bg-white p-6">
+    <div class="rounded-xl bg-white p-6">
       <EnvironmentForm
         :loading="environmentsStore.saving"
         :errors="environmentsStore.fieldErrors"

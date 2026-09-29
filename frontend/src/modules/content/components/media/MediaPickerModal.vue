@@ -29,7 +29,7 @@
             class="overflow-hidden rounded-lg border border-slate-200 text-left hover:border-brand-400"
             @click="select(item)"
           >
-            <img :src="item.url" :alt="item.alt_text || item.name" class="h-28 w-full object-cover" />
+            <img :src="mediaSrc(item)" :alt="item.alt_text || item.name" class="h-28 w-full object-cover" />
             <p class="truncate px-2 py-1.5 text-xs text-slate-700">{{ item.original_name }}</p>
           </button>
         </div>
@@ -41,6 +41,7 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import { mediaLibraryService } from '@/modules/content/services/mediaLibraryService';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -72,6 +73,10 @@ async function load() {
   } finally {
     loading.value = false;
   }
+}
+
+function mediaSrc(item) {
+  return resolveMediaUrl(item?.url);
 }
 
 function select(item) {

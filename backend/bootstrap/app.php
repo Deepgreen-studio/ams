@@ -1,6 +1,7 @@
 <?php
 
 use App\Domains\Audit\Middleware\LogApiRequests;
+use App\Domains\Authentication\Middleware\EnsureAssignedCompanyIsActive;
 use App\Domains\Companies\Middleware\SetCompanyTenant;
 use App\Domains\Content\Middleware\EnsureCmsPrivateAccess;
 use App\Shared\Exceptions\Handler as ApiExceptionHandler;
@@ -41,8 +42,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             SetCompanyTenant::class,
+            EnsureAssignedCompanyIsActive::class,
             LogApiRequests::class,
         ]);
+
+        $middleware->appendToPriorityList(
+            \Illuminate\Auth\Middleware\Authenticate::class,
+            EnsureAssignedCompanyIsActive::class,
+        );
 
         // Bearer-token API clients (local Vite → remote API) cannot share XSRF cookies.
         $middleware->validateCsrfTokens(except: [

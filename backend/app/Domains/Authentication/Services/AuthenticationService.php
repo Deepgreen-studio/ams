@@ -30,6 +30,7 @@ class AuthenticationService
         private readonly LoginHistoryService $loginHistoryService,
         private readonly TwoFactorService $twoFactorService,
         private readonly UserRepository $userRepository,
+        private readonly AssignedCompanyAccess $assignedCompanyAccess,
     ) {}
 
     /**
@@ -55,6 +56,8 @@ class AuthenticationService
 
             throw new ApiException($this->inactiveAccountMessage($user), 403);
         }
+
+        $this->assertAssignedCompanyIsActive($user, $request);
 
         if ($user->hasConfirmedTwoFactor()) {
             $challenge = Str::random(64);
@@ -100,6 +103,8 @@ class AuthenticationService
         if (! $user->isAccountActive()) {
             throw new ApiException($this->inactiveAccountMessage($user), 403);
         }
+
+        $this->assertAssignedCompanyIsActive($user, $request);
 
         return $this->issueSession($user, (bool) ($payload['remember'] ?? false), $request);
     }
@@ -297,6 +302,19 @@ class AuthenticationService
         }
 
         return $this->repository->loadAuthRelations($user->fresh());
+    }
+
+    protected function assertAssignedCompanyIsActive(User $user, Request $request): void
+    {
+        $message = $this->assignedCompanyAccess->blockMessage($user);
+
+        if ($message === null) {
+            return;
+        }
+
+        $this->loginHistoryService->recordFailedLogin($user, $request);
+
+        throw new ApiException($message, 403, null, null, AssignedCompanyAccess::BLOCK_CODE);
     }
 
     protected function inactiveAccountMessage(User $user): string

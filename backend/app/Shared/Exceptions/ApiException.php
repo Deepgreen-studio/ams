@@ -12,16 +12,20 @@ class ApiException extends Exception
 
     protected mixed $errors;
 
+    protected ?string $errorCode;
+
     public function __construct(
         string $message = 'Unexpected Error',
         int $statusCode = 500,
         mixed $errors = null,
-        ?Exception $previous = null
+        ?Exception $previous = null,
+        ?string $errorCode = null,
     ) {
         parent::__construct($message, $statusCode, $previous);
 
         $this->statusCode = $statusCode;
         $this->errors = $errors;
+        $this->errorCode = $errorCode;
     }
 
     public function getStatusCode(): int
@@ -39,7 +43,8 @@ class ApiException extends Exception
         return ApiResponse::error(
             $this->getMessage(),
             $this->getStatusCode(),
-            $this->getErrors()
+            $this->getErrors(),
+            $this->errorCode,
         );
     }
 }

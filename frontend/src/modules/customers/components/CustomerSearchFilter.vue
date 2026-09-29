@@ -36,13 +36,6 @@
         @change="emitSubmit"
       />
 
-      <SelectBox
-        v-model="local.trashed"
-        wrapper-class="min-w-[10rem]"
-        :options="trashedOptions"
-        @change="emitSubmit"
-      />
-
       <button
         type="button"
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
@@ -93,12 +86,6 @@ const statusOptions = [
   { value: 'pending', label: 'Pending' },
 ];
 
-const trashedOptions = [
-  { value: '', label: 'Deleted: Exclude' },
-  { value: 'with', label: 'Include deleted' },
-  { value: 'only', label: 'Only deleted' },
-];
-
 const companyOptions = computed(() => [
   { value: '', label: 'All companies' },
   ...companies.value.map((company) => ({
@@ -112,7 +99,6 @@ const local = reactive({
   status: props.modelValue.status || '',
   customer_type: props.modelValue.customer_type || '',
   company: props.modelValue.company || '',
-  trashed: props.modelValue.trashed || '',
 });
 
 watch(
@@ -122,7 +108,6 @@ watch(
     local.status = value.status || '';
     local.customer_type = value.customer_type || '';
     local.company = value.company || '';
-    local.trashed = value.trashed || '';
   },
   { deep: true },
 );
@@ -142,8 +127,9 @@ onMounted(async () => {
 });
 
 function emitSubmit() {
-  emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
-  emit('submit', { ...local, page: 1 });
+  const filters = { ...local, trashed: '', page: 1 };
+  emit('update:modelValue', { ...props.modelValue, ...filters });
+  emit('submit', filters);
 }
 
 function emitReset() {
@@ -151,7 +137,6 @@ function emitReset() {
   local.status = '';
   local.customer_type = '';
   local.company = '';
-  local.trashed = '';
   emit('reset');
 }
 

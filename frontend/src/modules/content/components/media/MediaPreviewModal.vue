@@ -9,12 +9,12 @@
         <button type="button" class="rounded-md px-2 py-1 text-sm text-slate-600 hover:bg-slate-100" @click="$emit('close')">Close</button>
       </div>
       <div class="max-h-[70vh] overflow-auto p-5">
-        <img v-if="item?.is_image" :src="item.url" :alt="item.alt_text || item.name" class="mx-auto max-h-[55vh] rounded-lg object-contain" />
-        <video v-else-if="item?.type === 'video'" :src="item.url" controls class="mx-auto max-h-[55vh] w-full rounded-lg bg-black" />
-        <iframe v-else-if="item?.extension === 'pdf'" :src="item.url" class="h-[55vh] w-full rounded-lg border border-slate-200" />
+        <img v-if="item?.is_image" :src="mediaSrc" :alt="item.alt_text || item.name" class="mx-auto max-h-[55vh] rounded-lg object-contain" />
+        <video v-else-if="item?.type === 'video'" :src="mediaSrc" controls class="mx-auto max-h-[55vh] w-full rounded-lg bg-black" />
+        <iframe v-else-if="item?.extension === 'pdf'" :src="mediaSrc" class="h-[55vh] w-full rounded-lg border border-slate-200" />
         <div v-else class="rounded-lg border border-slate-200 bg-slate-50 p-8 text-center text-sm text-slate-600">
           Preview not available for this file type.
-          <a :href="item?.url" target="_blank" rel="noopener" class="mt-3 block font-medium text-brand-700">Open file</a>
+          <a :href="mediaSrc" target="_blank" rel="noopener" class="mt-3 block font-medium text-brand-700">Open file</a>
         </div>
         <dl class="mt-5 grid gap-3 md:grid-cols-2">
           <div>
@@ -36,10 +36,15 @@
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
+
+const props = defineProps({
   open: { type: Boolean, default: false },
   item: { type: Object, default: null },
 });
 
 defineEmits(['close']);
+
+const mediaSrc = computed(() => resolveMediaUrl(props.item?.url));
 </script>

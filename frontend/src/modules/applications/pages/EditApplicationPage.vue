@@ -2,9 +2,9 @@
   <div>
     <div
       v-if="applicationsStore.loading && !applicationsStore.currentApplication"
-      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
+      class="mx-auto h-64 w-full max-w-[1200px] animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="rounded-[12px] bg-white p-6 sm:p-8">
+    <div v-else class="mx-auto w-full max-w-[1200px] rounded-[12px] bg-white p-6 sm:p-8">
       <ApplicationForm
         :initial="applicationsStore.currentApplication || {}"
         :loading="applicationsStore.saving"

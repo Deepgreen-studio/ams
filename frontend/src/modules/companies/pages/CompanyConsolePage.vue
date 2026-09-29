@@ -37,12 +37,16 @@
             v-for="kpi in consoleData.kpis"
             :key="kpi.key"
             type="button"
-            class="rounded-[12px] bg-white p-5 text-left ring-1 ring-zinc-100"
+            class="overflow-hidden rounded-[12px] bg-white text-left ring-1 ring-zinc-100"
             @click="openSection(kpi.key)"
           >
-            <p class="text-sm text-slate-500">{{ kpi.label }}</p>
-            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ kpi.value }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ kpi.detail }}</p>
+            <div class="px-5 pt-5">
+              <p class="text-sm text-slate-500">{{ kpi.label }}</p>
+              <p class="mt-2 text-2xl font-semibold text-slate-900">{{ kpi.value }}</p>
+            </div>
+            <div class="mt-4 border-t border-zinc-100 px-5 py-3">
+              <p class="text-xs text-slate-500">{{ kpi.detail }}</p>
+            </div>
           </button>
         </div>
         <ProfileCard :profile="consoleData.profile" />
@@ -105,27 +109,165 @@
         </ListCard>
       </section>
 
-      <section v-else-if="activeSection === 'users'" class="space-y-6">
-        <p class="text-sm text-slate-500">Company, then department, team, location, and the users assigned inside that company.</p>
-        <div v-for="department in consoleData.organization?.departments || []" :key="department.uuid" class="rounded-[12px] bg-white p-6">
-          <h3 class="text-base font-semibold text-slate-900">{{ department.name }}</h3>
-          <div v-for="team in department.teams" :key="team.uuid" class="mt-4 rounded-[12px] bg-slate-50/70 p-4">
-            <p class="text-sm font-medium text-slate-800">{{ team.name }}</p>
-            <p class="text-xs text-slate-500">Manager: {{ team.manager || 'Unassigned' }}</p>
-            <p v-if="!team.members.length" class="mt-2 text-xs text-slate-500">No assigned users.</p>
-            <ul v-else class="mt-2 space-y-1">
-              <li v-for="member in team.members" :key="member.uuid" class="text-sm text-slate-700">
-                {{ member.name }}<span v-if="member.location"> · {{ member.location }}</span>
+      <section v-else-if="activeSection === 'users'" class="space-y-4">
+        <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div
+            v-for="stat in orgStats"
+            :key="stat.label"
+            class="rounded-[12px] bg-white px-5 py-4 ring-1 ring-zinc-100"
+          >
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">{{ stat.label }}</p>
+            <p class="mt-1 text-2xl font-semibold text-slate-900">{{ stat.value }}</p>
+          </div>
+        </div>
+
+        <div
+          v-if="!orgDepartments.length"
+          class="rounded-[12px] bg-white px-6 py-10 text-center ring-1 ring-zinc-100"
+        >
+          <p class="text-sm font-medium text-slate-900">No departments yet</p>
+          <p class="mt-1 text-sm text-slate-500">Departments, teams, and assigned users will show here.</p>
+        </div>
+
+        <article
+          v-for="department in orgDepartments"
+          :key="department.uuid"
+          class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+        >
+          <header class="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-6 py-4">
+            <div class="flex min-w-0 items-center gap-3">
+              <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-brand-50 text-brand-600">
+                <BuildingOffice2Icon class="h-5 w-5" />
+              </span>
+              <div class="min-w-0">
+                <h3 class="truncate text-sm font-semibold text-slate-900">{{ department.name }}</h3>
+                <p class="mt-0.5 text-xs text-slate-500">
+                  {{ department.teams?.length || 0 }} {{ (department.teams?.length || 0) === 1 ? 'team' : 'teams' }}
+                  · {{ departmentUserCount(department) }} {{ departmentUserCount(department) === 1 ? 'user' : 'users' }}
+                </p>
+              </div>
+            </div>
+            <span
+              v-if="department.status"
+              class="rounded-full px-2.5 py-1 text-[11px] font-medium capitalize ring-1"
+              :class="tone(department.status)"
+            >
+              {{ department.status }}
+            </span>
+          </header>
+
+          <p v-if="!department.teams?.length" class="px-6 py-5 text-sm text-slate-500">No teams in this department.</p>
+          <div v-else class="divide-y divide-zinc-100">
+            <div v-for="team in department.teams" :key="team.uuid" class="px-6 py-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-medium text-slate-900">{{ team.name }}</p>
+                  <p class="mt-0.5 text-xs text-slate-500">Manager · {{ team.manager || 'Unassigned' }}</p>
+                </div>
+                <span class="shrink-0 text-xs text-slate-500">
+                  {{ membersForTeam(department, team).length }}
+                  {{ membersForTeam(department, team).length === 1 ? 'user' : 'users' }}
+                </span>
+              </div>
+              <ul v-if="membersForTeam(department, team).length" class="mt-3 grid gap-2 md:grid-cols-2">
+                <li
+                  v-for="member in membersForTeam(department, team)"
+                  :key="member.uuid"
+                  class="flex items-center gap-3 rounded-[10px] bg-zinc-50 px-3 py-2.5"
+                >
+                  <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-semibold text-slate-600 ring-1 ring-zinc-200">
+                    {{ initials(member.name) }}
+                  </span>
+                  <div class="min-w-0">
+                    <p class="truncate text-sm font-medium text-slate-800">{{ member.name }}</p>
+                    <p class="truncate text-xs text-slate-500">{{ member.email || member.location || 'No location' }}</p>
+                  </div>
+                </li>
+              </ul>
+              <p v-else class="mt-3 text-xs text-slate-400">No assigned users</p>
+            </div>
+          </div>
+
+          <div v-if="membersWithoutTeam(department).length" class="border-t border-zinc-100 px-6 py-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-slate-500">Not on a team</p>
+            <ul class="mt-3 grid gap-2 md:grid-cols-2">
+              <li
+                v-for="member in membersWithoutTeam(department)"
+                :key="member.uuid"
+                class="flex items-center gap-3 rounded-[10px] bg-zinc-50 px-3 py-2.5"
+              >
+                <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-semibold text-slate-600 ring-1 ring-zinc-200">
+                  {{ initials(member.name) }}
+                </span>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-medium text-slate-800">{{ member.name }}</p>
+                  <p class="truncate text-xs text-slate-500">{{ member.email || member.location || 'No location' }}</p>
+                </div>
               </li>
             </ul>
           </div>
-        </div>
-        <ListCard title="Locations" :items="consoleData.organization?.locations || []" empty="No locations yet.">
-          <template #item="{ item }">
-            <p class="text-sm font-medium text-slate-900">{{ item.name }}</p>
-            <p class="mt-1 text-xs text-slate-500">{{ [item.city, item.country].filter(Boolean).join(', ') || item.status }}</p>
-          </template>
-        </ListCard>
+        </article>
+
+        <article
+          v-if="usersOutsideDepartments.length"
+          class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100"
+        >
+          <header class="border-b border-zinc-100 px-6 py-4">
+            <h3 class="text-sm font-semibold text-slate-900">Company users</h3>
+            <p class="mt-0.5 text-xs text-slate-500">Assigned to this company, not placed in a department.</p>
+          </header>
+          <ul class="grid gap-2 p-4 md:grid-cols-2">
+            <li
+              v-for="member in usersOutsideDepartments"
+              :key="member.uuid"
+              class="flex items-center gap-3 rounded-[10px] bg-zinc-50 px-3 py-2.5"
+            >
+              <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[11px] font-semibold text-slate-600 ring-1 ring-zinc-200">
+                {{ initials(member.name) }}
+              </span>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-medium text-slate-800">{{ member.name }}</p>
+                <p class="truncate text-xs text-slate-500">{{ member.email || 'No email' }}</p>
+              </div>
+            </li>
+          </ul>
+        </article>
+
+        <article class="overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100">
+          <header class="flex items-center gap-3 border-b border-zinc-100 px-6 py-4">
+            <span class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-[12px] bg-sky-50 text-sky-600">
+              <MapPinIcon class="h-5 w-5" />
+            </span>
+            <div>
+              <h3 class="text-sm font-semibold text-slate-900">Locations</h3>
+              <p class="mt-0.5 text-xs text-slate-500">
+                {{ orgLocations.length }} {{ orgLocations.length === 1 ? 'location' : 'locations' }}
+              </p>
+            </div>
+          </header>
+          <p v-if="!orgLocations.length" class="px-6 py-5 text-sm text-slate-500">No locations yet.</p>
+          <ul v-else class="grid gap-3 p-4 sm:grid-cols-2 xl:grid-cols-3">
+            <li
+              v-for="item in orgLocations"
+              :key="item.uuid"
+              class="rounded-[12px] bg-zinc-50 px-4 py-3"
+            >
+              <div class="flex items-start justify-between gap-3">
+                <p class="text-sm font-medium text-slate-900">{{ item.name }}</p>
+                <span
+                  v-if="item.status"
+                  class="rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ring-1"
+                  :class="tone(item.status)"
+                >
+                  {{ item.status }}
+                </span>
+              </div>
+              <p class="mt-1 text-xs text-slate-500">
+                {{ [item.city, item.country].filter(Boolean).join(', ') || 'No address' }}
+              </p>
+            </li>
+          </ul>
+        </article>
       </section>
 
       <section v-else-if="activeSection === 'integrations'">
@@ -179,6 +321,7 @@
 </template>
 
 <script setup>
+import { BuildingOffice2Icon, MapPinIcon } from '@heroicons/vue/24/outline';
 import { computed, defineComponent, h, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -245,6 +388,46 @@ const consoleData = ref(null);
 const activeSection = ref('overview');
 
 const complianceCount = computed(() => consoleData.value?.kpis?.find((kpi) => kpi.key === 'compliance')?.value ?? 0);
+
+const orgDepartments = computed(() => consoleData.value?.organization?.departments || []);
+const orgUsers = computed(() => consoleData.value?.organization?.users || []);
+const orgLocations = computed(() => consoleData.value?.organization?.locations || []);
+const orgStats = computed(() => [
+  { label: 'Departments', value: orgDepartments.value.length },
+  {
+    label: 'Teams',
+    value: orgDepartments.value.reduce((count, department) => count + (department.teams?.length || 0), 0),
+  },
+  { label: 'Users', value: orgUsers.value.length },
+  { label: 'Locations', value: orgLocations.value.length },
+]);
+
+const usersOutsideDepartments = computed(() => {
+  const names = new Set(orgDepartments.value.map((department) => department.name));
+  return orgUsers.value.filter((user) => !user.department || !names.has(user.department));
+});
+
+function departmentUserCount(department) {
+  return orgUsers.value.filter((user) => user.department === department.name).length;
+}
+
+function membersForTeam(department, team) {
+  return orgUsers.value.filter((user) => user.department === department.name && user.team === team.name);
+}
+
+function membersWithoutTeam(department) {
+  return orgUsers.value.filter((user) => user.department === department.name && !user.team);
+}
+
+function initials(name) {
+  return String(name || '?')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase();
+}
 
 onMounted(load);
 

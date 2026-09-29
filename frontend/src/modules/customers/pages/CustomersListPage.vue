@@ -2,6 +2,13 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="canAny('customers.view', 'customers.restore', 'customers.delete')"
+        :to="{ name: 'customers.trash' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Soft Deleted
+      </RouterLink>
+      <RouterLink
         v-if="can('customers.create')"
         :to="{ name: 'customers.create' }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -87,9 +94,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete customer"
+      title="Soft delete customer"
       :message="`Soft delete ${pendingDelete?.display_name || 'this customer'}? It can be restored later.`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="customersStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -116,7 +123,7 @@ import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const customersStore = useCustomersStore();
-const { can } = usePermissions();
+const { can, canAny } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [
@@ -158,7 +165,7 @@ const statCards = computed(() => [
 ]);
 
 onMounted(() => {
-  customersStore.fetchCustomers();
+  customersStore.fetchCustomers({ trashed: '' });
 });
 
 function onFilter(filters) {

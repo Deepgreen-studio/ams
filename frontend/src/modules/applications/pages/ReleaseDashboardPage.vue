@@ -4,13 +4,13 @@
       <div class="flex flex-wrap items-center justify-end gap-2">
         <RouterLink
           :to="{ name: 'applications.releases.calendar', params: { id: route.params.id } }"
-          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           Calendar
         </RouterLink>
         <RouterLink
           :to="{ name: 'applications.releases.timeline', params: { id: route.params.id } }"
-          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           Timeline
         </RouterLink>

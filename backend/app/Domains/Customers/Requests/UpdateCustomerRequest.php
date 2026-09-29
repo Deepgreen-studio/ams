@@ -4,6 +4,7 @@ namespace App\Domains\Customers\Requests;
 
 use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Companies\Repositories\LocationRepository;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
@@ -68,6 +69,7 @@ class UpdateCustomerRequest extends FormRequest
 
         return [
             'company_id' => ['sometimes', 'required', 'string'],
+            'location_id' => ['nullable', 'string'],
             'customer_type' => ['sometimes', 'required', Rule::in(CustomerType::values())],
             'reference' => [
                 'nullable',
@@ -158,6 +160,21 @@ class UpdateCustomerRequest extends FormRequest
 
                 if (! $sameCompany && $status !== CompanyStatus::Active) {
                     $validator->errors()->add('company_id', 'Select an active company.');
+                }
+            }
+
+            if ($this->exists('location_id') && filled($this->input('location_id'))) {
+                $location = app(LocationRepository::class)->findByIdentifier((string) $this->input('location_id'));
+                $status = $location?->status instanceof CompanyStatus
+                    ? $location->status
+                    : CompanyStatus::tryFrom((string) $location?->status);
+                $sameLocation = $customer && $location && (int) $location->id === (int) $customer->location_id;
+                $companyId = $this->resolveCompanyId($this->input('company_id', $customer?->company_id)) ?? $customer?->company_id;
+
+                if (! $location || ($companyId && (int) $location->company_id !== (int) $companyId)) {
+                    $validator->errors()->add('location_id', 'Select an active location for this company.');
+                } elseif (! $sameLocation && $status !== CompanyStatus::Active) {
+                    $validator->errors()->add('location_id', 'Select an active location.');
                 }
             }
 

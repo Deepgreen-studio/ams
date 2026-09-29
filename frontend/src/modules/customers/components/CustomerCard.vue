@@ -18,7 +18,7 @@
       </div>
     </div>
 
-    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
       <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
         <p class="text-xs text-zinc-500">Owning company</p>
         <p class="mt-1 text-sm font-semibold text-slate-900">
@@ -28,6 +28,10 @@
       <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
         <p class="text-xs text-zinc-500">Customer ID</p>
         <p class="mt-1 text-sm font-semibold text-slate-900">{{ customer?.customer_number || '—' }}</p>
+      </div>
+      <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
+        <p class="text-xs text-zinc-500">Location</p>
+        <p class="mt-1 text-sm font-semibold text-slate-900">{{ customer?.location?.branch_name || '—' }}</p>
       </div>
       <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
         <p class="text-xs text-zinc-500">Country</p>

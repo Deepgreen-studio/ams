@@ -4,7 +4,7 @@
       <template v-if="customer">
         <RouterLink
           :to="{ name: 'customers.edit', params: { id: customer.uuid } }"
-          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           <PencilSquareIcon class="h-4 w-4 text-slate-500" />
           Edit

@@ -85,11 +85,12 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import RememberMeCheckbox from '@/modules/authentication/components/RememberMeCheckbox.vue';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
+import { AUTH_NOTICE_KEY } from '@/services/sessionGuard';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -99,6 +100,16 @@ const loading = ref(false);
 const sessionExpired = computed(
   () => route.query.reason === 'session' || authStore.sessionExpired
 );
+
+onMounted(() => {
+  const notice = sessionStorage.getItem(AUTH_NOTICE_KEY);
+  if (!notice) {
+    return;
+  }
+
+  sessionStorage.removeItem(AUTH_NOTICE_KEY);
+  errorMessage.value = notice;
+});
 
 const challenge = ref('');
 const form = reactive({

@@ -5,6 +5,7 @@ namespace App\Domains\Customers\Requests;
 use App\Domains\Applications\Enums\ApplicationPlatform;
 use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Companies\Repositories\LocationRepository;
 use App\Domains\Customers\Enums\CustomerApplicationOwnershipType;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
@@ -63,6 +64,7 @@ class StoreCustomerRequest extends FormRequest
 
         return [
             'company_id' => ['required', 'string'],
+            'location_id' => ['nullable', 'string'],
             'customer_type' => ['required', Rule::in(CustomerType::values())],
             'reference' => [
                 'nullable',
@@ -139,7 +141,32 @@ class StoreCustomerRequest extends FormRequest
 
             $this->validateIndustrySelection($validator);
             $this->validateActiveCompany($validator);
+            $this->validateLocation($validator);
         });
+    }
+
+    protected function validateLocation(Validator $validator, ?int $currentLocationId = null): void
+    {
+        if (blank($this->input('location_id'))) {
+            return;
+        }
+
+        $location = app(LocationRepository::class)->findByIdentifier((string) $this->input('location_id'));
+        $status = $location?->status instanceof CompanyStatus
+            ? $location->status
+            : CompanyStatus::tryFrom((string) $location?->status);
+        $companyId = $this->resolveCompanyId();
+        $sameLocation = $currentLocationId !== null && $location && (int) $location->id === $currentLocationId;
+
+        if (! $location || ($companyId && (int) $location->company_id !== $companyId)) {
+            $validator->errors()->add('location_id', 'Select an active location for this company.');
+
+            return;
+        }
+
+        if (! $sameLocation && $status !== CompanyStatus::Active) {
+            $validator->errors()->add('location_id', 'Select an active location.');
+        }
     }
 
     protected function validateIndustrySelection(Validator $validator): void

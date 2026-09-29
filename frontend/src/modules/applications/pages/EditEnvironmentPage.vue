@@ -5,7 +5,7 @@
       v-if="environmentsStore.loading && !environmentsStore.selectedEnvironment"
       class="h-64 animate-pulse rounded-xl bg-slate-100"
     />
-    <div v-else class="rounded-xl border border-slate-200 bg-white p-6">
+    <div v-else class="rounded-xl bg-white p-6">
       <EnvironmentForm
         :initial="environmentsStore.selectedEnvironment || {}"
         :loading="environmentsStore.saving"

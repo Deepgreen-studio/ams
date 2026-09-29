@@ -20,7 +20,7 @@
         <button type="button" class="block w-full bg-zinc-50" @click="$emit('preview', item)">
           <img
             v-if="item.is_image"
-            :src="item.url"
+            :src="mediaSrc(item)"
             :alt="item.alt_text || item.name"
             class="h-40 w-full object-cover"
           />
@@ -132,6 +132,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
@@ -142,6 +143,10 @@ const emit = defineEmits(['preview', 'download', 'replace', 'versions', 'delete'
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
+
+function mediaSrc(item) {
+  return resolveMediaUrl(item?.url);
+}
 
 const activeItem = computed(
   () => props.items.find((item) => item.uuid === openMenuId.value) || null,

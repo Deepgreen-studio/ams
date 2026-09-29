@@ -19,6 +19,22 @@
       </div>
 
       <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Location</label>
+        <SelectBox
+          v-model="form.location_id"
+          size="lg"
+          :placeholder="form.company_id ? 'Select a location' : 'Select a company first'"
+          :options="locationOptions"
+          :disabled="!form.company_id"
+          :error="Boolean(displayErrors.location_id)"
+        />
+        <p class="mt-1 text-xs text-slate-500">Active locations for the selected company.</p>
+        <p v-if="displayErrors.location_id" class="mt-1 text-xs text-rose-600">
+          {{ displayErrors.location_id[0] }}
+        </p>
+      </div>
+
+      <div>
         <FormLabel required>Customer Type</FormLabel>
         <SelectBox
           v-model="form.customer_type"
@@ -150,28 +166,6 @@
         <p v-if="displayErrors.industry_other" class="mt-1 text-xs text-rose-600">{{ displayErrors.industry_other[0] }}</p>
       </div>
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Country</label>
-        <SearchableSelect
-          v-model="form.country"
-          placeholder="Select country"
-          search-placeholder="Search country…"
-          :options="countryOptions"
-          @change="countryOverridden = true"
-        />
-        <p class="mt-1 text-xs text-slate-500">Defaults from the owning company. Override for the customer's location.</p>
-      </div>
-      <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-        <SelectBox
-          v-model="form.timezone"
-          size="lg"
-          :options="timezoneOptions"
-          @change="timezoneOverridden = true"
-        />
-        <p class="mt-1 text-xs text-slate-500">Stored as an IANA timezone.</p>
-        <p v-if="displayErrors.timezone" class="mt-1 text-xs text-rose-600">{{ displayErrors.timezone[0] }}</p>
-      </div>
-      <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
         <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
       </div>
@@ -255,15 +249,13 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
-import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 import { applicationService } from '@/modules/applications/services/applicationService';
 import { environmentService } from '@/modules/applications/services/environmentService';
 import { customerService } from '@/modules/customers/services/customerService';
-import { CUSTOMER_TIMEZONES, LEGAL_BASIS_OPTIONS, OWNERSHIP_OPTIONS } from '@/modules/customers/constants/customerModel';
-import { getPhoneCountries } from '@/utils/phone';
+import { LEGAL_BASIS_OPTIONS, OWNERSHIP_OPTIONS } from '@/modules/customers/constants/customerModel';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
@@ -278,12 +270,11 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const companies = ref([]);
+const locationItems = ref([]);
 const industries = ref([]);
 const applications = ref([]);
 const environments = ref([]);
 const localErrors = ref({});
-const countryOverridden = ref(Boolean(props.initial?.uuid && props.initial?.country));
-const timezoneOverridden = ref(Boolean(props.initial?.uuid && props.initial?.timezone));
 const form = reactive(createForm(props.initial));
 
 const typeOptions = [
@@ -303,6 +294,16 @@ const legalBasisOptions = LEGAL_BASIS_OPTIONS;
 const ownershipOptions = OWNERSHIP_OPTIONS.map((option) => ({ value: option.value, label: option.label }));
 
 const isIndividual = computed(() => form.customer_type === 'individual');
+
+const locationOptions = computed(() => [
+  { value: '', label: 'Not specified' },
+  ...locationItems.value
+    .filter((location) => location.status === 'active' || location.uuid === form.location_id)
+    .map((location) => ({
+      value: location.uuid,
+      label: location.branch_name || location.uuid,
+    })),
+]);
 
 const companyOptions = computed(() =>
   companies.value
@@ -332,19 +333,6 @@ const subIndustryOptions = computed(() => [
     label: industry.name,
   })),
 ]);
-
-const countryOptions = computed(() => [
-  { value: '', label: 'Not specified' },
-  ...getPhoneCountries()
-    .map((country) => ({ value: country.iso, label: country.name }))
-    .sort((a, b) => a.label.localeCompare(b.label)),
-]);
-
-const timezoneOptions = computed(() => {
-  const values = new Set(CUSTOMER_TIMEZONES);
-  if (form.timezone) values.add(form.timezone);
-  return [...values].map((zone) => ({ value: zone, label: zone }));
-});
 
 const applicationOptions = computed(() => [
   { value: '', label: 'Assign later' },
@@ -401,11 +389,6 @@ watch(
 );
 
 watch(
-  () => form.company_id,
-  () => applyCompanyDefaults(),
-);
-
-watch(
   () => form.application_id,
   (applicationId) => loadEnvironments(applicationId),
 );
@@ -416,8 +399,7 @@ const displayErrors = computed(() => ({
 }));
 
 onMounted(async () => {
-  await Promise.all([loadCompanies(), loadIndustries(), loadApplications()]);
-  applyCompanyDefaults();
+  await Promise.all([loadCompanies(), loadIndustries(), loadApplications(), loadLocations()]);
 });
 
 async function loadCompanies() {
@@ -480,23 +462,52 @@ async function loadEnvironments(applicationId) {
 }
 
 function onCompanyChange() {
-  countryOverridden.value = false;
-  timezoneOverridden.value = false;
+  form.location_id = '';
   form.application_id = '';
   loadApplications();
-  applyCompanyDefaults();
+  loadLocations();
 }
 
-function applyCompanyDefaults() {
-  const company = companies.value.find((item) => item.uuid === form.company_id);
-  if (!company || props.initial?.uuid) return;
-  if (!countryOverridden.value && company.country) form.country = company.country;
-  if (!timezoneOverridden.value && company.timezone) form.timezone = company.timezone;
+async function loadLocations() {
+  if (!form.company_id) {
+    locationItems.value = [];
+    form.location_id = '';
+    return;
+  }
+
+  try {
+    const { data } = await companyService.listLocations({
+      company: form.company_id,
+      status: 'active',
+      per_page: 100,
+      page: 1,
+    });
+    const items = data.data?.locations?.items ?? [];
+    const currentId = form.location_id;
+    const assigned = props.initial?.location;
+
+    if (currentId && assigned?.uuid === currentId && !items.some((item) => item.uuid === currentId)) {
+      items.push({
+        uuid: assigned.uuid,
+        branch_name: assigned.branch_name || 'Assigned location',
+        status: assigned.status || 'inactive',
+      });
+    }
+
+    locationItems.value = items;
+
+    if (currentId && !items.some((item) => item.uuid === currentId)) {
+      form.location_id = '';
+    }
+  } catch {
+    locationItems.value = [];
+  }
 }
 
 function createForm(value = {}) {
   return {
     company_id: value.company?.uuid || value.company_id || '',
+    location_id: value.location?.uuid || '',
     customer_type: value.customer_type || 'individual',
     reference: value.reference || '',
     first_name: value.first_name || '',
@@ -514,8 +525,6 @@ function createForm(value = {}) {
     industry_id: value.industry_master?.uuid || '',
     sub_industry_id: value.sub_industry?.uuid || '',
     industry_other: value.industry_other || '',
-    country: value.country || '',
-    timezone: value.timezone || '',
     language: value.language || 'en',
     legal_basis: value.legal_basis || '',
     processing_purpose: value.processing_purpose || '',
@@ -595,6 +604,7 @@ function onSubmit() {
   localErrors.value = {};
   const payload = {
     company_id: form.company_id,
+    location_id: form.location_id || null,
     customer_type: form.customer_type,
     reference: form.reference || null,
     email: form.email,
@@ -603,8 +613,6 @@ function onSubmit() {
     industry_id: form.industry_id || null,
     sub_industry_id: form.sub_industry_id || null,
     industry_other: form.industry_other || null,
-    country: form.country || null,
-    timezone: form.timezone || null,
     language: form.language || 'en',
     legal_basis: form.legal_basis || null,
     processing_purpose: form.processing_purpose || null,

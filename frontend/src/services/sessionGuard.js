@@ -4,6 +4,8 @@ const PUBLIC_AUTH_PATHS = [
   '/auth/reset-password',
 ];
 
+export const AUTH_NOTICE_KEY = 'ams_auth_notice';
+
 const SESSION_AUTH_MESSAGES = new Set([
   'Unauthorized',
   'Unauthenticated',
@@ -24,11 +26,15 @@ export function isSessionAuthenticationFailure(error) {
     return true;
   }
 
+  const data = error.response?.data ?? {};
+
+  if (status === 403 && data.code === 'COMPANY_INACTIVE') {
+    return true;
+  }
+
   if (status !== 401) {
     return false;
   }
-
-  const data = error.response?.data ?? {};
 
   if (data.code === 'UNAUTHENTICATED') {
     return true;
@@ -37,12 +43,16 @@ export function isSessionAuthenticationFailure(error) {
   return SESSION_AUTH_MESSAGES.has(String(data.message || ''));
 }
 
-export async function expireClientSession() {
+export async function expireClientSession(message) {
   if (handlingSessionExpiry) {
     return;
   }
 
   handlingSessionExpiry = true;
+
+  if (typeof message === 'string' && message.trim() !== '') {
+    sessionStorage.setItem(AUTH_NOTICE_KEY, message.trim());
+  }
 
   try {
     const { useAuthStore } = await import('@/modules/authentication/stores/auth');

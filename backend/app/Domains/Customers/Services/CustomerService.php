@@ -3,6 +3,7 @@
 namespace App\Domains\Customers\Services;
 
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Companies\Repositories\LocationRepository;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
 use App\Domains\Customers\Events\CustomerCreated;
@@ -24,6 +25,7 @@ class CustomerService
     public function __construct(
         private readonly CustomerRepository $customerRepository,
         private readonly CompanyRepository $companyRepository,
+        private readonly LocationRepository $locationRepository,
         private readonly IndustryRepository $industryRepository,
         private readonly CustomerApplicationService $customerApplicationService,
     ) {}
@@ -54,6 +56,7 @@ class CustomerService
 
         return $customer->load([
             'company:id,uuid,company_name,status,country,timezone',
+            'location:id,uuid,branch_name,city,country,status,company_id',
             'industryMaster:id,uuid,code,name,is_other',
             'subIndustry:id,uuid,code,name,parent_id',
             'creator:id,uuid,full_name,email',
@@ -72,6 +75,7 @@ class CustomerService
             $payload = $this->preparePayload($data);
             $payload = $this->applyIndustry($payload, $data);
             $payload['company_id'] = $company->id;
+            $payload['location_id'] = $this->resolveLocationId($data['location_id'] ?? null, $company->id);
             $payload['status'] = $payload['status'] ?? CustomerStatus::Active->value;
             $payload['country'] = $payload['country'] ?? $company->country;
             $payload['timezone'] = $payload['timezone'] ?? ($company->timezone ?: 'UTC');
@@ -118,6 +122,11 @@ class CustomerService
             if (array_key_exists('company_id', $data) && ! blank($data['company_id'])) {
                 $company = $this->companyRepository->findByIdentifierOrFail((string) $data['company_id']);
                 $payload['company_id'] = $company->id;
+            }
+
+            if (array_key_exists('location_id', $data)) {
+                $companyId = (int) ($payload['company_id'] ?? $customer->company_id);
+                $payload['location_id'] = $this->resolveLocationId($data['location_id'], $companyId);
             }
 
             $updated = $this->customerRepository->updateCustomer($customer, $payload);
@@ -244,6 +253,21 @@ class CustomerService
         }
 
         return $filters;
+    }
+
+    private function resolveLocationId(mixed $identifier, int $companyId): ?int
+    {
+        if (blank($identifier)) {
+            return null;
+        }
+
+        $location = $this->locationRepository->findByIdentifier((string) $identifier);
+
+        if (! $location || (int) $location->company_id !== $companyId) {
+            throw new ApiException('Select an active location for this company.', 422);
+        }
+
+        return $location->id;
     }
 
     /**

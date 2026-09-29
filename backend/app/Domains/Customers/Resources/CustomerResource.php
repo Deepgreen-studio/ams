@@ -18,6 +18,17 @@ class CustomerResource extends JsonResource
             'customer_number' => $this->customer_number,
             'reference' => $this->reference,
             'company_id' => $this->company_id,
+            'location_id' => $this->location_id,
+            'location' => $this->whenLoaded('location', function () {
+                return $this->location ? [
+                    'id' => $this->location->id,
+                    'uuid' => $this->location->uuid,
+                    'branch_name' => $this->location->branch_name,
+                    'city' => $this->location->city,
+                    'country' => $this->location->country,
+                    'status' => $this->location->status?->value ?? $this->location->status,
+                ] : null;
+            }),
             'company' => $this->whenLoaded('company', function () {
                 return [
                     'id' => $this->company->id,

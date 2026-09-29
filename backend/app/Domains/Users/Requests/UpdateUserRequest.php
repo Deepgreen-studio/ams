@@ -49,7 +49,7 @@ class UpdateUserRequest extends FormRequest
             ])],
             'roles' => ['sometimes', 'array', 'min:1', 'max:1'],
             'roles.*' => ['required', 'string', 'max:255'],
-            'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
+            'company_id' => ['sometimes', 'required', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
             'department_id' => ['nullable', 'string', Rule::exists('departments', 'uuid')->whereNull('deleted_at')],
             'team_id' => ['nullable', 'string', Rule::exists('teams', 'uuid')->whereNull('deleted_at')],
             'location_id' => ['nullable', 'string', Rule::exists('company_locations', 'uuid')->whereNull('deleted_at')],

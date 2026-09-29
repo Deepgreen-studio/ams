@@ -93,7 +93,7 @@
         <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
       </div>
       <div v-if="layout !== 'profile'">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <FormLabel required>Company</FormLabel>
         <SearchableSelect
           v-model="form.company_id"
           :options="companySelectOptions"
@@ -302,7 +302,7 @@ const companyButtonClass = computed(() => {
   const base =
     'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:outline-none focus:ring-0';
 
-  if (props.errors.company_id) {
+  if (fieldError('company_id')) {
     return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
   }
 
@@ -533,6 +533,10 @@ function onSubmit() {
 
   if (props.showRole && !payload.role) {
     nextErrors.roles = ['The role field is required.'];
+  }
+
+  if (props.layout !== 'profile' && !payload.company_id) {
+    nextErrors.company_id = ['The company field is required.'];
   }
 
   if (Object.keys(nextErrors).length) {

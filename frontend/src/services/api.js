@@ -46,7 +46,7 @@ api.interceptors.response.use(
       !isPublicAuthRequest(error.config) &&
       isSessionAuthenticationFailure(error)
     ) {
-      expireClientSession();
+      expireClientSession(error.response?.data?.message);
     }
 
     const payload = error.response?.data ?? {

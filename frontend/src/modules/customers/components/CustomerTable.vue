@@ -170,7 +170,7 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeCustomer"
-        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-48 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
@@ -216,7 +216,7 @@
             @click="onDelete(activeCustomer)"
           >
             <TrashIcon class="h-4 w-4 text-red-500" />
-            Delete
+            Soft Delete
           </button>
         </template>
       </div>
@@ -301,7 +301,7 @@ function toggleMenu(id, event) {
 
   const customer = props.customers.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 176;
+  const menuWidth = 192;
   const itemCount = isTrashed(customer)
     ? [can('customers.view'), can('customers.restore')].filter(Boolean).length
     : [can('customers.view'), can('customers.update'), can('customers.delete')].filter(Boolean)

@@ -55,6 +55,7 @@ class CustomerRepository extends BaseRepository
         return $this->filteredQuery($filters)
             ->with([
                 'company:id,uuid,company_name,status,country,timezone',
+                'location:id,uuid,branch_name,city,country,status,company_id',
                 'industryMaster:id,uuid,code,name,is_other',
                 'subIndustry:id,uuid,code,name,parent_id',
                 'creator:id,uuid,full_name,email',
@@ -126,6 +127,7 @@ class CustomerRepository extends BaseRepository
             'country',
             'created_at',
             'updated_at',
+            'deleted_at',
         ];
 
         if (! in_array($sortBy, $allowed, true)) {

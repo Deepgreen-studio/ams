@@ -325,6 +325,12 @@ const router = createRouter({
           meta: { title: 'Customers', requiresAuth: true },
         },
         {
+          path: 'customers/trash',
+          name: 'customers.trash',
+          component: () => import('@/modules/customers/pages/CustomersTrashPage.vue'),
+          meta: { title: 'Soft Deleted', requiresAuth: true },
+        },
+        {
           path: 'support',
           name: 'support.dashboard',
           component: () => import('@/modules/support/pages/SupportDashboardPage.vue'),

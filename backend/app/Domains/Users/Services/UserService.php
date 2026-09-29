@@ -118,7 +118,7 @@ class UserService
 
     protected function sendPasswordSetupEmail(User $user): void
     {
-        $token = Password::broker()->createToken($user);
+        $token = Password::createToken($user);
         $user->notify(new UserPasswordSetupNotification($token));
     }
 

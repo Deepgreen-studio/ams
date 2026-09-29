@@ -49,7 +49,6 @@ import {
   CURRENCY_OPTIONS,
   DATE_FORMAT_OPTIONS,
   getTimezoneOptions,
-  LANGUAGE_OPTIONS,
   TIME_FORMAT_OPTIONS,
 } from '@/utils/localeOptions';
 
@@ -83,14 +82,6 @@ const fields = [
     placeholder: 'Select timezone',
     searchPlaceholder: 'Search timezone…',
     options: getTimezoneOptions(),
-  },
-  {
-    key: 'language',
-    label: 'Language',
-    searchable: true,
-    placeholder: 'Select language',
-    searchPlaceholder: 'Search language…',
-    options: LANGUAGE_OPTIONS,
   },
   { key: 'currency', label: 'Currency', options: CURRENCY_OPTIONS },
   { key: 'date_format', label: 'Date format', options: DATE_FORMAT_OPTIONS },

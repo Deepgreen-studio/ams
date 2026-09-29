@@ -290,10 +290,12 @@ const roleSelectOptions = computed(() =>
 );
 
 const companySelectOptions = computed(() =>
-  (props.companyOptions || []).map((company) => ({
-    value: company.uuid,
-    label: company.company_name || company.legal_name || company.uuid,
-  }))
+  (props.companyOptions || [])
+    .filter((company) => company.status === 'active' || company.uuid === form.company_id)
+    .map((company) => ({
+      value: company.uuid,
+      label: company.company_name || company.legal_name || company.uuid,
+    }))
 );
 
 const companyButtonClass = computed(() => {

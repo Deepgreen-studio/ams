@@ -46,9 +46,9 @@ const canAssignRoles = computed(() => can('users.assign-roles'));
 const roleOptions = computed(() => rolesStore.roles || []);
 const companyOptions = ref([]);
 
-onMounted(() => {
-  usersStore.fetchUser(route.params.id);
-  loadCompanies();
+onMounted(async () => {
+  await Promise.all([usersStore.fetchUser(route.params.id), loadCompanies()]);
+  keepAssignedCompanyVisible();
 
   if (!canAssignRoles.value) {
     return;
@@ -61,6 +61,7 @@ async function loadCompanies() {
   try {
     const { data } = await companyService.list({
       per_page: 100,
+      status: 'active',
       sort_by: 'company_name',
       sort_dir: 'asc',
       page: 1,
@@ -69,6 +70,23 @@ async function loadCompanies() {
   } catch {
     companyOptions.value = [];
   }
+}
+
+function keepAssignedCompanyVisible() {
+  const currentId = usersStore.currentUser?.company_id;
+
+  if (!currentId || companyOptions.value.some((company) => company.uuid === currentId)) {
+    return;
+  }
+
+  companyOptions.value = [
+    ...companyOptions.value,
+    {
+      uuid: currentId,
+      company_name: usersStore.currentUser.company_name || 'Assigned company',
+      status: 'inactive',
+    },
+  ];
 }
 
 async function onSubmit(payload) {

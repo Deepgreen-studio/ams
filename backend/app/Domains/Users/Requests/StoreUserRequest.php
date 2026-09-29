@@ -2,6 +2,7 @@
 
 namespace App\Domains\Users\Requests;
 
+use App\Domains\Companies\Enums\CompanyStatus;
 use App\Domains\Users\Enums\UserPermission;
 use App\Shared\Http\NormalizesPhoneInput;
 use App\Shared\Support\PhoneNumber;
@@ -33,7 +34,7 @@ class StoreUserRequest extends FormRequest
             'status' => ['prohibited'],
             'roles' => ['sometimes', 'array', 'min:1', 'max:1'],
             'roles.*' => ['required', 'string', 'max:255'],
-            'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->whereNull('deleted_at')],
+            'company_id' => ['nullable', 'string', Rule::exists('companies', 'uuid')->where('status', CompanyStatus::Active->value)->whereNull('deleted_at')],
             'department_id' => ['nullable', 'string', Rule::exists('departments', 'uuid')->whereNull('deleted_at')],
             'team_id' => ['nullable', 'string', Rule::exists('teams', 'uuid')->whereNull('deleted_at')],
             'location_id' => ['nullable', 'string', Rule::exists('company_locations', 'uuid')->whereNull('deleted_at')],

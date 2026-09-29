@@ -127,6 +127,23 @@ class SettingsManagementTest extends TestCase
         $this->putJson('/api/v1/settings', ['app_name' => 'Nope'])->assertForbidden();
     }
 
+    public function test_branding_includes_application_timezone(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->putJson('/api/v1/settings', [
+            'timezone' => 'Africa/Abidjan',
+            'date_format' => 'd/m/Y',
+            'time_format' => 'h:i A',
+        ])->assertOk();
+
+        $this->getJson('/api/v1/settings/branding')
+            ->assertOk()
+            ->assertJsonPath('data.branding.timezone', 'Africa/Abidjan')
+            ->assertJsonPath('data.branding.date_format', 'd/m/Y')
+            ->assertJsonPath('data.branding.time_format', 'h:i A');
+    }
+
     public function test_system_info_endpoint(): void
     {
         Sanctum::actingAs($this->admin);

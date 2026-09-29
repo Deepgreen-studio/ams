@@ -35,6 +35,7 @@ import { computed, onMounted } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 import { settingsService } from '@/modules/settings/services/settingsService';
 import { useAppStore } from '@/stores/app';
+import { setAppDateTimeFormats, setAppTimezone } from '@/utils/appTimezone';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 import Sidebar from '@/components/layout/Sidebar.vue';
 import TopNavigation from '@/components/layout/TopNavigation.vue';
@@ -58,6 +59,8 @@ onMounted(async () => {
             appName: branding.app_name,
             logoUrl: resolveMediaUrl(branding.logo_url),
         });
+        setAppTimezone(branding.timezone);
+        setAppDateTimeFormats(branding.date_format, branding.time_format);
     } catch {
         // The shell keeps the default mark when branding cannot be loaded.
     }

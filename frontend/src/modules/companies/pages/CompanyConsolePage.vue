@@ -325,6 +325,7 @@ import { BuildingOffice2Icon, MapPinIcon } from '@heroicons/vue/24/outline';
 import { computed, defineComponent, h, onMounted, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import { companyService } from '@/modules/companies/services/companyService';
+import { formatAppDateTime, getAppTimezone } from '@/utils/appTimezone';
 
 const ListCard = defineComponent({
   props: {
@@ -455,8 +456,7 @@ function openSection(key) {
 
 function formatInZone(value) {
   if (!value) return '-';
-  const timeZone = consoleData.value?.timezone || 'Asia/Kolkata';
-  return new Intl.DateTimeFormat('en-IN', { timeZone, dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+  return formatAppDateTime(value, consoleData.value?.timezone || getAppTimezone());
 }
 
 function tone(status) {

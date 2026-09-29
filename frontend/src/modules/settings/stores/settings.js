@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { mediaService, settingsService } from '@/modules/settings/services/settingsService';
 import { useAppStore } from '@/stores/app';
+import { setAppDateTimeFormats, setAppTimezone } from '@/utils/appTimezone';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 function useAsyncState() {
@@ -44,6 +45,10 @@ function syncApplicationBranding(settingsMap = {}) {
     appName: values.app_name,
     logoUrl: resolveMediaUrl(values.logo),
   });
+  if (values.timezone) {
+    setAppTimezone(values.timezone);
+  }
+  setAppDateTimeFormats(values.date_format, values.time_format);
   if (values.logo) {
     values.logo = resolveMediaUrl(values.logo);
   }

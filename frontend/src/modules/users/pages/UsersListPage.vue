@@ -121,6 +121,7 @@ import UserSearchFilter from '@/modules/users/components/UserSearchFilter.vue';
 import UserTable from '@/modules/users/components/UserTable.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import { useUsersStore } from '@/modules/users/stores/users';
+import { formatDate } from '@/utils/formatters';
 
 const usersStore = useUsersStore();
 const { can, canAny } = usePermissions();
@@ -252,17 +253,7 @@ onMounted(() => {
 });
 
 function formatFilterDate(value) {
-  const [year, month, day] = String(value).split('-');
-  if (!year || !month || !day) {
-    return value;
-  }
-
-  const date = new Date(Number(year), Number(month) - 1, Number(day));
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleDateString();
+  return formatDate(value) || value;
 }
 
 function joinFilterParts(parts) {

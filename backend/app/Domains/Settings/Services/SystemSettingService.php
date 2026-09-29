@@ -197,15 +197,21 @@ class SystemSettingService
     }
 
     /**
-     * @return array{app_name: mixed, logo_url: ?string}
+     * @return array{app_name: mixed, logo_url: ?string, timezone: string, date_format: string, time_format: string}
      */
     public function publicBranding(): array
     {
         $path = $this->getValue('general', 'logo');
+        $timezone = $this->getValue('general', 'timezone', config('app.timezone', 'UTC'));
+        $dateFormat = $this->getValue('general', 'date_format', 'Y-m-d');
+        $timeFormat = $this->getValue('general', 'time_format', 'H:i');
 
         return [
             'app_name' => $this->getValue('general', 'app_name', config('app.name')),
             'logo_url' => $this->logoUrl(is_string($path) ? $path : null),
+            'timezone' => is_string($timezone) && $timezone !== '' ? $timezone : (string) config('app.timezone', 'UTC'),
+            'date_format' => is_string($dateFormat) && $dateFormat !== '' ? $dateFormat : 'Y-m-d',
+            'time_format' => is_string($timeFormat) && $timeFormat !== '' ? $timeFormat : 'H:i',
         ];
     }
 

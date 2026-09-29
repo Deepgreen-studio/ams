@@ -38,11 +38,25 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
+import { settingsService } from '@/modules/settings/services/settingsService';
+import { setAppDateTimeFormats, setAppTimezone } from '@/utils/appTimezone';
 
 const authStore = useAuthStore();
 const router = useRouter();
+
+onMounted(async () => {
+  try {
+    const { data } = await settingsService.branding();
+    const branding = data.data?.branding;
+    setAppTimezone(branding?.timezone);
+    setAppDateTimeFormats(branding?.date_format, branding?.time_format);
+  } catch {
+    // Timestamps stay on UTC when branding cannot be loaded.
+  }
+});
 
 async function logout() {
   await authStore.logout();

@@ -335,10 +335,19 @@ function sanitize(html) {
   });
 }
 
+function appCalendarDay(date) {
+  return new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
 function formatChatTime(value) {
   if (!value) return '';
   const date = new Date(value);
-  const sameDay = date.toDateString() === new Date().toDateString();
+  if (Number.isNaN(date.getTime())) return '';
+  const sameDay = appCalendarDay(date) === appCalendarDay(new Date());
   return date.toLocaleString(undefined, sameDay
     ? { hour: 'numeric', minute: '2-digit' }
     : { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });

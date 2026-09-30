@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="rounded-[12px] bg-white p-6 sm:p-8">
+    <div class="mx-auto w-full max-w-[1200px] rounded-[12px] bg-white p-6 sm:p-8">
       <IntegrationForm
         :loading="integrationsStore.saving"
         :errors="integrationsStore.fieldErrors"

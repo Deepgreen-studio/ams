@@ -2,6 +2,13 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('integrations.view-trash')"
+        :to="{ name: 'integrations.trash' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Soft Deleted
+      </RouterLink>
+      <RouterLink
         :to="{ name: 'integrations.docs' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -39,6 +46,7 @@
       :sort-dir="integrationsStore.filters.sort_dir"
       @sort="onSort"
       @delete="openDelete"
+      @restore="confirmRestore"
     >
       <template #toolbar>
         <SearchFilters
@@ -70,9 +78,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete integration"
+      title="Soft delete integration"
       :message="`Soft delete ${pendingDelete?.name || 'this integration'}? It can be restored later.`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="integrationsStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -134,6 +142,11 @@ async function confirmDelete() {
   if (!pendingDelete.value) return;
   await integrationsStore.deleteIntegration(pendingDelete.value.uuid);
   pendingDelete.value = null;
+  await integrationsStore.fetchIntegrations();
+}
+
+async function confirmRestore(integration) {
+  await integrationsStore.restoreIntegration(integration.uuid);
   await integrationsStore.fetchIntegrations();
 }
 </script>

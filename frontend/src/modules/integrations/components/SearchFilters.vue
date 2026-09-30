@@ -37,6 +37,7 @@
       />
 
       <SelectBox
+        v-if="showDeletedFilter"
         v-model="local.trashed"
         wrapper-class="min-w-[10rem]"
         :options="trashedOptions"
@@ -62,8 +63,9 @@
 </template>
 
 <script setup>
-import {reactive, watch, onBeforeUnmount } from 'vue';
+import { computed, reactive, watch, onBeforeUnmount } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -74,6 +76,8 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'submit', 'reset']);
+const { can } = usePermissions();
+const showDeletedFilter = computed(() => can('integrations.view-trash'));
 
 const statusOptions = [
   { value: '', label: 'Status: All' },

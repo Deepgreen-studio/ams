@@ -20,7 +20,7 @@ class UpdateIntegrationRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'alpha_dash:ascii'],
+            'slug' => ['sometimes', 'required', 'string', 'max:255', 'alpha_dash:ascii'],
             'description' => ['nullable', 'string', 'max:5000'],
             'type' => ['sometimes', 'required', Rule::in(IntegrationType::values())],
             'status' => ['sometimes', 'required', Rule::in(IntegrationStatus::values())],

@@ -24,7 +24,11 @@ class IntegrationController
 
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Integration::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Integration::class);
+        } else {
+            $this->authorize('viewAny', Integration::class);
+        }
 
         $integrations = $this->integrationService->list($request->only([
             'search',
@@ -92,7 +96,7 @@ class IntegrationController
         $actor = $request->user();
         $this->integrationService->delete($integration, $actor);
 
-        return ApiResponse::success(null, 'Integration deleted successfully.');
+        return ApiResponse::success(null, 'Integration soft deleted successfully.');
     }
 
     public function restore(Request $request, string $integration): JsonResponse

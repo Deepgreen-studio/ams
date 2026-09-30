@@ -61,12 +61,8 @@ class IntegrationService
             $company = $this->companyRepository->findByIdentifierOrFail((string) $data['company_id']);
             $payload = $this->preparePayload($data);
             $payload['company_id'] = $company->id;
-            $payload['slug'] = $this->resolveUniqueSlug(
-                $company->id,
-                $payload['slug'] ?? null,
-                $payload['name']
-            );
-            $payload['status'] = $payload['status'] ?? 'draft';
+            $payload['slug'] = $this->guardUniqueSlug($company->id, (string) ($payload['slug'] ?? ''));
+            $payload['status'] = $payload['status'] ?? 'active';
             $payload['health_status'] = $payload['health_status'] ?? 'unknown';
             $payload['timeout'] = $payload['timeout'] ?? 30;
             $payload['retry_attempts'] = $payload['retry_attempts'] ?? 3;
@@ -90,13 +86,10 @@ class IntegrationService
             $payload = $this->preparePayload($data, isUpdate: true);
             $payload['updated_by'] = $actor->id;
 
-            if (array_key_exists('slug', $payload) || array_key_exists('name', $payload)) {
-                $name = $payload['name'] ?? $integration->name;
-                $slugInput = $payload['slug'] ?? null;
-                $payload['slug'] = $this->resolveUniqueSlug(
+            if (array_key_exists('slug', $payload)) {
+                $payload['slug'] = $this->guardUniqueSlug(
                     $integration->company_id,
-                    $slugInput,
-                    $name,
+                    (string) $payload['slug'],
                     $integration->id
                 );
             }
@@ -178,21 +171,21 @@ class IntegrationService
         return $payload;
     }
 
-    protected function resolveUniqueSlug(int $companyId, ?string $slug, string $name, ?int $ignoreId = null): string
+    protected function guardUniqueSlug(int $companyId, string $slug, ?int $ignoreId = null): string
     {
-        $base = Str::slug($slug ?: $name);
-        if ($base === '') {
-            $base = 'integration';
+        $resolved = Str::slug($slug);
+        if ($resolved === '') {
+            throw new ApiException('Validation Failed', 422, [
+                'slug' => ['The slug field is required.'],
+            ]);
         }
 
-        $candidate = $base;
-        $suffix = 2;
-
-        while ($this->integrationRepository->slugExistsForCompany($companyId, $candidate, $ignoreId)) {
-            $candidate = $base.'-'.$suffix;
-            $suffix++;
+        if ($this->integrationRepository->slugExistsForCompany($companyId, $resolved, $ignoreId)) {
+            throw new ApiException('Validation Failed', 422, [
+                'slug' => ['The slug has already been taken.'],
+            ]);
         }
 
-        return $candidate;
+        return $resolved;
     }
 }

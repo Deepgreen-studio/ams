@@ -269,7 +269,14 @@ const navigationCatalog = [
                 icon: PuzzlePieceIcon,
                 match: ['integrations.'],
                 exclude: ['integrations.docs'],
-                permission: 'integrations.view',
+                permission: [
+                  'integrations.view',
+                  'integrations.create',
+                  'integrations.update',
+                  'integrations.delete',
+                  'integrations.view-trash',
+                  'integrations.restore',
+                ],
             },
             {
                 name: 'integrations.docs',

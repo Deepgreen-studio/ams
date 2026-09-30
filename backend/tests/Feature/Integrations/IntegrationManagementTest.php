@@ -3,11 +3,13 @@
 namespace Tests\Feature\Integrations;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Integrations\Enums\IntegrationPermission;
 use App\Domains\Integrations\Models\Integration;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class IntegrationManagementTest extends TestCase
@@ -51,6 +53,7 @@ class IntegrationManagementTest extends TestCase
         $create = $this->postJson('/api/v1/integrations', [
             'company_id' => $this->company->uuid,
             'name' => 'Salesforce CRM',
+            'slug' => 'salesforce-crm',
             'description' => 'Customer sync integration',
             'type' => 'rest_api',
             'authentication_type' => 'oauth2',
@@ -95,7 +98,7 @@ class IntegrationManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
-            ->assertJsonStructure(['errors' => ['company_id', 'name', 'type', 'authentication_type', 'base_url', 'timeout']]);
+            ->assertJsonStructure(['errors' => ['company_id', 'name', 'slug', 'type', 'authentication_type', 'base_url', 'timeout']]);
     }
 
     public function test_admin_can_update_soft_delete_and_restore_integration(): void
@@ -124,12 +127,41 @@ class IntegrationManagementTest extends TestCase
             ->assertJsonPath('data.integration.status', 'inactive')
             ->assertJsonPath('data.integration.timeout', 60);
 
-        $this->deleteJson('/api/v1/integrations/'.$integration->uuid)->assertOk();
+        $this->deleteJson('/api/v1/integrations/'.$integration->uuid)
+            ->assertOk()
+            ->assertJsonPath('message', 'Integration soft deleted successfully.');
         $this->assertSoftDeleted('integrations', ['id' => $integration->id]);
+
+        $this->getJson('/api/v1/integrations?trashed=only')
+            ->assertOk()
+            ->assertJsonPath('data.integrations.meta.total', 1);
 
         $this->postJson('/api/v1/integrations/'.$integration->uuid.'/restore')
             ->assertOk()
             ->assertJsonPath('data.integration.uuid', $integration->uuid);
+    }
+
+    public function test_soft_deleted_integrations_require_their_own_permission(): void
+    {
+        $companyAdmin = Role::findByName('company-admin', 'web');
+        $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::DELETE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::VIEW_TRASH));
+        $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::RESTORE));
+        $this->assertDatabaseHas('permissions', [
+            'name' => IntegrationPermission::VIEW_TRASH,
+            'display_name' => 'Soft Deleted View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => IntegrationPermission::DELETE,
+            'display_name' => 'Soft Delete Integration',
+        ]);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $this->getJson('/api/v1/integrations?trashed=only')->assertForbidden();
+        $this->deleteJson('/api/v1/integrations/'.$this->company->uuid)->assertForbidden();
     }
 
     public function test_user_without_permission_is_forbidden(): void
@@ -152,14 +184,14 @@ class IntegrationManagementTest extends TestCase
             'authentication_type' => 'bearer_token',
         ])->assertCreated();
 
-        $second = $this->postJson('/api/v1/integrations', [
+        $this->postJson('/api/v1/integrations', [
             'company_id' => $this->company->uuid,
-            'name' => 'Webhook Listener',
+            'name' => 'Webhook Listener Copy',
             'slug' => 'webhook-listener',
             'type' => 'webhook',
             'authentication_type' => 'bearer_token',
-        ])->assertCreated();
-
-        $this->assertSame('webhook-listener-2', $second->json('data.integration.slug'));
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.slug.0', 'The slug has already been taken.');
     }
 }

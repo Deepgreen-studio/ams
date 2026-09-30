@@ -35,7 +35,12 @@ class IntegrationPolicy
 
     public function restore(User $user, Integration $integration): bool
     {
-        return $user->can(IntegrationPermission::MANAGE) || $user->can(IntegrationPermission::DELETE);
+        return $user->can(IntegrationPermission::RESTORE);
+    }
+
+    public function viewTrash(User $user): bool
+    {
+        return $user->can(IntegrationPermission::VIEW_TRASH);
     }
 
     public function manage(User $user, Integration $integration): bool

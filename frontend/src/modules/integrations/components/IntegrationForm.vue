@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <FormLabel required>Company</FormLabel>
         <SelectBox
           v-model="form.company_id"
           size="lg"
@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+        <FormLabel required>Name</FormLabel>
         <input
           v-model="form.name"
           type="text"
@@ -31,11 +31,11 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Slug</label>
+        <FormLabel required>Slug</FormLabel>
         <input
           v-model="form.slug"
           type="text"
-          placeholder="auto-generated if empty"
+          placeholder="easycare-api"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
@@ -45,7 +45,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Type</label>
+        <FormLabel required>Type</FormLabel>
         <SelectBox
           v-model="form.type"
           size="lg"
@@ -58,7 +58,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Authentication</label>
+        <FormLabel required>Authentication</FormLabel>
         <SelectBox
           v-model="form.authentication_type"
           size="lg"
@@ -162,6 +162,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -258,7 +259,7 @@ function createForm(value = {}) {
     description: value.description || '',
     type: value.type || 'rest_api',
     authentication_type: value.authentication_type || 'api_key',
-    status: value.status || 'draft',
+    status: value.status || 'active',
     base_url: value.base_url || '',
     api_version: value.api_version || '',
     timeout: value.timeout ?? 30,
@@ -290,6 +291,13 @@ function validate() {
 
   if (!String(form.name || '').trim()) {
     next.name = ['The name field is required.'];
+  }
+
+  const slug = String(form.slug || '').trim();
+  if (!slug) {
+    next.slug = ['The slug field is required.'];
+  } else if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(slug)) {
+    next.slug = ['Use letters, numbers, and single hyphens only.'];
   }
 
   if (!String(form.type || '').trim()) {

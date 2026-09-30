@@ -15,7 +15,7 @@ Route::post('/webhooks/incoming/{webhook}', [WebhookController::class, 'incoming
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('integrations')->group(function (): void {
         Route::get('/', [IntegrationController::class, 'index'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.IntegrationPermission::VIEW.'|'.IntegrationPermission::VIEW_TRASH);
         Route::get('/connectors', [ConnectorController::class, 'index'])
             ->middleware('permission:' . IntegrationPermission::VIEW);
         Route::post('/', [IntegrationController::class, 'store'])
@@ -47,7 +47,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::delete('/{integration}', [IntegrationController::class, 'destroy'])
             ->middleware('permission:' . IntegrationPermission::DELETE);
         Route::post('/{integration}/restore', [IntegrationController::class, 'restore'])
-            ->middleware('permission:' . IntegrationPermission::MANAGE);
+            ->middleware('permission:'.IntegrationPermission::RESTORE);
     });
 
     Route::prefix('webhooks')->group(function (): void {

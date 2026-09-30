@@ -30,6 +30,7 @@ const items = [
     to: { name: 'integrations.index' },
     match: [
       'integrations.index',
+      'integrations.trash',
       'integrations.create',
       'integrations.show',
       'integrations.edit',

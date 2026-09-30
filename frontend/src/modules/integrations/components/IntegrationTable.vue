@@ -193,26 +193,40 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </button>
-        <button
-          v-if="can('integrations.update')"
-          type="button"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="goTo('integrations.edit', activeIntegration)"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </button>
-        <button
-          v-if="can('integrations.delete')"
-          type="button"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-          role="menuitem"
-          @click="onDelete(activeIntegration)"
-        >
-          <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
-        </button>
+        <template v-if="isTrashed(activeIntegration)">
+          <button
+            v-if="can('integrations.restore')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="onRestore(activeIntegration)"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+            Restore
+          </button>
+        </template>
+        <template v-else>
+          <button
+            v-if="can('integrations.update')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="goTo('integrations.edit', activeIntegration)"
+          >
+            <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+            Edit
+          </button>
+          <button
+            v-if="can('integrations.delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onDelete(activeIntegration)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Soft Delete
+          </button>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -222,6 +236,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import {
+  ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
@@ -239,11 +254,11 @@ const props = defineProps({
   sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'delete', 'restore']);
 const router = useRouter();
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('integrations.view', 'integrations.update', 'integrations.delete'),
+  canAny('integrations.view', 'integrations.update', 'integrations.delete', 'integrations.restore'),
 );
 
 const openMenuId = ref(null);
@@ -252,6 +267,10 @@ const menuStyle = ref({});
 const activeIntegration = computed(
   () => props.integrations.find((item) => item.uuid === openMenuId.value) || null,
 );
+
+function isTrashed(integration) {
+  return Boolean(integration?.deleted_at);
+}
 
 function initials(name) {
   return String(name || 'I')
@@ -266,13 +285,12 @@ function toggleMenu(id, event) {
     return;
   }
 
+  const integration = props.integrations.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
-  const itemCount = [
-    can('integrations.view'),
-    can('integrations.update'),
-    can('integrations.delete'),
-  ].filter(Boolean).length;
+  const menuWidth = 176;
+  const itemCount = isTrashed(integration)
+    ? [can('integrations.view'), can('integrations.restore')].filter(Boolean).length
+    : [can('integrations.view'), can('integrations.update'), can('integrations.delete')].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
@@ -307,6 +325,11 @@ function goTo(name, integration) {
 function onDelete(integration) {
   closeMenu();
   emit('delete', integration);
+}
+
+function onRestore(integration) {
+  closeMenu();
+  emit('restore', integration);
 }
 
 function onDocumentClick() {

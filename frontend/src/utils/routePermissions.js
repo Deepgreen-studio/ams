@@ -17,6 +17,7 @@ const EXACT = {
   'companies.profile': 'companies.profile',
   'customers.trash': 'customers.view-trash',
   'applications.trash': 'applications.view-trash',
+  'integrations.trash': 'integrations.view-trash',
   'content.workflow': ['content.review', 'content.approve'],
   'content.review': ['content.review', 'content.approve', 'content.publish'],
   'webhooks.index': 'integrations.view',

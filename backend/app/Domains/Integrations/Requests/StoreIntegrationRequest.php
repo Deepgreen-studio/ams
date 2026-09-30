@@ -21,7 +21,7 @@ class StoreIntegrationRequest extends FormRequest
         return [
             'company_id' => ['required', 'string'],
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', 'alpha_dash:ascii'],
+            'slug' => ['required', 'string', 'max:255', 'alpha_dash:ascii'],
             'description' => ['nullable', 'string', 'max:5000'],
             'type' => ['required', Rule::in(IntegrationType::values())],
             'status' => ['nullable', Rule::in(IntegrationStatus::values())],

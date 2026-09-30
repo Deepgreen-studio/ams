@@ -12,6 +12,10 @@ final class IntegrationPermission
 
     public const DELETE = 'integrations.delete';
 
+    public const RESTORE = 'integrations.restore';
+
+    public const VIEW_TRASH = 'integrations.view-trash';
+
     public const MANAGE = 'integrations.manage';
 
     /**
@@ -24,6 +28,8 @@ final class IntegrationPermission
             self::CREATE,
             self::UPDATE,
             self::DELETE,
+            self::RESTORE,
+            self::VIEW_TRASH,
             self::MANAGE,
         ];
     }

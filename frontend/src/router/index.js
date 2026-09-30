@@ -1554,6 +1554,12 @@ const router = createRouter({
           meta: { title: 'Integrations', requiresAuth: true },
         },
         {
+          path: 'integrations/trash',
+          name: 'integrations.trash',
+          component: () => import('@/modules/integrations/pages/IntegrationsTrashPage.vue'),
+          meta: { title: 'Soft Deleted', requiresAuth: true },
+        },
+        {
           path: 'integrations/create',
           name: 'integrations.create',
           component: () => import('@/modules/integrations/pages/CreateIntegrationPage.vue'),

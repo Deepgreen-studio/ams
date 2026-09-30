@@ -142,7 +142,16 @@ final class PermissionModule
             ],
             'integrations' => [
                 'label' => 'Integrations',
-                'actions' => array_merge($crud, ['manage']),
+                'actions' => array_merge($crud, ['restore', 'view-trash', 'manage']),
+                'labels' => [
+                    'view' => 'View Integration',
+                    'create' => 'Create Integration',
+                    'update' => 'Edit Integration',
+                    'delete' => 'Soft Delete Integration',
+                    'restore' => 'Restore Integration',
+                    'view-trash' => 'Soft Deleted View',
+                    'manage' => 'Manage Integration',
+                ],
             ],
             'queue' => [
                 'label' => 'Queue Processing',

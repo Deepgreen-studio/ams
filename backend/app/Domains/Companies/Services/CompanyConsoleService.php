@@ -196,7 +196,7 @@ class CompanyConsoleService
     private function restrict(array $payload, User $actor): array
     {
         $sections = [
-            ['key' => 'overview', 'label' => 'Overview', 'permission' => 'companies.view'],
+            ['key' => 'overview', 'label' => 'Overview', 'permission' => 'companies.console'],
         ];
 
         $map = [
@@ -215,7 +215,7 @@ class CompanyConsoleService
             'integrations' => $actor->can('integrations.view'),
             'support' => $actor->can('support.view'),
             'compliance' => $actor->can('compliance.view'),
-            'settings' => $actor->can('companies.update') || $actor->can('companies.manage'),
+            'settings' => $actor->can('companies.update') || $actor->can('companies.manage') || $actor->can('companies.profile'),
             'activity' => $actor->can('audit.view'),
         ];
 
@@ -244,7 +244,7 @@ class CompanyConsoleService
             unset($payload['applications'], $payload['platforms'], $payload['environments'], $payload['versions'], $payload['releases']);
         }
 
-        if (! $actor->can('companies.update') && ! $actor->can('companies.manage') && ! $actor->hasRole('super-admin')) {
+        if (! $actor->can('companies.update') && ! $actor->can('companies.manage') && ! $actor->can('companies.profile') && ! $actor->hasRole('super-admin')) {
             unset($payload['profile']['legal_name'], $payload['profile']['registration_number']);
         }
 

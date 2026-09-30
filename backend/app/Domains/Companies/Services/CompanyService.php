@@ -184,6 +184,36 @@ class CompanyService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $company = $this->companyRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $company->trashed()) {
+                throw new ApiException('Soft delete the company before permanently deleting it.', 422);
+            }
+
+            $blockers = $this->activeDependencyCounts($company);
+            if ($blockers !== []) {
+                throw new ApiException(
+                    'Permanently delete this company only after its applications, customers, integrations, users, and open support tickets are removed.',
+                    422,
+                    $blockers,
+                );
+            }
+
+            $this->deleteMediaFile($company->logo);
+            $this->deleteMediaFile($company->favicon);
+
+            foreach (['departments', 'teams', 'locations'] as $relation) {
+                $company->{$relation}()->withTrashed()->forceDelete();
+            }
+
+            $company->forceDelete();
+            event(new CompanyDeleted($company, $actor));
+        });
+    }
+
     public function uploadLogo(string $identifier, UploadedFile $file, User $actor): Company
     {
         return $this->uploadMedia($identifier, $file, 'logo', 'logos', $actor);

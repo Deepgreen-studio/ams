@@ -67,7 +67,7 @@
               {{ item.subscription?.plan_name || '—' }}
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
-              {{ formatDate(item.expires_at) }}
+              {{ formatDate(item.expires_at) || 'Lifetime' }}
             </td>
             <td class="px-5 py-4">
               <LicenseStatusBadge :status="item.status" />
@@ -182,11 +182,6 @@ const menuStyle = ref({});
 const activeLicense = computed(
   () => props.licenses.find((item) => item.uuid === openMenuId.value) || null,
 );
-
-function formatDate(value) {
-  if (!value) return 'Lifetime';
-  return new Date(value).toLocaleDateString();
-}
 
 function toggleMenu(id, event) {
   if (openMenuId.value === id) {

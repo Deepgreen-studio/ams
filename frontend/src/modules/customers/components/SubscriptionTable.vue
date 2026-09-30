@@ -69,7 +69,7 @@
               </div>
             </td>
             <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
-              {{ formatDate(item.renews_at || item.expires_at) }}
+              {{ formatDate(item.renews_at || item.expires_at) || '—' }}
               <span
                 v-if="item.is_renewal_due_soon"
                 class="ml-1 text-xs font-medium text-amber-700"
@@ -203,11 +203,6 @@ function initials(name) {
 
 function formatLabel(value) {
   return (value || '—').replaceAll('_', ' ');
-}
-
-function formatDate(value) {
-  if (!value) return '—';
-  return new Date(value).toLocaleDateString();
 }
 
 function toggleMenu(id, event) {

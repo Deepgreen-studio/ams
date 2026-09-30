@@ -140,7 +140,7 @@
         @click.stop
       >
         <button
-          v-if="can('companies.restore') || can('companies.delete')"
+          v-if="can('companies.restore')"
           type="button"
           class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -149,6 +149,16 @@
           <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
           Restore
         </button>
+        <button
+          v-if="can('companies.force-delete')"
+          type="button"
+          class="flex w-full cursor-pointer items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+          role="menuitem"
+          @click="onForceDelete(activeCompany)"
+        >
+          <TrashIcon class="h-4 w-4 text-red-500" />
+          Permanent Delete
+        </button>
       </div>
     </Teleport>
   </div>
@@ -156,7 +166,7 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { ArrowUturnLeftIcon, EllipsisVerticalIcon } from '@heroicons/vue/24/outline';
+import { ArrowUturnLeftIcon, EllipsisVerticalIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
@@ -170,10 +180,10 @@ const props = defineProps({
   sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'restore']);
+const emit = defineEmits(['sort', 'restore', 'force-delete']);
 
 const { can, canAny } = usePermissions();
-const hasAnyAction = computed(() => canAny('companies.restore', 'companies.delete'));
+const hasAnyAction = computed(() => canAny('companies.restore', 'companies.force-delete'));
 const failedLogos = ref({});
 const openMenuId = ref(null);
 const menuStyle = ref({});
@@ -201,7 +211,8 @@ function toggleMenu(id, event) {
 
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 176;
-  const menuHeight = 44;
+  const itemCount = [can('companies.restore'), can('companies.force-delete')].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;
@@ -222,6 +233,11 @@ function closeMenu() {
 function onRestore(company) {
   closeMenu();
   emit('restore', company);
+}
+
+function onForceDelete(company) {
+  closeMenu();
+  emit('force-delete', company);
 }
 
 function onDocumentClick() {

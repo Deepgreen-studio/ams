@@ -123,6 +123,21 @@ export const useCompaniesStore = defineStore('companies', () => {
     }
   }
 
+  async function forceDeleteCompany(id) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await companyService.forceDelete(id);
+      state.successMessage.value = data.message;
+      return data;
+    } catch (err) {
+      state.applyError(err, 'Unable to permanently delete company');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function restoreCompany(id) {
     state.saving.value = true;
     state.clearMessages();
@@ -195,6 +210,7 @@ export const useCompaniesStore = defineStore('companies', () => {
     updateCompany,
     deleteCompany,
     restoreCompany,
+    forceDeleteCompany,
     uploadLogo,
     updateBranding,
     resetFilters,

@@ -6,7 +6,9 @@ use App\Domains\Applications\Models\Application;
 use App\Domains\Applications\Models\ApplicationEnvironment;
 use App\Domains\Applications\Models\ApplicationRelease;
 use App\Domains\Applications\Models\ApplicationVersion;
+use App\Domains\Companies\Enums\CompanyPermission;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Roles\Models\Role;
 use App\Domains\Companies\Models\Department;
 use App\Domains\Integrations\Models\Integration;
 use App\Domains\Notifications\Models\Notification;
@@ -153,6 +155,65 @@ class CompanyManagementTest extends TestCase
             ->assertJsonPath('data.company.uuid', $company->uuid);
 
         $this->assertNotSoftDeleted('departments', ['id' => $department->id]);
+    }
+
+    public function test_company_screen_permissions_are_seeded_and_enforced(): void
+    {
+        $companyAdmin = Role::findByName('company-admin', 'web');
+        $this->assertTrue($companyAdmin->hasPermissionTo(CompanyPermission::VIEW_TRASH));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CompanyPermission::CONSOLE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CompanyPermission::PROFILE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CompanyPermission::FORCE_DELETE));
+        $this->assertDatabaseHas('permissions', [
+            'name' => CompanyPermission::VIEW_TRASH,
+            'display_name' => 'Soft Deleted View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => CompanyPermission::CONSOLE,
+            'display_name' => 'Company Console',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => CompanyPermission::PROFILE,
+            'display_name' => 'Company Profile',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => CompanyPermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Company',
+        ]);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $company = Company::query()->create([
+            'company_name' => 'Restricted Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        $this->getJson('/api/v1/companies?trashed=only')->assertForbidden();
+        $this->getJson('/api/v1/companies/'.$company->uuid.'/console')->assertForbidden();
+        $this->deleteJson('/api/v1/companies/'.$company->uuid.'/force-delete')->assertForbidden();
+    }
+
+    public function test_admin_can_permanently_delete_a_soft_deleted_company(): void
+    {
+        Sanctum::actingAs($this->admin);
+        $company = Company::query()->create([
+            'company_name' => 'Gone Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        $this->deleteJson('/api/v1/companies/'.$company->uuid.'/force-delete')->assertStatus(422);
+
+        $this->deleteJson('/api/v1/companies/'.$company->uuid)->assertOk();
+        $this->deleteJson('/api/v1/companies/'.$company->uuid.'/force-delete')->assertOk();
+        $this->assertDatabaseMissing('companies', ['id' => $company->id]);
     }
 
     public function test_admin_can_manage_departments_teams_and_locations(): void
@@ -430,6 +491,7 @@ class CompanyManagementTest extends TestCase
 
         $outsider = User::factory()->create();
         $outsider->assignRole('manager');
+        $outsider->givePermissionTo(CompanyPermission::CONSOLE);
         Sanctum::actingAs($outsider);
         $this->getJson('/api/v1/companies/'.$company->uuid.'/console')->assertNotFound();
     }

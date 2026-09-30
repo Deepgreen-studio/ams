@@ -4,6 +4,7 @@ namespace App\Domains\Companies\Controllers;
 
 use App\Domains\Audit\Resources\ActivityLogResource;
 use App\Domains\Audit\Resources\SystemEventResource;
+use App\Domains\Companies\Enums\CompanyPermission;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Requests\StoreCompanyRequest;
 use App\Domains\Companies\Requests\UpdateCompanyRequest;
@@ -31,7 +32,11 @@ class CompanyController
 
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Company::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Company::class);
+        } else {
+            $this->authorize('viewAny', Company::class);
+        }
 
         /** @var User $actor */
         $actor = $request->user();
@@ -67,7 +72,11 @@ class CompanyController
     {
         $model = $this->companyService->show($company);
         $this->companyAccess->assert($request->user(), $model);
-        $this->authorize('view', $model);
+        if ($request->user()?->can(CompanyPermission::VIEW)) {
+            $this->authorize('view', $model);
+        } else {
+            $this->authorize('viewProfile', $model);
+        }
 
         return ApiResponse::success([
             'company' => new CompanyResource($model),
@@ -80,7 +89,7 @@ class CompanyController
         /** @var User $actor */
         $actor = $request->user();
         $this->companyAccess->assert($actor, $model);
-        $this->authorize('view', $model);
+        $this->authorize('viewConsole', $model);
 
         return ApiResponse::success([
             'console' => $this->companyConsoleService->console($model, $actor),
@@ -142,6 +151,19 @@ class CompanyController
         return ApiResponse::success([
             'company' => new CompanyResource($restored),
         ], 'Company restored successfully.');
+    }
+
+    public function forceDelete(Request $request, string $company): JsonResponse
+    {
+        $existing = $this->companyService->find($company, withTrashed: true);
+        $this->companyAccess->assert($request->user(), $existing);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->companyService->forceDelete($company, $actor);
+
+        return ApiResponse::success(null, 'Company permanently deleted.');
     }
 
     public function uploadLogo(UploadCompanyMediaRequest $request, string $company): JsonResponse

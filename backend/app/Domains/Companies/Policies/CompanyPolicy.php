@@ -41,12 +41,34 @@ class CompanyPolicy
 
     public function restore(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::RESTORE) || $user->can(CompanyPermission::DELETE);
+        return $user->can(CompanyPermission::RESTORE);
+    }
+
+    public function forceDelete(User $user, Company $company): bool
+    {
+        return $user->can(CompanyPermission::FORCE_DELETE);
+    }
+
+    public function viewTrash(User $user): bool
+    {
+        return $user->can(CompanyPermission::VIEW_TRASH);
+    }
+
+    public function viewConsole(User $user, Company $company): bool
+    {
+        return $user->can(CompanyPermission::CONSOLE);
+    }
+
+    public function viewProfile(User $user, Company $company): bool
+    {
+        return $user->can(CompanyPermission::PROFILE);
     }
 
     public function manageBranding(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::MANAGE) || $user->can(CompanyPermission::UPDATE);
+        return $user->can(CompanyPermission::MANAGE)
+            || $user->can(CompanyPermission::UPDATE)
+            || $user->can(CompanyPermission::PROFILE);
     }
 
     public function manageDepartments(User $user): bool

@@ -14,6 +14,14 @@ final class CompanyPermission
 
     public const RESTORE = 'companies.restore';
 
+    public const FORCE_DELETE = 'companies.force-delete';
+
+    public const VIEW_TRASH = 'companies.view-trash';
+
+    public const CONSOLE = 'companies.console';
+
+    public const PROFILE = 'companies.profile';
+
     public const MANAGE = 'companies.manage';
 
     /**
@@ -27,6 +35,10 @@ final class CompanyPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::FORCE_DELETE,
+            self::VIEW_TRASH,
+            self::CONSOLE,
+            self::PROFILE,
             self::MANAGE,
         ];
     }

@@ -3,14 +3,14 @@
     <Teleport defer to="#page-header-actions">
       <RouterLink
         :to="{ name: 'customers.show', params: { id: route.params.id } }"
-        class="rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Back
       </RouterLink>
       <button
         v-if="primaryAction"
         type="button"
-        class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         @click="primaryAction.onClick"
       >
         {{ primaryAction.label }}
@@ -49,8 +49,8 @@
         class="rounded-[12px] px-4 py-2 text-sm font-medium transition"
         :class="
           activeTab === tab.id
-            ? 'bg-brand-600 text-white'
-            : 'border border-zinc-200 text-slate-700 hover:bg-zinc-50'
+            ? 'border border-zinc-300 bg-white text-slate-900 shadow-sm'
+            : 'border border-zinc-200 bg-white text-slate-700 hover:bg-zinc-50'
         "
         @click="switchTab(tab.id)"
       >
@@ -112,8 +112,8 @@
             class="rounded-[10px] px-3 py-1.5 text-xs font-medium transition"
             :class="
               noteTypeFilter === type.value
-                ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-200'
-                : 'bg-zinc-50 text-slate-600 hover:bg-zinc-100'
+                ? 'border border-zinc-300 bg-white text-slate-900 shadow-sm'
+                : 'border border-zinc-200 bg-white text-slate-600 hover:bg-zinc-50'
             "
             @click="filterNotes(type.value)"
           >
@@ -123,7 +123,7 @@
         <button
           v-if="can('customer-communications.create')"
           type="button"
-          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="rounded-[12px] border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openCreateNote"
         >
           Add Note
@@ -198,7 +198,7 @@
         <button
           v-if="can('customer-communications.create')"
           type="button"
-          class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openCreateTask"
         >
           <PlusIcon class="h-4 w-4" />
@@ -235,7 +235,7 @@
             <button
               v-if="task.status !== 'completed'"
               type="button"
-              class="rounded-[10px] border border-emerald-200 px-3 py-1.5 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+              class="rounded-[10px] border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-zinc-50"
               :disabled="store.saving"
               @click="completeTask(task.uuid)"
             >
@@ -292,7 +292,7 @@
         </div>
         <button
           type="button"
-          class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
+          class="h-10 rounded-[12px] border border-zinc-200 bg-white px-5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="loadCalendar"
         >
           Refresh
@@ -333,8 +333,8 @@
             class="rounded-[10px] px-3 py-1.5 text-xs font-medium transition"
             :class="
               commTypeFilter === type.value
-                ? 'bg-brand-50 text-brand-700 ring-1 ring-brand-200'
-                : 'bg-zinc-50 text-slate-600 hover:bg-zinc-100'
+                ? 'border border-zinc-300 bg-white text-slate-900 shadow-sm'
+                : 'border border-zinc-200 bg-white text-slate-600 hover:bg-zinc-50'
             "
             @click="filterCommunications(type.value)"
           >
@@ -344,7 +344,7 @@
         <button
           v-if="can('customer-communications.create')"
           type="button"
-          class="rounded-[12px] bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700"
+          class="rounded-[12px] border border-zinc-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-zinc-50"
           @click="openCreateCommunication"
         >
           Log Communication

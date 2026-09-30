@@ -117,16 +117,6 @@
         :style="menuStyle"
         @click.stop
       >
-        <RouterLink
-          v-if="can('roles.view')"
-          :to="{ name: 'roles.show', params: { id: activeRole.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <EyeIcon class="h-4 w-4 text-slate-400" />
-          View
-        </RouterLink>
         <button
           v-if="can('roles.restore')"
           type="button"
@@ -154,11 +144,10 @@
 
 <script setup>
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
-  EyeIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
@@ -185,7 +174,7 @@ function openDetails(role) {
   router.push({ name: 'roles.show', params: { id: role.uuid } });
 }
 const hasAnyAction = computed(() =>
-  canAny('roles.view', 'roles.restore', 'roles.force-delete'),
+  canAny('roles.restore', 'roles.force-delete'),
 );
 
 const openMenuId = ref(null);
@@ -205,7 +194,6 @@ function toggleMenu(id, event) {
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 176;
   const itemCount = [
-    can('roles.view'),
     can('roles.restore'),
     can('roles.force-delete') && role && !role.is_system,
   ].filter(Boolean).length;

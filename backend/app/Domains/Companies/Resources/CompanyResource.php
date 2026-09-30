@@ -71,6 +71,7 @@ class CompanyResource extends JsonResource
             $user->hasRole('super-admin')
             || $user->can('companies.update')
             || $user->can('companies.manage')
+            || $user->can('companies.profile')
         );
     }
 }

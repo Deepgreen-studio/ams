@@ -55,7 +55,26 @@ final class PermissionModule
             ],
             'companies' => [
                 'label' => 'Companies',
-                'actions' => array_merge($crud, ['restore', 'manage']),
+                'actions' => array_merge($crud, [
+                    'restore',
+                    'force-delete',
+                    'view-trash',
+                    'console',
+                    'profile',
+                    'manage',
+                ]),
+                'labels' => [
+                    'view' => 'View Company',
+                    'create' => 'Create Company',
+                    'update' => 'Edit Company',
+                    'delete' => 'Soft Delete Company',
+                    'restore' => 'Restore Company',
+                    'force-delete' => 'Permanent Delete Company',
+                    'view-trash' => 'Soft Deleted View',
+                    'console' => 'Company Console',
+                    'profile' => 'Company Profile',
+                    'manage' => 'Manage Company',
+                ],
             ],
             'departments' => [
                 'label' => 'Departments',

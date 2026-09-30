@@ -2,7 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="canAny('companies.view', 'companies.restore', 'companies.delete')"
+        v-if="can('companies.view-trash')"
         :to="{ name: 'companies.trash' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -77,7 +77,7 @@ import SearchFilters from '@/modules/companies/components/SearchFilters.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 
 const companiesStore = useCompaniesStore();
-const { can, canAny } = usePermissions();
+const { can } = usePermissions();
 const toast = useToast();
 const pendingDelete = ref(null);
 

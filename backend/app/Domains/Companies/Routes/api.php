@@ -13,27 +13,29 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('companies')->group(function (): void {
         Route::get('/', [CompanyController::class, 'index'])
-            ->middleware('permission:'.CompanyPermission::VIEW);
+            ->middleware('permission:'.CompanyPermission::VIEW.'|'.CompanyPermission::VIEW_TRASH);
         Route::post('/', [CompanyController::class, 'store'])
             ->middleware('permission:'.CompanyPermission::CREATE);
         Route::get('/{company}/console', [CompanyController::class, 'console'])
-            ->middleware('permission:'.CompanyPermission::VIEW);
+            ->middleware('permission:'.CompanyPermission::CONSOLE);
         Route::get('/{company}/activity', [CompanyController::class, 'activity'])
             ->middleware('permission:'.CompanyPermission::VIEW);
         Route::get('/{company}', [CompanyController::class, 'show'])
-            ->middleware('permission:'.CompanyPermission::VIEW);
+            ->middleware('permission:'.CompanyPermission::VIEW.'|'.CompanyPermission::PROFILE);
         Route::put('/{company}', [CompanyController::class, 'update'])
             ->middleware('permission:'.CompanyPermission::UPDATE);
+        Route::delete('/{company}/force-delete', [CompanyController::class, 'forceDelete'])
+            ->middleware('permission:'.CompanyPermission::FORCE_DELETE);
         Route::delete('/{company}', [CompanyController::class, 'destroy'])
             ->middleware('permission:'.CompanyPermission::DELETE);
         Route::post('/{company}/restore', [CompanyController::class, 'restore'])
             ->middleware('permission:'.CompanyPermission::RESTORE);
         Route::post('/{company}/logo', [CompanyController::class, 'uploadLogo'])
-            ->middleware('permission:'.CompanyPermission::MANAGE);
+            ->middleware('permission:'.CompanyPermission::MANAGE.'|'.CompanyPermission::PROFILE);
         Route::post('/{company}/favicon', [CompanyController::class, 'uploadFavicon'])
-            ->middleware('permission:'.CompanyPermission::MANAGE);
+            ->middleware('permission:'.CompanyPermission::MANAGE.'|'.CompanyPermission::PROFILE);
         Route::put('/{company}/branding', [CompanyController::class, 'updateBranding'])
-            ->middleware('permission:'.CompanyPermission::MANAGE);
+            ->middleware('permission:'.CompanyPermission::MANAGE.'|'.CompanyPermission::PROFILE);
     });
 
     Route::prefix('departments')->group(function (): void {

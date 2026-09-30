@@ -25,6 +25,9 @@ export const companyService = {
   restore(id) {
     return api.post(`/companies/${id}/restore`);
   },
+  forceDelete(id) {
+    return api.delete(`/companies/${id}/force-delete`);
+  },
   uploadLogo(id, file) {
     const formData = new FormData();
     formData.append('file', file);

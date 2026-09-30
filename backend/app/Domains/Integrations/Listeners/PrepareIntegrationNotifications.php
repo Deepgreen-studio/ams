@@ -18,6 +18,7 @@ use App\Domains\Integrations\Events\WebhookCreated;
 use App\Domains\Integrations\Events\WebhookDeleted;
 use App\Domains\Integrations\Events\WebhookDelivered;
 use App\Domains\Integrations\Events\WebhookFailed;
+use App\Domains\Integrations\Events\WebhookRestored;
 use App\Domains\Integrations\Events\WebhookUpdated;
 
 /** Placeholder for future integration notification workflows. */
@@ -40,6 +41,8 @@ class PrepareIntegrationNotifications
     public function handleWebhookUpdated(WebhookUpdated $event): void {}
 
     public function handleWebhookDeleted(WebhookDeleted $event): void {}
+
+    public function handleWebhookRestored(WebhookRestored $event): void {}
 
     public function handleWebhookDelivered(WebhookDelivered $event): void {}
 

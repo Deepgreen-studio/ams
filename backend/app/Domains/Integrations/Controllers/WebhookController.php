@@ -29,7 +29,11 @@ class WebhookController
 
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Webhook::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Webhook::class);
+        } else {
+            $this->authorize('viewAny', Webhook::class);
+        }
 
         $webhooks = $this->webhookService->list($request->only([
             'search', 'status', 'direction', 'company', 'company_id', 'integration_id',
@@ -87,7 +91,21 @@ class WebhookController
         $actor = $request->user();
         $this->webhookService->delete($webhook, $actor);
 
-        return ApiResponse::success(null, 'Webhook deleted successfully.');
+        return ApiResponse::success(null, 'Webhook soft deleted successfully.');
+    }
+
+    public function restore(Request $request, string $webhook): JsonResponse
+    {
+        $existing = $this->webhookService->find($webhook, withTrashed: true);
+        $this->authorize('restore', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $restored = $this->webhookService->restore($webhook, $actor);
+
+        return ApiResponse::success([
+            'webhook' => new WebhookResource($restored),
+        ], 'Webhook restored successfully.');
     }
 
     public function test(TestWebhookRequest $request, string $webhook): JsonResponse

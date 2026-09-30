@@ -351,6 +351,8 @@ const navigationCatalog = [
                   'webhooks.create',
                   'webhooks.update',
                   'webhooks.delete',
+                  'webhooks.view-trash',
+                  'webhooks.restore',
                   'webhooks.logs',
                   'webhooks.events',
                   'webhooks.docs',

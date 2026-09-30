@@ -1620,6 +1620,12 @@ const router = createRouter({
           meta: { title: 'Webhooks', requiresAuth: true },
         },
         {
+          path: 'webhooks/trash',
+          name: 'webhooks.trash',
+          component: () => import('@/modules/webhooks/pages/WebhooksTrashPage.vue'),
+          meta: { title: 'Soft Deleted', requiresAuth: true },
+        },
+        {
           path: 'webhooks/create',
           name: 'webhooks.create',
           component: () => import('@/modules/webhooks/pages/CreateWebhookPage.vue'),

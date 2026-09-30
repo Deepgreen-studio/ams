@@ -38,6 +38,7 @@ export const useWebhooksStore = defineStore('webhooks', () => {
     status: '',
     direction: '',
     company: '',
+    trashed: '',
     per_page: 10,
     page: 1,
   });
@@ -100,6 +101,21 @@ export const useWebhooksStore = defineStore('webhooks', () => {
       return data.data?.webhook;
     } catch (err) {
       state.applyError(err, 'Unable to update webhook');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
+  async function restoreWebhook(id) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await webhookService.restore(id);
+      state.successMessage.value = data.message;
+      return data;
+    } catch (err) {
+      state.applyError(err, 'Unable to restore webhook');
       throw err;
     } finally {
       state.saving.value = false;
@@ -214,6 +230,7 @@ export const useWebhooksStore = defineStore('webhooks', () => {
     createWebhook,
     updateWebhook,
     deleteWebhook,
+    restoreWebhook,
     testWebhook,
     fetchLogs,
     fetchLog,

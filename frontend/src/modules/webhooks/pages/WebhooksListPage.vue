@@ -2,6 +2,13 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('webhooks.view-trash')"
+        :to="{ name: 'webhooks.trash' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Soft Deleted
+      </RouterLink>
+      <RouterLink
         v-if="can('webhooks.create')"
         :to="{ name: 'webhooks.create' }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -24,6 +31,7 @@
       :webhooks="store.webhooks"
       :loading="store.loading"
       @delete="openDelete"
+      @restore="confirmRestore"
     >
       <template #toolbar>
         <SearchFilters v-model="filters" @submit="onFilter" @reset="onReset" />
@@ -51,9 +59,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete webhook"
-      :message="`Delete ${pendingDelete?.name || 'this webhook'}? This action cannot be undone.`"
-      confirm-label="Delete"
+      title="Soft delete webhook"
+      :message="`Soft delete ${pendingDelete?.name || 'this webhook'}? It can be restored later.`"
+      confirm-label="Soft Delete"
       :loading="store.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -114,10 +122,22 @@ async function confirmDelete() {
   try {
     const data = await store.deleteWebhook(pendingDelete.value.uuid);
     pendingDelete.value = null;
-    toast.success(data?.message || `${name} deleted successfully.`, 'Webhook deleted');
+    toast.success(data?.message || `${name} soft deleted.`, 'Webhook soft deleted');
     await store.fetchWebhooks({ ...filters });
   } catch (err) {
     toast.error(err?.message || store.error || 'Unable to delete webhook.', 'Delete failed');
+  }
+}
+
+async function confirmRestore(webhook) {
+  const name = webhook?.name || 'Webhook';
+
+  try {
+    const data = await store.restoreWebhook(webhook.uuid);
+    toast.success(data?.message || `${name} restored.`, 'Webhook restored');
+    await store.fetchWebhooks({ ...filters });
+  } catch (err) {
+    toast.error(err?.message || store.error || 'Unable to restore webhook.', 'Restore failed');
   }
 }
 </script>

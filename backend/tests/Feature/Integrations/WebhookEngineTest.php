@@ -269,5 +269,48 @@ class WebhookEngineTest extends TestCase
         $this->getJson('/api/v1/webhooks')->assertForbidden();
         $this->getJson('/api/v1/webhooks/logs')->assertForbidden();
         $this->getJson('/api/v1/webhooks/events')->assertForbidden();
+        $this->getJson('/api/v1/webhooks?trashed=only')->assertForbidden();
+    }
+
+    public function test_soft_deleted_webhooks_can_be_listed_and_restored(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $webhook = Webhook::query()->create([
+            'company_id' => $this->company->id,
+            'name' => 'Retired Hook',
+            'slug' => 'retired-hook',
+            'direction' => 'outgoing',
+            'status' => 'active',
+            'url' => 'https://hooks.example.test/retired',
+            'secret' => 'secret',
+            'signature_algorithm' => 'hmac_sha256',
+            'subscribed_events' => ['webhook.test'],
+        ]);
+
+        $this->deleteJson('/api/v1/webhooks/'.$webhook->uuid)
+            ->assertOk()
+            ->assertJsonPath('message', 'Webhook soft deleted successfully.');
+        $this->assertSoftDeleted('webhooks', ['id' => $webhook->id]);
+
+        $this->getJson('/api/v1/webhooks?trashed=only')
+            ->assertOk()
+            ->assertJsonPath('data.webhooks.meta.total', 1);
+
+        $this->postJson('/api/v1/webhooks/'.$webhook->uuid.'/restore')
+            ->assertOk()
+            ->assertJsonPath('data.webhook.uuid', $webhook->uuid);
+
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::VIEW_TRASH,
+            'display_name' => 'Soft Deleted View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::DELETE,
+            'display_name' => 'Soft Delete Webhook',
+        ]);
+        $this->assertTrue(
+            Role::findByName('company-admin', 'web')->hasPermissionTo(WebhookPermission::RESTORE)
+        );
     }
 }

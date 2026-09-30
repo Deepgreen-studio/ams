@@ -142,12 +142,14 @@ final class PermissionModule
             ],
             'webhooks' => [
                 'label' => 'Webhooks',
-                'actions' => ['view', 'create', 'update', 'delete', 'logs', 'events', 'docs', 'test'],
+                'actions' => ['view', 'create', 'update', 'delete', 'restore', 'view-trash', 'logs', 'events', 'docs', 'test'],
                 'labels' => [
                     'view' => 'View Webhook',
                     'create' => 'Create Webhook',
                     'update' => 'Edit Webhook',
-                    'delete' => 'Delete Webhook',
+                    'delete' => 'Soft Delete Webhook',
+                    'restore' => 'Restore Webhook',
+                    'view-trash' => 'Soft Deleted View',
                     'logs' => 'Webhook Logs',
                     'events' => 'Webhook Events',
                     'docs' => 'API Docs',

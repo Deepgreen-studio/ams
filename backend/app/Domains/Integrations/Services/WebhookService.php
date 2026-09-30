@@ -7,6 +7,7 @@ use App\Domains\Integrations\Enums\WebhookDirection;
 use App\Domains\Integrations\Enums\WebhookLogStatus;
 use App\Domains\Integrations\Events\WebhookCreated;
 use App\Domains\Integrations\Events\WebhookDeleted;
+use App\Domains\Integrations\Events\WebhookRestored;
 use App\Domains\Integrations\Events\WebhookUpdated;
 use App\Domains\Integrations\Jobs\DeliverOutgoingWebhookJob;
 use App\Domains\Integrations\Jobs\ProcessIncomingWebhookJob;
@@ -156,6 +157,23 @@ class WebhookService
             $this->webhookRepository->updateWebhook($webhook, ['updated_by' => $actor->id]);
             $webhook->delete();
             event(new WebhookDeleted($webhook, $actor));
+        });
+    }
+
+    public function restore(string $identifier, User $actor): Webhook
+    {
+        return DB::transaction(function () use ($identifier, $actor): Webhook {
+            $webhook = $this->webhookRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $webhook->trashed()) {
+                throw new ApiException('Webhook is not deleted.', 422);
+            }
+
+            $webhook->restore();
+            $restored = $this->webhookRepository->updateWebhook($webhook, ['updated_by' => $actor->id]);
+            event(new WebhookRestored($restored, $actor));
+
+            return $restored;
         });
     }
 

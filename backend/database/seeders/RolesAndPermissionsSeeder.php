@@ -101,6 +101,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'integrations.view', 'integrations.create', 'integrations.update', 'integrations.delete',
             'integrations.restore', 'integrations.view-trash',
             'webhooks.view', 'webhooks.create', 'webhooks.update', 'webhooks.delete',
+            'webhooks.restore', 'webhooks.view-trash',
             'webhooks.logs', 'webhooks.events', 'webhooks.docs', 'webhooks.test',
             'queue.view', 'queue.retry',
             'monitoring.view',

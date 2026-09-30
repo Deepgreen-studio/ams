@@ -37,6 +37,7 @@ const items = [
     permission: 'webhooks.view',
     match: [
       'webhooks.index',
+      'webhooks.trash',
       'webhooks.create',
       'webhooks.show',
       'webhooks.edit',

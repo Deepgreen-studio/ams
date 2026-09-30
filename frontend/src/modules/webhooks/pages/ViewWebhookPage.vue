@@ -3,7 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <div v-if="webhook" class="flex flex-wrap items-center justify-end gap-2">
         <RouterLink
-          v-if="can('webhooks.test')"
+          v-if="can('webhooks.test') && !webhook.deleted_at"
           :to="{ name: 'webhooks.tester', params: { id: webhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -11,7 +11,7 @@
           Test
         </RouterLink>
         <RouterLink
-          v-if="can('webhooks.update')"
+          v-if="can('webhooks.update') && !webhook.deleted_at"
           :to="{ name: 'webhooks.edit', params: { id: webhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -19,13 +19,22 @@
           Edit
         </RouterLink>
         <button
-          v-if="can('webhooks.delete')"
+          v-if="webhook.deleted_at && can('webhooks.restore')"
+          type="button"
+          class="rounded-[12px] bg-brand-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-brand-700 disabled:opacity-60"
+          :disabled="store.saving"
+          @click="restore"
+        >
+          Restore
+        </button>
+        <button
+          v-else-if="!webhook.deleted_at && can('webhooks.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700"
           @click="showDelete = true"
         >
           <TrashIcon class="h-4 w-4 text-white" />
-          Delete
+          Soft Delete
         </button>
       </div>
     </Teleport>
@@ -173,9 +182,9 @@
 
     <DeleteConfirmation
       :open="showDelete"
-      title="Delete webhook"
-      :message="`Delete ${webhook?.name || 'this webhook'}? This action cannot be undone.`"
-      confirm-label="Delete"
+      title="Soft delete webhook"
+      :message="`Soft delete ${webhook?.name || 'this webhook'}? It can be restored later.`"
+      confirm-label="Soft Delete"
       :loading="store.saving"
       @cancel="showDelete = false"
       @confirm="confirmDelete"
@@ -250,6 +259,20 @@ async function copyUrl() {
   }
 }
 
+async function restore() {
+  if (!webhook.value) return;
+
+  const name = webhook.value.name || 'Webhook';
+
+  try {
+    const data = await store.restoreWebhook(route.params.id);
+    toast.success(data?.message || `${name} restored.`, 'Webhook restored');
+    await store.fetchWebhook(route.params.id);
+  } catch (err) {
+    toast.error(err?.message || store.error || 'Unable to restore webhook.', 'Restore failed');
+  }
+}
+
 async function confirmDelete() {
   if (!webhook.value) return;
 
@@ -258,7 +281,7 @@ async function confirmDelete() {
   try {
     const data = await store.deleteWebhook(route.params.id);
     showDelete.value = false;
-    toast.success(data?.message || `${name} deleted successfully.`, 'Webhook deleted');
+    toast.success(data?.message || `${name} soft deleted.`, 'Webhook soft deleted');
     await router.push({ name: 'webhooks.index' });
   } catch (err) {
     toast.error(err?.message || store.error || 'Unable to delete webhook.', 'Delete failed');

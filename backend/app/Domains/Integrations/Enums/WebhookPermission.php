@@ -12,6 +12,10 @@ final class WebhookPermission
 
     public const DELETE = 'webhooks.delete';
 
+    public const RESTORE = 'webhooks.restore';
+
+    public const VIEW_TRASH = 'webhooks.view-trash';
+
     public const LOGS = 'webhooks.logs';
 
     public const EVENTS = 'webhooks.events';
@@ -30,6 +34,8 @@ final class WebhookPermission
             self::CREATE,
             self::UPDATE,
             self::DELETE,
+            self::RESTORE,
+            self::VIEW_TRASH,
             self::LOGS,
             self::EVENTS,
             self::DOCS,

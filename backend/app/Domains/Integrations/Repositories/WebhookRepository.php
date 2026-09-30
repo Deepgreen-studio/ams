@@ -101,7 +101,7 @@ class WebhookRepository extends BaseRepository
 
         $sortBy = (string) ($filters['sort_by'] ?? 'created_at');
         $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowed = ['id', 'name', 'status', 'direction', 'created_at', 'updated_at', 'last_triggered_at'];
+        $allowed = ['id', 'name', 'status', 'direction', 'created_at', 'updated_at', 'last_triggered_at', 'deleted_at'];
         if (! in_array($sortBy, $allowed, true)) {
             $sortBy = 'created_at';
         }
@@ -131,10 +131,9 @@ class WebhookRepository extends BaseRepository
 
     public function slugExistsForCompany(int $companyId, string $slug, ?int $ignoreId = null): bool
     {
-        $query = $this->model->newQuery()
+        $query = $this->model->newQuery()->withTrashed()
             ->where('company_id', $companyId)
-            ->where('slug', $slug)
-            ->whereNull('deleted_at');
+            ->where('slug', $slug);
 
         if ($ignoreId !== null) {
             $query->where('id', '!=', $ignoreId);

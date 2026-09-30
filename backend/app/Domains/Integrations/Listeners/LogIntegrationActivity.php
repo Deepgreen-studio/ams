@@ -18,6 +18,7 @@ use App\Domains\Integrations\Events\WebhookCreated;
 use App\Domains\Integrations\Events\WebhookDeleted;
 use App\Domains\Integrations\Events\WebhookDelivered;
 use App\Domains\Integrations\Events\WebhookFailed;
+use App\Domains\Integrations\Events\WebhookRestored;
 use App\Domains\Integrations\Events\WebhookUpdated;
 
 class LogIntegrationActivity
@@ -123,7 +124,16 @@ class LogIntegrationActivity
             ->causedBy($event->actor)
             ->performedOn($event->webhook)
             ->withProperties(['event' => 'webhook_deleted', 'name' => $event->webhook->name])
-            ->log('Webhook deleted');
+            ->log('Webhook soft deleted');
+    }
+
+    public function handleWebhookRestored(WebhookRestored $event): void
+    {
+        activity('webhooks')
+            ->causedBy($event->actor)
+            ->performedOn($event->webhook)
+            ->withProperties(['event' => 'webhook_restored', 'name' => $event->webhook->name])
+            ->log('Webhook restored');
     }
 
     public function handleWebhookDelivered(WebhookDelivered $event): void

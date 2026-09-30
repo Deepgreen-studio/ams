@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('webhooks')->group(function (): void {
         Route::get('/', [WebhookController::class, 'index'])
-            ->middleware('permission:'.WebhookPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::VIEW.'|'.WebhookPermission::VIEW_TRASH);
         Route::post('/', [WebhookController::class, 'store'])
             ->middleware('permission:'.WebhookPermission::CREATE);
         Route::get('/logs', [WebhookController::class, 'logs'])
@@ -72,6 +72,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.WebhookPermission::UPDATE);
         Route::delete('/{webhook}', [WebhookController::class, 'destroy'])
             ->middleware('permission:'.WebhookPermission::DELETE);
+        Route::post('/{webhook}/restore', [WebhookController::class, 'restore'])
+            ->middleware('permission:'.WebhookPermission::RESTORE);
         Route::post('/{webhook}/test', [WebhookController::class, 'test'])
             ->middleware('permission:'.WebhookPermission::TEST);
     });

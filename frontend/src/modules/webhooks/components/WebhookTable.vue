@@ -124,36 +124,50 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </RouterLink>
-        <RouterLink
-          v-if="can('webhooks.test')"
-          :to="{ name: 'webhooks.tester', params: { id: activeWebhook.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <BeakerIcon class="h-4 w-4 text-slate-400" />
-          Test
-        </RouterLink>
-        <RouterLink
-          v-if="can('webhooks.update')"
-          :to="{ name: 'webhooks.edit', params: { id: activeWebhook.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </RouterLink>
-        <button
-          v-if="can('webhooks.delete')"
-          type="button"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-          role="menuitem"
-          @click="onDelete(activeWebhook)"
-        >
-          <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
-        </button>
+        <template v-if="isTrashed(activeWebhook)">
+          <button
+            v-if="can('webhooks.restore')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="onRestore(activeWebhook)"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+            Restore
+          </button>
+        </template>
+        <template v-else>
+          <RouterLink
+            v-if="can('webhooks.test')"
+            :to="{ name: 'webhooks.tester', params: { id: activeWebhook.uuid } }"
+            class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="closeMenu"
+          >
+            <BeakerIcon class="h-4 w-4 text-slate-400" />
+            Test
+          </RouterLink>
+          <RouterLink
+            v-if="can('webhooks.update')"
+            :to="{ name: 'webhooks.edit', params: { id: activeWebhook.uuid } }"
+            class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="closeMenu"
+          >
+            <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+            Edit
+          </RouterLink>
+          <button
+            v-if="can('webhooks.delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onDelete(activeWebhook)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Soft Delete
+          </button>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -163,6 +177,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import {
+  ArrowUturnLeftIcon,
   BeakerIcon,
   EllipsisVerticalIcon,
   EyeIcon,
@@ -180,11 +195,11 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['delete']);
+const emit = defineEmits(['delete', 'restore']);
 const router = useRouter();
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('webhooks.view', 'webhooks.test', 'webhooks.update', 'webhooks.delete'),
+  canAny('webhooks.view', 'webhooks.test', 'webhooks.update', 'webhooks.delete', 'webhooks.restore'),
 );
 
 function openDetails(webhook) {
@@ -202,6 +217,10 @@ const activeWebhook = computed(
   () => props.webhooks.find((item) => item.uuid === openMenuId.value) || null,
 );
 
+function isTrashed(webhook) {
+  return Boolean(webhook?.deleted_at);
+}
+
 function initials(name) {
   return String(name || 'W')
     .trim()
@@ -215,14 +234,17 @@ function toggleMenu(id, event) {
     return;
   }
 
+  const webhook = props.webhooks.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
-  const itemCount = [
-    can('webhooks.view'),
-    can('webhooks.test'),
-    can('webhooks.update'),
-    can('webhooks.delete'),
-  ].filter(Boolean).length;
+  const menuWidth = 176;
+  const itemCount = isTrashed(webhook)
+    ? [can('webhooks.view'), can('webhooks.restore')].filter(Boolean).length
+    : [
+        can('webhooks.view'),
+        can('webhooks.test'),
+        can('webhooks.update'),
+        can('webhooks.delete'),
+      ].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
@@ -244,6 +266,11 @@ function closeMenu() {
 function onDelete(webhook) {
   closeMenu();
   emit('delete', webhook);
+}
+
+function onRestore(webhook) {
+  closeMenu();
+  emit('restore', webhook);
 }
 
 function onDocumentClick() {

@@ -27,6 +27,7 @@ const EXACT = {
   'webhooks.logs': 'webhooks.logs',
   'webhooks.events': 'webhooks.events',
   'webhooks.tester': 'webhooks.test',
+  'webhooks.trash': 'webhooks.view-trash',
   'integrations.docs': ['integrations.view', 'webhooks.docs'],
   'sync.dashboard': 'integrations.view',
   'mappings.index': 'integrations.view',

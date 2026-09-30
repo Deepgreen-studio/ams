@@ -77,7 +77,7 @@
         </div>
       </div>
 
-      <div class="mb-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <button
           v-for="category in store.overview.categories || []"
           :key="category.value"
@@ -87,10 +87,7 @@
           @click="selectCategory(category.value)"
         >
           <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
-              <h3 class="text-sm font-semibold text-slate-900">{{ category.label }}</h3>
-              <p class="mt-1 text-xs text-slate-500">{{ category.description }}</p>
-            </div>
+            <h3 class="min-w-0 text-sm font-semibold text-slate-900">{{ category.label }}</h3>
             <span
               class="inline-flex shrink-0 items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset"
               :class="shareTone(category.event_count)"
@@ -98,6 +95,9 @@
               {{ category.share }}%
             </span>
           </div>
+          <p class="mt-1 min-h-10 whitespace-pre-line text-xs leading-5 text-slate-500">
+            {{ category.description }}
+          </p>
           <p class="mt-4 text-2xl font-bold tracking-tight text-slate-900">
             {{ formatNumber(category.event_count) }}
           </p>

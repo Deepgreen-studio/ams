@@ -38,14 +38,14 @@ enum AnalyticsCategory: string
     public function description(): string
     {
         return match ($this) {
-            self::Business => 'Revenue, growth, and portfolio performance across companies and products.',
-            self::Operational => 'Delivery, automation, workflows, and day-to-day platform operations.',
-            self::Application => 'App usage, sessions, installs, retention, and release health.',
-            self::Customer => 'Customer lifecycle, subscriptions, engagement, and support signals.',
-            self::Api => 'API traffic, latency, error rates, and integration throughput.',
-            self::System => 'Infrastructure health, queues, jobs, and platform reliability.',
-            self::Security => 'Logins, permissions, GDPR actions, threat signals, and API key activity.',
-            self::Executive => 'CEO and leadership scorecards, KPI boards, trends, and forecasts.',
+            self::Business => "Revenue, growth, and portfolio.\nCompanies, products, and trends.",
+            self::Operational => "Delivery, automation, workflows.\nDay-to-day platform operations.",
+            self::Application => "Usage, sessions, and retention.\nRelease health for applications.",
+            self::Customer => "Lifecycle, plans, and engagement.\nSupport signals per customer.",
+            self::Api => "Traffic, latency, and errors.\nIntegration throughput.",
+            self::System => "Health, queues, and reliability.\nInfrastructure and uptime.",
+            self::Security => "Logins, permissions, and threats.\nGDPR actions and API keys.",
+            self::Executive => "Scorecards, KPIs, and forecasts.\nLeadership performance view.",
         };
     }
 }

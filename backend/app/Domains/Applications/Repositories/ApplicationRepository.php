@@ -122,6 +122,7 @@ class ApplicationRepository extends BaseRepository
             'current_version',
             'created_at',
             'updated_at',
+            'deleted_at',
         ];
 
         if (! in_array($sortBy, $allowed, true)) {
@@ -155,9 +156,22 @@ class ApplicationRepository extends BaseRepository
 
     public function slugExistsForCompany(int $companyId, string $slug, ?int $ignoreId = null): bool
     {
+        $query = $this->model->newQuery()->withTrashed()
+            ->where('company_id', $companyId)
+            ->where('slug', $slug);
+
+        if ($ignoreId !== null) {
+            $query->where('id', '!=', $ignoreId);
+        }
+
+        return $query->exists();
+    }
+
+    public function nameExistsForCompany(int $companyId, string $name, ?int $ignoreId = null): bool
+    {
         $query = $this->model->newQuery()
             ->where('company_id', $companyId)
-            ->where('slug', $slug)
+            ->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($name))])
             ->whereNull('deleted_at');
 
         if ($ignoreId !== null) {

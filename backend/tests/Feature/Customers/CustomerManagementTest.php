@@ -3,7 +3,9 @@
 namespace Tests\Feature\Customers;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Customers\Enums\CustomerPermission;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Roles\Models\Role;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -213,6 +215,33 @@ class CustomerManagementTest extends TestCase
             'first_name' => 'Blocked',
             'last_name' => 'User',
             'email' => 'blocked@example.com',
+        ])->assertForbidden();
+    }
+
+    public function test_customer_list_actions_follow_their_own_permissions(): void
+    {
+        $companyAdmin = Role::findByName('company-admin', 'web');
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::VIEW));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::CREATE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::UPDATE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::DELETE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::VIEW_TRASH));
+        $this->assertDatabaseHas('permissions', [
+            'name' => CustomerPermission::VIEW_TRASH,
+            'display_name' => 'Soft Deleted View',
+        ]);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $this->getJson('/api/v1/customers?trashed=only')->assertForbidden();
+        $this->postJson('/api/v1/customers', [
+            'company_id' => $this->company->uuid,
+            'customer_type' => 'individual',
+            'first_name' => 'No',
+            'last_name' => 'Create',
+            'email' => 'no.create@example.com',
         ])->assertForbidden();
     }
 }

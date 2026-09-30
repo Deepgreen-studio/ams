@@ -30,7 +30,11 @@ class CustomerController
 
     public function index(IndexCustomerRequest $request): JsonResponse
     {
-        $this->authorize('viewAny', Customer::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Customer::class);
+        } else {
+            $this->authorize('viewAny', Customer::class);
+        }
 
         $result = $this->customerService->list($request->filters());
 

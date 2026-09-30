@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('applications')->group(function (): void {
         Route::get('/', [ApplicationController::class, 'index'])
-            ->middleware('permission:'.ApplicationPermission::VIEW);
+            ->middleware('permission:'.ApplicationPermission::VIEW.'|'.ApplicationPermission::VIEW_TRASH);
         Route::post('/', [ApplicationController::class, 'store'])
             ->middleware('permission:'.ApplicationPermission::CREATE);
 
@@ -176,6 +176,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::delete('/{application}', [ApplicationController::class, 'destroy'])
             ->middleware('permission:'.ApplicationPermission::DELETE);
         Route::post('/{application}/restore', [ApplicationController::class, 'restore'])
-            ->middleware('permission:'.ApplicationPermission::DELETE);
+            ->middleware('permission:'.ApplicationPermission::RESTORE);
     });
 });

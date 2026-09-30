@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Applications;
 
+use App\Domains\Applications\Enums\ApplicationPermission;
 use App\Domains\Applications\Models\Application;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Models\Integration;
+use App\Domains\Roles\Models\Role;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -52,6 +54,7 @@ class ApplicationManagementTest extends TestCase
         $create = $this->postJson('/api/v1/applications', [
             'company_id' => $this->company->uuid,
             'name' => 'Customer Portal',
+            'slug' => 'customer-portal',
             'description' => 'Mobile customer experience app',
             'platform' => 'android',
             'category' => 'business',
@@ -86,6 +89,34 @@ class ApplicationManagementTest extends TestCase
             ->assertJsonPath('data.application.company.uuid', $this->company->uuid);
     }
 
+    public function test_other_category_requires_a_custom_name(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $this->postJson('/api/v1/applications', [
+            'company_id' => $this->company->uuid,
+            'name' => 'Custom Category App',
+            'slug' => 'custom-category-app',
+            'platform' => 'web',
+            'category' => 'other',
+        ])
+            ->assertStatus(422)
+            ->assertJsonStructure(['errors' => ['category_custom']]);
+
+        $this->postJson('/api/v1/applications', [
+            'company_id' => $this->company->uuid,
+            'name' => 'Custom Category App',
+            'slug' => 'custom-category-app',
+            'platform' => 'web',
+            'category' => 'other',
+            'category_custom' => 'Logistics',
+        ])
+            ->assertCreated()
+            ->assertJsonPath('data.application.category', 'other')
+            ->assertJsonPath('data.application.category_custom', 'Logistics')
+            ->assertJsonPath('data.application.category_label', 'Logistics');
+    }
+
     public function test_application_validation_rejects_invalid_payload(): void
     {
         Sanctum::actingAs($this->admin);
@@ -100,7 +131,7 @@ class ApplicationManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
-            ->assertJsonStructure(['errors' => ['company_id', 'name', 'platform', 'category', 'status', 'visibility']]);
+            ->assertJsonStructure(['errors' => ['company_id', 'name', 'slug', 'platform', 'category', 'status', 'visibility']]);
     }
 
     public function test_admin_can_update_soft_delete_and_restore_application(): void
@@ -133,6 +164,32 @@ class ApplicationManagementTest extends TestCase
         $this->postJson('/api/v1/applications/'.$application->uuid.'/restore')
             ->assertOk()
             ->assertJsonPath('data.application.uuid', $application->uuid);
+
+        $this->getJson('/api/v1/applications?trashed=only')
+            ->assertOk();
+    }
+
+    public function test_soft_deleted_applications_require_their_own_permission(): void
+    {
+        $companyAdmin = Role::findByName('company-admin', 'web');
+        $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::DELETE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::VIEW_TRASH));
+        $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::RESTORE));
+        $this->assertDatabaseHas('permissions', [
+            'name' => ApplicationPermission::VIEW_TRASH,
+            'display_name' => 'Soft Deleted View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => ApplicationPermission::DELETE,
+            'display_name' => 'Soft Delete Application',
+        ]);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $this->getJson('/api/v1/applications?trashed=only')->assertForbidden();
+        $this->deleteJson('/api/v1/applications/'.$this->company->uuid)->assertForbidden();
     }
 
     public function test_user_without_permission_is_forbidden(): void
@@ -154,14 +211,23 @@ class ApplicationManagementTest extends TestCase
             'platform' => 'web',
         ])->assertCreated();
 
-        $second = $this->postJson('/api/v1/applications', [
+        $this->postJson('/api/v1/applications', [
             'company_id' => $this->company->uuid,
             'name' => 'Field Service',
-            'slug' => 'field-service',
+            'slug' => 'field-service-web',
             'platform' => 'android',
-        ])->assertCreated();
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.name.0', 'The name has already been taken.');
 
-        $this->assertSame('field-service-2', $second->json('data.application.slug'));
+        $this->postJson('/api/v1/applications', [
+            'company_id' => $this->company->uuid,
+            'name' => 'Field Service Mobile',
+            'slug' => 'field-service',
+            'platform' => 'ios',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.slug.0', 'The slug has already been taken.');
     }
 
     public function test_integration_must_belong_to_same_company(): void
@@ -192,6 +258,7 @@ class ApplicationManagementTest extends TestCase
             'company_id' => $this->company->uuid,
             'integration_id' => $integration->uuid,
             'name' => 'Linked App',
+            'slug' => 'linked-app',
             'platform' => 'ios',
         ])->assertStatus(422);
     }
@@ -216,6 +283,7 @@ class ApplicationManagementTest extends TestCase
             'company_id' => $this->company->uuid,
             'integration_id' => $integration->uuid,
             'name' => 'Push Enabled App',
+            'slug' => 'push-enabled-app',
             'platform' => 'android',
             'status' => 'active',
         ])

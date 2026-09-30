@@ -3,6 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <div v-if="application" class="flex flex-wrap items-center justify-end gap-2">
         <RouterLink
+          v-if="application && !application.deleted_at && can('applications.update')"
           :to="{ name: 'applications.edit', params: { id: application.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
@@ -10,7 +11,7 @@
           Edit
         </RouterLink>
         <button
-          v-if="application.deleted_at"
+          v-if="application.deleted_at && can('applications.restore')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="applicationsStore.saving"
@@ -19,13 +20,13 @@
           Restore
         </button>
         <button
-          v-else
+          v-else-if="!application.deleted_at && can('applications.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
           @click="showDelete = true"
         >
           <TrashIcon class="h-4 w-4 text-white" />
-          Delete
+          Soft Delete
         </button>
       </div>
     </Teleport>
@@ -50,9 +51,9 @@
 
     <DeleteConfirmation
       :open="showDelete"
-      title="Delete application"
-      :message="`Soft delete ${application?.name || 'this application'}?`"
-      confirm-label="Delete"
+      title="Soft delete application"
+      :message="`Soft delete ${application?.name || 'this application'}? It can be restored later.`"
+      confirm-label="Soft Delete"
       :loading="applicationsStore.saving"
       @cancel="showDelete = false"
       @confirm="confirmDelete"
@@ -65,6 +66,7 @@ import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import ApplicationCard from '@/modules/applications/components/ApplicationCard.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
@@ -72,6 +74,7 @@ import { useApplicationsStore } from '@/modules/applications/stores/applications
 const route = useRoute();
 const router = useRouter();
 const applicationsStore = useApplicationsStore();
+const { can } = usePermissions();
 const showDelete = ref(false);
 
 const application = computed(() => applicationsStore.currentApplication);

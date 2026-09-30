@@ -90,11 +90,27 @@ final class PermissionModule
             ],
             'applications' => [
                 'label' => 'Applications',
-                'actions' => $crud,
+                'actions' => array_merge($crud, ['restore', 'view-trash']),
+                'labels' => [
+                    'view' => 'View Application',
+                    'create' => 'Create Application',
+                    'update' => 'Edit Application',
+                    'delete' => 'Soft Delete Application',
+                    'restore' => 'Restore Application',
+                    'view-trash' => 'Soft Deleted View',
+                ],
             ],
             'customers' => [
                 'label' => 'Customers',
-                'actions' => array_merge($crud, ['restore', 'export', 'anonymize']),
+                'actions' => array_merge($crud, ['restore', 'view-trash', 'export', 'anonymize']),
+                'labels' => [
+                    'view' => 'View Customer',
+                    'create' => 'Create Customer',
+                    'update' => 'Edit Customer',
+                    'delete' => 'Soft Delete Customer',
+                    'restore' => 'Restore Customer',
+                    'view-trash' => 'Soft Deleted View',
+                ],
             ],
             'customer-contacts' => [
                 'label' => 'Customer Contacts',

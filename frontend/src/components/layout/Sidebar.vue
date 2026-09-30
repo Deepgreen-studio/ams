@@ -238,7 +238,14 @@ const navigationCatalog = [
                 to: { name: 'customers.index' },
                 icon: UserGroupIcon,
                 match: ['customers.'],
-                permission: 'customers.view',
+                permission: [
+                  'customers.view',
+                  'customers.create',
+                  'customers.update',
+                  'customers.delete',
+                  'customers.view-trash',
+                  'customers.restore',
+                ],
             },
             {
                 name: 'applications.index',
@@ -246,7 +253,14 @@ const navigationCatalog = [
                 to: { name: 'applications.index' },
                 icon: DevicePhoneMobileIcon,
                 match: ['applications.'],
-                permission: 'applications.view',
+                permission: [
+                  'applications.view',
+                  'applications.create',
+                  'applications.update',
+                  'applications.delete',
+                  'applications.view-trash',
+                  'applications.restore',
+                ],
             },
             {
                 name: 'integrations.index',

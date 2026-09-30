@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('customers')->group(function (): void {
         Route::get('/', [CustomerController::class, 'index'])
-            ->middleware('permission:' . CustomerPermission::VIEW);
+            ->middleware('permission:' . CustomerPermission::VIEW . '|' . CustomerPermission::VIEW_TRASH);
         Route::get('/statistics', [CustomerController::class, 'statistics'])
             ->middleware('permission:' . CustomerPermission::VIEW);
         Route::get('/industries', [CustomerController::class, 'industries'])
@@ -42,7 +42,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::delete('/{customer}', [CustomerController::class, 'destroy'])
             ->middleware('permission:' . CustomerPermission::DELETE);
         Route::post('/{customer}/restore', [CustomerController::class, 'restore'])
-            ->middleware('permission:' . CustomerPermission::RESTORE . '|' . CustomerPermission::DELETE);
+            ->middleware('permission:' . CustomerPermission::RESTORE);
     });
 
     Route::prefix('customer-contacts')->group(function (): void {

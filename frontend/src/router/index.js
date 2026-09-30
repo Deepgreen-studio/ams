@@ -211,6 +211,12 @@ const router = createRouter({
           meta: { title: 'Applications', requiresAuth: true },
         },
         {
+          path: 'applications/trash',
+          name: 'applications.trash',
+          component: () => import('@/modules/applications/pages/ApplicationsTrashPage.vue'),
+          meta: { title: 'Soft Deleted', requiresAuth: true },
+        },
+        {
           path: 'applications/create',
           name: 'applications.create',
           component: () => import('@/modules/applications/pages/CreateApplicationPage.vue'),

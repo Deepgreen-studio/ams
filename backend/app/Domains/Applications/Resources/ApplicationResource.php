@@ -42,7 +42,10 @@ class ApplicationResource extends JsonResource
             'platform' => $this->platform?->value ?? $this->platform,
             'platform_label' => $this->platform?->label(),
             'category' => $this->category?->value ?? $this->category,
-            'category_label' => $this->category?->label(),
+            'category_custom' => $this->category_custom,
+            'category_label' => $this->category?->value === 'other' && filled($this->category_custom)
+                ? $this->category_custom
+                : $this->category?->label(),
             'icon' => $this->icon,
             'banner' => $this->banner,
             'current_version' => $this->current_version,

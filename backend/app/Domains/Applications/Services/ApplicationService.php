@@ -78,10 +78,10 @@ class ApplicationService
                 $data['integration_id'] ?? null,
                 $company->id
             );
-            $payload['slug'] = $this->resolveUniqueSlug(
+            $payload['slug'] = $this->guardUniqueIdentity(
                 $company->id,
-                $payload['slug'] ?? null,
-                $payload['name']
+                $payload['name'],
+                $payload['slug'] ?? null
             );
             $payload['status'] = $payload['status'] ?? 'draft';
             $payload['visibility'] = $payload['visibility'] ?? 'private';
@@ -112,14 +112,15 @@ class ApplicationService
                 );
             }
 
-            if (array_key_exists('slug', $payload) || array_key_exists('name', $payload)) {
-                $name = $payload['name'] ?? $application->name;
-                $slugInput = $payload['slug'] ?? null;
-                $payload['slug'] = $this->resolveUniqueSlug(
+            if (array_key_exists('name', $payload) || array_key_exists('slug', $payload)) {
+                $name = (string) ($payload['name'] ?? $application->name);
+                $slugInput = array_key_exists('slug', $payload) ? $payload['slug'] : $application->slug;
+                $payload['slug'] = $this->guardUniqueIdentity(
                     $application->company_id,
-                    $slugInput,
                     $name,
-                    $application->id
+                    is_string($slugInput) ? $slugInput : null,
+                    $application->id,
+                    checkName: array_key_exists('name', $payload)
                 );
             }
 
@@ -169,6 +170,7 @@ class ApplicationService
             'description',
             'platform',
             'category',
+            'category_custom',
             'icon',
             'banner',
             'current_version',
@@ -183,6 +185,7 @@ class ApplicationService
             'description',
             'slug',
             'category',
+            'category_custom',
             'icon',
             'banner',
             'current_version',
@@ -195,6 +198,17 @@ class ApplicationService
 
         if ($isUpdate && array_key_exists('slug', $payload) && $payload['slug'] === null) {
             unset($payload['slug']);
+        }
+
+        if (array_key_exists('category', $payload) && $payload['category'] !== 'other') {
+            $payload['category_custom'] = null;
+        }
+
+        if (array_key_exists('category_custom', $payload) && is_string($payload['category_custom'])) {
+            $payload['category_custom'] = trim($payload['category_custom']);
+            if ($payload['category_custom'] === '') {
+                $payload['category_custom'] = null;
+            }
         }
 
         return $payload;
@@ -215,21 +229,32 @@ class ApplicationService
         return $integration->id;
     }
 
-    protected function resolveUniqueSlug(int $companyId, ?string $slug, string $name, ?int $ignoreId = null): string
-    {
-        $base = Str::slug($slug ?: $name);
-        if ($base === '') {
-            $base = 'application';
+    protected function guardUniqueIdentity(
+        int $companyId,
+        string $name,
+        ?string $slug,
+        ?int $ignoreId = null,
+        bool $checkName = true
+    ): string {
+        $errors = [];
+
+        if ($checkName && $this->applicationRepository->nameExistsForCompany($companyId, $name, $ignoreId)) {
+            $errors['name'] = ['The name has already been taken.'];
         }
 
-        $candidate = $base;
-        $suffix = 2;
-
-        while ($this->applicationRepository->slugExistsForCompany($companyId, $candidate, $ignoreId)) {
-            $candidate = $base.'-'.$suffix;
-            $suffix++;
+        $resolved = Str::slug($slug ?: $name);
+        if ($resolved === '') {
+            $resolved = 'application';
         }
 
-        return $candidate;
+        if ($this->applicationRepository->slugExistsForCompany($companyId, $resolved, $ignoreId)) {
+            $errors['slug'] = ['The slug has already been taken.'];
+        }
+
+        if ($errors !== []) {
+            throw new ApiException('Validation Failed', 422, $errors);
+        }
+
+        return $resolved;
     }
 }

@@ -185,7 +185,7 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeApplication"
-        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-44 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
@@ -200,26 +200,40 @@
           <EyeIcon class="h-4 w-4 text-slate-400" />
           View
         </RouterLink>
-        <RouterLink
-          v-if="can('applications.update')"
-          :to="{ name: 'applications.edit', params: { id: activeApplication.uuid } }"
-          class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
-          role="menuitem"
-          @click="closeMenu"
-        >
-          <PencilSquareIcon class="h-4 w-4 text-slate-400" />
-          Edit
-        </RouterLink>
-        <button
-          v-if="can('applications.delete')"
-          type="button"
-          class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
-          role="menuitem"
-          @click="onDelete(activeApplication)"
-        >
-          <TrashIcon class="h-4 w-4 text-red-500" />
-          Delete
-        </button>
+        <template v-if="isTrashed(activeApplication)">
+          <button
+            v-if="can('applications.restore')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="onRestore(activeApplication)"
+          >
+            <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
+            Restore
+          </button>
+        </template>
+        <template v-else>
+          <RouterLink
+            v-if="can('applications.update')"
+            :to="{ name: 'applications.edit', params: { id: activeApplication.uuid } }"
+            class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+            role="menuitem"
+            @click="closeMenu"
+          >
+            <PencilSquareIcon class="h-4 w-4 text-slate-400" />
+            Edit
+          </RouterLink>
+          <button
+            v-if="can('applications.delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onDelete(activeApplication)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Soft Delete
+          </button>
+        </template>
       </div>
     </Teleport>
   </div>
@@ -229,6 +243,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import {
+  ArrowUturnLeftIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
@@ -247,7 +262,7 @@ const props = defineProps({
   sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete']);
+const emit = defineEmits(['sort', 'delete', 'restore']);
 
 const { can, canAny } = usePermissions();
 const router = useRouter();
@@ -260,7 +275,7 @@ function openDetails(application) {
   router.push({ name: 'applications.show', params: { id: application.uuid } });
 }
 const hasAnyAction = computed(() =>
-  canAny('applications.view', 'applications.update', 'applications.delete'),
+  canAny('applications.view', 'applications.update', 'applications.delete', 'applications.restore'),
 );
 
 const openMenuId = ref(null);
@@ -270,6 +285,10 @@ const failedIcons = reactive({});
 const activeApplication = computed(
   () => props.applications.find((item) => item.uuid === openMenuId.value) || null,
 );
+
+function isTrashed(application) {
+  return Boolean(application?.deleted_at);
+}
 
 function initials(name) {
   return String(name || 'A')
@@ -292,13 +311,12 @@ function toggleMenu(id, event) {
     return;
   }
 
+  const application = props.applications.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 160;
-  const itemCount = [
-    can('applications.view'),
-    can('applications.update'),
-    can('applications.delete'),
-  ].filter(Boolean).length;
+  const menuWidth = 176;
+  const itemCount = isTrashed(application)
+    ? [can('applications.view'), can('applications.restore')].filter(Boolean).length
+    : [can('applications.view'), can('applications.update'), can('applications.delete')].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
@@ -320,6 +338,11 @@ function closeMenu() {
 function onDelete(application) {
   closeMenu();
   emit('delete', application);
+}
+
+function onRestore(application) {
+  closeMenu();
+  emit('restore', application);
 }
 
 function onDocumentClick() {

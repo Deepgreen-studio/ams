@@ -2,7 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="canAny('customers.view', 'customers.restore', 'customers.delete')"
+        v-if="can('customers.view-trash')"
         :to="{ name: 'customers.trash' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -123,7 +123,7 @@ import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const customersStore = useCustomersStore();
-const { can, canAny } = usePermissions();
+const { can } = usePermissions();
 const pendingDelete = ref(null);
 
 const statCards = computed(() => [

@@ -51,7 +51,12 @@ class CustomerPolicy
 
     public function restore(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::RESTORE) || $user->can(CustomerPermission::DELETE);
+        return $user->can(CustomerPermission::RESTORE);
+    }
+
+    public function viewTrash(User $user): bool
+    {
+        return $user->can(CustomerPermission::VIEW_TRASH);
     }
 
     public function anonymize(User $user, Customer $customer): bool

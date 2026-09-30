@@ -14,6 +14,8 @@ final class CustomerPermission
 
     public const RESTORE = 'customers.restore';
 
+    public const VIEW_TRASH = 'customers.view-trash';
+
     public const EXPORT = 'customers.export';
 
     public const ANONYMIZE = 'customers.anonymize';
@@ -29,6 +31,7 @@ final class CustomerPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::VIEW_TRASH,
             self::EXPORT,
             self::ANONYMIZE,
         ];

@@ -25,6 +25,7 @@ class UpdateApplicationRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:5000'],
             'platform' => ['sometimes', 'required', Rule::in(ApplicationPlatform::values())],
             'category' => ['nullable', Rule::in(ApplicationCategory::values())],
+            'category_custom' => ['nullable', 'required_if:category,other', 'string', 'max:64'],
             'icon' => ['nullable', 'string', 'max:500'],
             'banner' => ['nullable', 'string', 'max:500'],
             'current_version' => ['nullable', 'string', 'max:64'],

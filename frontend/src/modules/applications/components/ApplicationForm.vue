@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <FormLabel required>Company</FormLabel>
         <SelectBox
           v-model="form.company_id"
           size="lg"
@@ -18,7 +18,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+        <FormLabel required>Name</FormLabel>
         <input
           v-model="form.name"
           type="text"
@@ -31,11 +31,11 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Slug</label>
+        <FormLabel required>Slug</FormLabel>
         <input
           v-model="form.slug"
           type="text"
-          placeholder="auto-generated if empty"
+          placeholder="easycare"
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
@@ -45,7 +45,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Platform</label>
+        <FormLabel required>Platform</FormLabel>
         <SelectBox
           v-model="form.platform"
           size="lg"
@@ -69,6 +69,19 @@
         <p v-if="displayErrors.category" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.category[0] }}
         </p>
+        <div v-if="form.category === 'other'" class="mt-3">
+          <FormLabel required>Other category</FormLabel>
+          <input
+            v-model="form.category_custom"
+            type="text"
+            placeholder="Enter category"
+            class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
+            :class="fieldClass('category_custom')"
+          />
+          <p v-if="displayErrors.category_custom" class="mt-1 text-xs text-rose-600">
+            {{ displayErrors.category_custom[0] }}
+          </p>
+        </div>
       </div>
 
       <div>
@@ -179,6 +192,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
 import { integrationService } from '@/modules/integrations/services/integrationService';
@@ -328,6 +342,7 @@ function createForm(value = {}) {
     description: value.description || '',
     platform: value.platform || 'android',
     category: value.category || '',
+    category_custom: value.category_custom || '',
     icon: value.icon || '',
     banner: value.banner || '',
     current_version: value.current_version || '',
@@ -361,6 +376,16 @@ function validate() {
     next.name = ['The name field is required.'];
   }
 
+  if (!String(form.slug || '').trim()) {
+    next.slug = ['The slug field is required.'];
+  } else if (!/^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$/.test(String(form.slug).trim())) {
+    next.slug = ['The slug may only contain letters, numbers, and dashes.'];
+  }
+
+  if (form.category === 'other' && !String(form.category_custom || '').trim()) {
+    next.category_custom = ['Enter the other category.'];
+  }
+
   if (!String(form.platform || '').trim()) {
     next.platform = ['The platform field is required.'];
   }
@@ -384,6 +409,10 @@ function onSubmit() {
   }
 
   localErrors.value = {};
-  emit('submit', { ...form });
+  const payload = { ...form };
+  if (payload.category !== 'other') {
+    payload.category_custom = '';
+  }
+  emit('submit', payload);
 }
 </script>

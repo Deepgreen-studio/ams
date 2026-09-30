@@ -2,6 +2,13 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('applications.view-trash')"
+        :to="{ name: 'applications.trash' }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Soft Deleted
+      </RouterLink>
+      <RouterLink
         v-if="can('applications.create')"
         :to="{ name: 'applications.create' }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
@@ -50,6 +57,7 @@
       :sort-dir="applicationsStore.filters.sort_dir"
       @sort="onSort"
       @delete="openDelete"
+      @restore="confirmRestore"
     >
       <template #toolbar>
         <SearchFilters
@@ -81,9 +89,9 @@
 
     <DeleteConfirmation
       :open="Boolean(pendingDelete)"
-      title="Delete application"
+      title="Soft delete application"
       :message="`Soft delete ${pendingDelete?.name || 'this application'}? It can be restored later.`"
-      confirm-label="Delete"
+      confirm-label="Soft Delete"
       :loading="applicationsStore.saving"
       @cancel="pendingDelete = null"
       @confirm="confirmDelete"
@@ -182,6 +190,11 @@ async function confirmDelete() {
   if (!pendingDelete.value) return;
   await applicationsStore.deleteApplication(pendingDelete.value.uuid);
   pendingDelete.value = null;
+  await applicationsStore.fetchApplications();
+}
+
+async function confirmRestore(application) {
+  await applicationsStore.restoreApplication(application.uuid);
   await applicationsStore.fetchApplications();
 }
 </script>

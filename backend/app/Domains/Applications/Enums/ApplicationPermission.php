@@ -12,6 +12,10 @@ final class ApplicationPermission
 
     public const DELETE = 'applications.delete';
 
+    public const RESTORE = 'applications.restore';
+
+    public const VIEW_TRASH = 'applications.view-trash';
+
     /**
      * @return list<string>
      */
@@ -22,6 +26,8 @@ final class ApplicationPermission
             self::CREATE,
             self::UPDATE,
             self::DELETE,
+            self::RESTORE,
+            self::VIEW_TRASH,
         ];
     }
 }

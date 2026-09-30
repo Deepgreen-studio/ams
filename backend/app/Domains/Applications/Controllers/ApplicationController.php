@@ -24,7 +24,11 @@ class ApplicationController
 
     public function index(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Application::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Application::class);
+        } else {
+            $this->authorize('viewAny', Application::class);
+        }
 
         $result = $this->applicationService->list($request->only([
             'search',
@@ -95,7 +99,7 @@ class ApplicationController
         $actor = $request->user();
         $this->applicationService->delete($application, $actor);
 
-        return ApiResponse::success(null, 'Application deleted successfully.');
+        return ApiResponse::success(null, 'Application soft deleted successfully.');
     }
 
     public function restore(Request $request, string $application): JsonResponse

@@ -35,6 +35,11 @@ class ApplicationPolicy
 
     public function restore(User $user, Application $application): bool
     {
-        return $user->can(ApplicationPermission::DELETE);
+        return $user->can(ApplicationPermission::RESTORE);
+    }
+
+    public function viewTrash(User $user): bool
+    {
+        return $user->can(ApplicationPermission::VIEW_TRASH);
     }
 }

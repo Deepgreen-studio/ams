@@ -1,104 +1,115 @@
 <template>
-  <div class="overflow-hidden rounded-xl border border-slate-200 bg-white">
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50">
-          <tr>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Request</th>
-            <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 md:table-cell">Type</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Status</th>
-            <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Identity</th>
-            <th class="hidden px-4 py-3 text-left font-semibold text-slate-600 lg:table-cell">Due</th>
-            <th class="px-4 py-3 text-left font-semibold text-slate-600">Created At</th>
+  <div :class="framed ? 'overflow-hidden rounded-[12px] bg-white ring-1 ring-zinc-100' : ''">
+    <div class="scrollbar-light overflow-x-auto px-3">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="border-b border-zinc-100">
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Request</th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
+              Type
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Status</th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
+              Identity
+            </th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 xl:table-cell">
+              Due
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
             <th
               v-if="hasAnyAction"
-              class="px-4 py-3 text-right font-semibold text-slate-600"
+              class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
             >
               Actions
             </th>
           </tr>
         </thead>
         <tbody v-if="loading">
-
-          <tr v-for="n in 5" :key="n">
-
+          <tr v-for="n in 6" :key="n">
             <td colspan="12" class="px-5 py-3">
-
-              <div class="h-10 animate-pulse rounded bg-slate-100" />
-
+              <div class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
             </td>
-
           </tr>
-
         </tbody>
-
         <tbody v-else-if="!requests.length">
-
           <tr>
-
             <td colspan="12" class="p-0">
               <EmptyState
                 title="No privacy requests found"
                 description="Create a GDPR or privacy request to begin the workflow."
-                >
-                <template #action><slot name="empty-action" /></template>
+              >
+                <template #action>
+                  <slot name="empty-action" />
+                </template>
               </EmptyState>
             </td>
-
           </tr>
-
         </tbody>
-
         <tbody v-else>
           <tr
             v-for="item in requests"
             :key="item.uuid"
-            class="hover:bg-slate-50/80"
+            class="border-b border-zinc-50 last:border-0 transition hover:bg-zinc-50/80"
             :class="can('compliance.view') ? 'cursor-pointer' : ''"
             @click="openDetails(item)"
           >
-            <td class="px-4 py-3">
-              <p class="font-medium text-slate-900">{{ item.requester_name }}</p>
-              <p class="text-xs text-slate-500">
-                {{ item.request_number }} · {{ item.requester_email }}
-              </p>
+            <td class="px-5 py-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-brand-50 text-xs font-semibold text-brand-700"
+                >
+                  {{ initials(item.requester_name) }}
+                </div>
+                <div class="min-w-0">
+                  <RouterLink
+                    v-if="can('compliance.view')"
+                    :to="{ name: 'compliance.privacy.show', params: { id: item.uuid } }"
+                    class="truncate font-semibold text-slate-900 hover:text-brand-700"
+                    @click.stop
+                  >
+                    {{ item.requester_name }}
+                  </RouterLink>
+                  <p v-else class="truncate font-semibold text-slate-900">{{ item.requester_name }}</p>
+                  <p class="truncate text-xs text-slate-500">
+                    {{ item.request_number }} · {{ item.requester_email || '—' }}
+                  </p>
+                </div>
+              </div>
             </td>
-            <td class="hidden px-4 py-3 text-slate-600 md:table-cell">
-              {{ item.request_type_label || item.request_type }}
+            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
+              {{ item.request_type_label || item.request_type || '—' }}
             </td>
-            <td class="px-4 py-3">
+            <td class="px-5 py-4">
               <PrivacyStatusBadge :status="item.status" :label="item.status_label" />
             </td>
-            <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">
-              {{ item.identity_verification_status_label || item.identity_verification_status }}
+            <td class="hidden px-5 py-4 lg:table-cell">
+              <span
+                class="inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium"
+                :class="identityClass(item.identity_verification_status)"
+              >
+                {{ item.identity_verification_status_label || item.identity_verification_status || '—' }}
+              </span>
             </td>
-            <td class="hidden px-4 py-3 text-slate-600 lg:table-cell">{{ item.due_date || '—' }}</td>
-            <td class="whitespace-nowrap px-4 py-3 text-slate-600">
+            <td
+              class="hidden whitespace-nowrap px-5 py-4 xl:table-cell"
+              :class="isOverdue(item) ? 'font-medium text-rose-600' : 'text-slate-600'"
+            >
+              {{ dueLabel(item) }}
+            </td>
+            <td class="whitespace-nowrap px-5 py-4 text-slate-600">
               {{ formatDate(item.created_at) || '—' }}
             </td>
-            <td v-if="hasAnyAction" class="px-4 py-3">
-              <div class="flex justify-end gap-2">
-                <RouterLink
-                  v-if="can('compliance.view')"
-                  :to="{ name: 'compliance.privacy.show', params: { id: item.uuid } }"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-brand-700 hover:bg-brand-50"
-                >
-                  View
-                </RouterLink>
-                <RouterLink
-                  v-if="can('compliance.update')"
-                  :to="{ name: 'compliance.privacy.verify', params: { id: item.uuid } }"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
-                >
-                  Verify
-                </RouterLink>
+            <td v-if="hasAnyAction" class="px-5 py-4">
+              <div class="relative flex justify-end">
                 <button
-                  v-if="can('compliance.delete')"
                   type="button"
-                  class="rounded-md px-2 py-1 text-xs font-medium text-rose-700 hover:bg-rose-50"
-                  @click="$emit('delete', item)"
+                  class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+                  :aria-expanded="openMenuId === item.uuid"
+                  aria-haspopup="menu"
+                  aria-label="Open actions"
+                  @click.stop="toggleMenu(item.uuid, $event)"
                 >
-                  Delete
+                  <EllipsisVerticalIcon class="h-5 w-5" />
                 </button>
               </div>
             </td>
@@ -107,25 +118,94 @@
       </table>
     </div>
   </div>
+
+  <Teleport to="body">
+    <div
+      v-if="openMenuId && activeRequest"
+      class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+      role="menu"
+      :style="menuStyle"
+      @click.stop
+    >
+      <RouterLink
+        v-if="can('compliance.view')"
+        :to="{ name: 'compliance.privacy.show', params: { id: activeRequest.uuid } }"
+        class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+        role="menuitem"
+        @click="closeMenu"
+      >
+        <EyeIcon class="h-4 w-4 text-slate-400" />
+        View
+      </RouterLink>
+      <RouterLink
+        v-if="can('compliance.update')"
+        :to="{ name: 'compliance.privacy.verify', params: { id: activeRequest.uuid } }"
+        class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
+        role="menuitem"
+        @click="closeMenu"
+      >
+        <ShieldCheckIcon class="h-4 w-4 text-slate-400" />
+        Verify
+      </RouterLink>
+      <button
+        v-if="can('compliance.delete')"
+        type="button"
+        class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+        role="menuitem"
+        @click="onDelete(activeRequest)"
+      >
+        <TrashIcon class="h-4 w-4 text-red-500" />
+        Delete
+      </button>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+import {
+  EllipsisVerticalIcon,
+  EyeIcon,
+  ShieldCheckIcon,
+  TrashIcon,
+} from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import PrivacyStatusBadge from '@/modules/compliance/components/PrivacyStatusBadge.vue';
 
-defineProps({
+const props = defineProps({
   requests: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
+  framed: { type: Boolean, default: true },
 });
 
-defineEmits(['delete']);
+const emit = defineEmits(['delete']);
 
 const { can, canAny } = usePermissions();
 const router = useRouter();
+const hasAnyAction = computed(() =>
+  canAny('compliance.view', 'compliance.update', 'compliance.delete'),
+);
+const openMenuId = ref(null);
+const menuStyle = ref({});
+
+const activeRequest = computed(
+  () => props.requests.find((item) => item.uuid === openMenuId.value) || null,
+);
+
+onMounted(() => {
+  document.addEventListener('click', closeMenu);
+  window.addEventListener('scroll', closeMenu, true);
+  window.addEventListener('resize', closeMenu);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeMenu);
+  window.removeEventListener('scroll', closeMenu, true);
+  window.removeEventListener('resize', closeMenu);
+});
 
 function openDetails(item) {
   if (!item?.uuid || !can('compliance.view')) {
@@ -134,7 +214,84 @@ function openDetails(item) {
 
   router.push({ name: 'compliance.privacy.show', params: { id: item.uuid } });
 }
-const hasAnyAction = computed(() =>
-  canAny('compliance.view', 'compliance.update', 'compliance.delete'),
-);
+
+function initials(name) {
+  return String(name || 'P')
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase();
+}
+
+function identityClass(status) {
+  switch (status) {
+    case 'verified':
+      return 'bg-emerald-50 text-emerald-700';
+    case 'failed':
+      return 'bg-rose-50 text-rose-700';
+    case 'pending':
+      return 'bg-amber-50 text-amber-700';
+    default:
+      return 'bg-slate-100 text-slate-600';
+  }
+}
+
+function isOverdue(item) {
+  if (!item?.due_date) {
+    return false;
+  }
+
+  const terminal = ['completed', 'cancelled', 'rejected'];
+  if (terminal.includes(item.status)) {
+    return false;
+  }
+
+  return String(item.due_date) < new Date().toISOString().slice(0, 10);
+}
+
+function dueLabel(item) {
+  if (!item?.due_date) {
+    return '—';
+  }
+
+  return isOverdue(item) ? `Overdue ${item.due_date}` : item.due_date;
+}
+
+function toggleMenu(id, event) {
+  if (openMenuId.value === id) {
+    closeMenu();
+    return;
+  }
+
+  const rect = event.currentTarget.getBoundingClientRect();
+  const menuWidth = 160;
+  const itemCount = [
+    can('compliance.view'),
+    can('compliance.update'),
+    can('compliance.delete'),
+  ].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
+  const gap = 8;
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const openUp = spaceBelow < menuHeight + gap;
+  const top = openUp ? rect.top - menuHeight - gap : rect.bottom + gap;
+  const left = Math.min(Math.max(8, rect.right - menuWidth), window.innerWidth - menuWidth - 8);
+
+  menuStyle.value = {
+    top: `${Math.max(8, top)}px`,
+    left: `${left}px`,
+  };
+  openMenuId.value = id;
+}
+
+function closeMenu() {
+  openMenuId.value = null;
+}
+
+function onDelete(item) {
+  closeMenu();
+  emit('delete', item);
+}
 </script>

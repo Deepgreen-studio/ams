@@ -5,7 +5,7 @@
       aria-label="Workflow Engine sections"
     >
       <RouterLink
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.name"
         :to="item.to"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -22,9 +22,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const items = [
   {
@@ -32,32 +35,39 @@ const items = [
     label: 'Dashboard',
     to: { name: 'workflows.dashboard' },
     match: ['workflows.dashboard'],
+    permission: 'workflows.view',
   },
   {
     name: 'workflows.designer',
     label: 'Designer',
     to: { name: 'workflows.designer' },
     match: ['workflows.designer', 'workflows.designer.create', 'workflows.designer.edit'],
+    permission: 'workflows.designer',
   },
   {
     name: 'workflows.monitor',
     label: 'Monitor',
     to: { name: 'workflows.monitor' },
     match: ['workflows.monitor', 'workflows.instances.show'],
+    permission: 'workflows.monitor',
   },
   {
     name: 'workflows.queue',
     label: 'Approval Queue',
     to: { name: 'workflows.queue' },
     match: ['workflows.queue'],
+    permission: 'workflows.approve',
   },
   {
     name: 'workflows.history',
     label: 'History',
     to: { name: 'workflows.history' },
     match: ['workflows.history'],
+    permission: 'workflows.history',
   },
 ];
+
+const visibleItems = computed(() => items.filter((item) => can(item.permission)));
 
 function isActive(item) {
   return item.match.includes(route.name);

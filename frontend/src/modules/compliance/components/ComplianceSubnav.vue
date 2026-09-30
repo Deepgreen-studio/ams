@@ -3,7 +3,7 @@
     <div class="border-b border-zinc-200">
       <nav class="-mb-px flex gap-x-0.5 overflow-x-auto" aria-label="Compliance sections">
         <RouterLink
-          v-for="group in groups"
+          v-for="group in visibleGroups"
           :key="group.id"
           :to="group.to"
           class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -43,13 +43,16 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const groups = [
   {
     id: 'cases',
     label: 'Cases',
+    permission: ['compliance.view', 'compliance.cases'],
     to: { name: 'compliance.dashboard' },
     prefixes: ['compliance.dashboard', 'compliance.cases.'],
     links: [
@@ -60,6 +63,7 @@ const groups = [
   {
     id: 'privacy',
     label: 'Privacy',
+    permission: 'compliance.privacy',
     to: { name: 'compliance.privacy.dashboard' },
     prefixes: ['compliance.privacy.'],
     links: [
@@ -70,6 +74,7 @@ const groups = [
   {
     id: 'consents',
     label: 'Consent',
+    permission: 'compliance.consents',
     to: { name: 'compliance.consents.dashboard' },
     prefixes: ['compliance.consents.'],
     links: [
@@ -81,6 +86,7 @@ const groups = [
   {
     id: 'breaches',
     label: 'Breaches',
+    permission: 'compliance.breaches',
     to: { name: 'compliance.breaches.dashboard' },
     prefixes: ['compliance.breaches.'],
     links: [
@@ -92,6 +98,7 @@ const groups = [
   {
     id: 'dpia',
     label: 'DPIA',
+    permission: 'compliance.dpia',
     to: { name: 'compliance.dpia.dashboard' },
     prefixes: ['compliance.dpia.'],
     links: [
@@ -105,6 +112,7 @@ const groups = [
   {
     id: 'policies',
     label: 'Policies',
+    permission: 'compliance.policies',
     to: { name: 'compliance.policies.dashboard' },
     prefixes: ['compliance.policies.'],
     links: [
@@ -116,6 +124,7 @@ const groups = [
   {
     id: 'analytics',
     label: 'Analytics',
+    permission: 'compliance.reports',
     to: { name: 'compliance.analytics.dashboard' },
     prefixes: ['compliance.analytics.'],
     links: [
@@ -130,8 +139,10 @@ const groups = [
 
 const routeName = computed(() => String(route.name || ''));
 
+const visibleGroups = computed(() => groups.filter((group) => can(group.permission)));
+
 const activeGroup = computed(
-  () => groups.find((group) => isGroupActive(group.id)) || groups[0],
+  () => visibleGroups.value.find((group) => isGroupActive(group.id)) || visibleGroups.value[0],
 );
 
 const activeLinks = computed(() => activeGroup.value?.links ?? []);

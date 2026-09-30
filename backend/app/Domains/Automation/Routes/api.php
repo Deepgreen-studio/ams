@@ -10,14 +10,14 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('automation')->group
     Route::get('/catalog', [AutomationRuleController::class, 'catalog'])
         ->middleware('permission:'.AutomationPermission::VIEW);
     Route::get('/logs', [AutomationRuleController::class, 'logs'])
-        ->middleware('permission:'.AutomationPermission::VIEW);
+        ->middleware('permission:'.AutomationPermission::HISTORY.'|'.AutomationPermission::VIEW);
 
     Route::get('/rules', [AutomationRuleController::class, 'index'])
-        ->middleware('permission:'.AutomationPermission::VIEW);
+        ->middleware('permission:'.AutomationPermission::RULES.'|'.AutomationPermission::VIEW);
     Route::post('/rules', [AutomationRuleController::class, 'store'])
         ->middleware('permission:'.AutomationPermission::CREATE);
     Route::get('/rules/{rule}', [AutomationRuleController::class, 'show'])
-        ->middleware('permission:'.AutomationPermission::VIEW);
+        ->middleware('permission:'.AutomationPermission::RULES.'|'.AutomationPermission::VIEW);
     Route::put('/rules/{rule}', [AutomationRuleController::class, 'update'])
         ->middleware('permission:'.AutomationPermission::UPDATE);
     Route::delete('/rules/{rule}', [AutomationRuleController::class, 'destroy'])

@@ -29,9 +29,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('canned-responses')->group(function (): void {
             Route::get('/dashboard', [SupportCannedResponseController::class, 'dashboard'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::CANNED.'|'.SupportPermission::VIEW);
             Route::get('/', [SupportCannedResponseController::class, 'index'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::CANNED.'|'.SupportPermission::VIEW);
             Route::post('/', [SupportCannedResponseController::class, 'store'])
                 ->middleware('permission:'.SupportPermission::CREATE.'|'.SupportPermission::MANAGE);
             Route::get('/{response}', [SupportCannedResponseController::class, 'show'])
@@ -46,9 +46,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('knowledge')->group(function (): void {
             Route::get('/dashboard', [KnowledgeBaseController::class, 'dashboard'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::KNOWLEDGE.'|'.SupportPermission::VIEW);
             Route::get('/articles', [KnowledgeBaseController::class, 'index'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::KNOWLEDGE.'|'.SupportPermission::VIEW);
             Route::post('/articles', [KnowledgeBaseController::class, 'store'])
                 ->middleware('permission:'.SupportPermission::CREATE.'|'.SupportPermission::MANAGE);
             Route::get('/articles/{article}', [KnowledgeBaseController::class, 'show'])
@@ -93,7 +93,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('sla')->group(function (): void {
             Route::get('/dashboard', [SupportSlaController::class, 'dashboard'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::SLA.'|'.SupportPermission::VIEW);
             Route::get('/escalations', [SupportSlaController::class, 'escalationQueue'])
                 ->middleware('permission:'.SupportPermission::VIEW);
             Route::post('/escalations/{escalation}/acknowledge', [SupportSlaController::class, 'acknowledgeEscalation'])
@@ -135,11 +135,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('tickets')->group(function (): void {
             Route::get('/', [SupportTicketController::class, 'index'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::TICKETS.'|'.SupportPermission::VIEW);
             Route::get('/board', [SupportTicketController::class, 'board'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::BOARD.'|'.SupportPermission::VIEW);
             Route::get('/queue', [SupportTicketController::class, 'queue'])
-                ->middleware('permission:'.SupportPermission::VIEW);
+                ->middleware('permission:'.SupportPermission::QUEUE.'|'.SupportPermission::VIEW);
             Route::post('/', [SupportTicketController::class, 'store'])
                 ->middleware('permission:'.SupportPermission::CREATE);
             Route::get('/{ticket}', [SupportTicketController::class, 'show'])
@@ -167,7 +167,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             Route::post('/{ticket}/transition', [SupportTicketController::class, 'transition'])
                 ->middleware('permission:'.SupportPermission::UPDATE.'|'.SupportPermission::MANAGE);
             Route::post('/{ticket}/assign', [SupportTicketController::class, 'assign'])
-                ->middleware('permission:'.SupportPermission::UPDATE.'|'.SupportPermission::MANAGE);
+                ->middleware('permission:'.SupportPermission::ASSIGNMENT.'|'.SupportPermission::UPDATE.'|'.SupportPermission::MANAGE);
             Route::post('/{ticket}/close', [SupportTicketController::class, 'close'])
                 ->middleware('permission:'.SupportPermission::UPDATE.'|'.SupportPermission::MANAGE);
             Route::post('/{ticket}/reopen', [SupportTicketController::class, 'reopen'])

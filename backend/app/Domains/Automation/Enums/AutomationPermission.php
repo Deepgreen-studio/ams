@@ -14,6 +14,10 @@ final class AutomationPermission
 
     public const MANAGE = 'automation.manage';
 
+    public const RULES = 'automation.rules';
+
+    public const HISTORY = 'automation.history';
+
     /**
      * @return list<string>
      */
@@ -25,6 +29,8 @@ final class AutomationPermission
             self::UPDATE,
             self::DELETE,
             self::MANAGE,
+            self::RULES,
+            self::HISTORY,
         ];
     }
 }

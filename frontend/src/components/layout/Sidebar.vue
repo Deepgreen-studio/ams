@@ -100,7 +100,7 @@
 
         <!-- Help -->
         <div
-            v-if="can('support.view')"
+            v-if="can(['support.view', 'support.tickets', 'support.create'])"
             class="shrink-0 p-4"
             :class="collapsed ? 'flex justify-center' : ''"
         >
@@ -306,7 +306,16 @@ const navigationCatalog = [
                 to: { name: 'notifications.dashboard' },
                 icon: BellAlertIcon,
                 match: ['notifications.'],
-                permission: 'notifications.view',
+                permission: [
+                  'notifications.view',
+                  'notifications.center',
+                  'notifications.unread',
+                  'notifications.history',
+                  'notifications.preferences',
+                  'notifications.templates',
+                  'notifications.approve',
+                  'notifications.logs',
+                ],
             },
             {
                 name: 'automation.dashboard',
@@ -314,7 +323,7 @@ const navigationCatalog = [
                 to: { name: 'automation.dashboard' },
                 icon: BoltIcon,
                 match: ['automation.'],
-                permission: 'automation.view',
+                permission: ['automation.view', 'automation.rules', 'automation.history'],
             },
             {
                 name: 'workflows.dashboard',
@@ -322,7 +331,13 @@ const navigationCatalog = [
                 to: { name: 'workflows.dashboard' },
                 icon: Squares2X2Icon,
                 match: ['workflows.'],
-                permission: 'workflows.view',
+                permission: [
+                  'workflows.view',
+                  'workflows.designer',
+                  'workflows.monitor',
+                  'workflows.approve',
+                  'workflows.history',
+                ],
             },
             {
                 name: 'scheduler.dashboard',
@@ -330,7 +345,15 @@ const navigationCatalog = [
                 to: { name: 'scheduler.dashboard' },
                 icon: ClockIcon,
                 match: ['scheduler.'],
-                permission: 'scheduler.view',
+                permission: [
+                  'scheduler.view',
+                  'scheduler.jobs',
+                  'scheduler.history',
+                  'scheduler.running',
+                  'scheduler.failed',
+                  'scheduler.logs',
+                  'scheduler.statistics',
+                ],
             },
             {
                 name: 'ai.dashboard',
@@ -338,7 +361,15 @@ const navigationCatalog = [
                 to: { name: 'ai.dashboard' },
                 icon: SparklesIcon,
                 match: ['ai.'],
-                permission: 'ai.view',
+                permission: [
+                  'ai.view',
+                  'ai.settings',
+                  'ai.prompts',
+                  'ai.conversations',
+                  'ai.chat',
+                  'ai.analytics',
+                  'ai.logs',
+                ],
             },
             {
                 name: 'webhooks.index',
@@ -373,7 +404,7 @@ const navigationCatalog = [
                 to: { name: 'queue.dashboard' },
                 icon: QueueListIcon,
                 match: ['queue.'],
-                permission: 'queue.view',
+                permission: ['queue.view', 'queue.running', 'queue.failed', 'queue.statistics'],
             },
             {
                 name: 'sync.dashboard',
@@ -381,7 +412,7 @@ const navigationCatalog = [
                 to: { name: 'sync.dashboard' },
                 icon: BoltIcon,
                 match: ['sync.', 'mappings.'],
-                permission: 'integrations.view',
+                permission: ['sync.view', 'sync.configs', 'sync.history', 'sync.logs'],
             },
         ],
     },
@@ -394,7 +425,17 @@ const navigationCatalog = [
                 to: { name: 'support.dashboard' },
                 icon: LifebuoyIcon,
                 match: ['support.'],
-                permission: 'support.view',
+                permission: [
+                  'support.view',
+                  'support.tickets',
+                  'support.board',
+                  'support.queue',
+                  'support.assignment',
+                  'support.sla',
+                  'support.knowledge',
+                  'support.canned',
+                  'support.create',
+                ],
             },
             {
                 name: 'compliance.dashboard',
@@ -402,7 +443,16 @@ const navigationCatalog = [
                 to: { name: 'compliance.dashboard' },
                 icon: ScaleIcon,
                 match: ['compliance.'],
-                permission: 'compliance.view',
+                permission: [
+                  'compliance.view',
+                  'compliance.cases',
+                  'compliance.privacy',
+                  'compliance.consents',
+                  'compliance.breaches',
+                  'compliance.dpia',
+                  'compliance.policies',
+                  'compliance.reports',
+                ],
             },
             {
                 name: 'analytics.dashboard',
@@ -410,7 +460,19 @@ const navigationCatalog = [
                 to: { name: 'analytics.dashboard' },
                 icon: ChartBarIcon,
                 match: ['analytics.'],
-                permission: 'analytics.view',
+                permission: [
+                  'analytics.view',
+                  'analytics.dashboards',
+                  'analytics.templates',
+                  'analytics.reports',
+                  'analytics.saved-reports',
+                  'analytics.saved-views',
+                  'analytics.events',
+                  'analytics.business',
+                  'analytics.executive',
+                  'analytics.security',
+                  'analytics.operational',
+                ],
             },
             {
                 name: 'audit.activity',
@@ -418,7 +480,14 @@ const navigationCatalog = [
                 to: { name: 'audit.activity' },
                 icon: ClipboardDocumentListIcon,
                 match: ['audit.'],
-                permission: 'audit.view',
+                permission: [
+                  'audit.view',
+                  'audit.trail',
+                  'audit.login',
+                  'audit.events',
+                  'audit.api',
+                  'audit.errors',
+                ],
             },
         ],
     },
@@ -431,7 +500,16 @@ const navigationCatalog = [
                 to: { name: 'settings.general' },
                 icon: Cog6ToothIcon,
                 match: ['settings.'],
-                permission: 'settings.view',
+                permission: [
+                  'settings.view',
+                  'settings.email',
+                  'settings.storage',
+                  'settings.security',
+                  'settings.api',
+                  'settings.queue',
+                  'settings.media',
+                  'settings.files',
+                ],
             },
             {
                 name: 'monitoring.dashboard',
@@ -439,7 +517,17 @@ const navigationCatalog = [
                 to: { name: 'monitoring.dashboard' },
                 icon: PresentationChartLineIcon,
                 match: ['monitoring.'],
-                permission: 'monitoring.view',
+                permission: [
+                  'monitoring.view',
+                  'monitoring.realtime',
+                  'monitoring.api',
+                  'monitoring.webhooks',
+                  'monitoring.queue',
+                  'monitoring.integrations',
+                  'monitoring.timeline',
+                  'monitoring.history',
+                  'monitoring.alerts',
+                ],
             },
         ],
     },

@@ -109,6 +109,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'content.view', 'content.create', 'content.update', 'content.publish',
             'content.submit', 'content.review', 'content.approve',
             'support.view', 'support.create', 'support.update', 'support.manage',
+            'compliance.view', 'compliance.create', 'compliance.update', 'compliance.delete', 'compliance.manage',
             'notifications.view', 'notifications.create', 'notifications.update',
             'notifications.approve', 'notifications.publish',
             'automation.view', 'automation.create', 'automation.update', 'automation.delete', 'automation.manage',
@@ -252,7 +253,138 @@ class RolesAndPermissionsSeeder extends Seeder
      */
     private function syncNamedPermissions(string $roleName, array $permissions, string $guard): void
     {
-        Role::findByName($roleName, $guard)->syncPermissions($permissions);
+        Role::findByName($roleName, $guard)->syncPermissions($this->withSectionGrants($permissions));
+    }
+
+    /**
+     * Roles that can open a module also receive that module's section permissions.
+     *
+     * @param  list<string>  $permissions
+     * @return list<string>
+     */
+    private function withSectionGrants(array $permissions): array
+    {
+        $granted = array_fill_keys($permissions, true);
+
+        foreach ($this->sectionGrants() as $parent => $sections) {
+            if (! isset($granted[$parent])) {
+                continue;
+            }
+
+            foreach ($sections as $section) {
+                $granted[$section] = true;
+            }
+        }
+
+        return array_keys($granted);
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    private function sectionGrants(): array
+    {
+        return [
+            'notifications.view' => [
+                'notifications.center',
+                'notifications.unread',
+                'notifications.history',
+                'notifications.preferences',
+                'notifications.templates',
+                'notifications.logs',
+            ],
+            'automation.view' => [
+                'automation.rules',
+                'automation.history',
+            ],
+            'workflows.view' => [
+                'workflows.designer',
+                'workflows.monitor',
+                'workflows.history',
+            ],
+            'scheduler.view' => [
+                'scheduler.jobs',
+                'scheduler.history',
+                'scheduler.running',
+                'scheduler.failed',
+                'scheduler.logs',
+                'scheduler.statistics',
+            ],
+            'ai.view' => [
+                'ai.settings',
+                'ai.prompts',
+                'ai.conversations',
+                'ai.analytics',
+                'ai.logs',
+            ],
+            'queue.view' => [
+                'queue.running',
+                'queue.failed',
+                'queue.statistics',
+            ],
+            'integrations.view' => [
+                'sync.view',
+                'sync.configs',
+                'sync.history',
+                'sync.logs',
+            ],
+            'support.view' => [
+                'support.tickets',
+                'support.board',
+                'support.queue',
+                'support.assignment',
+                'support.sla',
+                'support.knowledge',
+                'support.canned',
+            ],
+            'compliance.view' => [
+                'compliance.cases',
+                'compliance.privacy',
+                'compliance.consents',
+                'compliance.breaches',
+                'compliance.dpia',
+                'compliance.policies',
+                'compliance.reports',
+            ],
+            'analytics.view' => [
+                'analytics.dashboards',
+                'analytics.templates',
+                'analytics.reports',
+                'analytics.saved-reports',
+                'analytics.saved-views',
+                'analytics.events',
+                'analytics.business',
+                'analytics.executive',
+                'analytics.security',
+                'analytics.operational',
+            ],
+            'audit.view' => [
+                'audit.trail',
+                'audit.login',
+                'audit.events',
+                'audit.api',
+                'audit.errors',
+            ],
+            'settings.view' => [
+                'settings.email',
+                'settings.storage',
+                'settings.security',
+                'settings.api',
+                'settings.queue',
+                'settings.media',
+                'settings.files',
+            ],
+            'monitoring.view' => [
+                'monitoring.realtime',
+                'monitoring.api',
+                'monitoring.webhooks',
+                'monitoring.queue',
+                'monitoring.integrations',
+                'monitoring.timeline',
+                'monitoring.history',
+                'monitoring.alerts',
+            ],
+        ];
     }
 
     /**

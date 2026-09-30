@@ -5,7 +5,7 @@
       aria-label="Audit sections"
     >
       <RouterLink
-        v-for="tab in tabs"
+        v-for="tab in visibleTabs"
         :key="tab.to"
         :to="{ name: tab.to }"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -22,15 +22,20 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 const tabs = [
-  { label: 'Activity', to: 'audit.activity' },
-  { label: 'Audit Trail', to: 'audit.trail' },
-  { label: 'Login History', to: 'audit.login' },
-  { label: 'System Events', to: 'audit.events' },
-  { label: 'API Logs', to: 'audit.api' },
-  { label: 'Errors', to: 'audit.errors' },
+  { label: 'Activity', to: 'audit.activity', permission: 'audit.view' },
+  { label: 'Audit Trail', to: 'audit.trail', permission: 'audit.trail' },
+  { label: 'Login History', to: 'audit.login', permission: 'audit.login' },
+  { label: 'System Events', to: 'audit.events', permission: 'audit.events' },
+  { label: 'API Logs', to: 'audit.api', permission: 'audit.api' },
+  { label: 'Errors', to: 'audit.errors', permission: 'audit.errors' },
 ];
+
+const visibleTabs = computed(() => tabs.filter((tab) => can(tab.permission)));
 </script>

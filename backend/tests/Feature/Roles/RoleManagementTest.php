@@ -82,6 +82,27 @@ class RoleManagementTest extends TestCase
             'name' => RolePermission::ASSIGN,
             'display_name' => 'Assign Permissions',
         ]);
+
+        foreach ([
+            'notifications.logs',
+            'automation.rules',
+            'workflows.designer',
+            'scheduler.statistics',
+            'ai.prompts',
+            'sync.configs',
+            'queue.failed',
+            'support.tickets',
+            'compliance.privacy',
+            'analytics.dashboards',
+            'audit.trail',
+            'settings.security',
+            'monitoring.alerts',
+        ] as $permission) {
+            $this->assertTrue(
+                $companyAdmin->hasPermissionTo($permission),
+                "Company admin is missing {$permission}."
+            );
+        }
     }
 
     public function test_admin_can_list_and_filter_roles(): void

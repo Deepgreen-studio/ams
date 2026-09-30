@@ -16,6 +16,18 @@ final class SchedulerPermission
 
     public const RETRY = 'scheduler.retry';
 
+    public const JOBS = 'scheduler.jobs';
+
+    public const HISTORY = 'scheduler.history';
+
+    public const RUNNING = 'scheduler.running';
+
+    public const FAILED = 'scheduler.failed';
+
+    public const LOGS = 'scheduler.logs';
+
+    public const STATISTICS = 'scheduler.statistics';
+
     /**
      * @return list<string>
      */
@@ -28,6 +40,12 @@ final class SchedulerPermission
             self::DELETE,
             self::MANAGE,
             self::RETRY,
+            self::JOBS,
+            self::HISTORY,
+            self::RUNNING,
+            self::FAILED,
+            self::LOGS,
+            self::STATISTICS,
         ];
     }
 }

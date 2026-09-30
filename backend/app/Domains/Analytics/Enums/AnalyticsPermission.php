@@ -16,6 +16,26 @@ final class AnalyticsPermission
 
     public const MANAGE = 'analytics.manage';
 
+    public const DASHBOARDS = 'analytics.dashboards';
+
+    public const TEMPLATES = 'analytics.templates';
+
+    public const REPORTS = 'analytics.reports';
+
+    public const SAVED_REPORTS = 'analytics.saved-reports';
+
+    public const SAVED_VIEWS = 'analytics.saved-views';
+
+    public const EVENTS = 'analytics.events';
+
+    public const BUSINESS = 'analytics.business';
+
+    public const EXECUTIVE = 'analytics.executive';
+
+    public const SECURITY = 'analytics.security';
+
+    public const OPERATIONAL = 'analytics.operational';
+
     /**
      * @return list<string>
      */
@@ -28,6 +48,16 @@ final class AnalyticsPermission
             self::DELETE,
             self::EXPORT,
             self::MANAGE,
+            self::DASHBOARDS,
+            self::TEMPLATES,
+            self::REPORTS,
+            self::SAVED_REPORTS,
+            self::SAVED_VIEWS,
+            self::EVENTS,
+            self::BUSINESS,
+            self::EXECUTIVE,
+            self::SECURITY,
+            self::OPERATIONAL,
         ];
     }
 }

@@ -5,7 +5,7 @@
       aria-label="Automation sections"
     >
       <RouterLink
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.name"
         :to="item.to"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -22,20 +22,26 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const items = [
-  { name: 'automation.dashboard', label: 'Dashboard', to: { name: 'automation.dashboard' }, match: ['automation.dashboard'] },
+  { name: 'automation.dashboard', label: 'Dashboard', to: { name: 'automation.dashboard' }, match: ['automation.dashboard'], permission: 'automation.view' },
   {
     name: 'automation.rules',
     label: 'Rules',
     to: { name: 'automation.rules' },
     match: ['automation.rules', 'automation.rules.create', 'automation.rules.edit'],
+    permission: 'automation.rules',
   },
-  { name: 'automation.history', label: 'History', to: { name: 'automation.history' }, match: ['automation.history'] },
+  { name: 'automation.history', label: 'History', to: { name: 'automation.history' }, match: ['automation.history'], permission: 'automation.history' },
 ];
+
+const visibleItems = computed(() => items.filter((item) => can(item.permission)));
 
 function isActive(item) {
   return item.match.includes(route.name);

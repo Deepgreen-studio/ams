@@ -13,15 +13,15 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('compliance')->group(function (): void {
         Route::get('/dashboard', [ComplianceCaseController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::CASES.'|'.CompliancePermission::VIEW);
 
         Route::prefix('cases')->group(function (): void {
             Route::get('/', [ComplianceCaseController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::CASES.'|'.CompliancePermission::VIEW);
             Route::post('/', [ComplianceCaseController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{case}', [ComplianceCaseController::class, 'show'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::CASES.'|'.CompliancePermission::VIEW);
             Route::put('/{case}', [ComplianceCaseController::class, 'update'])
                 ->middleware('permission:'.CompliancePermission::UPDATE);
             Route::delete('/{case}', [ComplianceCaseController::class, 'destroy'])
@@ -31,15 +31,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         });
 
         Route::get('/privacy-requests/dashboard', [PrivacyRequestController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::PRIVACY.'|'.CompliancePermission::VIEW);
 
         Route::prefix('privacy-requests')->group(function (): void {
             Route::get('/', [PrivacyRequestController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::PRIVACY.'|'.CompliancePermission::VIEW);
             Route::post('/', [PrivacyRequestController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{privacyRequest}', [PrivacyRequestController::class, 'show'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::PRIVACY.'|'.CompliancePermission::VIEW);
             Route::put('/{privacyRequest}', [PrivacyRequestController::class, 'update'])
                 ->middleware('permission:'.CompliancePermission::UPDATE);
             Route::delete('/{privacyRequest}', [PrivacyRequestController::class, 'destroy'])
@@ -69,21 +69,21 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         });
 
         Route::get('/consents/dashboard', [ConsentController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::CONSENTS.'|'.CompliancePermission::VIEW);
         Route::get('/consents/types', [ConsentController::class, 'types'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::CONSENTS.'|'.CompliancePermission::VIEW);
         Route::post('/consents/types', [ConsentController::class, 'storeType'])
             ->middleware('permission:'.CompliancePermission::MANAGE);
         Route::get('/consents/history', [ConsentController::class, 'history'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::CONSENTS.'|'.CompliancePermission::VIEW);
         Route::get('/consents/preferences', [ConsentController::class, 'preferenceCenter'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::CONSENTS.'|'.CompliancePermission::VIEW);
         Route::post('/consents/preferences', [ConsentController::class, 'savePreferences'])
             ->middleware('permission:'.CompliancePermission::CREATE);
 
         Route::prefix('consents')->group(function (): void {
             Route::get('/', [ConsentController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::CONSENTS.'|'.CompliancePermission::VIEW);
             Route::post('/', [ConsentController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{consent}', [ConsentController::class, 'show'])
@@ -95,17 +95,17 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         });
 
         Route::get('/breaches/dashboard', [DataBreachController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::BREACHES.'|'.CompliancePermission::VIEW);
         Route::get('/breaches/risk-matrix', [DataBreachController::class, 'riskMatrix'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::BREACHES.'|'.CompliancePermission::VIEW);
         Route::get('/breaches/notifications', [DataBreachController::class, 'notificationCenter'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::BREACHES.'|'.CompliancePermission::VIEW);
         Route::get('/breaches/reports', [DataBreachController::class, 'reports'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::BREACHES.'|'.CompliancePermission::VIEW);
 
         Route::prefix('breaches')->group(function (): void {
             Route::get('/', [DataBreachController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::BREACHES.'|'.CompliancePermission::VIEW);
             Route::post('/', [DataBreachController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{breach}', [DataBreachController::class, 'show'])
@@ -141,18 +141,18 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         });
 
         Route::get('/dpia/dashboard', [DpiaController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
         Route::get('/dpia/risk-matrix', [DpiaController::class, 'riskMatrix'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
         Route::get('/dpia/templates', [DpiaController::class, 'templates'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
         Route::get('/dpia/mitigation', [DpiaController::class, 'mitigationTracker'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
         Route::get('/dpia/actions', [DpiaController::class, 'actions'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
 
         Route::get('/dpia/risks', [DpiaController::class, 'risks'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
         Route::post('/dpia/risks', [DpiaController::class, 'storeRisk'])
             ->middleware('permission:'.CompliancePermission::CREATE);
         Route::get('/dpia/risks/{risk}', [DpiaController::class, 'showRisk'])
@@ -170,7 +170,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('dpia')->group(function (): void {
             Route::get('/', [DpiaController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::DPIA.'|'.CompliancePermission::VIEW);
             Route::post('/', [DpiaController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{assessment}', [DpiaController::class, 'show'])
@@ -190,9 +190,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         });
 
         Route::get('/policies/dashboard', [PolicyDocumentController::class, 'dashboard'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::POLICIES.'|'.CompliancePermission::VIEW);
         Route::get('/policies/approvals', [PolicyDocumentController::class, 'approvalQueue'])
-            ->middleware('permission:'.CompliancePermission::VIEW);
+            ->middleware('permission:'.CompliancePermission::POLICIES.'|'.CompliancePermission::VIEW);
         Route::post('/policies/approvals/{approval}/approve', [PolicyDocumentController::class, 'approve'])
             ->middleware('permission:'.CompliancePermission::UPDATE);
         Route::post('/policies/approvals/{approval}/reject', [PolicyDocumentController::class, 'reject'])
@@ -200,7 +200,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('policies')->group(function (): void {
             Route::get('/', [PolicyDocumentController::class, 'index'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::POLICIES.'|'.CompliancePermission::VIEW);
             Route::post('/', [PolicyDocumentController::class, 'store'])
                 ->middleware('permission:'.CompliancePermission::CREATE);
             Route::get('/{policy}', [PolicyDocumentController::class, 'show'])
@@ -229,17 +229,17 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
         Route::prefix('analytics')->group(function (): void {
             Route::get('/dashboard', [ComplianceAnalyticsController::class, 'dashboard'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
             Route::get('/risks', [ComplianceAnalyticsController::class, 'risks'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
             Route::get('/reports/gdpr', [ComplianceAnalyticsController::class, 'gdprReport'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
             Route::get('/reports/consent', [ComplianceAnalyticsController::class, 'consentReport'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
             Route::get('/reports/audit', [ComplianceAnalyticsController::class, 'auditReport'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
             Route::get('/export', [ComplianceAnalyticsController::class, 'export'])
-                ->middleware('permission:'.CompliancePermission::VIEW);
+                ->middleware('permission:'.CompliancePermission::REPORTS.'|'.CompliancePermission::VIEW);
         });
     });
 });

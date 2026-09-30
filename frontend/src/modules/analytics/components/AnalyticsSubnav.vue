@@ -3,7 +3,7 @@
     <div class="border-b border-zinc-200">
       <nav class="-mb-px flex gap-x-0.5 overflow-x-auto" aria-label="Analytics sections">
         <RouterLink
-          v-for="group in groups"
+          v-for="group in visibleGroups"
           :key="group.id"
           :to="group.to"
           class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -43,13 +43,16 @@
 <script setup>
 import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const groups = [
   {
     id: 'overview',
     label: 'Overview',
+    permission: 'analytics.view',
     to: { name: 'analytics.dashboard' },
     prefixes: [],
     exact: ['analytics.dashboard'],
@@ -58,6 +61,7 @@ const groups = [
   {
     id: 'dashboards',
     label: 'Dashboards',
+    permission: 'analytics.dashboards',
     to: { name: 'analytics.dashboards' },
     prefixes: ['analytics.dashboards'],
     links: [],
@@ -65,6 +69,7 @@ const groups = [
   {
     id: 'templates',
     label: 'Templates',
+    permission: 'analytics.templates',
     to: { name: 'analytics.templates' },
     prefixes: ['analytics.templates'],
     links: [],
@@ -72,6 +77,7 @@ const groups = [
   {
     id: 'reports',
     label: 'Reports',
+    permission: 'analytics.reports',
     to: { name: 'analytics.reports' },
     prefixes: ['analytics.reports'],
     links: [],
@@ -79,6 +85,7 @@ const groups = [
   {
     id: 'saved-reports',
     label: 'Saved Reports',
+    permission: 'analytics.saved-reports',
     to: { name: 'analytics.saved-reports' },
     prefixes: ['analytics.saved-reports'],
     links: [],
@@ -86,6 +93,7 @@ const groups = [
   {
     id: 'saved-views',
     label: 'Saved Views',
+    permission: 'analytics.saved-views',
     to: { name: 'analytics.saved-views' },
     prefixes: ['analytics.saved-views'],
     links: [],
@@ -93,6 +101,7 @@ const groups = [
   {
     id: 'events',
     label: 'Events',
+    permission: 'analytics.events',
     to: { name: 'analytics.events' },
     prefixes: ['analytics.events'],
     links: [],
@@ -100,6 +109,7 @@ const groups = [
   {
     id: 'business',
     label: 'Business',
+    permission: 'analytics.business',
     to: { name: 'analytics.business' },
     prefixes: ['analytics.business'],
     links: [
@@ -113,6 +123,7 @@ const groups = [
   {
     id: 'executive',
     label: 'Executive',
+    permission: 'analytics.executive',
     to: { name: 'analytics.executive' },
     prefixes: ['analytics.executive'],
     links: [
@@ -130,6 +141,7 @@ const groups = [
   {
     id: 'security',
     label: 'Security',
+    permission: 'analytics.security',
     to: { name: 'analytics.security' },
     prefixes: ['analytics.security'],
     links: [
@@ -144,6 +156,7 @@ const groups = [
   {
     id: 'operational',
     label: 'Operational',
+    permission: 'analytics.operational',
     to: { name: 'analytics.operational' },
     prefixes: ['analytics.operational', 'analytics.delivery', 'analytics.automation', 'analytics.workflows', 'analytics.ai'],
     links: [
@@ -158,8 +171,10 @@ const groups = [
 
 const routeName = computed(() => String(route.name || ''));
 
+const visibleGroups = computed(() => groups.filter((group) => can(group.permission)));
+
 const activeGroup = computed(
-  () => groups.find((group) => isGroupActive(group.id)) || groups[0],
+  () => visibleGroups.value.find((group) => isGroupActive(group.id)) || visibleGroups.value[0],
 );
 
 const activeLinks = computed(() => activeGroup.value?.links ?? []);

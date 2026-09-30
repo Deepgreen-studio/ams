@@ -9,19 +9,19 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::get('/dashboard', [MonitoringController::class, 'dashboard'])
             ->middleware('permission:'.MonitoringPermission::VIEW);
         Route::get('/api', [MonitoringController::class, 'apiMonitor'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::API.'|'.MonitoringPermission::VIEW);
         Route::get('/webhooks', [MonitoringController::class, 'webhookMonitor'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::WEBHOOKS.'|'.MonitoringPermission::VIEW);
         Route::get('/queue', [MonitoringController::class, 'queueHealth'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::QUEUE.'|'.MonitoringPermission::VIEW);
         Route::get('/response-history', [MonitoringController::class, 'responseHistory'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::HISTORY.'|'.MonitoringPermission::VIEW);
         Route::get('/realtime', [MonitoringController::class, 'realtime'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::REALTIME.'|'.MonitoringPermission::VIEW);
         Route::get('/integrations', [MonitoringController::class, 'integrations'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::INTEGRATIONS.'|'.MonitoringPermission::VIEW);
         Route::get('/timeline', [MonitoringController::class, 'timeline'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::TIMELINE.'|'.MonitoringPermission::VIEW);
         Route::get('/health-checks', [MonitoringController::class, 'healthChecks'])
             ->middleware('permission:'.MonitoringPermission::VIEW);
         Route::get('/services', [MonitoringController::class, 'serviceStatuses'])
@@ -32,7 +32,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.MonitoringPermission::MANAGE);
 
         Route::get('/alerts', [MonitoringController::class, 'alerts'])
-            ->middleware('permission:'.MonitoringPermission::VIEW);
+            ->middleware('permission:'.MonitoringPermission::ALERTS.'|'.MonitoringPermission::VIEW);
         Route::post('/alerts', [MonitoringController::class, 'storeAlert'])
             ->middleware('permission:'.MonitoringPermission::MANAGE);
         Route::get('/alerts/{alert}', [MonitoringController::class, 'showAlert'])

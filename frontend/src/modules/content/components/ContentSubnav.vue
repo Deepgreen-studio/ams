@@ -5,7 +5,7 @@
       aria-label="Content sections"
     >
       <RouterLink
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.name"
         :to="{ name: item.name }"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -22,33 +22,41 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const items = [
-  { name: 'content.dashboard', label: 'Dashboard', match: ['content.dashboard'] },
+  { name: 'content.dashboard', label: 'Dashboard', match: ['content.dashboard'], permission: 'content.view' },
   {
     name: 'content.index',
     label: 'Content',
     match: ['content.index', 'content.create', 'content.edit', 'content.show'],
+    permission: 'content.view',
   },
-  { name: 'content.workflow', label: 'Approval Queue', match: ['content.workflow'] },
-  { name: 'content.media', label: 'Media Library', match: ['content.media'] },
+  { name: 'content.workflow', label: 'Approval Queue', match: ['content.workflow'], permission: ['content.review', 'content.approve'] },
+  { name: 'content.media', label: 'Media Library', match: ['content.media'], permission: 'content.view' },
   {
     name: 'content.categories',
     label: 'Categories',
     match: ['content.categories', 'content.categories.create', 'content.categories.edit'],
+    permission: 'content.view',
   },
   {
     name: 'content.tags',
     label: 'Tags',
     match: ['content.tags', 'content.tags.create', 'content.tags.edit'],
+    permission: 'content.view',
   },
-  { name: 'content.delivery', label: 'Delivery Preview', match: ['content.delivery'] },
-  { name: 'content.seo', label: 'SEO Tools', match: ['content.seo'] },
-  { name: 'content.api-explorer', label: 'API Explorer', match: ['content.api-explorer'] },
+  { name: 'content.delivery', label: 'Delivery Preview', match: ['content.delivery'], permission: 'content.view' },
+  { name: 'content.seo', label: 'SEO Tools', match: ['content.seo'], permission: 'content.view' },
+  { name: 'content.api-explorer', label: 'API Explorer', match: ['content.api-explorer'], permission: 'content.view' },
 ];
+
+const visibleItems = computed(() => items.filter((item) => can(item.permission)));
 
 function isActive(item) {
   const names = item.match || [item.name];

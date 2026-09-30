@@ -2,7 +2,7 @@
   <div class="mb-6 border-b border-zinc-200">
     <nav class="-mb-px flex gap-x-0.5 overflow-x-auto" aria-label="Sync sections">
       <RouterLink
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.name"
         :to="item.to"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -19,9 +19,12 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const items = [
   {
@@ -29,32 +32,39 @@ const items = [
     label: 'Dashboard',
     to: { name: 'sync.dashboard' },
     match: ['sync.dashboard'],
+    permission: 'sync.view',
   },
   {
     name: 'sync.configs',
     label: 'Configs',
     to: { name: 'sync.configs' },
     match: ['sync.configs', 'sync.configs.create', 'sync.configs.show', 'sync.configs.edit'],
+    permission: 'sync.configs',
   },
   {
     name: 'sync.history',
     label: 'History',
     to: { name: 'sync.history' },
     match: ['sync.history'],
+    permission: 'sync.history',
   },
   {
     name: 'sync.logs',
     label: 'Logs',
     to: { name: 'sync.logs' },
     match: ['sync.logs'],
+    permission: 'sync.logs',
   },
   {
     name: 'integrations.docs',
     label: 'API Docs',
     to: { name: 'integrations.docs' },
     match: ['integrations.docs'],
+    permission: ['webhooks.docs', 'integrations.view'],
   },
 ];
+
+const visibleItems = computed(() => items.filter((item) => can(item.permission)));
 
 function isActive(item) {
   return item.match.includes(route.name);

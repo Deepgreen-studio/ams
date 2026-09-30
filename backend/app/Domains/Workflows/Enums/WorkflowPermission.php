@@ -16,6 +16,12 @@ final class WorkflowPermission
 
     public const APPROVE = 'workflows.approve';
 
+    public const DESIGNER = 'workflows.designer';
+
+    public const MONITOR = 'workflows.monitor';
+
+    public const HISTORY = 'workflows.history';
+
     /**
      * @return list<string>
      */
@@ -28,6 +34,9 @@ final class WorkflowPermission
             self::DELETE,
             self::MANAGE,
             self::APPROVE,
+            self::DESIGNER,
+            self::MONITOR,
+            self::HISTORY,
         ];
     }
 }

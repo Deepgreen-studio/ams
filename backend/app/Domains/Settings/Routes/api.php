@@ -19,29 +19,29 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
         Route::get('/branding', [SettingController::class, 'branding']);
 
         Route::get('/email', [SettingController::class, 'showEmail'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::EMAIL.'|'.SettingPermission::VIEW);
         Route::put('/email', [SettingController::class, 'updateEmail'])
-            ->middleware('permission:'.SettingPermission::UPDATE);
+            ->middleware('permission:'.SettingPermission::EMAIL.'|'.SettingPermission::UPDATE);
 
         Route::get('/storage', [SettingController::class, 'showStorage'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::STORAGE.'|'.SettingPermission::VIEW);
         Route::put('/storage', [SettingController::class, 'updateStorage'])
-            ->middleware('permission:'.SettingPermission::UPDATE);
+            ->middleware('permission:'.SettingPermission::STORAGE.'|'.SettingPermission::UPDATE);
 
         Route::get('/security', [SettingController::class, 'showSecurity'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::SECURITY.'|'.SettingPermission::VIEW);
         Route::put('/security', [SettingController::class, 'updateSecurity'])
-            ->middleware('permission:'.SettingPermission::UPDATE);
+            ->middleware('permission:'.SettingPermission::SECURITY.'|'.SettingPermission::UPDATE);
 
         Route::get('/api', [SettingController::class, 'showApi'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::API.'|'.SettingPermission::VIEW);
         Route::put('/api', [SettingController::class, 'updateApi'])
-            ->middleware('permission:'.SettingPermission::UPDATE);
+            ->middleware('permission:'.SettingPermission::API.'|'.SettingPermission::UPDATE);
 
         Route::get('/queue', [SettingController::class, 'showQueue'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::QUEUE.'|'.SettingPermission::VIEW);
         Route::put('/queue', [SettingController::class, 'updateQueue'])
-            ->middleware('permission:'.SettingPermission::UPDATE);
+            ->middleware('permission:'.SettingPermission::QUEUE.'|'.SettingPermission::UPDATE);
 
         Route::get('/cache', [SettingController::class, 'showCache'])
             ->middleware('permission:'.SettingPermission::VIEW);
@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('media')->group(function (): void {
         Route::get('/', [MediaController::class, 'index'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::MEDIA.'|'.SettingPermission::VIEW);
         Route::post('/', [MediaController::class, 'store'])
             ->middleware('permission:'.SettingPermission::MANAGE.'|'.SettingPermission::UPDATE);
         Route::delete('/{media}', [MediaController::class, 'destroy'])
@@ -64,7 +64,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('folders')->group(function (): void {
         Route::get('/', [FolderController::class, 'index'])
-            ->middleware('permission:'.SettingPermission::VIEW);
+            ->middleware('permission:'.SettingPermission::FILES.'|'.SettingPermission::VIEW);
         Route::post('/', [FolderController::class, 'store'])
             ->middleware('permission:'.SettingPermission::MANAGE.'|'.SettingPermission::UPDATE);
         Route::put('/{folder}', [FolderController::class, 'update'])

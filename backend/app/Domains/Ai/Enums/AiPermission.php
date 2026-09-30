@@ -16,6 +16,16 @@ final class AiPermission
 
     public const CHAT = 'ai.chat';
 
+    public const SETTINGS = 'ai.settings';
+
+    public const PROMPTS = 'ai.prompts';
+
+    public const CONVERSATIONS = 'ai.conversations';
+
+    public const ANALYTICS = 'ai.analytics';
+
+    public const LOGS = 'ai.logs';
+
     /**
      * @return list<string>
      */
@@ -28,6 +38,11 @@ final class AiPermission
             self::DELETE,
             self::MANAGE,
             self::CHAT,
+            self::SETTINGS,
+            self::PROMPTS,
+            self::CONVERSATIONS,
+            self::ANALYTICS,
+            self::LOGS,
         ];
     }
 }

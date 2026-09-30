@@ -7,6 +7,7 @@ use App\Domains\Integrations\Controllers\IntegrationController;
 use App\Domains\Integrations\Controllers\SyncController;
 use App\Domains\Integrations\Controllers\WebhookController;
 use App\Domains\Integrations\Enums\IntegrationPermission;
+use App\Domains\Integrations\Enums\SyncPermission;
 use App\Domains\Integrations\Enums\WebhookPermission;
 use Illuminate\Support\Facades\Route;
 
@@ -80,32 +81,32 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('sync')->group(function (): void {
         Route::get('/dashboard', [SyncController::class, 'dashboard'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::VIEW.'|'.IntegrationPermission::VIEW);
         Route::get('/configs', [SyncController::class, 'index'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::VIEW);
         Route::post('/configs', [SyncController::class, 'store'])
-            ->middleware('permission:' . IntegrationPermission::CREATE);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::CREATE);
         Route::get('/configs/{sync}', [SyncController::class, 'show'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::VIEW);
         Route::put('/configs/{sync}', [SyncController::class, 'update'])
-            ->middleware('permission:' . IntegrationPermission::UPDATE);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::UPDATE);
         Route::delete('/configs/{sync}', [SyncController::class, 'destroy'])
-            ->middleware('permission:' . IntegrationPermission::DELETE);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::DELETE);
         Route::post('/configs/{sync}/run', [SyncController::class, 'run'])
-            ->middleware('permission:' . IntegrationPermission::MANAGE);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::MANAGE);
         Route::get('/runs', [SyncController::class, 'runs'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::HISTORY.'|'.IntegrationPermission::VIEW);
         Route::get('/runs/{run}', [SyncController::class, 'showRun'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::HISTORY.'|'.IntegrationPermission::VIEW);
         Route::get('/logs', [SyncController::class, 'logs'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::LOGS.'|'.IntegrationPermission::VIEW);
     });
 
     Route::prefix('mappings')->group(function (): void {
         Route::get('/catalogs', [DataMappingController::class, 'catalogs'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::VIEW);
         Route::get('/', [DataMappingController::class, 'index'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.SyncPermission::CONFIGS.'|'.IntegrationPermission::VIEW);
         Route::post('/', [DataMappingController::class, 'store'])
             ->middleware('permission:' . IntegrationPermission::CREATE);
         Route::get('/{mapping}', [DataMappingController::class, 'show'])

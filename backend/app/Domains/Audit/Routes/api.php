@@ -21,20 +21,20 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('audit-logs')->group(function (): void {
         Route::get('/', [AuditLogController::class, 'index'])
-            ->middleware('permission:'.AuditPermission::VIEW);
+            ->middleware('permission:'.AuditPermission::TRAIL.'|'.AuditPermission::VIEW);
         Route::get('/{auditLog}', [AuditLogController::class, 'show'])
-            ->middleware('permission:'.AuditPermission::VIEW);
+            ->middleware('permission:'.AuditPermission::TRAIL.'|'.AuditPermission::VIEW);
     });
 
     Route::get('/login-history', [LoginHistoryController::class, 'index'])
-        ->middleware('permission:'.AuditPermission::VIEW);
+        ->middleware('permission:'.AuditPermission::LOGIN.'|'.AuditPermission::VIEW);
 
     Route::get('/system-events', [SystemEventController::class, 'index'])
-        ->middleware('permission:'.AuditPermission::VIEW);
+        ->middleware('permission:'.AuditPermission::EVENTS.'|'.AuditPermission::VIEW);
 
     Route::get('/api-logs', [ApiLogController::class, 'index'])
-        ->middleware('permission:'.AuditPermission::VIEW);
+        ->middleware('permission:'.AuditPermission::API.'|'.AuditPermission::VIEW);
 
     Route::get('/error-logs', [ErrorLogController::class, 'index'])
-        ->middleware('permission:'.AuditPermission::VIEW);
+        ->middleware('permission:'.AuditPermission::ERRORS.'|'.AuditPermission::VIEW);
 });

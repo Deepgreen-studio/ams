@@ -12,11 +12,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('workflows')->group(
         ->middleware('permission:'.WorkflowPermission::VIEW);
 
     Route::get('/monitor', [WorkflowInstanceController::class, 'monitor'])
-        ->middleware('permission:'.WorkflowPermission::VIEW);
+        ->middleware('permission:'.WorkflowPermission::MONITOR.'|'.WorkflowPermission::VIEW);
     Route::get('/queue', [WorkflowInstanceController::class, 'queue'])
         ->middleware('permission:'.WorkflowPermission::APPROVE);
     Route::get('/history', [WorkflowInstanceController::class, 'history'])
-        ->middleware('permission:'.WorkflowPermission::VIEW);
+        ->middleware('permission:'.WorkflowPermission::HISTORY.'|'.WorkflowPermission::VIEW);
     Route::get('/instances', [WorkflowInstanceController::class, 'index'])
         ->middleware('permission:'.WorkflowPermission::VIEW);
     Route::get('/instances/{instance}', [WorkflowInstanceController::class, 'show'])
@@ -29,7 +29,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('workflows')->group(
         ->middleware('permission:'.WorkflowPermission::MANAGE);
 
     Route::get('/', [WorkflowController::class, 'index'])
-        ->middleware('permission:'.WorkflowPermission::VIEW);
+        ->middleware('permission:'.WorkflowPermission::DESIGNER.'|'.WorkflowPermission::VIEW);
     Route::post('/', [WorkflowController::class, 'store'])
         ->middleware('permission:'.WorkflowPermission::CREATE);
     Route::get('/{workflow}', [WorkflowController::class, 'show'])

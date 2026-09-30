@@ -10,16 +10,16 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('scheduler')->group(
     Route::get('/catalog', [ScheduledJobController::class, 'catalog'])
         ->middleware('permission:'.SchedulerPermission::VIEW);
     Route::get('/statistics', [ScheduledJobController::class, 'statistics'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::STATISTICS.'|'.SchedulerPermission::VIEW);
 
     Route::get('/history', [ScheduledJobController::class, 'history'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::HISTORY.'|'.SchedulerPermission::VIEW);
     Route::get('/running', [ScheduledJobController::class, 'running'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::RUNNING.'|'.SchedulerPermission::VIEW);
     Route::get('/failed', [ScheduledJobController::class, 'failed'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::FAILED.'|'.SchedulerPermission::VIEW);
     Route::get('/logs', [ScheduledJobController::class, 'logs'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::LOGS.'|'.SchedulerPermission::VIEW);
 
     Route::get('/runs/{run}', [ScheduledJobController::class, 'showRun'])
         ->middleware('permission:'.SchedulerPermission::VIEW);
@@ -27,7 +27,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('scheduler')->group(
         ->middleware('permission:'.SchedulerPermission::RETRY);
 
     Route::get('/jobs', [ScheduledJobController::class, 'index'])
-        ->middleware('permission:'.SchedulerPermission::VIEW);
+        ->middleware('permission:'.SchedulerPermission::JOBS.'|'.SchedulerPermission::VIEW);
     Route::post('/jobs', [ScheduledJobController::class, 'store'])
         ->middleware('permission:'.SchedulerPermission::CREATE);
     Route::get('/jobs/{job}', [ScheduledJobController::class, 'show'])

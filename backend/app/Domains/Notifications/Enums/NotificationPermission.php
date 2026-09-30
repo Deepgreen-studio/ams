@@ -16,6 +16,18 @@ final class NotificationPermission
 
     public const PUBLISH = 'notifications.publish';
 
+    public const CENTER = 'notifications.center';
+
+    public const UNREAD = 'notifications.unread';
+
+    public const HISTORY = 'notifications.history';
+
+    public const PREFERENCES = 'notifications.preferences';
+
+    public const TEMPLATES = 'notifications.templates';
+
+    public const LOGS = 'notifications.logs';
+
     /**
      * @return list<string>
      */
@@ -28,6 +40,12 @@ final class NotificationPermission
             self::DELETE,
             self::APPROVE,
             self::PUBLISH,
+            self::CENTER,
+            self::UNREAD,
+            self::HISTORY,
+            self::PREFERENCES,
+            self::TEMPLATES,
+            self::LOGS,
         ];
     }
 }

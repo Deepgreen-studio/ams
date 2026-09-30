@@ -5,7 +5,7 @@
       aria-label="Monitoring sections"
     >
       <RouterLink
-        v-for="item in items"
+        v-for="item in visibleItems"
         :key="item.name"
         :to="item.to"
         class="shrink-0 border-b-2 px-3.5 py-2.5 text-sm font-medium transition-colors"
@@ -22,21 +22,26 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 
 const route = useRoute();
+const { can } = usePermissions();
 
 const items = [
-  { name: 'monitoring.dashboard', label: 'Health Dashboard', to: { name: 'monitoring.dashboard' } },
-  { name: 'monitoring.realtime', label: 'Real-Time', to: { name: 'monitoring.realtime' } },
-  { name: 'monitoring.api', label: 'API Monitor', to: { name: 'monitoring.api' } },
-  { name: 'monitoring.webhooks', label: 'Webhook Monitor', to: { name: 'monitoring.webhooks' } },
-  { name: 'monitoring.queue', label: 'Queue Monitor', to: { name: 'monitoring.queue' } },
-  { name: 'monitoring.integrations', label: 'Integrations', to: { name: 'monitoring.integrations' } },
-  { name: 'monitoring.timeline', label: 'Incident Timeline', to: { name: 'monitoring.timeline' } },
-  { name: 'monitoring.history', label: 'Response History', to: { name: 'monitoring.history' } },
-  { name: 'monitoring.alerts', label: 'Alerts', to: { name: 'monitoring.alerts' } },
+  { name: 'monitoring.dashboard', label: 'Health Dashboard', to: { name: 'monitoring.dashboard' }, permission: 'monitoring.view' },
+  { name: 'monitoring.realtime', label: 'Real-Time', to: { name: 'monitoring.realtime' }, permission: 'monitoring.realtime' },
+  { name: 'monitoring.api', label: 'API Monitor', to: { name: 'monitoring.api' }, permission: 'monitoring.api' },
+  { name: 'monitoring.webhooks', label: 'Webhook Monitor', to: { name: 'monitoring.webhooks' }, permission: 'monitoring.webhooks' },
+  { name: 'monitoring.queue', label: 'Queue Monitor', to: { name: 'monitoring.queue' }, permission: 'monitoring.queue' },
+  { name: 'monitoring.integrations', label: 'Integrations', to: { name: 'monitoring.integrations' }, permission: 'monitoring.integrations' },
+  { name: 'monitoring.timeline', label: 'Incident Timeline', to: { name: 'monitoring.timeline' }, permission: 'monitoring.timeline' },
+  { name: 'monitoring.history', label: 'Response History', to: { name: 'monitoring.history' }, permission: 'monitoring.history' },
+  { name: 'monitoring.alerts', label: 'Alerts', to: { name: 'monitoring.alerts' }, permission: 'monitoring.alerts' },
 ];
+
+const visibleItems = computed(() => items.filter((item) => can(item.permission)));
 
 function isActive(name) {
   return route.name === name;

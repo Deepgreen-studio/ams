@@ -10,10 +10,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('ai')->group(functio
     Route::get('/catalog', [AiController::class, 'catalog'])
         ->middleware('permission:'.AiPermission::VIEW);
     Route::get('/analytics', [AiController::class, 'analytics'])
-        ->middleware('permission:'.AiPermission::VIEW);
+        ->middleware('permission:'.AiPermission::ANALYTICS.'|'.AiPermission::VIEW);
 
     Route::get('/settings', [AiController::class, 'settings'])
-        ->middleware('permission:'.AiPermission::MANAGE);
+        ->middleware('permission:'.AiPermission::SETTINGS.'|'.AiPermission::MANAGE);
     Route::put('/settings', [AiController::class, 'updateSettings'])
         ->middleware('permission:'.AiPermission::MANAGE);
 
@@ -31,7 +31,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('ai')->group(functio
         ->middleware('permission:'.AiPermission::MANAGE);
 
     Route::get('/prompts', [AiController::class, 'prompts'])
-        ->middleware('permission:'.AiPermission::VIEW);
+        ->middleware('permission:'.AiPermission::PROMPTS.'|'.AiPermission::VIEW);
     Route::post('/prompts', [AiController::class, 'storePrompt'])
         ->middleware('permission:'.AiPermission::CREATE);
     Route::get('/prompts/{prompt}', [AiController::class, 'showPrompt'])
@@ -44,7 +44,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('ai')->group(functio
         ->middleware('permission:'.AiPermission::MANAGE);
 
     Route::get('/conversations', [AiController::class, 'conversations'])
-        ->middleware('permission:'.AiPermission::VIEW);
+        ->middleware('permission:'.AiPermission::CONVERSATIONS.'|'.AiPermission::VIEW.'|'.AiPermission::CHAT);
     Route::get('/conversations/{conversation}', [AiController::class, 'showConversation'])
         ->middleware('permission:'.AiPermission::VIEW);
     Route::post('/conversations/{conversation}/archive', [AiController::class, 'archiveConversation'])
@@ -71,7 +71,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->prefix('ai')->group(functio
         ->middleware('permission:'.AiPermission::CHAT);
 
     Route::get('/logs', [AiController::class, 'logs'])
-        ->middleware('permission:'.AiPermission::VIEW);
+        ->middleware('permission:'.AiPermission::LOGS.'|'.AiPermission::VIEW);
     Route::get('/logs/{log}', [AiController::class, 'showLog'])
         ->middleware('permission:'.AiPermission::VIEW);
 });

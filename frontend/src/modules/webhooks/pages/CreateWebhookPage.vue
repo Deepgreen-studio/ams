@@ -1,7 +1,7 @@
 <template>
   <div>
     <WebhookSubnav />
-    <div class="overflow-hidden rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100">
+    <div class="mx-auto w-full max-w-[1200px] overflow-hidden rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
       <WebhookForm
         :loading="store.saving"
         :errors="store.fieldErrors"

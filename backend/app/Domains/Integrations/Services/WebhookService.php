@@ -81,7 +81,7 @@ class WebhookService
             }
 
             $payload['slug'] = $this->resolveUniqueSlug($company->id, $payload['slug'] ?? null, $payload['name']);
-            $payload['status'] = $payload['status'] ?? 'inactive';
+            $payload['status'] = $payload['status'] ?? 'active';
             $payload['signature_algorithm'] = $payload['signature_algorithm'] ?? 'hmac_sha256';
             $payload['signature_header'] = $payload['signature_header'] ?? 'X-AMS-Signature';
             $payload['timeout'] = $payload['timeout'] ?? 30;

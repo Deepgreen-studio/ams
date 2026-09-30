@@ -3,9 +3,9 @@
     <WebhookSubnav />
     <div
       v-if="store.loading && !store.currentWebhook"
-      class="h-64 animate-pulse rounded-[12px] bg-slate-100"
+      class="mx-auto h-64 w-full max-w-[1200px] animate-pulse rounded-[12px] bg-slate-100"
     />
-    <div v-else class="overflow-hidden rounded-[12px] bg-white p-6 sm:p-8 ring-1 ring-zinc-100">
+    <div v-else class="mx-auto w-full max-w-[1200px] overflow-hidden rounded-[12px] bg-white p-6 ring-1 ring-zinc-100 sm:p-8">
       <WebhookForm
         :initial="store.currentWebhook || {}"
         hide-company

@@ -2,7 +2,7 @@
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
     <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Company</label>
+        <FormLabel required>Company</FormLabel>
         <SelectBox
           v-model="form.company_id"
           size="lg"
@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Name</label>
+        <FormLabel required>Name</FormLabel>
         <input
           v-model="form.name"
           type="text"
@@ -31,7 +31,7 @@
       </div>
 
       <div>
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Direction</label>
+        <FormLabel required>Direction</FormLabel>
         <SelectBox
           v-model="form.direction"
           size="lg"
@@ -46,7 +46,7 @@
       </div>
 
       <div v-if="form.direction === 'outgoing'" class="md:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-slate-700">Destination URL</label>
+        <FormLabel required>Destination URL</FormLabel>
         <input
           v-model="form.url"
           type="url"
@@ -162,6 +162,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import FormLabel from '@/components/ui/FormLabel.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -254,7 +255,7 @@ function createForm(value = {}) {
     company_id: value.company?.uuid || value.company_id || '',
     name: value.name || '',
     direction: value.direction || 'outgoing',
-    status: value.status || 'inactive',
+    status: value.status || 'active',
     url: value.url || '',
     description: value.description || '',
     signature_algorithm: value.signature_algorithm || 'hmac_sha256',

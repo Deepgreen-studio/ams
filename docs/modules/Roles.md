@@ -18,6 +18,23 @@ Enterprise RBAC for AMS Phase 1.4 using Spatie Laravel Permission, Policies, Gat
 - Customer
 - Read Only User
 
+## Roles Permissions
+
+| Permission | Screen action |
+|------------|----------------|
+| `roles.view` | View a role |
+| `roles.create` | Create Role |
+| `roles.update` | Edit |
+| `roles.assign` | Permissions |
+| `roles.assign-roles` | Assign Roles |
+| `roles.matrix` | Permission Matrix |
+| `roles.view-trash` | Soft Delete view |
+| `roles.delete` | Soft delete a role |
+| `roles.restore` | Restore |
+| `roles.force-delete` | Permanent delete |
+
+`users.assign-roles` still grants Assign Roles. Company Admin receives the roles permissions above.
+
 ## Permission Groups
 
 Authentication, Dashboard, Users, Roles, Companies, Applications, Customers, Integrations, Releases, Content, Support, Notifications, Analytics, Compliance, Reports, Settings.

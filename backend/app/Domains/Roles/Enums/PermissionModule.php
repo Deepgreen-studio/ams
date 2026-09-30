@@ -8,7 +8,7 @@ namespace App\Domains\Roles\Enums;
 final class PermissionModule
 {
     /**
-     * @return array<string, array{label: string, actions: list<string>}>
+     * @return array<string, array{label: string, actions: list<string>, labels?: array<string, string>}>
      */
     public static function catalog(): array
     {
@@ -26,10 +26,32 @@ final class PermissionModule
             'users' => [
                 'label' => 'Users',
                 'actions' => array_merge($crud, ['restore', 'force-delete', 'assign-roles']),
+                'labels' => [
+                    'assign-roles' => 'Assign Roles to Users',
+                ],
             ],
             'roles' => [
                 'label' => 'Roles',
-                'actions' => array_merge($crud, ['restore', 'force-delete', 'assign']),
+                'actions' => array_merge($crud, [
+                    'restore',
+                    'force-delete',
+                    'assign',
+                    'assign-roles',
+                    'matrix',
+                    'view-trash',
+                ]),
+                'labels' => [
+                    'view' => 'View Role',
+                    'create' => 'Create Role',
+                    'update' => 'Edit Role',
+                    'delete' => 'Soft Delete Role',
+                    'restore' => 'Restore Role',
+                    'force-delete' => 'Permanent Delete Role',
+                    'assign' => 'Assign Permissions',
+                    'assign-roles' => 'Assign Roles',
+                    'matrix' => 'Permission Matrix',
+                    'view-trash' => 'Soft Delete View',
+                ],
             ],
             'companies' => [
                 'label' => 'Companies',

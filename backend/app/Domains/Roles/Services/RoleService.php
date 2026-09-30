@@ -9,6 +9,7 @@ use App\Domains\Roles\Events\RoleDeleted;
 use App\Domains\Roles\Events\RoleUpdated;
 use App\Domains\Roles\Events\UserRoleAssigned;
 use App\Domains\Roles\Events\UserRoleRemoved;
+use App\Domains\Roles\Enums\RolePermission;
 use App\Domains\Roles\Models\Role;
 use App\Domains\Roles\Repositories\PermissionRepository;
 use App\Domains\Roles\Repositories\RoleRepository;
@@ -117,6 +118,10 @@ class RoleService
             $role = $this->roleRepository->updateRole($role, $payload);
 
             if (array_key_exists('permissions', $data) && is_array($data['permissions'])) {
+                if (! $actor->can(RolePermission::ASSIGN)) {
+                    throw new ApiException('You do not have permission to assign role permissions.', 403);
+                }
+
                 $this->syncRolePermissions($role, $data['permissions'], $actor, fireEvents: false);
             }
 

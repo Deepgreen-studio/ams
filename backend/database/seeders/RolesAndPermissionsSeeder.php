@@ -55,11 +55,14 @@ class RolesAndPermissionsSeeder extends Seeder
                 $name = "{$module}.{$action}";
                 Permission::findOrCreate($name, $guard);
 
+                $displayName = $meta['labels'][$action]
+                    ?? Str::of($action)->replace('-', ' ')->title().' '.$meta['label'];
+
                 Permission::query()
                     ->where('name', $name)
                     ->where('guard_name', $guard)
                     ->update([
-                        'display_name' => Str::of($action)->replace('-', ' ')->title() . ' ' . $meta['label'],
+                        'display_name' => $displayName,
                         'module' => $module,
                         'description' => "Allows {$action} access in {$meta['label']}.",
                         'permission_group_id' => $group->id,
@@ -89,7 +92,8 @@ class RolesAndPermissionsSeeder extends Seeder
         $this->syncNamedPermissions('company-admin', array_merge([
             'dashboard.view',
             'users.view', 'users.create', 'users.update', 'users.delete', 'users.restore', 'users.assign-roles',
-            'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'roles.restore', 'roles.assign',
+            'roles.view', 'roles.create', 'roles.update', 'roles.delete', 'roles.restore', 'roles.force-delete',
+            'roles.assign', 'roles.assign-roles', 'roles.matrix', 'roles.view-trash',
             'companies.view', 'companies.create', 'companies.update', 'companies.delete', 'companies.restore', 'companies.manage',
             'applications.view', 'applications.create', 'applications.update', 'applications.delete',
             'customers.view', 'customers.create', 'customers.update', 'customers.delete', 'customers.restore', 'customers.export', 'customers.anonymize',

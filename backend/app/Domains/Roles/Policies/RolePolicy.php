@@ -39,7 +39,7 @@ class RolePolicy
 
     public function restore(User $user, Role $role): bool
     {
-        return $user->can(RolePermission::RESTORE) || $user->can(RolePermission::DELETE);
+        return $user->can(RolePermission::RESTORE);
     }
 
     public function forceDelete(User $user, Role $role): bool
@@ -53,16 +53,28 @@ class RolePolicy
 
     public function assignPermissions(User $user, Role $role): bool
     {
-        return $user->can(RolePermission::ASSIGN) || $user->can(RolePermission::UPDATE);
+        return $user->can(RolePermission::ASSIGN);
     }
 
     public function assignToUser(User $user): bool
     {
-        return $user->can(RolePermission::ASSIGN_USERS);
+        return $user->can(RolePermission::ASSIGN_ROLES) || $user->can(RolePermission::ASSIGN_USERS);
+    }
+
+    public function viewMatrix(User $user): bool
+    {
+        return $user->can(RolePermission::MATRIX);
+    }
+
+    public function viewTrash(User $user): bool
+    {
+        return $user->can(RolePermission::VIEW_TRASH);
     }
 
     public function viewPermissions(User $user): bool
     {
-        return $user->can(RolePermission::VIEW);
+        return $user->can(RolePermission::VIEW)
+            || $user->can(RolePermission::ASSIGN)
+            || $user->can(RolePermission::MATRIX);
     }
 }

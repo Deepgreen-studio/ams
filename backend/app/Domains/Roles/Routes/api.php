@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
     Route::prefix('roles')->group(function (): void {
         Route::get('/', [RoleController::class, 'index'])
-            ->middleware('permission:'.RolePermission::VIEW);
+            ->middleware('permission:'.RolePermission::VIEW.'|'.RolePermission::VIEW_TRASH.'|'.RolePermission::MATRIX);
         Route::post('/', [RoleController::class, 'store'])
             ->middleware('permission:'.RolePermission::CREATE);
         Route::get('/{role}', [RoleController::class, 'show'])
@@ -28,15 +28,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('permissions')->group(function (): void {
         Route::get('/', [PermissionController::class, 'index'])
-            ->middleware('permission:'.RolePermission::VIEW);
+            ->middleware('permission:'.RolePermission::VIEW.'|'.RolePermission::ASSIGN.'|'.RolePermission::MATRIX.'|'.RolePermission::CREATE);
         Route::get('/groups', [PermissionController::class, 'groups'])
-            ->middleware('permission:'.RolePermission::VIEW);
+            ->middleware('permission:'.RolePermission::VIEW.'|'.RolePermission::ASSIGN.'|'.RolePermission::MATRIX.'|'.RolePermission::CREATE);
         Route::get('/matrix', [PermissionController::class, 'matrix'])
-            ->middleware('permission:'.RolePermission::VIEW);
+            ->middleware('permission:'.RolePermission::MATRIX);
     });
 
     Route::post('/users/{user}/roles', [UserRoleController::class, 'store'])
-        ->middleware('permission:'.RolePermission::ASSIGN_USERS);
+        ->middleware('permission:'.RolePermission::ASSIGN_ROLES.'|'.RolePermission::ASSIGN_USERS);
     Route::delete('/users/{user}/roles/{role}', [UserRoleController::class, 'destroy'])
-        ->middleware('permission:'.RolePermission::ASSIGN_USERS);
+        ->middleware('permission:'.RolePermission::ASSIGN_ROLES.'|'.RolePermission::ASSIGN_USERS);
 });

@@ -29,7 +29,13 @@ class RoleController
 
     public function index(IndexRoleRequest $request): JsonResponse
     {
-        $this->authorize('viewAny', Role::class);
+        if ($request->input('trashed') === 'only') {
+            $this->authorize('viewTrash', Role::class);
+        } elseif ($request->user()?->can(RolePermission::VIEW)) {
+            $this->authorize('viewAny', Role::class);
+        } else {
+            $this->authorize('viewMatrix', Role::class);
+        }
 
         $roles = $this->roleService->list($request->filters());
 

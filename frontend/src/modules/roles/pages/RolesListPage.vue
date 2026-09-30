@@ -2,21 +2,21 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="canAny('roles.view', 'roles.restore', 'roles.force-delete')"
+        v-if="can('roles.view-trash')"
         :to="{ name: 'roles.trash' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Soft Delete
       </RouterLink>
       <RouterLink
-        v-if="can('roles.view')"
+        v-if="can('roles.matrix')"
         :to="{ name: 'roles.matrix' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
         Permission Matrix
       </RouterLink>
       <RouterLink
-        v-if="can('roles.assign')"
+        v-if="canAny('roles.assign-roles', 'users.assign-roles')"
         :to="{ name: 'roles.assign' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >

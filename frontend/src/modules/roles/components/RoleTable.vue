@@ -132,7 +132,7 @@
           Edit
         </RouterLink>
         <RouterLink
-          v-if="canAny('roles.assign', 'roles.update') && !isTrashed(activeRole)"
+          v-if="can('roles.assign') && !isTrashed(activeRole)"
           :to="{ name: 'roles.permissions', params: { id: activeRole.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -246,7 +246,7 @@ function toggleMenu(id, event) {
   const itemCount = [
     can('roles.view'),
     can('roles.update'),
-    canAny('roles.assign', 'roles.update'),
+    can('roles.assign'),
     can('roles.delete') && role && !role.is_system,
   ].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;

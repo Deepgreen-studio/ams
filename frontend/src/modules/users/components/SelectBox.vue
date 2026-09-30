@@ -58,7 +58,7 @@
           v-for="option in group.options"
           :key="String(option.value)"
           type="button"
-          class="flex w-full items-center gap-2.5 px-3.5 text-left text-sm transition"
+          class="flex w-full items-center gap-2.5 px-3.5 text-left transition"
           :class="[
             sizeClasses.option,
             isSelected(option.value)
@@ -111,7 +111,7 @@ const props = defineProps({
   size: {
     type: String,
     default: 'md',
-    validator: (value) => ['sm', 'md', 'lg'].includes(value),
+    validator: (value) => ['xs', 'sm', 'md', 'lg'].includes(value),
   },
   dropUp: {
     type: Boolean,
@@ -137,11 +137,19 @@ const open = ref(false);
 const rootRef = ref(null);
 
 const sizeClasses = computed(() => {
+  if (props.size === 'xs') {
+    return {
+      button: 'h-7 rounded-full py-1 pl-3 pr-2.5 text-xs font-medium',
+      icon: 'h-3.5 w-3.5',
+      option: 'py-1.5 text-xs',
+    };
+  }
+
   if (props.size === 'sm') {
     return {
       button: 'h-8 rounded-[12px] py-1.5 pl-3 pr-2.5 text-sm',
       icon: 'h-3.5 w-3.5',
-      option: 'py-2',
+      option: 'py-2 text-sm',
     };
   }
 
@@ -149,14 +157,14 @@ const sizeClasses = computed(() => {
     return {
       button: 'h-12 rounded-xl py-2.5 pl-3.5 pr-3 text-sm',
       icon: 'h-4 w-4',
-      option: 'py-2.5',
+      option: 'py-2.5 text-sm',
     };
   }
 
   return {
     button: 'h-10 rounded-[12px] py-2 pl-3.5 pr-3 text-sm',
     icon: 'h-4 w-4',
-    option: 'py-2.5',
+    option: 'py-2.5 text-sm',
   };
 });
 

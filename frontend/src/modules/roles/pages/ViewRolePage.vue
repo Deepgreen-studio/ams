@@ -2,7 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="rolesStore.currentRole && canAny('roles.assign', 'roles.update')"
+        v-if="rolesStore.currentRole && can('roles.assign')"
         :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -75,7 +75,7 @@
           <div class="flex flex-wrap items-center justify-between gap-3">
             <h3 class="text-base font-semibold text-slate-900">Permissions</h3>
             <RouterLink
-              v-if="canAny('roles.assign', 'roles.update')"
+              v-if="can('roles.assign')"
               :to="{ name: 'roles.permissions', params: { id: rolesStore.currentRole.uuid } }"
               class="text-sm font-medium text-brand-600 hover:text-brand-700"
             >
@@ -187,7 +187,7 @@ import { useRolesStore } from '@/modules/roles/stores/roles';
 const route = useRoute();
 const router = useRouter();
 const rolesStore = useRolesStore();
-const { can, canAny } = usePermissions();
+const { can } = usePermissions();
 const toast = useToast();
 const showDelete = ref(false);
 const showAllPermissions = ref(false);

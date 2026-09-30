@@ -58,7 +58,7 @@ class PermissionController
 
     public function matrix(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Role::class);
+        $this->authorize('viewMatrix', Role::class);
 
         $matrix = $this->permissionService->matrix($request->query('role'));
 

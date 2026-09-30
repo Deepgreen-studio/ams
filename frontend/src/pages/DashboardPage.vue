@@ -24,15 +24,13 @@
       <section>
         <div class="mb-3 flex items-center justify-between">
           <h2 class="text-sm font-semibold text-zinc-800">Overview</h2>
-          <select
+          <SelectBox
             v-model="selectedDays"
-            class="rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs font-medium text-zinc-600 outline-none hover:bg-zinc-50 focus:border-brand-500"
+            size="xs"
+            wrapper-class="w-36 shrink-0"
+            :options="periodOptions"
             @change="onDaysChange"
-          >
-            <option :value="7">Last 7 days</option>
-            <option :value="30">Last 30 days</option>
-            <option :value="90">Last 90 days</option>
-          </select>
+          />
         </div>
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <MetricCard
@@ -73,10 +71,17 @@ import ApplicationSummaryCard from '@/components/dashboard/ApplicationSummaryCar
 import OverallProgressCard from '@/components/dashboard/OverallProgressCard.vue';
 import TodayTasksCard from '@/components/dashboard/TodayTasksCard.vue';
 import TeamWorkloadCard from '@/components/dashboard/TeamWorkloadCard.vue';
+import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useDashboardStore } from '@/modules/dashboard/stores/dashboard';
 
 const dashboardStore = useDashboardStore();
 const selectedDays = ref(dashboardStore.days || 30);
+
+const periodOptions = [
+  { value: 7, label: 'Last 7 days' },
+  { value: 30, label: 'Last 30 days' },
+  { value: 90, label: 'Last 90 days' },
+];
 
 const iconMap = {
   applications: {
@@ -122,8 +127,8 @@ onMounted(() => {
   dashboardStore.fetchOverview({ days: selectedDays.value }).catch(() => {});
 });
 
-function onDaysChange() {
-  dashboardStore.fetchOverview({ days: Number(selectedDays.value) }).catch(() => {});
+function onDaysChange(days) {
+  dashboardStore.fetchOverview({ days: Number(days ?? selectedDays.value) }).catch(() => {});
 }
 
 function reload() {

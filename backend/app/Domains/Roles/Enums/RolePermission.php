@@ -22,6 +22,12 @@ final class RolePermission
 
     public const ASSIGN = 'roles.assign';
 
+    public const ASSIGN_ROLES = 'roles.assign-roles';
+
+    public const MATRIX = 'roles.matrix';
+
+    public const VIEW_TRASH = 'roles.view-trash';
+
     public const ASSIGN_USERS = 'users.assign-roles';
 
     /**
@@ -37,6 +43,9 @@ final class RolePermission
             self::RESTORE,
             self::FORCE_DELETE,
             self::ASSIGN,
+            self::ASSIGN_ROLES,
+            self::MATRIX,
+            self::VIEW_TRASH,
             self::ASSIGN_USERS,
         ];
     }

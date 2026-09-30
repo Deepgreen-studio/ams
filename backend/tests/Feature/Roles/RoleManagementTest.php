@@ -45,7 +45,43 @@ class RoleManagementTest extends TestCase
         $this->assertDatabaseHas('roles', ['name' => 'read-only-user']);
         $this->assertDatabaseHas('permission_groups', ['slug' => 'users']);
         $this->assertDatabaseHas('permissions', ['name' => 'applications.view']);
-        $this->assertTrue(Role::findByName('super-admin', 'web')->hasPermissionTo(RolePermission::ASSIGN_USERS));
+        $superAdmin = Role::findByName('super-admin', 'web');
+        $companyAdmin = Role::findByName('company-admin', 'web');
+
+        $this->assertTrue($superAdmin->hasPermissionTo(RolePermission::ASSIGN_USERS));
+        $this->assertTrue($superAdmin->hasPermissionTo(RolePermission::ASSIGN_ROLES));
+        $this->assertTrue($superAdmin->hasPermissionTo(RolePermission::MATRIX));
+        $this->assertTrue($superAdmin->hasPermissionTo(RolePermission::VIEW_TRASH));
+        $this->assertTrue($superAdmin->hasPermissionTo(RolePermission::FORCE_DELETE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(RolePermission::MATRIX));
+        $this->assertTrue($companyAdmin->hasPermissionTo(RolePermission::VIEW_TRASH));
+        $this->assertTrue($companyAdmin->hasPermissionTo(RolePermission::ASSIGN_ROLES));
+        $this->assertTrue($companyAdmin->hasPermissionTo(RolePermission::FORCE_DELETE));
+
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::MATRIX,
+            'display_name' => 'Permission Matrix',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::VIEW_TRASH,
+            'display_name' => 'Soft Delete View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::ASSIGN_ROLES,
+            'display_name' => 'Assign Roles',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Role',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::RESTORE,
+            'display_name' => 'Restore Role',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => RolePermission::ASSIGN,
+            'display_name' => 'Assign Permissions',
+        ]);
     }
 
     public function test_admin_can_list_and_filter_roles(): void
@@ -182,6 +218,27 @@ class RoleManagementTest extends TestCase
             ->assertOk();
 
         $this->assertFalse($user->fresh()->hasRole('developer'));
+    }
+
+    public function test_role_screen_permissions_are_enforced_separately(): void
+    {
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $this->getJson('/api/v1/permissions/matrix')->assertForbidden();
+        $this->getJson('/api/v1/roles?trashed=only')->assertForbidden();
+
+        $role = Role::findByName('developer', 'web');
+        $user = User::factory()->create();
+
+        $this->postJson('/api/v1/users/'.$user->uuid.'/roles', [
+            'roles' => [$role->uuid],
+        ])->assertForbidden();
+
+        $this->postJson('/api/v1/roles/'.$role->uuid.'/permissions', [
+            'permissions' => ['dashboard.view'],
+        ])->assertForbidden();
     }
 
     public function test_permission_middleware_blocks_unauthorized_role_create(): void

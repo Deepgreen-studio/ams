@@ -93,7 +93,7 @@ class WebhookController
     public function test(TestWebhookRequest $request, string $webhook): JsonResponse
     {
         $existing = $this->webhookService->find($webhook);
-        $this->authorize('manage', $existing);
+        $this->authorize('test', $existing);
 
         /** @var User $actor */
         $actor = $request->user();
@@ -109,7 +109,7 @@ class WebhookController
 
     public function logs(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Webhook::class);
+        $this->authorize('viewLogs', Webhook::class);
 
         $logs = $this->webhookService->listLogs($request->only([
             'search', 'status', 'direction', 'event_name', 'webhook', 'webhook_id',
@@ -148,7 +148,7 @@ class WebhookController
 
     public function events(Request $request): JsonResponse
     {
-        $this->authorize('viewAny', Webhook::class);
+        $this->authorize('viewEvents', Webhook::class);
 
         $events = $this->webhookService->listEvents($request->only([
             'search', 'source_module', 'status', 'per_page', 'page',
@@ -161,7 +161,7 @@ class WebhookController
 
     public function showEvent(string $event): JsonResponse
     {
-        $this->authorize('viewAny', Webhook::class);
+        $this->authorize('viewEvents', Webhook::class);
 
         return ApiResponse::success([
             'event' => new WebhookEventResource($this->webhookService->showEvent($event)),

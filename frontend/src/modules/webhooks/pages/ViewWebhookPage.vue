@@ -3,6 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <div v-if="webhook" class="flex flex-wrap items-center justify-end gap-2">
         <RouterLink
+          v-if="can('webhooks.test')"
           :to="{ name: 'webhooks.tester', params: { id: webhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -10,6 +11,7 @@
           Test
         </RouterLink>
         <RouterLink
+          v-if="can('webhooks.update')"
           :to="{ name: 'webhooks.edit', params: { id: webhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -17,6 +19,7 @@
           Edit
         </RouterLink>
         <button
+          v-if="can('webhooks.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-red-700"
           @click="showDelete = true"
@@ -188,6 +191,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import DirectionBadge from '@/modules/webhooks/components/DirectionBadge.vue';
@@ -198,6 +202,7 @@ import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 const route = useRoute();
 const router = useRouter();
 const store = useWebhooksStore();
+const { can } = usePermissions();
 const toast = useToast();
 const showDelete = ref(false);
 

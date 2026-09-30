@@ -132,6 +132,7 @@ import {
   EyeIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/webhooks/components/StatusBadge.vue';
 
 const props = defineProps({
@@ -141,6 +142,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['view', 'retry']);
+const { can } = usePermissions();
 
 const openMenuId = ref(null);
 const menuStyle = ref({});
@@ -151,7 +153,7 @@ const activeLog = computed(
 );
 
 function canRetry(item) {
-  return ['failed', 'retrying'].includes(item?.status);
+  return can('webhooks.test') && ['failed', 'retrying'].includes(item?.status);
 }
 
 function formatDate(value) {

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Integrations;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Integrations\Enums\WebhookPermission;
 use App\Domains\Integrations\Models\Webhook;
 use App\Domains\Integrations\Models\WebhookLog;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Database\Seeders\WebhookEventSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Laravel\Sanctum\Sanctum;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class WebhookEngineTest extends TestCase
@@ -234,5 +236,38 @@ class WebhookEngineTest extends TestCase
         $this->getJson('/api/v1/webhooks/logs?webhook='.$webhook->uuid)
             ->assertOk()
             ->assertJsonPath('data.logs.meta.total', 1);
+    }
+
+    public function test_webhook_sections_follow_their_own_permissions(): void
+    {
+        $companyAdmin = Role::findByName('company-admin', 'web');
+        foreach (WebhookPermission::all() as $permission) {
+            $this->assertTrue($companyAdmin->hasPermissionTo($permission));
+        }
+
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::LOGS,
+            'display_name' => 'Webhook Logs',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::EVENTS,
+            'display_name' => 'Webhook Events',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::DOCS,
+            'display_name' => 'API Docs',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::TEST,
+            'display_name' => 'Test Webhook',
+        ]);
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+
+        $this->getJson('/api/v1/webhooks')->assertForbidden();
+        $this->getJson('/api/v1/webhooks/logs')->assertForbidden();
+        $this->getJson('/api/v1/webhooks/events')->assertForbidden();
     }
 }

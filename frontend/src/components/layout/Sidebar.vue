@@ -346,7 +346,16 @@ const navigationCatalog = [
                 to: { name: 'webhooks.index' },
                 icon: PuzzlePieceIcon,
                 match: ['webhooks.'],
-                permission: 'integrations.view',
+                permission: [
+                  'webhooks.view',
+                  'webhooks.create',
+                  'webhooks.update',
+                  'webhooks.delete',
+                  'webhooks.logs',
+                  'webhooks.events',
+                  'webhooks.docs',
+                  'webhooks.test',
+                ],
             },
             {
                 name: 'content.workflow',

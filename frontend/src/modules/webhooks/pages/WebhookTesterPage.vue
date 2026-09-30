@@ -3,6 +3,7 @@
     <Teleport defer to="#page-header-actions">
       <div v-if="store.currentWebhook" class="flex flex-wrap items-center justify-end gap-2">
         <RouterLink
+          v-if="can('webhooks.view')"
           :to="{ name: 'webhooks.show', params: { id: store.currentWebhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -10,6 +11,7 @@
           View webhook
         </RouterLink>
         <RouterLink
+          v-if="can('webhooks.update')"
           :to="{ name: 'webhooks.edit', params: { id: store.currentWebhook.uuid } }"
           class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-zinc-50"
         >
@@ -199,6 +201,7 @@ import {
   PencilSquareIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 import DirectionBadge from '@/modules/webhooks/components/DirectionBadge.vue';
 import StatusBadge from '@/modules/webhooks/components/StatusBadge.vue';
@@ -207,6 +210,7 @@ import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 
 const route = useRoute();
 const store = useWebhooksStore();
+const { can } = usePermissions();
 const toast = useToast();
 
 const defaultPayload = '{\n  "message": "AMS webhook test"\n}';

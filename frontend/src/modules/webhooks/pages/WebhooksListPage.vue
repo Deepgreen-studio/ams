@@ -2,6 +2,7 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
+        v-if="can('webhooks.create')"
         :to="{ name: 'webhooks.create' }"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
@@ -64,6 +65,7 @@
 import { PlusIcon } from '@heroicons/vue/24/outline';
 import { onMounted, reactive, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import { usePermissions } from '@/composables/usePermissions';
 import { useToast } from '@/composables/useToast';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -73,6 +75,7 @@ import WebhookTable from '@/modules/webhooks/components/WebhookTable.vue';
 import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 
 const store = useWebhooksStore();
+const { can } = usePermissions();
 const toast = useToast();
 const pendingDelete = ref(null);
 const filters = reactive({ search: '', direction: '', status: '' });

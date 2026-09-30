@@ -47,7 +47,8 @@
           <tr
             v-for="item in webhooks"
             :key="item.uuid"
-            class="cursor-pointer border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
+            :class="can('webhooks.view') ? 'cursor-pointer' : ''"
             @click="openDetails(item)"
           >
             <td class="px-5 py-4">
@@ -59,11 +60,13 @@
                 </div>
                 <div class="min-w-0">
                   <RouterLink
+                    v-if="can('webhooks.view')"
                     :to="{ name: 'webhooks.show', params: { id: item.uuid } }"
                     class="truncate font-semibold text-slate-900 hover:text-brand-700"
                   >
                     {{ item.name }}
                   </RouterLink>
+                  <p v-else class="truncate font-semibold text-slate-900">{{ item.name }}</p>
                   <p class="truncate text-xs text-slate-500">
                     {{ item.slug }} · {{ item.company?.company_name || '—' }}
                   </p>
@@ -82,6 +85,7 @@
             <td class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
+                  v-if="hasAnyAction"
                   type="button"
                   class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
                   :aria-expanded="openMenuId === item.uuid"
@@ -111,6 +115,7 @@
         @click.stop
       >
         <RouterLink
+          v-if="can('webhooks.view')"
           :to="{ name: 'webhooks.show', params: { id: activeWebhook.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -120,6 +125,7 @@
           View
         </RouterLink>
         <RouterLink
+          v-if="can('webhooks.test')"
           :to="{ name: 'webhooks.tester', params: { id: activeWebhook.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -129,6 +135,7 @@
           Test
         </RouterLink>
         <RouterLink
+          v-if="can('webhooks.update')"
           :to="{ name: 'webhooks.edit', params: { id: activeWebhook.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -138,6 +145,7 @@
           Edit
         </RouterLink>
         <button
+          v-if="can('webhooks.delete')"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
           role="menuitem"
@@ -162,6 +170,7 @@ import {
   TrashIcon,
 } from '@heroicons/vue/24/outline';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import { usePermissions } from '@/composables/usePermissions';
 import DirectionBadge from '@/modules/webhooks/components/DirectionBadge.vue';
 import StatusBadge from '@/modules/webhooks/components/StatusBadge.vue';
 import { formatDate } from '@/utils/formatters';
@@ -173,9 +182,13 @@ const props = defineProps({
 
 const emit = defineEmits(['delete']);
 const router = useRouter();
+const { can, canAny } = usePermissions();
+const hasAnyAction = computed(() =>
+  canAny('webhooks.view', 'webhooks.test', 'webhooks.update', 'webhooks.delete'),
+);
 
 function openDetails(webhook) {
-  if (!webhook?.uuid) {
+  if (!webhook?.uuid || !can('webhooks.view')) {
     return;
   }
 
@@ -204,7 +217,13 @@ function toggleMenu(id, event) {
 
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 160;
-  const menuHeight = 8 + 4 * 36;
+  const itemCount = [
+    can('webhooks.view'),
+    can('webhooks.test'),
+    can('webhooks.update'),
+    can('webhooks.delete'),
+  ].filter(Boolean).length;
+  const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
   const spaceBelow = window.innerHeight - rect.bottom;
   const openUp = spaceBelow < menuHeight + gap;

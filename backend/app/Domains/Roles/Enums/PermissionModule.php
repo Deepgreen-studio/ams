@@ -140,6 +140,20 @@ final class PermissionModule
                 'label' => 'Customer Analytics',
                 'actions' => ['view', 'refresh'],
             ],
+            'webhooks' => [
+                'label' => 'Webhooks',
+                'actions' => ['view', 'create', 'update', 'delete', 'logs', 'events', 'docs', 'test'],
+                'labels' => [
+                    'view' => 'View Webhook',
+                    'create' => 'Create Webhook',
+                    'update' => 'Edit Webhook',
+                    'delete' => 'Delete Webhook',
+                    'logs' => 'Webhook Logs',
+                    'events' => 'Webhook Events',
+                    'docs' => 'API Docs',
+                    'test' => 'Test Webhook',
+                ],
+            ],
             'integrations' => [
                 'label' => 'Integrations',
                 'actions' => array_merge($crud, ['restore', 'view-trash', 'manage']),

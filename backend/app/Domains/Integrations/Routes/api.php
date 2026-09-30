@@ -7,6 +7,7 @@ use App\Domains\Integrations\Controllers\IntegrationController;
 use App\Domains\Integrations\Controllers\SyncController;
 use App\Domains\Integrations\Controllers\WebhookController;
 use App\Domains\Integrations\Enums\IntegrationPermission;
+use App\Domains\Integrations\Enums\WebhookPermission;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/webhooks/incoming/{webhook}', [WebhookController::class, 'incoming'])
@@ -52,27 +53,27 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
 
     Route::prefix('webhooks')->group(function (): void {
         Route::get('/', [WebhookController::class, 'index'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::VIEW);
         Route::post('/', [WebhookController::class, 'store'])
-            ->middleware('permission:' . IntegrationPermission::CREATE);
+            ->middleware('permission:'.WebhookPermission::CREATE);
         Route::get('/logs', [WebhookController::class, 'logs'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::LOGS);
         Route::get('/logs/{log}', [WebhookController::class, 'showLog'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::LOGS);
         Route::post('/logs/{log}/retry', [WebhookController::class, 'retry'])
-            ->middleware('permission:' . IntegrationPermission::MANAGE);
+            ->middleware('permission:'.WebhookPermission::TEST);
         Route::get('/events', [WebhookController::class, 'events'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::EVENTS);
         Route::get('/events/{event}', [WebhookController::class, 'showEvent'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::EVENTS);
         Route::get('/{webhook}', [WebhookController::class, 'show'])
-            ->middleware('permission:' . IntegrationPermission::VIEW);
+            ->middleware('permission:'.WebhookPermission::VIEW);
         Route::put('/{webhook}', [WebhookController::class, 'update'])
-            ->middleware('permission:' . IntegrationPermission::UPDATE);
+            ->middleware('permission:'.WebhookPermission::UPDATE);
         Route::delete('/{webhook}', [WebhookController::class, 'destroy'])
-            ->middleware('permission:' . IntegrationPermission::DELETE);
+            ->middleware('permission:'.WebhookPermission::DELETE);
         Route::post('/{webhook}/test', [WebhookController::class, 'test'])
-            ->middleware('permission:' . IntegrationPermission::MANAGE);
+            ->middleware('permission:'.WebhookPermission::TEST);
     });
 
     Route::prefix('sync')->group(function (): void {

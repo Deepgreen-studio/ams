@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\LicenseStatus;
 use App\Models\User;
 use Database\Factories\LicenseFactory;
@@ -13,6 +14,7 @@ use Illuminate\Support\Str;
 
 class License extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

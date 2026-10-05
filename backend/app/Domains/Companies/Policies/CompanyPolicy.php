@@ -2,6 +2,7 @@
 
 namespace App\Domains\Companies\Policies;
 
+use App\Domains\Companies\Concerns\ChecksCompanyMembership;
 use App\Domains\Companies\Enums\CompanyPermission;
 use App\Domains\Companies\Enums\DepartmentPermission;
 use App\Domains\Companies\Enums\LocationPermission;
@@ -14,6 +15,8 @@ use App\Models\User;
 
 class CompanyPolicy
 {
+    use ChecksCompanyMembership;
+
     public function viewAny(User $user): bool
     {
         return $user->can(CompanyPermission::VIEW);
@@ -21,7 +24,7 @@ class CompanyPolicy
 
     public function view(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::VIEW);
+        return $user->can(CompanyPermission::VIEW) && $this->inCompany($user, $company);
     }
 
     public function create(User $user): bool
@@ -31,22 +34,22 @@ class CompanyPolicy
 
     public function update(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::UPDATE);
+        return $user->can(CompanyPermission::UPDATE) && $this->inCompany($user, $company);
     }
 
     public function delete(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::DELETE);
+        return $user->can(CompanyPermission::DELETE) && $this->inCompany($user, $company);
     }
 
     public function restore(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::RESTORE);
+        return $user->can(CompanyPermission::RESTORE) && $this->inCompany($user, $company);
     }
 
     public function forceDelete(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::FORCE_DELETE);
+        return $user->can(CompanyPermission::FORCE_DELETE) && $this->inCompany($user, $company);
     }
 
     public function viewTrash(User $user): bool
@@ -56,19 +59,20 @@ class CompanyPolicy
 
     public function viewConsole(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::CONSOLE);
+        return $user->can(CompanyPermission::CONSOLE) && $this->inCompany($user, $company);
     }
 
     public function viewProfile(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::PROFILE);
+        return $user->can(CompanyPermission::PROFILE) && $this->inCompany($user, $company);
     }
 
     public function manageBranding(User $user, Company $company): bool
     {
-        return $user->can(CompanyPermission::MANAGE)
+        return ($user->can(CompanyPermission::MANAGE)
             || $user->can(CompanyPermission::UPDATE)
-            || $user->can(CompanyPermission::PROFILE);
+            || $user->can(CompanyPermission::PROFILE))
+            && $this->inCompany($user, $company);
     }
 
     public function manageDepartments(User $user): bool
@@ -83,7 +87,7 @@ class CompanyPolicy
 
     public function viewDepartment(User $user, Department $department): bool
     {
-        return $this->viewDepartments($user);
+        return $this->viewDepartments($user) && $this->inCompany($user, $department);
     }
 
     public function manageTeams(User $user): bool
@@ -108,31 +112,31 @@ class CompanyPolicy
 
     public function updateDepartment(User $user, Department $department): bool
     {
-        return $user->can(DepartmentPermission::UPDATE);
+        return $user->can(DepartmentPermission::UPDATE) && $this->inCompany($user, $department);
     }
 
     public function deleteDepartment(User $user, Department $department): bool
     {
-        return $user->can(DepartmentPermission::DELETE);
+        return $user->can(DepartmentPermission::DELETE) && $this->inCompany($user, $department);
     }
 
     public function updateTeam(User $user, Team $team): bool
     {
-        return $user->can(TeamPermission::UPDATE);
+        return $user->can(TeamPermission::UPDATE) && $this->inCompany($user, $team);
     }
 
     public function deleteTeam(User $user, Team $team): bool
     {
-        return $user->can(TeamPermission::DELETE);
+        return $user->can(TeamPermission::DELETE) && $this->inCompany($user, $team);
     }
 
     public function updateLocation(User $user, CompanyLocation $location): bool
     {
-        return $user->can(LocationPermission::UPDATE);
+        return $user->can(LocationPermission::UPDATE) && $this->inCompany($user, $location);
     }
 
     public function deleteLocation(User $user, CompanyLocation $location): bool
     {
-        return $user->can(LocationPermission::DELETE);
+        return $user->can(LocationPermission::DELETE) && $this->inCompany($user, $location);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Support\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class SupportSlaCalendar extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 
@@ -66,6 +68,11 @@ class SupportSlaCalendar extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function companyTenantSharesUnassigned(): bool
+    {
+        return true;
     }
 
     public function company(): BelongsTo

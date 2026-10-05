@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\CustomerNoteStatus;
 use App\Domains\Customers\Enums\CustomerNoteType;
 use App\Models\User;
@@ -14,6 +15,7 @@ use Illuminate\Support\Str;
 
 class CustomerNote extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

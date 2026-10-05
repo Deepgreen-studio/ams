@@ -3,11 +3,14 @@
 namespace App\Domains\Applications\Policies;
 
 use App\Domains\Applications\Enums\ApplicationPermission;
+use App\Domains\Companies\Concerns\ChecksCompanyMembership;
 use App\Domains\Applications\Models\Application;
 use App\Models\User;
 
 class ApplicationPolicy
 {
+    use ChecksCompanyMembership;
+
     public function viewAny(User $user): bool
     {
         return $user->can(ApplicationPermission::VIEW);
@@ -15,7 +18,7 @@ class ApplicationPolicy
 
     public function view(User $user, Application $application): bool
     {
-        return $user->can(ApplicationPermission::VIEW);
+        return $user->can(ApplicationPermission::VIEW) && $this->inCompany($user, $application);
     }
 
     public function create(User $user): bool
@@ -25,17 +28,17 @@ class ApplicationPolicy
 
     public function update(User $user, Application $application): bool
     {
-        return $user->can(ApplicationPermission::UPDATE);
+        return $user->can(ApplicationPermission::UPDATE) && $this->inCompany($user, $application);
     }
 
     public function delete(User $user, Application $application): bool
     {
-        return $user->can(ApplicationPermission::DELETE);
+        return $user->can(ApplicationPermission::DELETE) && $this->inCompany($user, $application);
     }
 
     public function restore(User $user, Application $application): bool
     {
-        return $user->can(ApplicationPermission::RESTORE);
+        return $user->can(ApplicationPermission::RESTORE) && $this->inCompany($user, $application);
     }
 
     public function viewTrash(User $user): bool

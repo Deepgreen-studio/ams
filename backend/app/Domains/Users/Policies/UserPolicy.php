@@ -2,6 +2,7 @@
 
 namespace App\Domains\Users\Policies;
 
+use App\Domains\Companies\Services\CompanyAccess;
 use App\Domains\Users\Enums\UserPermission;
 use App\Models\User;
 
@@ -18,7 +19,8 @@ class UserPolicy
             return true;
         }
 
-        return $user->can(UserPermission::VIEW);
+        return $user->can(UserPermission::VIEW)
+            && app(CompanyAccess::class)->sharesCompany($user, $model);
     }
 
     public function create(User $user): bool
@@ -32,7 +34,8 @@ class UserPolicy
             return true;
         }
 
-        return $user->can(UserPermission::UPDATE);
+        return $user->can(UserPermission::UPDATE)
+            && app(CompanyAccess::class)->sharesCompany($user, $model);
     }
 
     public function delete(User $user, User $model): bool
@@ -41,13 +44,14 @@ class UserPolicy
             return false;
         }
 
-        return $user->can(UserPermission::DELETE);
+        return $user->can(UserPermission::DELETE)
+            && app(CompanyAccess::class)->sharesCompany($user, $model);
     }
 
     public function restore(User $user, User $model): bool
     {
-        return $user->can(UserPermission::RESTORE)
-            || $user->can(UserPermission::DELETE);
+        return ($user->can(UserPermission::RESTORE) || $user->can(UserPermission::DELETE))
+            && app(CompanyAccess::class)->sharesCompany($user, $model);
     }
 
     public function forceDelete(User $user, User $model): bool
@@ -56,7 +60,8 @@ class UserPolicy
             return false;
         }
 
-        return $user->can(UserPermission::FORCE_DELETE);
+        return $user->can(UserPermission::FORCE_DELETE)
+            && app(CompanyAccess::class)->sharesCompany($user, $model);
     }
 
     public function updateProfile(User $user, User $model): bool

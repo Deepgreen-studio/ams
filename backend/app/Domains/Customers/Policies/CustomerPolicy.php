@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Policies;
 
+use App\Domains\Companies\Concerns\ChecksCompanyMembership;
 use App\Domains\Customers\Enums\CustomerAnalyticsPermission;
 use App\Domains\Customers\Enums\CustomerApplicationPermission;
 use App\Domains\Customers\Enums\CustomerCommunicationPermission;
@@ -24,6 +25,8 @@ use App\Models\User;
 
 class CustomerPolicy
 {
+    use ChecksCompanyMembership;
+
     public function viewAny(User $user): bool
     {
         return $user->can(CustomerPermission::VIEW);
@@ -31,7 +34,7 @@ class CustomerPolicy
 
     public function view(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::VIEW);
+        return $user->can(CustomerPermission::VIEW) && $this->inCompany($user, $customer);
     }
 
     public function create(User $user): bool
@@ -41,17 +44,17 @@ class CustomerPolicy
 
     public function update(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::UPDATE);
+        return $user->can(CustomerPermission::UPDATE) && $this->inCompany($user, $customer);
     }
 
     public function delete(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::DELETE);
+        return $user->can(CustomerPermission::DELETE) && $this->inCompany($user, $customer);
     }
 
     public function restore(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::RESTORE);
+        return $user->can(CustomerPermission::RESTORE) && $this->inCompany($user, $customer);
     }
 
     public function viewTrash(User $user): bool
@@ -61,7 +64,7 @@ class CustomerPolicy
 
     public function anonymize(User $user, Customer $customer): bool
     {
-        return $user->can(CustomerPermission::ANONYMIZE);
+        return $user->can(CustomerPermission::ANONYMIZE) && $this->inCompany($user, $customer);
     }
 
     public function exportContacts(User $user): bool
@@ -86,22 +89,22 @@ class CustomerPolicy
 
     public function viewContact(User $user, CustomerContact $contact): bool
     {
-        return $user->can(CustomerContactPermission::VIEW);
+        return $user->can(CustomerContactPermission::VIEW) && $this->inCompany($user, $contact);
     }
 
     public function updateContact(User $user, CustomerContact $contact): bool
     {
-        return $user->can(CustomerContactPermission::UPDATE);
+        return $user->can(CustomerContactPermission::UPDATE) && $this->inCompany($user, $contact);
     }
 
     public function deleteContact(User $user, CustomerContact $contact): bool
     {
-        return $user->can(CustomerContactPermission::DELETE);
+        return $user->can(CustomerContactPermission::DELETE) && $this->inCompany($user, $contact);
     }
 
     public function restoreContact(User $user, CustomerContact $contact): bool
     {
-        return $user->can(CustomerContactPermission::RESTORE);
+        return $user->can(CustomerContactPermission::RESTORE) && $this->inCompany($user, $contact);
     }
 
     public function viewApplications(User $user): bool
@@ -116,22 +119,22 @@ class CustomerPolicy
 
     public function viewApplicationAssignment(User $user, CustomerApplication $assignment): bool
     {
-        return $user->can(CustomerApplicationPermission::VIEW);
+        return $user->can(CustomerApplicationPermission::VIEW) && $this->inCompany($user, $assignment);
     }
 
     public function updateApplicationAssignment(User $user, CustomerApplication $assignment): bool
     {
-        return $user->can(CustomerApplicationPermission::UPDATE);
+        return $user->can(CustomerApplicationPermission::UPDATE) && $this->inCompany($user, $assignment);
     }
 
     public function deleteApplicationAssignment(User $user, CustomerApplication $assignment): bool
     {
-        return $user->can(CustomerApplicationPermission::DELETE);
+        return $user->can(CustomerApplicationPermission::DELETE) && $this->inCompany($user, $assignment);
     }
 
     public function restoreApplicationAssignment(User $user, CustomerApplication $assignment): bool
     {
-        return $user->can(CustomerApplicationPermission::RESTORE);
+        return $user->can(CustomerApplicationPermission::RESTORE) && $this->inCompany($user, $assignment);
     }
 
     public function viewSubscriptions(User $user): bool
@@ -146,27 +149,27 @@ class CustomerPolicy
 
     public function viewSubscription(User $user, Subscription $subscription): bool
     {
-        return $user->can(CustomerSubscriptionPermission::VIEW);
+        return $user->can(CustomerSubscriptionPermission::VIEW) && $this->inCompany($user, $subscription);
     }
 
     public function updateSubscription(User $user, Subscription $subscription): bool
     {
-        return $user->can(CustomerSubscriptionPermission::UPDATE);
+        return $user->can(CustomerSubscriptionPermission::UPDATE) && $this->inCompany($user, $subscription);
     }
 
     public function cancelSubscription(User $user, Subscription $subscription): bool
     {
-        return $user->can(CustomerSubscriptionPermission::CANCEL);
+        return $user->can(CustomerSubscriptionPermission::CANCEL) && $this->inCompany($user, $subscription);
     }
 
     public function deleteSubscription(User $user, Subscription $subscription): bool
     {
-        return $user->can(CustomerSubscriptionPermission::DELETE);
+        return $user->can(CustomerSubscriptionPermission::DELETE) && $this->inCompany($user, $subscription);
     }
 
     public function restoreSubscription(User $user, Subscription $subscription): bool
     {
-        return $user->can(CustomerSubscriptionPermission::RESTORE);
+        return $user->can(CustomerSubscriptionPermission::RESTORE) && $this->inCompany($user, $subscription);
     }
 
     public function viewLicenses(User $user): bool
@@ -181,27 +184,27 @@ class CustomerPolicy
 
     public function viewLicense(User $user, License $license): bool
     {
-        return $user->can(CustomerLicensePermission::VIEW);
+        return $user->can(CustomerLicensePermission::VIEW) && $this->inCompany($user, $license);
     }
 
     public function updateLicense(User $user, License $license): bool
     {
-        return $user->can(CustomerLicensePermission::UPDATE);
+        return $user->can(CustomerLicensePermission::UPDATE) && $this->inCompany($user, $license);
     }
 
     public function revokeLicense(User $user, License $license): bool
     {
-        return $user->can(CustomerLicensePermission::REVOKE);
+        return $user->can(CustomerLicensePermission::REVOKE) && $this->inCompany($user, $license);
     }
 
     public function deleteLicense(User $user, License $license): bool
     {
-        return $user->can(CustomerLicensePermission::DELETE);
+        return $user->can(CustomerLicensePermission::DELETE) && $this->inCompany($user, $license);
     }
 
     public function restoreLicense(User $user, License $license): bool
     {
-        return $user->can(CustomerLicensePermission::RESTORE);
+        return $user->can(CustomerLicensePermission::RESTORE) && $this->inCompany($user, $license);
     }
 
     public function viewDocuments(User $user): bool
@@ -216,27 +219,27 @@ class CustomerPolicy
 
     public function viewDocument(User $user, CustomerDocument $document): bool
     {
-        return $user->can(CustomerDocumentPermission::VIEW);
+        return $user->can(CustomerDocumentPermission::VIEW) && $this->inCompany($user, $document);
     }
 
     public function downloadDocument(User $user, CustomerDocument $document): bool
     {
-        return $user->can(CustomerDocumentPermission::DOWNLOAD);
+        return $user->can(CustomerDocumentPermission::DOWNLOAD) && $this->inCompany($user, $document);
     }
 
     public function updateDocument(User $user, CustomerDocument $document): bool
     {
-        return $user->can(CustomerDocumentPermission::UPDATE);
+        return $user->can(CustomerDocumentPermission::UPDATE) && $this->inCompany($user, $document);
     }
 
     public function deleteDocument(User $user, CustomerDocument $document): bool
     {
-        return $user->can(CustomerDocumentPermission::DELETE);
+        return $user->can(CustomerDocumentPermission::DELETE) && $this->inCompany($user, $document);
     }
 
     public function restoreDocument(User $user, CustomerDocument $document): bool
     {
-        return $user->can(CustomerDocumentPermission::RESTORE);
+        return $user->can(CustomerDocumentPermission::RESTORE) && $this->inCompany($user, $document);
     }
 
     public function viewCommunications(User $user): bool
@@ -251,22 +254,22 @@ class CustomerPolicy
 
     public function viewCommunication(User $user, CustomerNote|CustomerTask|CustomerCommunication $item): bool
     {
-        return $user->can(CustomerCommunicationPermission::VIEW);
+        return $user->can(CustomerCommunicationPermission::VIEW) && $this->inCompany($user, $item);
     }
 
     public function updateCommunication(User $user, CustomerNote|CustomerTask|CustomerCommunication $item): bool
     {
-        return $user->can(CustomerCommunicationPermission::UPDATE);
+        return $user->can(CustomerCommunicationPermission::UPDATE) && $this->inCompany($user, $item);
     }
 
     public function deleteCommunication(User $user, CustomerNote|CustomerTask|CustomerCommunication $item): bool
     {
-        return $user->can(CustomerCommunicationPermission::DELETE);
+        return $user->can(CustomerCommunicationPermission::DELETE) && $this->inCompany($user, $item);
     }
 
     public function restoreCommunication(User $user, CustomerNote|CustomerTask|CustomerCommunication $item): bool
     {
-        return $user->can(CustomerCommunicationPermission::RESTORE);
+        return $user->can(CustomerCommunicationPermission::RESTORE) && $this->inCompany($user, $item);
     }
 
     public function viewAnalytics(User $user): bool
@@ -281,6 +284,6 @@ class CustomerPolicy
 
     public function viewAnalyticsSnapshot(User $user, CustomerAnalyticsSnapshot $snapshot): bool
     {
-        return $user->can(CustomerAnalyticsPermission::VIEW);
+        return $user->can(CustomerAnalyticsPermission::VIEW) && $this->inCompany($user, $snapshot);
     }
 }

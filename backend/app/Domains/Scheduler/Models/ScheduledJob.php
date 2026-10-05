@@ -2,6 +2,7 @@
 
 namespace App\Domains\Scheduler\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Scheduler\Enums\ScheduledJobType;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class ScheduledJob extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 

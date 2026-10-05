@@ -8,6 +8,9 @@ use App\Domains\Applications\Models\ApplicationRelease;
 use App\Domains\Applications\Models\ApplicationVersion;
 use App\Domains\Companies\Enums\CompanyPermission;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerContact;
+use App\Domains\Workflows\Models\Workflow;
 use App\Domains\Roles\Models\Role;
 use App\Domains\Companies\Models\Department;
 use App\Domains\Integrations\Models\Integration;
@@ -546,7 +549,7 @@ class CompanyManagementTest extends TestCase
     {
         $member = User::factory()->create();
         $member->assignRole('manager');
-        $member->givePermissionTo(['applications.view', 'users.view', 'companies.view']);
+        $member->givePermissionTo(['applications.view', 'users.view', 'companies.view', 'workflows.view']);
 
         $own = Company::query()->create([
             'company_name' => 'Own Co',
@@ -577,6 +580,20 @@ class CompanyManagementTest extends TestCase
             'name' => 'Own Dept',
             'status' => 'active',
         ]);
+        $ownCustomer = Customer::factory()->individual()->forCompany($own)->create();
+        $otherCustomer = Customer::factory()->individual()->forCompany($other)->create();
+        $ownContact = CustomerContact::factory()->forCustomer($ownCustomer)->create(['name' => 'Own Contact']);
+        $otherContact = CustomerContact::factory()->forCustomer($otherCustomer)->create(['name' => 'Secret Contact']);
+        $ownWorkflow = Workflow::query()->create([
+            'company_id' => $own->id,
+            'name' => 'Own Flow',
+            'type' => 'approval',
+        ]);
+        $otherWorkflow = Workflow::query()->create([
+            'company_id' => $other->id,
+            'name' => 'Secret Flow',
+            'type' => 'approval',
+        ]);
 
         Sanctum::actingAs($member);
         $this->getJson('/api/v1/applications')
@@ -591,5 +608,25 @@ class CompanyManagementTest extends TestCase
             ->assertOk()
             ->assertJsonMissing(['email' => 'hidden-person@example.test']);
         $this->getJson('/api/v1/companies/'.$other->uuid)->assertNotFound();
+        $this->getJson('/api/v1/customers/'.$ownCustomer->uuid)->assertOk();
+        $this->getJson('/api/v1/customers/'.$otherCustomer->uuid)->assertNotFound();
+        $this->getJson('/api/v1/customer-contacts/'.$ownContact->uuid)->assertOk();
+        $this->getJson('/api/v1/customer-contacts/'.$otherContact->uuid)->assertNotFound();
+        $this->getJson('/api/v1/workflows/'.$ownWorkflow->uuid)->assertOk();
+        $this->getJson('/api/v1/workflows/'.$otherWorkflow->uuid)->assertNotFound();
+    }
+
+    public function test_user_without_a_company_only_sees_their_own_user_record(): void
+    {
+        $lonely = User::factory()->create(['email' => 'lonely@example.test']);
+        $lonely->assignRole('manager');
+        User::factory()->create(['email' => 'someone-else@example.test']);
+
+        Sanctum::actingAs($lonely);
+
+        $this->getJson('/api/v1/users')
+            ->assertOk()
+            ->assertJsonPath('data.users.meta.total', 1)
+            ->assertJsonPath('data.users.items.0.email', 'lonely@example.test');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Support\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Support\Enums\SupportTicketCategory;
 use App\Domains\Support\Enums\SupportTicketPriority;
@@ -16,6 +17,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class SupportSlaPolicy extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 
@@ -91,6 +93,11 @@ class SupportSlaPolicy extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    public function companyTenantSharesUnassigned(): bool
+    {
+        return true;
     }
 
     public function company(): BelongsTo

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Workflows\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Workflows\Enums\WorkflowInstanceStatus;
 use App\Models\User;
@@ -12,6 +13,8 @@ use Illuminate\Support\Str;
 
 class WorkflowInstance extends Model
 {
+    use BelongsToCompanyTenant;
+
     protected $table = 'workflow_instances';
 
     /**

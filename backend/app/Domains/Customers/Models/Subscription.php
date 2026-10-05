@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\PaymentProvider;
 use App\Domains\Customers\Enums\PaymentStatus;
 use App\Domains\Customers\Enums\SubscriptionPlanType;
@@ -18,6 +19,7 @@ use Illuminate\Support\Str;
 
 class Subscription extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

@@ -322,6 +322,7 @@ class UserManagementTest extends TestCase
 
         $manager = User::factory()->create();
         $manager->assignRole('manager');
+        $this->shareCompany($manager, $target);
         Sanctum::actingAs($manager);
 
         $this->deleteJson('/api/v1/users/' . $target->uuid . '/force-delete')
@@ -441,6 +442,7 @@ class UserManagementTest extends TestCase
         $manager = User::factory()->create();
         $manager->assignRole('manager');
         $target = User::factory()->create();
+        $this->shareCompany($manager, $target);
         Sanctum::actingAs($manager);
 
         $this->putJson('/api/v1/users/'.$target->uuid, [
@@ -459,6 +461,7 @@ class UserManagementTest extends TestCase
         $manager = User::factory()->create();
         $manager->assignRole('manager');
         $target = User::factory()->create(['first_name' => 'Old']);
+        $this->shareCompany($manager, $target);
         Sanctum::actingAs($manager);
 
         $this->putJson('/api/v1/users/'.$target->uuid, [
@@ -489,6 +492,7 @@ class UserManagementTest extends TestCase
         $this->assertFalse($adminRoleUser->can(UserPermission::FORCE_DELETE));
 
         $target = User::factory()->create();
+        $this->shareCompany($adminRoleUser, $target);
         Sanctum::actingAs($adminRoleUser);
 
         $this->deleteJson('/api/v1/users/' . $target->uuid . '/force-delete')
@@ -693,5 +697,20 @@ class UserManagementTest extends TestCase
         ])->assertOk()
             ->assertJsonPath('data.mfa_required', false)
             ->assertJsonStructure(['data' => ['token']]);
+    }
+
+    private function shareCompany(User ...$users): void
+    {
+        $company = Company::query()->create([
+            'company_name' => 'Shared Co '.uniqid(),
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        foreach ($users as $user) {
+            $company->users()->attach($user->id, ['is_primary' => true, 'status' => 'active']);
+        }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\CustomerRiskLevel;
 use Database\Factories\CustomerAnalyticsSnapshotFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -11,6 +12,7 @@ use Illuminate\Support\Str;
 
 class CustomerAnalyticsSnapshot extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Domains\Workflows\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Workflows\Enums\WorkflowDefinitionStatus;
 use App\Domains\Workflows\Enums\WorkflowType;
@@ -16,6 +17,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Workflow extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 

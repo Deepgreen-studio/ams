@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\CustomerDocumentCategory;
 use App\Domains\Customers\Enums\CustomerDocumentStatus;
 use App\Models\User;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class CustomerDocument extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

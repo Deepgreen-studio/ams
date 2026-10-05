@@ -88,7 +88,13 @@ class CompanyTenant
 
         $ids = $this->idsFor($user);
 
-        if ($ids === null || $ids === []) {
+        if ($ids === null) {
+            return;
+        }
+
+        if ($ids === []) {
+            $query->where('users.id', $user->id);
+
             return;
         }
 

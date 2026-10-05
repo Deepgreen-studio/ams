@@ -4,17 +4,18 @@ namespace App\Domains\Companies\Concerns;
 
 use App\Domains\Companies\Services\CompanyAccess;
 use App\Domains\Companies\Services\CompanyTenant;
+use App\Domains\Customers\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
-trait BelongsToCompanyTenant
+trait BelongsToCustomerCompany
 {
-    public static function bootBelongsToCompanyTenant(): void
+    public static function bootBelongsToCustomerCompany(): void
     {
-        static::addGlobalScope('company_tenant', function (Builder $builder): void {
+        static::addGlobalScope('customer_company', function (Builder $builder): void {
             $tenant = app(CompanyTenant::class);
 
             if (! $tenant->enforced()) {
@@ -22,10 +23,12 @@ trait BelongsToCompanyTenant
             }
 
             $model = $builder->getModel();
-            $tenant->constrain(
-                $builder,
-                $model->getTable().'.'.$model->companyTenantColumn(),
-                $model->companyTenantSharesUnassigned(),
+            $table = $model->getTable();
+            $column = $model->customerCompanyColumn();
+
+            $builder->whereIn(
+                $table.'.'.$column,
+                Customer::query()->select('customers.id'),
             );
         });
 
@@ -37,25 +40,21 @@ trait BelongsToCompanyTenant
             }
 
             $user = Auth::user();
-            $companyId = $model->getAttribute($model->companyTenantColumn());
 
-            if (! $user instanceof User || $companyId === null || $companyId === '') {
+            if (! $user instanceof User) {
                 return;
             }
 
-            if (! app(CompanyAccess::class)->allowsCompany($user, $companyId)) {
+            $customerId = $model->getAttribute($model->customerCompanyColumn());
+
+            if (! app(CompanyAccess::class)->allowsCustomer($user, $customerId)) {
                 throw new AuthorizationException('You cannot create records for another company.');
             }
         });
     }
 
-    public function companyTenantColumn(): string
+    public function customerCompanyColumn(): string
     {
-        return 'company_id';
-    }
-
-    public function companyTenantSharesUnassigned(): bool
-    {
-        return false;
+        return 'customer_id';
     }
 }

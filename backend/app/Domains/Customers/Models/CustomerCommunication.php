@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Customers\Enums\CustomerCommunicationDirection;
 use App\Domains\Customers\Enums\CustomerCommunicationStatus;
 use App\Domains\Customers\Enums\CustomerCommunicationType;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 
 class CustomerCommunication extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

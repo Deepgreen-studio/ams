@@ -3,6 +3,7 @@
 namespace App\Domains\Automation\Models;
 
 use App\Domains\Automation\Enums\AutomationTriggerType;
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class AutomationRule extends Model
 {
+    use BelongsToCompanyTenant;
     use LogsActivity;
     use SoftDeletes;
 

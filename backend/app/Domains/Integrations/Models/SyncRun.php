@@ -2,6 +2,7 @@
 
 namespace App\Domains\Integrations\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Enums\SyncDirection;
 use App\Domains\Integrations\Enums\SyncMode;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class SyncRun extends Model
 {
+    use BelongsToCompanyTenant;
+
     protected $fillable = [
         'uuid', 'sync_config_id', 'company_id', 'integration_id', 'trigger', 'mode',
         'direction', 'status', 'started_at', 'completed_at', 'failed_at',

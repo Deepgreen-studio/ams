@@ -2,6 +2,7 @@
 
 namespace App\Domains\Support\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,13 @@ use Illuminate\Support\Str;
 
 class SupportSlaHoliday extends Model
 {
+    use BelongsToCompanyTenant;
+
+    public function companyTenantSharesUnassigned(): bool
+    {
+        return true;
+    }
+
     protected $table = 'support_sla_holidays';
 
     /**

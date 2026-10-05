@@ -2,6 +2,7 @@
 
 namespace App\Domains\Support\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Support\Enums\SupportSlaEscalationLevel;
 use App\Domains\Support\Enums\SupportSlaEscalationStatus;
@@ -14,6 +15,8 @@ use Illuminate\Support\Str;
 
 class SupportSlaEscalation extends Model
 {
+    use BelongsToCompanyTenant;
+
     protected $table = 'support_sla_escalations';
 
     /**

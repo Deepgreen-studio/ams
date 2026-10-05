@@ -2,6 +2,7 @@
 
 namespace App\Domains\Customers\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCustomerCompany;
 use App\Domains\Applications\Models\Application;
 use App\Domains\Applications\Models\ApplicationEnvironment;
 use App\Domains\Applications\Models\ApplicationRelease;
@@ -22,6 +23,7 @@ use Illuminate\Support\Str;
 
 class CustomerApplication extends Model
 {
+    use BelongsToCustomerCompany;
     use HasFactory;
     use SoftDeletes;
 

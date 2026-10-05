@@ -2,6 +2,7 @@
 
 namespace App\Domains\Integrations\Models;
 
+use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Integrations\Enums\SyncConflictStrategy;
 use App\Domains\Integrations\Enums\SyncDirection;
@@ -17,6 +18,7 @@ use Illuminate\Support\Str;
 
 class SyncConfig extends Model
 {
+    use BelongsToCompanyTenant;
     use SoftDeletes;
 
     protected $fillable = [

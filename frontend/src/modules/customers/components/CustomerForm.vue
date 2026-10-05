@@ -12,7 +12,7 @@
           :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
         />
-        <p class="mt-1 text-xs text-slate-500">Company that owns the applications this customer will use.</p>
+        <p class="mt-1 text-xs text-slate-500">The company owns the applications. This customer is entitled to use them.</p>
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
@@ -194,7 +194,7 @@
       <div v-if="!initial.uuid" class="md:col-span-2 rounded-xl border border-slate-200 p-4">
         <h3 class="text-sm font-semibold text-slate-900">Application entitlement</h3>
         <p class="mt-1 text-xs text-slate-500">
-          Optional. This links the customer to an existing application. It does not create another application record.
+          Optional. Assign an application the company already owns. This does not create or transfer the application.
           You can also assign applications after the customer is created.
         </p>
         <div class="mt-4 grid gap-4 md:grid-cols-2">

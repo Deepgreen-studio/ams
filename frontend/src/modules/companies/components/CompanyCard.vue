@@ -20,6 +20,7 @@
           <StatusBadge :status="company?.status || 'active'" />
         </div>
         <p class="mt-1 truncate text-sm text-slate-500">{{ subtitle }}</p>
+        <p class="mt-1 text-sm text-slate-500">Owns applications and has customers.</p>
       </div>
     </div>
 

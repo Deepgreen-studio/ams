@@ -12,6 +12,7 @@
           :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
         />
+        <p class="mt-1 text-xs text-slate-500">This company owns the application.</p>
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>

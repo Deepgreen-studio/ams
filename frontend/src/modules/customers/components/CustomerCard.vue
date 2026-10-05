@@ -15,6 +15,9 @@
           <StatusBadge :status="customer?.status || 'active'" />
         </div>
         <p class="mt-1 truncate text-sm text-slate-500">{{ customer?.email || '—' }}</p>
+        <p class="mt-1 text-sm text-slate-500">
+          Entitled to applications owned by {{ customer?.company?.company_name || 'the company' }}.
+        </p>
       </div>
     </div>
 

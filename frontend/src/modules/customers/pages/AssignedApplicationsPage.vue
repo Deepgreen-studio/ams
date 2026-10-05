@@ -36,6 +36,10 @@
       {{ store.error }}
     </div>
 
+    <p class="mb-4 text-sm text-slate-500">
+      Assignments entitle this customer to applications owned by their company.
+    </p>
+
     <AssignmentTable
       :assignments="store.assignments"
       :loading="store.loading"

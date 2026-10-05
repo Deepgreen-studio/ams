@@ -15,3 +15,4 @@ Schedule::command('support:evaluate-sla')->everyFiveMinutes()->withoutOverlappin
 Schedule::command('automation:process')->everyMinute()->withoutOverlapping();
 Schedule::command('workflows:process-timeouts')->everyMinute()->withoutOverlapping();
 Schedule::command('scheduler:process')->everyMinute()->withoutOverlapping();
+Schedule::command('customers:enforce-retention')->daily()->withoutOverlapping();

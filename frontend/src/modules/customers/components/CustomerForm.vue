@@ -173,12 +173,13 @@
       <div class="md:col-span-2 rounded-xl border border-slate-200 p-4">
         <h3 class="text-sm font-semibold text-slate-900">Privacy</h3>
         <p class="mt-1 text-xs text-slate-500">
-          Purpose and retention for personal data on this record. Anonymization is available from the customer console.
+          Legal basis and purpose are required. After the retention date, identifying data is anonymized. A confirmed deletion request does the same, unless a legal obligation is still in force.
         </p>
         <div class="mt-4 grid gap-4 md:grid-cols-2">
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal basis</label>
-            <SelectBox v-model="form.legal_basis" size="lg" :options="legalBasisOptions" />
+            <SelectBox v-model="form.legal_basis" size="lg" :options="legalBasisOptions" :class="fieldClass('legal_basis')" />
+            <p v-if="displayErrors.legal_basis" class="mt-1 text-xs text-rose-600">{{ displayErrors.legal_basis[0] }}</p>
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">Retain until</label>
@@ -186,7 +187,8 @@
           </div>
           <div class="md:col-span-2">
             <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing purpose</label>
-            <textarea v-model="form.processing_purpose" rows="2" class="area" />
+            <textarea v-model="form.processing_purpose" rows="2" class="area" :class="fieldClass('processing_purpose')" />
+            <p v-if="displayErrors.processing_purpose" class="mt-1 text-xs text-rose-600">{{ displayErrors.processing_purpose[0] }}</p>
           </div>
         </div>
       </div>
@@ -566,6 +568,14 @@ function validate() {
     if (!String(form.last_name || '').trim()) next.last_name = ['Last name is required for individual customers.'];
   } else if (!String(form.company_name || '').trim()) {
     next.company_name = ['Organization name is required for organization customers.'];
+  }
+
+  if (!String(form.legal_basis || '').trim()) {
+    next.legal_basis = ['Legal basis is required.'];
+  }
+
+  if (!String(form.processing_purpose || '').trim()) {
+    next.processing_purpose = ['Processing purpose is required.'];
   }
 
   if (!String(form.email || '').trim()) {

@@ -59,6 +59,8 @@ class CustomerManagementTest extends TestCase
             'phone' => '+1 555 0100',
             'country' => 'US',
             'status' => 'active',
+            'legal_basis' => 'contract',
+            'processing_purpose' => 'Provide the subscribed application and support.',
         ]);
 
         $create->assertCreated()
@@ -91,6 +93,8 @@ class CustomerManagementTest extends TestCase
             'company_name' => 'Acme Retail',
             'email' => 'ops@acme-retail.test',
             'industry' => 'Retail',
+            'legal_basis' => 'contract',
+            'processing_purpose' => 'Provide the subscribed application and support.',
         ])
             ->assertCreated()
             ->assertJsonPath('data.customer.display_name', 'Acme Retail')
@@ -102,6 +106,8 @@ class CustomerManagementTest extends TestCase
             'company_name' => 'Globex Holdings',
             'email' => 'contact@globex.test',
             'industry' => 'Technology',
+            'legal_basis' => 'contract',
+            'processing_purpose' => 'Provide the subscribed application and support.',
         ])
             ->assertCreated()
             ->assertJsonPath('data.customer.customer_type', 'enterprise');

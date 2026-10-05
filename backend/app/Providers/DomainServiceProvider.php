@@ -48,6 +48,7 @@ class DomainServiceProvider extends ServiceProvider
     {
         $this->registerDomainRoutes();
         $this->commands([
+            \App\Domains\Customers\Console\EnforceCustomerRetentionCommand::class,
             \App\Domains\Support\Console\EvaluateSupportSlaCommand::class,
             \App\Domains\Automation\Console\ProcessAutomationRulesCommand::class,
             \App\Domains\Workflows\Console\ProcessWorkflowTimeoutsCommand::class,

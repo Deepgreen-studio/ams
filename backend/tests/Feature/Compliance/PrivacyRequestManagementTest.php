@@ -189,6 +189,62 @@ class PrivacyRequestManagementTest extends TestCase
             ->assertJsonPath('data.privacy_request.status', 'completed');
     }
 
+    public function test_deletion_confirmation_anonymizes_the_linked_customer(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'first_name' => 'Ada',
+            'email' => 'ada.private@example.test',
+            'legal_basis' => 'consent',
+            'processing_purpose' => 'Send product updates the customer agreed to.',
+        ]);
+
+        $request = PrivacyRequest::factory()->forCompany($this->company)->forCustomer($customer)->create([
+            'request_type' => 'data_deletion',
+            'status' => 'approved',
+            'identity_verification_status' => 'verified',
+            'identity_verified_at' => now(),
+            'decision' => 'approved',
+            'decision_at' => now(),
+        ]);
+
+        $this->postJson('/api/v1/compliance/privacy-requests/'.$request->uuid.'/confirm-deletion', [
+            'confirmed' => true,
+            'notes' => 'Erasure completed',
+        ])->assertOk();
+
+        $this->assertNotNull($customer->fresh()->anonymized_at);
+        $this->assertNull($customer->fresh()->first_name);
+    }
+
+    public function test_deletion_confirmation_respects_a_legal_obligation_hold(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'email' => 'held.records@example.test',
+            'legal_basis' => 'legal_obligation',
+            'processing_purpose' => 'Retain invoices required by law.',
+            'retention_until' => now()->addYear()->toDateString(),
+        ]);
+
+        $request = PrivacyRequest::factory()->forCompany($this->company)->forCustomer($customer)->create([
+            'request_type' => 'data_deletion',
+            'status' => 'approved',
+            'identity_verification_status' => 'verified',
+            'identity_verified_at' => now(),
+            'decision' => 'approved',
+            'decision_at' => now(),
+        ]);
+
+        $this->postJson('/api/v1/compliance/privacy-requests/'.$request->uuid.'/confirm-deletion', [
+            'confirmed' => true,
+        ])->assertStatus(422);
+
+        $this->assertNull($customer->fresh()->anonymized_at);
+    }
+
     public function test_reject_requires_notes(): void
     {
         Sanctum::actingAs($this->admin);

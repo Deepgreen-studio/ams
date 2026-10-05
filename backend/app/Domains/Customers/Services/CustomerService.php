@@ -11,6 +11,7 @@ use App\Domains\Customers\Events\CustomerDeleted;
 use App\Domains\Customers\Events\CustomerRestored;
 use App\Domains\Customers\Events\CustomerUpdated;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerDocument;
 use App\Domains\Customers\Models\Industry;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Domains\Customers\Repositories\IndustryRepository;
@@ -20,6 +21,7 @@ use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerService
 {
@@ -139,9 +141,14 @@ class CustomerService
 
     public function anonymize(string $identifier, User $actor): Customer
     {
-        return DB::transaction(function () use ($identifier, $actor): Customer {
-            $customer = $this->customerRepository->findByIdentifierOrFail($identifier);
+        $customer = $this->customerRepository->findByIdentifierOrFail($identifier);
 
+        return $this->anonymizeCustomer($customer, $actor);
+    }
+
+    public function anonymizeCustomer(Customer $customer, ?User $actor): Customer
+    {
+        return DB::transaction(function () use ($customer, $actor): Customer {
             if ($customer->anonymized_at !== null) {
                 throw new ApiException('Customer is already anonymized.', 422);
             }
@@ -149,53 +156,145 @@ class CustomerService
             activity()->disableLogging();
 
             try {
-                $customer->contacts()->update([
-                    'name' => 'Anonymized contact',
-                    'email' => null,
-                    'phone' => null,
-                    'notes' => null,
-                    'updated_by' => $actor->id,
-                ]);
-
-                $this->customerRepository->updateCustomer($customer, [
-                    'first_name' => null,
-                    'last_name' => null,
-                    'company_name' => $customer->customer_type?->isOrganization() ? 'Anonymized organization' : null,
-                    'legal_name' => null,
-                    'registration_number' => null,
-                    'reference' => null,
-                    'email' => 'anonymized-' . $customer->id . '@invalid.example',
-                    'phone' => null,
-                    'primary_contact_name' => null,
-                    'primary_contact_email' => null,
-                    'primary_contact_phone' => null,
-                    'primary_contact_title' => null,
-                    'website' => null,
-                    'industry_other' => null,
-                    'notes' => null,
-                    'status' => CustomerStatus::Inactive->value,
-                    'anonymized_at' => now(),
-                    'updated_by' => $actor->id,
-                ]);
+                $this->scrubCustomerPersonalData($customer, $actor);
             } finally {
                 activity()->enableLogging();
             }
 
-            $customer = $this->show($customer->uuid);
-            activity()
+            $customer = $customer->trashed()
+                ? $this->customerRepository->findByIdentifierOrFail($customer->uuid, withTrashed: true)
+                : $this->show($customer->uuid);
+            $logger = activity()
                 ->performedOn($customer)
-                ->causedBy($actor)
                 ->withProperties([
                     'customer_number' => $customer->customer_number,
                     'anonymized_at' => $customer->anonymized_at?->toIso8601String(),
                 ])
-                ->event('anonymized')
-                ->log('Customer personal data anonymized');
+                ->event('anonymized');
 
-            event(new CustomerUpdated($customer, $actor));
+            if ($actor !== null) {
+                $logger->causedBy($actor);
+            }
+
+            $logger->log('Customer personal data anonymized');
+
+            if ($actor !== null) {
+                event(new CustomerUpdated($customer, $actor));
+            }
 
             return $customer;
         });
+    }
+
+    public function enforceRetention(int $limit = 200): int
+    {
+        $due = Customer::query()
+            ->withTrashed()
+            ->whereNull('anonymized_at')
+            ->whereNotNull('retention_until')
+            ->whereDate('retention_until', '<', now()->toDateString())
+            ->orderBy('id')
+            ->limit(max(1, $limit))
+            ->get();
+
+        foreach ($due as $customer) {
+            $this->anonymizeCustomer($customer, null);
+        }
+
+        return $due->count();
+    }
+
+    private function scrubCustomerPersonalData(Customer $customer, ?User $actor): void
+    {
+        $actorId = $actor?->id;
+
+        $customer->contacts()->withTrashed()->update([
+            'name' => 'Anonymized contact',
+            'email' => null,
+            'phone' => null,
+            'position' => null,
+            'department' => null,
+            'responsibilities' => null,
+            'notes' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->notes()->withTrashed()->update([
+            'title' => 'Anonymized note',
+            'body' => '',
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->tasks()->withTrashed()->update([
+            'title' => 'Anonymized task',
+            'description' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->communications()->withTrashed()->update([
+            'subject' => 'Anonymized communication',
+            'body' => null,
+            'channel_reference' => null,
+            'participants' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->applications()->withTrashed()->update([
+            'notes' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->subscriptions()->withTrashed()->update([
+            'notes' => null,
+            'external_subscription_id' => null,
+            'external_customer_id' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->licenses()->withTrashed()->update([
+            'notes' => null,
+            'revoked_reason' => null,
+            'updated_by' => $actorId,
+        ]);
+
+        $customer->analyticsSnapshots()->update([
+            'metrics' => null,
+        ]);
+
+        $customer->documents()->withTrashed()->each(function (CustomerDocument $document) use ($actorId): void {
+            if (filled($document->path) && $document->path !== 'redacted') {
+                Storage::disk($document->disk ?: 'public')->delete($document->path);
+            }
+
+            $document->forceFill([
+                'name' => 'Anonymized document',
+                'original_filename' => 'redacted',
+                'path' => 'redacted',
+                'notes' => null,
+                'updated_by' => $actorId,
+            ])->saveQuietly();
+        });
+
+        $this->customerRepository->updateCustomer($customer, [
+            'first_name' => null,
+            'last_name' => null,
+            'company_name' => $customer->customer_type?->isOrganization() ? 'Anonymized organization' : null,
+            'legal_name' => null,
+            'registration_number' => null,
+            'reference' => null,
+            'email' => 'anonymized-'.$customer->id.'@invalid.example',
+            'phone' => null,
+            'primary_contact_name' => null,
+            'primary_contact_email' => null,
+            'primary_contact_phone' => null,
+            'primary_contact_title' => null,
+            'website' => null,
+            'industry_other' => null,
+            'notes' => null,
+            'status' => CustomerStatus::Inactive->value,
+            'anonymized_at' => now(),
+            'updated_by' => $actorId,
+        ]);
     }
 
     public function delete(string $identifier, User $actor): void

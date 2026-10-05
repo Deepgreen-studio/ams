@@ -22,8 +22,10 @@ use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Compliance\Models\PrivacyRequestLog;
 use App\Domains\Compliance\Repositories\PrivacyRequestLogRepository;
 use App\Domains\Compliance\Repositories\PrivacyRequestRepository;
+use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Models\Customer;
 use App\Domains\Customers\Repositories\CustomerRepository;
+use App\Domains\Customers\Services\CustomerService;
 use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
 use App\Domains\Support\Enums\SupportTicketMessageVisibility;
 use App\Domains\Support\Models\SupportTicketMessage;
@@ -45,6 +47,7 @@ class PrivacyRequestService
         private readonly PrivacyRequestLogRepository $privacyRequestLogRepository,
         private readonly CompanyRepository $companyRepository,
         private readonly CustomerRepository $customerRepository,
+        private readonly CustomerService $customerService,
         private readonly SupportTicketConversationService $conversationService,
     ) {}
 
@@ -544,6 +547,8 @@ class PrivacyRequestService
                 throw new ApiException('Deletion confirmation is required.', 422);
             }
 
+            $this->anonymizeLinkedCustomer($request, $actor);
+
             $fromStatus = $request->status;
             $payload = [
                 'deletion_confirmed_at' => now(),
@@ -746,6 +751,29 @@ class PrivacyRequestService
         }
 
         return $customer;
+    }
+
+    private function anonymizeLinkedCustomer(PrivacyRequest $request, User $actor): void
+    {
+        $customer = $request->customer()->withTrashed()->first();
+
+        if ($customer === null || $customer->anonymized_at !== null) {
+            return;
+        }
+
+        $basis = $customer->legal_basis;
+        $retentionUntil = $customer->retention_until;
+        $legalHold = $basis === CustomerLegalBasis::LegalObligation
+            && ($retentionUntil === null || $retentionUntil->copy()->endOfDay()->isFuture());
+
+        if ($legalHold) {
+            throw new ApiException(
+                'This customer is kept under a legal obligation until the retention date. Deletion cannot be confirmed yet.',
+                422,
+            );
+        }
+
+        $this->customerService->anonymizeCustomer($customer, $actor);
     }
 
     protected function resolveUser(mixed $identifier): ?User

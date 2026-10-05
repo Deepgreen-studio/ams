@@ -38,7 +38,7 @@ API: `/api/v1/compliance/privacy-requests`
 
 ## Important limitations (operators must know)
 
-- **Deletion confirmation is not automatic data purge.** Confirm only after operational erasure is completed outside or when the purge pipeline is implemented.  
+- **Deletion confirmation anonymizes the linked customer**, including contacts, notes, tasks, communications, documents, subscriptions, licenses, and analytics detail. A customer kept under a legal obligation is not anonymized until the retention date has passed. Confirming a request with no linked customer only records the confirmation.  
 - **Export packages are scoped** to privacy-request payload fields (subject + customer/company profile), not every AMS subsystem.  
 - Do not share export downloads outside authorized channels.
 

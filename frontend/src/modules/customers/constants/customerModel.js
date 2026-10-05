@@ -24,7 +24,6 @@ export const CUSTOMER_TIMEZONES = [
 ];
 
 export const LEGAL_BASIS_OPTIONS = [
-  { value: '', label: 'Not specified' },
   { value: 'consent', label: 'Consent' },
   { value: 'contract', label: 'Contract' },
   { value: 'legal_obligation', label: 'Legal obligation' },

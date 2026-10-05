@@ -173,6 +173,16 @@ class CustomerOperatingModelTest extends TestCase
             'phone' => '+14155552671',
         ]);
 
+        $contact = \App\Domains\Customers\Models\CustomerContact::factory()->forCustomer($customer)->create([
+            'name' => 'Jane Doe',
+            'email' => 'jane.contact@example.test',
+            'notes' => 'Private note',
+        ]);
+        $note = \App\Domains\Customers\Models\CustomerNote::factory()->forCustomer($customer)->create([
+            'title' => 'Private',
+            'body' => 'Call Jane at home.',
+        ]);
+
         $this->postJson('/api/v1/customers/' . $customer->uuid . '/anonymize')
             ->assertOk()
             ->assertJsonPath('data.customer.first_name', null)
@@ -182,5 +192,28 @@ class CustomerOperatingModelTest extends TestCase
         $this->assertNotNull($customer->anonymized_at);
         $this->assertStringStartsWith('anonymized-', $customer->email);
         $this->assertNotNull($customer->customer_number);
+        $this->assertSame('Anonymized contact', $contact->fresh()->name);
+        $this->assertNull($contact->fresh()->email);
+        $this->assertSame('', $note->fresh()->body);
+    }
+
+    public function test_retention_date_anonymizes_the_customer(): void
+    {
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'email' => 'expired.retention@example.test',
+            'legal_basis' => 'contract',
+            'processing_purpose' => 'Provide the subscribed application and support.',
+            'retention_until' => now()->subDay()->toDateString(),
+        ]);
+        $kept = Customer::factory()->individual()->forCompany($this->company)->create([
+            'email' => 'still.kept@example.test',
+            'legal_basis' => 'legal_obligation',
+            'retention_until' => now()->addYear()->toDateString(),
+        ]);
+
+        $this->artisan('customers:enforce-retention')->assertSuccessful();
+
+        $this->assertNotNull($customer->fresh()->anonymized_at);
+        $this->assertNull($kept->fresh()->anonymized_at);
     }
 }

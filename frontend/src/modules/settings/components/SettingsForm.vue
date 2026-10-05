@@ -36,6 +36,7 @@
           :placeholder="field.placeholder || 'Select…'"
           :search-placeholder="field.searchPlaceholder || 'Search…'"
           :button-class="searchableButtonClass(field)"
+          :list-class="field.listClass"
         />
         <SelectBox
           v-else-if="field.options?.length"

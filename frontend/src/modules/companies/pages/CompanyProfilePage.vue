@@ -97,7 +97,8 @@
                   v-model="branding.timezone"
                   :options="timezoneOptions"
                   placeholder="Select timezone"
-                  search-placeholder="Search timezone…"
+                  search-placeholder="Search city, country, or offset…"
+                  list-class="max-h-[min(32rem,70vh)]"
                 />
               </div>
               <div>

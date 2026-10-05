@@ -46,7 +46,7 @@
         />
       </div>
 
-      <ul class="max-h-56 overflow-y-auto py-1">
+      <ul class="overflow-y-auto py-1" :class="listClass">
         <li v-if="filteredOptions.length === 0" class="px-3 py-2.5 text-sm text-slate-500">
           No matches found
         </li>
@@ -101,6 +101,10 @@ const props = defineProps({
     type: String,
     default:
       'h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0',
+  },
+  listClass: {
+    type: String,
+    default: 'max-h-56',
   },
 });
 

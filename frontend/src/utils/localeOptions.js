@@ -2,32 +2,73 @@
  * Shared locale preference options for profile / user forms.
  */
 
-const FALLBACK_TIMEZONES = [
+import timezoneCountries from './timezoneCountries.json';
+
+/** Shown first so a region search does not open on obscure alphabetical names. */
+const COMMON_TIMEZONES = [
   'UTC',
+  'Asia/Dhaka',
+  'Asia/Kolkata',
+  'Asia/Karachi',
+  'Asia/Kathmandu',
+  'Asia/Colombo',
+  'Asia/Dubai',
+  'Asia/Riyadh',
+  'Asia/Qatar',
+  'Asia/Kuwait',
+  'Asia/Bahrain',
+  'Asia/Muscat',
+  'Asia/Tehran',
+  'Asia/Baghdad',
+  'Asia/Jerusalem',
+  'Asia/Beirut',
+  'Asia/Singapore',
+  'Asia/Kuala_Lumpur',
+  'Asia/Jakarta',
+  'Asia/Bangkok',
+  'Asia/Ho_Chi_Minh',
+  'Asia/Manila',
+  'Asia/Hong_Kong',
+  'Asia/Shanghai',
+  'Asia/Taipei',
+  'Asia/Tokyo',
+  'Asia/Seoul',
+  'Asia/Yangon',
+  'Europe/London',
+  'Europe/Dublin',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'Europe/Madrid',
+  'Europe/Rome',
+  'Europe/Amsterdam',
+  'Europe/Stockholm',
+  'Europe/Warsaw',
+  'Europe/Athens',
+  'Europe/Istanbul',
+  'Europe/Moscow',
+  'Africa/Cairo',
+  'Africa/Lagos',
+  'Africa/Nairobi',
+  'Africa/Johannesburg',
   'America/New_York',
   'America/Chicago',
   'America/Denver',
   'America/Los_Angeles',
   'America/Toronto',
+  'America/Vancouver',
+  'America/Mexico_City',
   'America/Sao_Paulo',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Europe/Madrid',
-  'Europe/Moscow',
-  'Africa/Cairo',
-  'Africa/Johannesburg',
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Dhaka',
-  'Asia/Bangkok',
-  'Asia/Singapore',
-  'Asia/Shanghai',
-  'Asia/Tokyo',
-  'Asia/Seoul',
+  'America/Buenos_Aires',
   'Australia/Sydney',
+  'Australia/Melbourne',
+  'Australia/Perth',
   'Pacific/Auckland',
+  'Pacific/Honolulu',
 ];
+
+const regionNames = typeof Intl !== 'undefined' && Intl.DisplayNames
+  ? new Intl.DisplayNames(['en'], { type: 'region' })
+  : null;
 
 export const CURRENCY_OPTIONS = [
   { value: 'USD', label: 'USD — US Dollar' },
@@ -82,21 +123,87 @@ export const LANGUAGE_OPTIONS = [
   { value: 'vi', label: 'Vietnamese' },
 ];
 
-export function getTimezoneOptions() {
-  let zones = FALLBACK_TIMEZONES;
+function countryLabel(iso) {
+  if (!iso) {
+    return '';
+  }
+
+  try {
+    return regionNames?.of(iso) || '';
+  } catch {
+    return '';
+  }
+}
+
+function offsetLabel(timeZone) {
+  if (timeZone === 'UTC' || timeZone === 'Etc/UTC' || timeZone === 'Etc/GMT') {
+    return 'UTC+00:00';
+  }
+
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      timeZoneName: 'longOffset',
+    }).formatToParts(new Date());
+    const raw = parts.find((part) => part.type === 'timeZoneName')?.value || '';
+    const normalized = raw.replace('GMT', 'UTC');
+
+    if (!normalized || normalized === 'UTC') {
+      return 'UTC+00:00';
+    }
+
+    const match = normalized.match(/^UTC([+-])(\d{1,2})(?::(\d{2}))?$/);
+    if (!match) {
+      return normalized;
+    }
+
+    return `UTC${match[1]}${match[2].padStart(2, '0')}:${match[3] || '00'}`;
+  } catch {
+    return '';
+  }
+}
+
+function timezoneLabel(value) {
+  const pretty = value.replaceAll('_', ' ');
+  const detail = [countryLabel(timezoneCountries[value]), offsetLabel(value)].filter(Boolean).join(' · ');
+
+  return detail ? `${pretty} — ${detail}` : pretty;
+}
+
+function collectTimezones() {
+  const zones = new Set(Object.keys(timezoneCountries));
 
   try {
     if (typeof Intl !== 'undefined' && typeof Intl.supportedValuesOf === 'function') {
-      zones = Intl.supportedValuesOf('timeZone');
+      Intl.supportedValuesOf('timeZone').forEach((zone) => zones.add(zone));
     }
   } catch {
-    zones = FALLBACK_TIMEZONES;
+    // The bundled IANA map remains the catalog.
   }
 
-  const unique = Array.from(new Set(['UTC', ...zones]));
+  zones.add('UTC');
 
-  return unique.map((value) => ({
+  return zones;
+}
+
+function sortTimezones(zones) {
+  const rank = new Map(COMMON_TIMEZONES.map((zone, index) => [zone, index]));
+
+  return [...zones].sort((left, right) => {
+    const leftRank = rank.has(left) ? rank.get(left) : Number.MAX_SAFE_INTEGER;
+    const rightRank = rank.has(right) ? rank.get(right) : Number.MAX_SAFE_INTEGER;
+
+    if (leftRank !== rightRank) {
+      return leftRank - rightRank;
+    }
+
+    return left.localeCompare(right);
+  });
+}
+
+export function getTimezoneOptions() {
+  return sortTimezones(collectTimezones()).map((value) => ({
     value,
-    label: value.replaceAll('_', ' '),
+    label: timezoneLabel(value),
   }));
 }

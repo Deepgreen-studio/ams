@@ -23,20 +23,12 @@
       </div>
     </div>
 
-    <div class="mt-6 grid gap-3 sm:grid-cols-3">
-      <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
-        <p class="text-xs text-zinc-500">Country</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900">{{ company?.country || '-' }}</p>
+    <dl class="mt-6 divide-y divide-slate-100 overflow-hidden rounded-[12px] bg-slate-50/60">
+      <div class="grid grid-cols-[7.5rem_1fr] gap-3 px-3.5 py-3 sm:grid-cols-[8.5rem_1fr]">
+        <dt class="text-xs font-medium text-slate-500">Currency</dt>
+        <dd class="min-w-0 truncate text-sm font-medium text-slate-900">{{ currencyLabel }}</dd>
       </div>
-      <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
-        <p class="text-xs text-zinc-500">Timezone</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900">{{ company?.timezone || '-' }}</p>
-      </div>
-      <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
-        <p class="text-xs text-zinc-500">Currency</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900">{{ company?.currency || '-' }}</p>
-      </div>
-    </div>
+    </dl>
 
     <div class="mt-5">
       <p class="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
@@ -70,6 +62,7 @@
 <script setup>
 import { computed } from 'vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
+import { CURRENCY_OPTIONS } from '@/utils/localeOptions';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({
@@ -89,6 +82,15 @@ const subtitle = computed(() => {
     return legal;
   }
   return email || legal || '-';
+});
+
+const currencyLabel = computed(() => {
+  const code = props.company?.currency;
+  if (!code) {
+    return '-';
+  }
+
+  return CURRENCY_OPTIONS.find((option) => option.value === code)?.label || code;
 });
 
 const contactItems = computed(() => [

@@ -45,7 +45,7 @@ class StoreCompanyRequest extends FormRequest
             'city' => ['required', 'string', 'max:120'],
             'state' => ['required', 'string', 'max:120'],
             'postal_code' => ['required', 'string', 'max:32'],
-            'country' => ['required', 'string', 'max:100', CountryCatalog::rule()],
+            'country' => ['nullable', 'string', 'max:100', CountryCatalog::rule()],
             'timezone' => ['nullable', 'timezone:all'],
             'language' => ['nullable', 'string', 'max:16'],
             'currency' => ['required', 'string', 'size:3'],

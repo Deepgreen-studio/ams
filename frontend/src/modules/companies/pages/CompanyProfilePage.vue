@@ -92,28 +92,9 @@
                 </div>
               </div>
               <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Timezone</label>
-                <SearchableSelect
-                  v-model="branding.timezone"
-                  :options="timezoneOptions"
-                  placeholder="Select timezone"
-                  search-placeholder="Search city, country, or offset…"
-                  list-class="max-h-[min(32rem,70vh)]"
-                />
-              </div>
-              <div>
-                <label class="mb-1.5 block text-sm font-medium text-slate-700">Language</label>
-                <SearchableSelect
-                  v-model="branding.language"
-                  :options="languageOptions"
-                  placeholder="Select language"
-                  search-placeholder="Search language…"
-                />
-              </div>
-              <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-700">Currency</label>
                 <SelectBox v-model="branding.currency" size="lg" :options="currencyOptions" />
-                <p class="mt-1 text-xs text-slate-500">Company currency is saved on its own and is not inferred from the country.</p>
+                <p class="mt-1 text-xs text-slate-500">Company currency is saved on its own.</p>
               </div>
               <div>
                 <label class="mb-1.5 block text-sm font-medium text-slate-700">Date Format</label>
@@ -175,22 +156,16 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
-import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import CompanyLogoUpload from '@/modules/companies/components/CompanyLogoUpload.vue';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
 import { useCompaniesStore } from '@/modules/companies/stores/companies';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
-import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
-import { getAppTimezone } from '@/utils/appTimezone';
-
 const route = useRoute();
 const companiesStore = useCompaniesStore();
 const toast = useToast();
 const company = computed(() => companiesStore.currentCompany);
-const timezoneOptionsBase = getTimezoneOptions();
-
 const currencyOptionsBase = [
   { value: 'USD', label: 'USD — US Dollar' },
   { value: 'GBP', label: 'GBP — British Pound' },
@@ -221,8 +196,6 @@ const timeFormatOptionsBase = [
 const branding = reactive({
   primary_color: '#2563EB',
   secondary_color: '#0F172A',
-  timezone: getAppTimezone(),
-  language: 'en',
   currency: 'USD',
   date_format: 'Y-m-d',
   time_format: 'H:i',
@@ -235,8 +208,6 @@ function withCurrentOption(options, current) {
   return options;
 }
 
-const timezoneOptions = computed(() => withCurrentOption(timezoneOptionsBase, branding.timezone));
-const languageOptions = computed(() => withCurrentOption(LANGUAGE_OPTIONS, branding.language));
 const currencyOptions = computed(() => withCurrentOption(currencyOptionsBase, branding.currency));
 const dateFormatOptions = computed(() => withCurrentOption(dateFormatOptionsBase, branding.date_format));
 const timeFormatOptions = computed(() => withCurrentOption(timeFormatOptionsBase, branding.time_format));
@@ -262,7 +233,6 @@ const detailSections = computed(() => {
     {
       title: 'Address',
       items: [
-        { label: 'Country', value: current?.country || '-' },
         { label: 'State', value: current?.state || '-' },
         { label: 'City', value: current?.city || '-' },
         { label: 'Address', value: current?.address || '-' },
@@ -272,8 +242,6 @@ const detailSections = computed(() => {
     {
       title: 'Regional',
       items: [
-        { label: 'Timezone', value: current?.timezone || '-' },
-        { label: 'Language', value: current?.language || '-' },
         { label: 'Currency', value: current?.currency || '-' },
         { label: 'Date format', value: current?.date_format || '-' },
         { label: 'Time format', value: current?.time_format || '-' },
@@ -293,8 +261,6 @@ function applyBranding(value) {
   if (!value) return;
   branding.primary_color = value.branding?.primary_color || value.primary_color || '#2563EB';
   branding.secondary_color = value.branding?.secondary_color || value.secondary_color || '#0F172A';
-  branding.timezone = value.timezone || getAppTimezone();
-  branding.language = value.language || 'en';
   branding.currency = value.currency || 'USD';
   branding.date_format = value.date_format || 'Y-m-d';
   branding.time_format = value.time_format || 'H:i';

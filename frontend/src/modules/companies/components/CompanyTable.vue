@@ -32,18 +32,6 @@
                 </span>
               </button>
             </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'country')"
-              >
-                Country
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'country' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
                 type="button"
@@ -137,9 +125,6 @@
             </td>
             <td class="px-5 py-4 text-slate-600">
               {{ company.company_code || '—' }}
-            </td>
-            <td class="hidden px-5 py-4 text-slate-600 md:table-cell">
-              {{ countryName(company.country) || company.country_name || company.country || '—' }}
             </td>
             <td class="px-5 py-4">
               <button
@@ -284,7 +269,6 @@ import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/companies/components/StatusBadge.vue';
 import { formatDate } from '@/utils/formatters';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
-import { countryName } from '@/utils/phone';
 
 const props = defineProps({
   companies: {

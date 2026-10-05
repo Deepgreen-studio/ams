@@ -108,10 +108,6 @@
               <dd><StatusBadge :status="company.status || 'active'" /></dd>
             </div>
             <div class="flex items-center justify-between gap-3">
-              <dt class="text-sm text-zinc-500">Language</dt>
-              <dd class="text-sm font-medium text-slate-900">{{ company.language || '-' }}</dd>
-            </div>
-            <div class="flex items-center justify-between gap-3">
               <dt class="text-sm text-zinc-500">Created by</dt>
               <dd class="text-sm font-medium text-slate-900">{{ company.creator?.full_name || '—' }}</dd>
             </div>
@@ -205,7 +201,6 @@ import {
   UserGroupIcon,
 } from '@heroicons/vue/24/outline';
 import { formatDate, formatDateTime } from '@/utils/formatters';
-import { countryName } from '@/utils/phone';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import CompanyCard from '@/modules/companies/components/CompanyCard.vue';
@@ -241,7 +236,6 @@ const fullAddress = computed(() => {
     company.value.city,
     company.value.state,
     company.value.postal_code,
-    company.value.country_name || countryName(company.value.country) || company.value.country,
   ].filter(Boolean);
 
   return parts.length ? parts.join(', ') : '-';

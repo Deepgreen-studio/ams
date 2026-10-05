@@ -92,7 +92,7 @@
       <div>
         <FormLabel required>Currency</FormLabel>
         <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
-        <p class="mt-1 text-xs text-slate-500">Set explicitly for this company. It is not taken from the country.</p>
+        <p class="mt-1 text-xs text-slate-500">Set explicitly for this company.</p>
         <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.currency[0] }}
         </p>
@@ -100,19 +100,6 @@
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
         <SelectBox v-model="form.status" size="lg" :options="statusOptions" />
-      </div>
-      <div>
-        <FormLabel required>Country</FormLabel>
-        <SearchableSelect
-          v-model="form.country"
-          :options="countryOptions"
-          placeholder="Select country"
-          search-placeholder="Search country"
-          :button-class="countryButtonClass"
-        />
-        <p v-if="displayErrors.country" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.country[0] }}
-        </p>
       </div>
       <div>
         <FormLabel required>State</FormLabel>
@@ -231,13 +218,11 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
-import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
-import { getPhoneCountries, isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
-import { getAppTimezone } from '@/utils/appTimezone';
+import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -262,10 +247,6 @@ const statusOptions = [
   { value: 'suspended', label: 'Suspended' },
   { value: 'pending', label: 'Pending' },
 ];
-
-const countryOptionsBase = getPhoneCountries()
-  .map((country) => ({ value: country.iso, label: country.name }))
-  .sort((a, b) => a.label.localeCompare(b.label));
 
 const currencyOptionsBase = [
   { value: 'USD', label: 'USD — US Dollar' },
@@ -314,13 +295,6 @@ function withCurrentOption(options, current) {
   return options;
 }
 
-const countryOptions = computed(() => withCurrentOption(countryOptionsBase, form.country));
-const countryButtonClass = computed(() =>
-  [
-    'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:border-brand-500 focus:outline-none focus:ring-0',
-    displayErrors.value.country ? 'border-rose-400' : 'border-slate-200',
-  ].join(' '),
-);
 const currencyOptions = computed(() => withCurrentOption(currencyOptionsBase, form.currency));
 
 function createForm(value = {}) {
@@ -337,9 +311,6 @@ function createForm(value = {}) {
     city: value.city || '',
     state: value.state || '',
     postal_code: value.postal_code || '',
-    country: value.country || '',
-    timezone: value.timezone || getAppTimezone(),
-    language: value.language || 'en',
     currency: value.currency || 'USD',
     date_format: value.date_format || 'Y-m-d',
     time_format: value.time_format || 'H:i',
@@ -388,10 +359,6 @@ function validate() {
 
   if (!String(form.postal_code || '').trim()) {
     next.postal_code = ['The postal code field is required.'];
-  }
-
-  if (!String(form.country || '').trim()) {
-    next.country = ['The country field is required.'];
   }
 
   if (form.website) {

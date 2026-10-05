@@ -361,14 +361,13 @@ const ProfileCard = defineComponent({
         ['Website', profile.website],
         ['Primary contact', profile.primary_contact],
         ['Support contact', profile.support_contact],
-        ['Timezone', profile.timezone],
         ['Currency', profile.currency],
       ].filter(([, value]) => value !== undefined);
       return h('div', { class: 'rounded-[12px] bg-white p-6' }, [
         h('div', { class: 'flex items-start justify-between gap-4' }, [
           h('div', [
             h('h3', { class: 'text-base font-semibold text-slate-900' }, props.showBranding ? 'Settings' : 'Company'),
-            h('p', { class: 'mt-1 text-xs text-slate-500' }, 'Currency is an explicit company setting and is not inferred from the country.'),
+            h('p', { class: 'mt-1 text-xs text-slate-500' }, 'Identity and contact details.'),
           ]),
           profile.logo_url ? h('img', { src: profile.logo_url, alt: '', class: 'h-12 w-12 rounded-[10px] object-cover' }) : null,
         ]),

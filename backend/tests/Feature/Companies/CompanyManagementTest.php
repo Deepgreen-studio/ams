@@ -100,7 +100,7 @@ class CompanyManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('success', false)
-            ->assertJsonStructure(['errors' => ['company_name', 'company_code', 'email', 'phone', 'address', 'city', 'state', 'postal_code', 'country', 'website', 'currency']]);
+            ->assertJsonStructure(['errors' => ['company_name', 'company_code', 'email', 'phone', 'address', 'city', 'state', 'postal_code', 'website', 'currency']]);
     }
 
     public function test_admin_can_update_soft_delete_and_restore_company(): void

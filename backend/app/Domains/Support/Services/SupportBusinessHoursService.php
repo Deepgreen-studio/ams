@@ -2,6 +2,7 @@
 
 namespace App\Domains\Support\Services;
 
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Domains\Support\Models\SupportSlaCalendar;
 use App\Domains\Support\Models\SupportSlaHoliday;
 use Carbon\CarbonImmutable;
@@ -36,7 +37,7 @@ class SupportBusinessHoursService
             return $start->addMinutes($minutes);
         }
 
-        $timezone = $calendar->timezone ?: 'UTC';
+        $timezone = $calendar->timezone ?: ApplicationTimezone::name();
         $cursor = $start->timezone($timezone);
         $remaining = $minutes;
         $holidaySet = $this->holidayKeys($holidays ?? collect());
@@ -114,7 +115,7 @@ class SupportBusinessHoursService
             return (int) $from->diffInMinutes($to);
         }
 
-        $timezone = $calendar->timezone ?: 'UTC';
+        $timezone = $calendar->timezone ?: ApplicationTimezone::name();
         $cursor = $from->timezone($timezone);
         $end = $to->timezone($timezone);
         $holidaySet = $this->holidayKeys($holidays ?? collect());

@@ -237,6 +237,7 @@ import { useToast } from '@/composables/useToast';
 import { useAuthStore } from '@/modules/authentication/stores/auth';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 import { getPhoneCountries, isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
+import { getAppTimezone } from '@/utils/appTimezone';
 
 const props = defineProps({
   initial: { type: Object, default: () => ({}) },
@@ -337,7 +338,7 @@ function createForm(value = {}) {
     state: value.state || '',
     postal_code: value.postal_code || '',
     country: value.country || '',
-    timezone: value.timezone || 'Asia/Kolkata',
+    timezone: value.timezone || getAppTimezone(),
     language: value.language || 'en',
     currency: value.currency || 'USD',
     date_format: value.date_format || 'Y-m-d',

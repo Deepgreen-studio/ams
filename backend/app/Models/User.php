@@ -13,6 +13,7 @@ use App\Domains\Notifications\Models\DatabaseNotification;
 use App\Domains\Users\Enums\InvitationStatus;
 use App\Domains\Users\Enums\UserGender;
 use App\Domains\Users\Enums\UserStatus;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Domains\Users\Models\UserLoginHistory;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\Passwords\CanResetPassword;
@@ -364,7 +365,7 @@ class User extends Authenticatable implements CanResetPasswordContract, MustVeri
         }
 
         if (blank($this->timezone)) {
-            $this->timezone = 'UTC';
+            $this->timezone = ApplicationTimezone::name();
         }
 
         if (blank($this->language)) {

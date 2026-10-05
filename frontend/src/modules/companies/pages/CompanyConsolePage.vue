@@ -456,7 +456,7 @@ function openSection(key) {
 
 function formatInZone(value) {
   if (!value) return '-';
-  return formatAppDateTime(value, consoleData.value?.timezone || getAppTimezone());
+  return formatAppDateTime(value, getAppTimezone());
 }
 
 function tone(status) {

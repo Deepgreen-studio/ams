@@ -7,6 +7,7 @@ use App\Domains\Automation\Enums\AutomationTriggerType;
 use App\Domains\Automation\Models\AutomationRule;
 use App\Domains\Automation\Repositories\AutomationLogRepository;
 use App\Domains\Automation\Repositories\AutomationRuleRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use Carbon\Carbon;
 use Cron\CronExpression;
@@ -219,7 +220,7 @@ class AutomationEngineService
         }
 
         try {
-            $timezone = $rule->schedule_timezone ?: 'UTC';
+            $timezone = $rule->schedule_timezone ?: ApplicationTimezone::name();
             $cron = new CronExpression((string) $rule->schedule_cron);
             $next = Carbon::instance($cron->getNextRunDate('now', 0, false, $timezone));
 
@@ -236,7 +237,7 @@ class AutomationEngineService
         }
     }
 
-    public function computeNextRun(?string $cron, ?string $timezone = 'UTC'): ?Carbon
+    public function computeNextRun(?string $cron, ?string $timezone = null): ?Carbon
     {
         if (blank($cron)) {
             return null;
@@ -244,6 +245,6 @@ class AutomationEngineService
 
         $expression = new CronExpression($cron);
 
-        return Carbon::instance($expression->getNextRunDate('now', 0, false, $timezone ?: 'UTC'))->utc();
+        return Carbon::instance($expression->getNextRunDate('now', 0, false, $timezone ?: ApplicationTimezone::name()))->utc();
     }
 }

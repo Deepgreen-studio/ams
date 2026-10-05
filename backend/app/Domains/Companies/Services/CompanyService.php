@@ -19,6 +19,7 @@ use App\Domains\Support\Enums\SupportTicketStatus;
 use App\Domains\Support\Models\SupportTicket;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Shared\Support\CountryCatalog;
 use App\Shared\Support\PhoneNumber;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -335,7 +336,7 @@ class CompanyService
         }
 
         if (! $isUpdate && empty($payload['timezone'])) {
-            $payload['timezone'] = 'Asia/Kolkata';
+            $payload['timezone'] = ApplicationTimezone::name();
         }
 
         return $payload;

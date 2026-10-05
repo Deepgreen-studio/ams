@@ -7,6 +7,7 @@ use App\Domains\Analytics\Models\AnalyticsReport;
 use App\Domains\Scheduler\Enums\ScheduledJobHandler;
 use App\Domains\Scheduler\Enums\ScheduledJobType;
 use App\Domains\Scheduler\Services\ScheduledJobService;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -27,7 +28,7 @@ class AnalyticsReportScheduleService
             $enabled = (bool) ($config['enabled'] ?? false);
             $cron = (string) ($config['cron'] ?? ScheduledJobHandler::AnalyticsReport->defaultCron());
             $format = (string) ($config['format'] ?? $report->format_defaults['format'] ?? AnalyticsReportFormat::Csv->value);
-            $timezone = (string) ($config['timezone'] ?? 'UTC');
+            $timezone = (string) ($config['timezone'] ?? ApplicationTimezone::name());
 
             if (! $enabled) {
                 return $this->disable($report, $actor, keepConfig: true);

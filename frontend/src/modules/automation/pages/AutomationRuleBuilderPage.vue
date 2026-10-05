@@ -316,6 +316,7 @@ import { useToast } from '@/composables/useToast';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import AutomationSubnav from '@/modules/automation/components/AutomationSubnav.vue';
 import { useAutomationStore } from '@/modules/automation/stores/automation';
+import { getAppTimezone } from '@/utils/appTimezone';
 
 const store = useAutomationStore();
 const route = useRoute();
@@ -331,7 +332,7 @@ const form = reactive({
   trigger_type: 'event',
   event_key: '',
   schedule_cron: '',
-  schedule_timezone: 'UTC',
+  schedule_timezone: getAppTimezone(),
   delay_minutes: null,
   condition_logic: 'and',
   is_enabled: true,
@@ -439,7 +440,7 @@ function hydrate(rule) {
   form.trigger_type = rule.trigger_type || 'event';
   form.event_key = rule.event_key || '';
   form.schedule_cron = rule.schedule_cron || '';
-  form.schedule_timezone = rule.schedule_timezone || 'UTC';
+  form.schedule_timezone = rule.schedule_timezone || getAppTimezone();
   form.delay_minutes = rule.delay_minutes;
   form.condition_logic = rule.condition_logic || 'and';
   form.is_enabled = Boolean(rule.is_enabled);
@@ -514,7 +515,7 @@ async function submit() {
     trigger_type: form.trigger_type,
     event_key: form.event_key || null,
     schedule_cron: form.schedule_cron || null,
-    schedule_timezone: form.schedule_timezone || 'UTC',
+    schedule_timezone: form.schedule_timezone || getAppTimezone(),
     delay_minutes: form.trigger_type === 'time' ? form.delay_minutes : null,
     condition_logic: form.condition_logic,
     is_enabled: form.is_enabled,

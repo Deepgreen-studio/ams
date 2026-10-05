@@ -17,6 +17,7 @@ use App\Domains\Integrations\Repositories\SyncLogRepository;
 use App\Domains\Integrations\Repositories\SyncRunRepository;
 use App\Domains\Queue\Jobs\ProcessExportJob;
 use App\Domains\Queue\Jobs\ProcessImportJob;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Services\Sync\Scheduler;
@@ -379,7 +380,7 @@ class IntegrationSyncService
     {
         $due = 0;
         foreach ($this->syncConfigRepository->dueScheduled() as $config) {
-            if (! $config->schedule_cron || ! $this->scheduler->isDue($config->schedule_cron)) {
+            if (! $config->schedule_cron || ! $this->scheduler->isDue($config->schedule_cron, null, ApplicationTimezone::name())) {
                 continue;
             }
 

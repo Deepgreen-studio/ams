@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { expireClientSession, isPublicAuthRequest, isSessionAuthenticationFailure } from '@/services/sessionGuard';
+import { dateTimeLocalToUtcIso } from '@/utils/appTimezone';
 
 const apiBaseURL = import.meta.env.VITE_API_BASE_URL || '';
 const usesRemoteApi = /^https?:\/\//i.test(apiBaseURL);
@@ -38,6 +39,40 @@ export async function ensureCsrfCookie() {
     },
   });
 }
+
+function convertDateTimeLocals(value) {
+  if (typeof value === 'string') {
+    return dateTimeLocalToUtcIso(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => convertDateTimeLocals(item));
+  }
+
+  if (typeof FormData !== 'undefined' && value instanceof FormData) {
+    const next = new FormData();
+    value.forEach((item, key) => {
+      next.append(key, typeof item === 'string' ? convertDateTimeLocals(item) : item);
+    });
+    return next;
+  }
+
+  if (value && typeof value === 'object' && !(value instanceof Date) && !(typeof Blob !== 'undefined' && value instanceof Blob)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, convertDateTimeLocals(item)]),
+    );
+  }
+
+  return value;
+}
+
+api.interceptors.request.use((config) => {
+  if (config.data) {
+    config.data = convertDateTimeLocals(config.data);
+  }
+
+  return config;
+});
 
 api.interceptors.response.use(
   (response) => response,

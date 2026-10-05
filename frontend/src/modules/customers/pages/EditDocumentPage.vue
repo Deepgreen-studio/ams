@@ -76,6 +76,7 @@ import { computed, onMounted, reactive, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import { useCustomerDocumentsStore } from '@/modules/customers/stores/documents';
+import { toDateTimeLocalInput } from '@/utils/appTimezone';
 
 const route = useRoute();
 const router = useRouter();
@@ -109,11 +110,7 @@ onMounted(() => {
 });
 
 function toLocalInput(value) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return toDateTimeLocalInput(value);
 }
 
 async function onSubmit() {

@@ -183,6 +183,7 @@ import { useCompaniesStore } from '@/modules/companies/stores/companies';
 import { useToast } from '@/composables/useToast';
 import { formatDate } from '@/utils/formatters';
 import { getTimezoneOptions, LANGUAGE_OPTIONS } from '@/utils/localeOptions';
+import { getAppTimezone } from '@/utils/appTimezone';
 
 const route = useRoute();
 const companiesStore = useCompaniesStore();
@@ -220,7 +221,7 @@ const timeFormatOptionsBase = [
 const branding = reactive({
   primary_color: '#2563EB',
   secondary_color: '#0F172A',
-  timezone: 'Asia/Kolkata',
+  timezone: getAppTimezone(),
   language: 'en',
   currency: 'USD',
   date_format: 'Y-m-d',
@@ -292,7 +293,7 @@ function applyBranding(value) {
   if (!value) return;
   branding.primary_color = value.branding?.primary_color || value.primary_color || '#2563EB';
   branding.secondary_color = value.branding?.secondary_color || value.secondary_color || '#0F172A';
-  branding.timezone = value.timezone || 'Asia/Kolkata';
+  branding.timezone = value.timezone || getAppTimezone();
   branding.language = value.language || 'en';
   branding.currency = value.currency || 'USD';
   branding.date_format = value.date_format || 'Y-m-d';

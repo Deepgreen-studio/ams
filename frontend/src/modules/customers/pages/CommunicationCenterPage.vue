@@ -495,6 +495,7 @@ import TaskStatusBadge from '@/modules/customers/components/TaskStatusBadge.vue'
 import { usePermissions } from '@/composables/usePermissions';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 import { useCommunicationStore } from '@/modules/customers/stores/communication';
+import { appMonthRange } from '@/utils/appTimezone';
 
 const route = useRoute();
 const { can } = usePermissions();
@@ -589,11 +590,9 @@ const deleteMessage = computed(() => {
 
 onMounted(async () => {
   await customersStore.fetchCustomer(route.params.id);
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  calendarFrom.value = toDateInput(start);
-  calendarTo.value = toDateInput(end);
+  const month = appMonthRange();
+  calendarFrom.value = month.from;
+  calendarTo.value = month.to;
   await store.fetchOverview(route.params.id);
   await store.fetchTimeline({ customer: route.params.id });
 });
@@ -826,8 +825,4 @@ function formatSubjectType(value) {
   return formatLabel(parts[parts.length - 1] || value);
 }
 
-function toDateInput(date) {
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
 </script>

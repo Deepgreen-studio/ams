@@ -121,16 +121,14 @@ import ApplicationSubnav from '@/modules/applications/components/ApplicationSubn
 import ReleaseStatusBadge from '@/modules/applications/components/ReleaseStatusBadge.vue';
 import { useReleasesStore } from '@/modules/applications/stores/releases';
 import { useToast } from '@/composables/useToast';
+import { appMonthRange } from '@/utils/appTimezone';
 
 const route = useRoute();
 const releasesStore = useReleasesStore();
 const toast = useToast();
 
-const now = new Date();
-const defaultFrom = () =>
-  new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
-const defaultTo = () =>
-  new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
+const defaultFrom = () => appMonthRange().from;
+const defaultTo = () => appMonthRange().to;
 
 const from = ref(defaultFrom());
 const to = ref(defaultTo());

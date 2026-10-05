@@ -3,6 +3,7 @@
 namespace Tests\Feature\Settings;
 
 use App\Domains\Settings\Models\SystemSetting;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\SystemSettingsSeeder;
@@ -142,6 +143,8 @@ class SettingsManagementTest extends TestCase
             ->assertJsonPath('data.branding.timezone', 'Africa/Abidjan')
             ->assertJsonPath('data.branding.date_format', 'd/m/Y')
             ->assertJsonPath('data.branding.time_format', 'h:i A');
+
+        $this->assertSame('Africa/Abidjan', ApplicationTimezone::name());
     }
 
     public function test_system_info_endpoint(): void

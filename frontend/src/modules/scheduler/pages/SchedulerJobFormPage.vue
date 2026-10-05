@@ -125,6 +125,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useToast } from '@/composables/useToast';
 import SchedulerSubnav from '@/modules/scheduler/components/SchedulerSubnav.vue';
 import { useSchedulerStore } from '@/modules/scheduler/stores/scheduler';
+import { getAppTimezone } from '@/utils/appTimezone';
 
 const store = useSchedulerStore();
 const route = useRoute();
@@ -140,7 +141,7 @@ const form = reactive({
   job_type: 'cron',
   handler_key: 'daily_report',
   schedule_cron: '0 6 * * *',
-  timezone: 'UTC',
+  timezone: getAppTimezone(),
   run_at: '',
   delay_minutes: 15,
   queue_name: 'default',
@@ -175,7 +176,7 @@ function hydrate(job) {
   form.job_type = job.job_type || 'cron';
   form.handler_key = job.handler_key || 'daily_report';
   form.schedule_cron = job.schedule_cron || '';
-  form.timezone = job.timezone || 'UTC';
+  form.timezone = job.timezone || getAppTimezone();
   form.run_at = job.run_at ? new Date(job.run_at).toISOString().slice(0, 16) : '';
   form.delay_minutes = job.delay_minutes || 15;
   form.queue_name = job.queue_name || 'default';

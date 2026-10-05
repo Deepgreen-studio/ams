@@ -10,24 +10,29 @@ class Scheduler
     /**
      * Whether a cron expression is due at the given moment.
      */
-    public function isDue(string $expression, ?Carbon $now = null): bool
+    public function isDue(string $expression, ?Carbon $now = null, ?string $timeZone = null): bool
     {
         $now ??= now();
+
+        if ($timeZone) {
+            $now = $now->copy()->timezone($timeZone);
+        }
 
         if (! CronExpression::isValidExpression($expression)) {
             return false;
         }
 
-        return (new CronExpression($expression))->isDue($now->toDateTimeString());
+        return (new CronExpression($expression))->isDue($now->toDateTimeString(), $timeZone);
     }
 
-    public function nextRunDate(string $expression, ?Carbon $now = null): ?Carbon
+    public function nextRunDate(string $expression, ?Carbon $now = null, ?string $timeZone = null): ?Carbon
     {
         if (! CronExpression::isValidExpression($expression)) {
             return null;
         }
 
-        $next = (new CronExpression($expression))->getNextRunDate(($now ?? now())->toDateTime());
+        $current = ($now ?? now())->toDateTime();
+        $next = (new CronExpression($expression))->getNextRunDate($current, 0, false, $timeZone);
 
         return Carbon::instance($next);
     }

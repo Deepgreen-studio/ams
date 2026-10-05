@@ -14,6 +14,7 @@ use App\Domains\Customers\Models\Customer;
 use App\Domains\Customers\Models\Industry;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Domains\Customers\Repositories\IndustryRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
@@ -78,7 +79,7 @@ class CustomerService
             $payload['location_id'] = $this->resolveLocationId($data['location_id'] ?? null, $company->id);
             $payload['status'] = $payload['status'] ?? CustomerStatus::Active->value;
             $payload['country'] = $payload['country'] ?? $company->country;
-            $payload['timezone'] = $payload['timezone'] ?? ($company->timezone ?: 'UTC');
+            $payload['timezone'] = $payload['timezone'] ?? ($company->timezone ?: ApplicationTimezone::name());
             $payload['language'] = $payload['language'] ?? 'en';
             $payload['created_by'] = $actor->id;
             $payload['updated_by'] = $actor->id;

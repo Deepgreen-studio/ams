@@ -281,6 +281,7 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import AnalyticsSubnav from '@/modules/analytics/components/AnalyticsSubnav.vue';
 import { useEnterpriseAnalyticsStore } from '@/modules/analytics/stores/enterpriseAnalytics';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import { getAppTimezone } from '@/utils/appTimezone';
 
 const route = useRoute();
 const store = useEnterpriseAnalyticsStore();
@@ -305,7 +306,7 @@ const schedule = reactive({
   enabled: false,
   cron: '0 7 * * *',
   format: 'csv',
-  timezone: 'UTC',
+  timezone: getAppTimezone(),
 });
 
 const visibilityOptions = [
@@ -405,7 +406,7 @@ function hydrate(report) {
   schedule.enabled = !!report.schedule_config?.enabled || !!report.is_scheduled;
   schedule.cron = report.schedule_config?.cron || '0 7 * * *';
   schedule.format = report.schedule_config?.format || 'csv';
-  schedule.timezone = report.schedule_config?.timezone || 'UTC';
+  schedule.timezone = report.schedule_config?.timezone || getAppTimezone();
 }
 
 function toggleColumn(col) {

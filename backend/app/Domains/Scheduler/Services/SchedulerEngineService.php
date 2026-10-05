@@ -9,6 +9,7 @@ use App\Domains\Scheduler\Models\ScheduledJob;
 use App\Domains\Scheduler\Models\ScheduledJobRun;
 use App\Domains\Scheduler\Repositories\ScheduledJobRepository;
 use App\Domains\Scheduler\Repositories\ScheduledJobRunRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Services\Sync\Scheduler as CronScheduler;
@@ -230,21 +231,21 @@ class SchedulerEngineService
             return $reserveOnly ? null : $job->next_run_at;
         }
 
-        return $this->nextFromCron($job->schedule_cron, $job->timezone);
+        return $this->nextFromCron($job->schedule_cron, $job->timezone ?: ApplicationTimezone::name());
     }
 
-    private function nextFromCron(?string $cron, ?string $timezone = 'UTC'): ?Carbon
+    private function nextFromCron(?string $cron, ?string $timezone = null): ?Carbon
     {
         if (blank($cron)) {
             return null;
         }
 
-        $next = $this->cronScheduler->nextRunDate($cron);
+        $timezone = $timezone ?: ApplicationTimezone::name();
+        $next = $this->cronScheduler->nextRunDate($cron, null, $timezone);
         if (! $next) {
             return null;
         }
 
-        // CronExpression returns server-local; store UTC.
         return $next->utc();
     }
 }

@@ -17,6 +17,7 @@ use App\Domains\Support\Repositories\SupportSlaCalendarRepository;
 use App\Domains\Support\Repositories\SupportSlaEscalationRepository;
 use App\Domains\Support\Repositories\SupportSlaHolidayRepository;
 use App\Domains\Support\Repositories\SupportSlaPolicyRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -385,7 +386,7 @@ class SupportSlaService
     {
         $payload = [
             'name' => $data['name'],
-            'timezone' => $data['timezone'] ?? 'UTC',
+            'timezone' => $data['timezone'] ?? ApplicationTimezone::name(),
             'business_hours' => $data['business_hours'],
             'is_default' => (bool) ($data['is_default'] ?? false),
             'is_active' => array_key_exists('is_active', $data) ? (bool) $data['is_active'] : true,

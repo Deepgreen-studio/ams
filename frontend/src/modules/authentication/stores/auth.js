@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import { authService } from '@/modules/authentication/services/authService';
 import { setAuthToken } from '@/services/api';
+import { loadApplicationClock } from '@/utils/applicationClock';
 
 const TOKEN_KEY = 'mamp_access_token';
 const REMEMBER_KEY = 'mamp_remember_me';
@@ -117,6 +118,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data } = await authService.me();
       user.value = data.data?.user ?? null;
+      await loadApplicationClock();
     } catch {
       clearSession();
     } finally {
@@ -145,6 +147,7 @@ export const useAuthStore = defineStore('auth', () => {
       persistToken(token.value, remember);
       initialized.value = true;
       sessionExpired.value = false;
+      await loadApplicationClock();
       return data;
     } catch (err) {
       error.value = err.message || 'Unable to login';
@@ -166,6 +169,7 @@ export const useAuthStore = defineStore('auth', () => {
       persistToken(token.value, remember);
       initialized.value = true;
       sessionExpired.value = false;
+      await loadApplicationClock();
       return data;
     } catch (err) {
       error.value = err.message || 'Unable to verify the code';

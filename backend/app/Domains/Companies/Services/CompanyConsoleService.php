@@ -23,6 +23,7 @@ use App\Domains\Notifications\Models\Notification;
 use App\Domains\Support\Enums\SupportTicketPriority;
 use App\Domains\Support\Enums\SupportTicketStatus;
 use App\Domains\Support\Models\SupportTicket;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use BackedEnum;
 use Illuminate\Support\Collection;
@@ -71,7 +72,7 @@ class CompanyConsoleService
                 'status' => $company->status?->value ?? (string) $company->status,
             ],
             'profile' => $this->profile($company),
-            'timezone' => $company->timezone ?: 'Asia/Kolkata',
+            'timezone' => $company->timezone ?: ApplicationTimezone::name(),
             'kpis' => [
                 $this->kpi('applications', 'Total / active applications', $applicationTotal, $activeApplications.' active', 'applications.view'),
                 $this->kpi('support', 'Issues / tickets', (int) $snapshot['open_issues'], $snapshot['elevated_issues'].' high priority', 'support.view'),
@@ -285,7 +286,7 @@ class CompanyConsoleService
             'favicon_url' => $company->favicon_url,
             'primary_color' => $company->primary_color,
             'secondary_color' => $company->secondary_color,
-            'timezone' => $company->timezone ?: 'Asia/Kolkata',
+            'timezone' => $company->timezone ?: ApplicationTimezone::name(),
             'currency' => $company->currency,
         ];
     }

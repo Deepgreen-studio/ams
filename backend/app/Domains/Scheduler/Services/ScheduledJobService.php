@@ -13,6 +13,7 @@ use App\Domains\Scheduler\Models\ScheduledJobRun;
 use App\Domains\Scheduler\Repositories\ScheduledJobLogRepository;
 use App\Domains\Scheduler\Repositories\ScheduledJobRepository;
 use App\Domains\Scheduler\Repositories\ScheduledJobRunRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Services\Sync\Scheduler as CronScheduler;
@@ -272,7 +273,7 @@ class ScheduledJobService
         }
 
         if (! array_key_exists('timezone', $payload) && ! $isUpdate) {
-            $payload['timezone'] = 'UTC';
+            $payload['timezone'] = ApplicationTimezone::name();
         }
         if (! array_key_exists('queue_name', $payload) && ! $isUpdate) {
             $payload['queue_name'] = 'default';

@@ -15,6 +15,7 @@ use App\Domains\Automation\Models\AutomationRule;
 use App\Domains\Automation\Repositories\AutomationLogRepository;
 use App\Domains\Automation\Repositories\AutomationRuleRepository;
 use App\Domains\Companies\Repositories\CompanyRepository;
+use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -102,7 +103,7 @@ class AutomationRuleService
             if ($trigger === AutomationTriggerType::Schedule) {
                 $payload['next_run_at'] = $this->engineService->computeNextRun(
                     $payload['schedule_cron'] ?? null,
-                    $payload['schedule_timezone'] ?? 'UTC'
+                    $payload['schedule_timezone'] ?? ApplicationTimezone::name()
                 );
             }
 

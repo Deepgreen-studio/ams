@@ -20,10 +20,13 @@ use App\Domains\Compliance\Events\PrivacyRequestStatusChanged;
 use App\Domains\Compliance\Events\PrivacyRequestUpdated;
 use App\Domains\Compliance\Models\PrivacyRequest;
 use App\Domains\Compliance\Models\PrivacyRequestLog;
+use App\Domains\Compliance\Models\UserConsent;
 use App\Domains\Compliance\Repositories\PrivacyRequestLogRepository;
 use App\Domains\Compliance\Repositories\PrivacyRequestRepository;
+use App\Domains\Customers\Enums\CustomerContactType;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerContact;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Domains\Customers\Services\CustomerService;
 use App\Domains\Support\Enums\SupportTicketMessageAuthorType;
@@ -672,6 +675,15 @@ class PrivacyRequestService
     protected function buildExportPayload(PrivacyRequest $request): array
     {
         $customer = $request->customer;
+        $privacyContacts = $customer
+            ? $customer->contacts()
+                ->where('contact_type', CustomerContactType::Compliance->value)
+                ->orderBy('id')
+                ->get()
+            : collect();
+        $consents = $customer
+            ? $customer->consents()->with('consentType')->orderBy('id')->get()
+            : collect();
 
         return [
             'request_number' => $request->request_number,
@@ -691,8 +703,30 @@ class PrivacyRequestService
                 'email' => $customer->email,
                 'phone' => $customer->phone,
                 'customer_type' => $customer->customer_type?->value ?? $customer->customer_type,
+                'legal_basis' => $customer->legal_basis?->value ?? $customer->legal_basis,
+                'processing_purpose' => $customer->processing_purpose,
+                'retention_until' => $customer->retention_until?->toDateString(),
                 'created_at' => optional($customer->created_at)?->toIso8601String(),
             ] : null,
+            'privacy_contacts' => $privacyContacts->map(fn (CustomerContact $contact): array => [
+                'uuid' => $contact->uuid,
+                'name' => $contact->name,
+                'email' => $contact->email,
+                'phone' => $contact->phone,
+                'position' => $contact->position,
+            ])->values()->all(),
+            'consents' => $consents->map(fn (UserConsent $consent): array => [
+                'uuid' => $consent->uuid,
+                'consent_type' => $consent->consentType?->name,
+                'consent_code' => $consent->consentType?->code,
+                'status' => $consent->status?->value ?? $consent->status,
+                'granted' => (bool) $consent->granted,
+                'consent_version' => $consent->consent_version,
+                'consented_at' => optional($consent->consented_at)?->toIso8601String(),
+                'withdrawn_at' => optional($consent->withdrawn_at)?->toIso8601String(),
+                'source' => $consent->source?->value ?? $consent->source,
+                'subject_email' => $consent->subject_email,
+            ])->values()->all(),
             'company' => [
                 'uuid' => $request->company?->uuid,
                 'company_name' => $request->company?->company_name,

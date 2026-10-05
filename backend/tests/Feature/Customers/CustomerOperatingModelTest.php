@@ -4,7 +4,10 @@ namespace Tests\Feature\Customers;
 
 use App\Domains\Applications\Models\Application;
 use App\Domains\Companies\Models\Company;
+use App\Domains\Compliance\Models\ConsentType;
+use App\Domains\Compliance\Models\UserConsent;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerContact;
 use App\Domains\Customers\Models\Industry;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
@@ -215,5 +218,38 @@ class CustomerOperatingModelTest extends TestCase
 
         $this->assertNotNull($customer->fresh()->anonymized_at);
         $this->assertNull($kept->fresh()->anonymized_at);
+    }
+
+    public function test_console_privacy_tab_includes_privacy_contact_and_consents(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'email' => 'privacy.console@example.test',
+            'legal_basis' => 'consent',
+            'processing_purpose' => 'Deliver the service the customer requested.',
+        ]);
+
+        CustomerContact::factory()->forCustomer($customer)->create([
+            'contact_type' => 'compliance',
+            'name' => 'Dana Privacy',
+            'email' => 'dana.privacy@example.test',
+        ]);
+
+        $type = ConsentType::factory()->forCompany($this->company)->create([
+            'name' => 'Product analytics',
+            'code' => 'product_analytics_console',
+        ]);
+        UserConsent::factory()->forType($type)->forCustomer($customer)->create([
+            'status' => 'granted',
+            'granted' => true,
+        ]);
+
+        $this->getJson('/api/v1/customers/'.$customer->uuid.'/console')
+            ->assertOk()
+            ->assertJsonPath('data.console.privacy.privacy_contacts.0.name', 'Dana Privacy')
+            ->assertJsonPath('data.console.privacy.privacy_contacts.0.email', 'dana.privacy@example.test')
+            ->assertJsonPath('data.console.privacy.consents.0.consent_type', 'Product analytics')
+            ->assertJsonPath('data.console.privacy.consents.0.status', 'granted');
     }
 }

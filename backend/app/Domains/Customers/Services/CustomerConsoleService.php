@@ -4,8 +4,11 @@ namespace App\Domains\Customers\Services;
 
 use App\Domains\Applications\Models\ApplicationHealthMetric;
 use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Compliance\Models\UserConsent;
+use App\Domains\Customers\Enums\CustomerContactType;
 use App\Domains\Customers\Models\Customer;
 use App\Domains\Customers\Models\CustomerApplication;
+use App\Domains\Customers\Models\CustomerContact;
 use App\Domains\Support\Enums\SupportSlaStatus;
 use App\Domains\Support\Enums\SupportTicketCategory;
 use App\Domains\Support\Enums\SupportTicketPriority;
@@ -90,6 +93,17 @@ class CustomerConsoleService
             ->limit(20)
             ->get(['id', 'uuid', 'request_number', 'request_type', 'status', 'due_date', 'created_at']);
 
+        $privacyContacts = $customer->contacts()
+            ->where('contact_type', CustomerContactType::Compliance->value)
+            ->orderBy('name')
+            ->get(['id', 'uuid', 'name', 'email', 'phone', 'position', 'contact_type']);
+
+        $consents = $customer->consents()
+            ->with('consentType:id,uuid,name,code')
+            ->latest('id')
+            ->limit(50)
+            ->get();
+
         return [
             'model' => [
                 'company_owns_applications' => true,
@@ -127,6 +141,23 @@ class CustomerConsoleService
                 'processing_purpose' => $customer->processing_purpose,
                 'retention_until' => $customer->retention_until?->toDateString(),
                 'anonymized_at' => $customer->anonymized_at,
+                'privacy_contacts' => $privacyContacts->map(fn (CustomerContact $contact): array => [
+                    'uuid' => $contact->uuid,
+                    'name' => $contact->name,
+                    'email' => $contact->email,
+                    'phone' => $contact->phone,
+                    'position' => $contact->position,
+                ])->values(),
+                'consents' => $consents->map(fn (UserConsent $consent): array => [
+                    'uuid' => $consent->uuid,
+                    'consent_type' => $consent->consentType?->name,
+                    'status' => $consent->status?->value ?? $consent->status,
+                    'status_label' => $consent->status?->label(),
+                    'granted' => (bool) $consent->granted,
+                    'consent_version' => $consent->consent_version,
+                    'consented_at' => $consent->consented_at,
+                    'withdrawn_at' => $consent->withdrawn_at,
+                ])->values(),
                 'requests' => $privacyRequests->map(fn (PrivacyRequest $request): array => [
                     'uuid' => $request->uuid,
                     'request_number' => $request->request_number,

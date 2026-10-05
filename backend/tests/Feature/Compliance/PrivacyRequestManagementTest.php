@@ -3,8 +3,11 @@
 namespace Tests\Feature\Compliance;
 
 use App\Domains\Companies\Models\Company;
+use App\Domains\Compliance\Models\ConsentType;
 use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Compliance\Models\UserConsent;
 use App\Domains\Customers\Models\Customer;
+use App\Domains\Customers\Models\CustomerContact;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -151,6 +154,8 @@ class PrivacyRequestManagementTest extends TestCase
 
         $this->assertNotNull($request->fresh()->export_file_path);
         Storage::disk('local')->assertExists($request->fresh()->export_file_path);
+        $this->assertSame([], $request->fresh()->export_payload['privacy_contacts']);
+        $this->assertSame([], $request->fresh()->export_payload['consents']);
 
         $this->postJson('/api/v1/compliance/privacy-requests/'.$request->uuid.'/complete', [
             'notes' => 'Package delivered',
@@ -187,6 +192,58 @@ class PrivacyRequestManagementTest extends TestCase
         $this->postJson('/api/v1/compliance/privacy-requests/'.$request->uuid.'/complete')
             ->assertOk()
             ->assertJsonPath('data.privacy_request.status', 'completed');
+    }
+
+    public function test_export_includes_privacy_contact_and_consents(): void
+    {
+        Storage::fake('local');
+        Sanctum::actingAs($this->admin);
+
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'first_name' => 'Ada',
+            'last_name' => 'Subject',
+            'email' => 'ada.subject@example.test',
+            'legal_basis' => 'consent',
+            'processing_purpose' => 'Send updates the customer agreed to.',
+        ]);
+
+        CustomerContact::factory()->forCustomer($customer)->create([
+            'contact_type' => 'compliance',
+            'name' => 'Privacy Officer',
+            'email' => 'privacy.officer@example.test',
+        ]);
+        CustomerContact::factory()->forCustomer($customer)->create([
+            'contact_type' => 'support',
+            'name' => 'Support Desk',
+            'email' => 'support.desk@example.test',
+        ]);
+
+        $type = ConsentType::factory()->forCompany($this->company)->create([
+            'name' => 'Marketing email',
+            'code' => 'marketing_email_export',
+        ]);
+        UserConsent::factory()->forType($type)->forCustomer($customer)->create([
+            'status' => 'granted',
+            'granted' => true,
+        ]);
+
+        $request = PrivacyRequest::factory()->forCompany($this->company)->forCustomer($customer)->create([
+            'request_type' => 'data_export',
+            'status' => 'approved',
+            'identity_verification_status' => 'verified',
+            'identity_verified_at' => now(),
+            'decision' => 'approved',
+            'decision_at' => now(),
+        ]);
+
+        $this->postJson('/api/v1/compliance/privacy-requests/'.$request->uuid.'/export')
+            ->assertOk()
+            ->assertJsonPath('data.privacy_request.customer.uuid', $customer->uuid)
+            ->assertJsonPath('data.privacy_request.export_payload.privacy_contacts.0.email', 'privacy.officer@example.test')
+            ->assertJsonPath('data.privacy_request.export_payload.privacy_contacts.0.name', 'Privacy Officer')
+            ->assertJsonPath('data.privacy_request.export_payload.consents.0.consent_type', 'Marketing email')
+            ->assertJsonPath('data.privacy_request.export_payload.consents.0.status', 'granted')
+            ->assertJsonCount(1, 'data.privacy_request.export_payload.privacy_contacts');
     }
 
     public function test_deletion_confirmation_anonymizes_the_linked_customer(): void

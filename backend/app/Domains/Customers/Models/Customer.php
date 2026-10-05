@@ -6,6 +6,7 @@ use App\Domains\Companies\Concerns\BelongsToCompanyTenant;
 use App\Domains\Companies\Models\Company;
 use App\Domains\Companies\Models\CompanyLocation;
 use App\Domains\Compliance\Models\PrivacyRequest;
+use App\Domains\Compliance\Models\UserConsent;
 use App\Domains\Customers\Enums\CustomerLegalBasis;
 use App\Domains\Customers\Enums\CustomerStatus;
 use App\Domains\Customers\Enums\CustomerType;
@@ -186,6 +187,11 @@ class Customer extends Model
     public function privacyRequests(): HasMany
     {
         return $this->hasMany(PrivacyRequest::class);
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(UserConsent::class);
     }
 
     public function contacts(): HasMany

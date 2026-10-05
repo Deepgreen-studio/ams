@@ -16,6 +16,23 @@
         </p>
       </div>
       <div>
+        <label class="mb-1.5 block text-sm font-medium text-slate-700">Customer</label>
+        <SelectBox
+          v-model="form.customer_id"
+          size="lg"
+          placeholder="Not linked"
+          :options="customerSelectOptions"
+          :disabled="loading || !form.company_id"
+          :error="Boolean(fieldError('customer_id'))"
+        />
+        <p v-if="fieldError('customer_id')" class="mt-1 text-xs text-rose-600">
+          {{ fieldError('customer_id') }}
+        </p>
+        <p v-else class="mt-1 text-xs text-slate-500">
+          Optional. Choosing a customer fills the requester details and links this request.
+        </p>
+      </div>
+      <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Request Type</label>
         <SelectBox
           v-model="form.request_type"
@@ -127,9 +144,10 @@
 </template>
 
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import { companyService } from '@/modules/companies/services/companyService';
+import { customerService } from '@/modules/customers/services/customerService';
 import { userService } from '@/modules/users/services/userService';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
@@ -142,6 +160,7 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 
 const companies = ref([]);
+const customers = ref([]);
 const users = ref([]);
 
 const typeOptions = [
@@ -157,6 +176,7 @@ const typeOptions = [
 
 const form = reactive({
   company_id: '',
+  customer_id: '',
   request_type: 'access_request',
   requester_name: '',
   requester_email: '',
@@ -172,6 +192,16 @@ const companySelectOptions = computed(() =>
     label: company.company_name,
   })),
 );
+
+const customerSelectOptions = computed(() => [
+  { value: '', label: 'Not linked' },
+  ...customers.value.map((customer) => ({
+    value: customer.uuid,
+    label: customer.email
+      ? `${customer.display_name || customer.email} (${customer.email})`
+      : (customer.display_name || customer.uuid),
+  })),
+]);
 
 const officerSelectOptions = computed(() => [
   { value: '', label: 'Unassigned' },
@@ -190,6 +220,31 @@ function fieldError(key) {
   return Array.isArray(value) ? value[0] : value || '';
 }
 
+watch(
+  () => form.company_id,
+  async (companyId, previous) => {
+    if (previous && companyId !== previous) {
+      form.customer_id = '';
+    }
+
+    await loadCustomers(companyId);
+  },
+);
+
+watch(
+  () => form.customer_id,
+  (customerId) => {
+    const customer = customers.value.find((item) => item.uuid === customerId);
+    if (!customer) {
+      return;
+    }
+
+    form.requester_name = customer.display_name || '';
+    form.requester_email = customer.email || '';
+    form.requester_phone = customer.phone || '';
+  },
+);
+
 onMounted(async () => {
   try {
     const [{ data: companyData }, { data: userData }] = await Promise.all([
@@ -204,6 +259,20 @@ onMounted(async () => {
   }
 });
 
+async function loadCustomers(companyId) {
+  if (!companyId) {
+    customers.value = [];
+    return;
+  }
+
+  try {
+    const { data } = await customerService.list({ company: companyId, per_page: 100 });
+    customers.value = data.data?.customers?.items ?? [];
+  } catch {
+    customers.value = [];
+  }
+}
+
 function onSubmit() {
   if (!canSubmit.value || props.loading) {
     return;
@@ -211,6 +280,7 @@ function onSubmit() {
 
   emit('submit', {
     company_id: form.company_id,
+    customer_id: form.customer_id || null,
     request_type: form.request_type,
     requester_name: form.requester_name,
     requester_email: form.requester_email,

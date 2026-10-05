@@ -126,6 +126,40 @@
           <dd class="mt-1 text-sm font-medium whitespace-pre-wrap">{{ consoleData?.privacy?.processing_purpose || 'Not specified' }}</dd>
         </div>
       </dl>
+      <div>
+        <h4 class="text-sm font-semibold text-slate-900">Privacy contact</h4>
+        <p v-if="!(consoleData?.privacy?.privacy_contacts || []).length" class="mt-2 text-sm text-slate-500">
+          No Compliance / Privacy contact is recorded.
+        </p>
+        <ul v-else class="mt-2 divide-y divide-slate-100">
+          <li v-for="contact in consoleData.privacy.privacy_contacts" :key="contact.uuid" class="py-2 text-sm">
+            <RouterLink
+              :to="{ name: 'customers.contacts.show', params: { id: customerId, contactId: contact.uuid } }"
+              class="font-medium text-brand-700"
+            >
+              {{ contact.name || 'Unnamed contact' }}
+            </RouterLink>
+            <p class="text-slate-500">
+              {{ contact.email || 'No email' }}<span v-if="contact.phone"> · {{ contact.phone }}</span>
+              <span v-if="contact.position"> · {{ contact.position }}</span>
+            </p>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-slate-900">Consent and preferences</h4>
+        <p v-if="!(consoleData?.privacy?.consents || []).length" class="mt-2 text-sm text-slate-500">
+          No consent records are linked to this customer.
+        </p>
+        <ul v-else class="mt-2 divide-y divide-slate-100">
+          <li v-for="consent in consoleData.privacy.consents" :key="consent.uuid" class="flex items-center justify-between gap-3 py-2 text-sm">
+            <RouterLink :to="{ name: 'compliance.consents.show', params: { id: consent.uuid } }" class="font-medium text-brand-700">
+              {{ consent.consent_type || 'Consent' }}
+            </RouterLink>
+            <span class="text-slate-500">{{ consent.status_label || consent.status }}</span>
+          </li>
+        </ul>
+      </div>
       <div v-if="consoleData?.privacy?.anonymized_at" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
         Personal data was anonymized.
       </div>

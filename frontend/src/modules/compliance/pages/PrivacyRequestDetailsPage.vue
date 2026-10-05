@@ -63,6 +63,19 @@
             </dd>
           </div>
           <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Customer</dt>
+            <dd class="mt-1 text-sm text-slate-900">
+              <RouterLink
+                v-if="current.customer?.uuid"
+                :to="{ name: 'customers.show', params: { id: current.customer.uuid } }"
+                class="font-medium text-brand-700"
+              >
+                {{ current.customer.display_name || current.customer.email }}
+              </RouterLink>
+              <span v-else>Not linked</span>
+            </dd>
+          </div>
+          <div>
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500">Assignee</dt>
             <dd class="mt-1 text-sm text-slate-900">{{ current.assignee?.full_name || 'Unassigned' }}</dd>
           </div>

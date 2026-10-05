@@ -29,6 +29,7 @@
       :sort-dir="applicationsStore.filters.sort_dir"
       @sort="onSort"
       @restore="confirmRestore"
+      @force-delete="openForceDelete"
     >
       <template #toolbar>
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -73,6 +74,16 @@
         />
       </template>
     </ApplicationTable>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingForceDelete)"
+      title="Permanently delete application"
+      :message="`Permanently delete ${pendingForceDelete?.name || 'this application'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="applicationsStore.saving"
+      @cancel="pendingForceDelete = null"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -80,12 +91,14 @@
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import ApplicationTable from '@/modules/applications/components/ApplicationTable.vue';
 import { useApplicationsStore } from '@/modules/applications/stores/applications';
 
 const applicationsStore = useApplicationsStore();
 const search = ref('');
+const pendingForceDelete = ref(null);
 const previousFilters = ref(null);
 let searchTimer = null;
 
@@ -156,6 +169,24 @@ function onSort(column) {
 
 async function confirmRestore(application) {
   await applicationsStore.restoreApplication(application.uuid);
+  await loadTrash({
+    page: applicationsStore.filters.page,
+    sort_by: applicationsStore.filters.sort_by,
+    sort_dir: applicationsStore.filters.sort_dir,
+  });
+}
+
+function openForceDelete(application) {
+  pendingForceDelete.value = application;
+}
+
+async function confirmForceDelete() {
+  if (!pendingForceDelete.value) {
+    return;
+  }
+
+  await applicationsStore.forceDeleteApplication(pendingForceDelete.value.uuid);
+  pendingForceDelete.value = null;
   await loadTrash({
     page: applicationsStore.filters.page,
     sort_by: applicationsStore.filters.sort_by,

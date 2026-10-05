@@ -158,6 +158,20 @@ class ApplicationService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $application = $this->applicationRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $application->trashed()) {
+                throw new ApiException('Soft delete the application before permanently deleting it.', 422);
+            }
+
+            $application->forceDelete();
+            event(new ApplicationDeleted($application, $actor));
+        });
+    }
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>

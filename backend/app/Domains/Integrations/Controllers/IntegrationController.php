@@ -112,4 +112,16 @@ class IntegrationController
             'integration' => new IntegrationResource($restored),
         ], 'Integration restored successfully.');
     }
+
+    public function forceDelete(Request $request, string $integration): JsonResponse
+    {
+        $existing = $this->integrationService->find($integration, withTrashed: true);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->integrationService->forceDelete($integration, $actor);
+
+        return ApiResponse::success(null, 'Integration permanently deleted.');
+    }
 }

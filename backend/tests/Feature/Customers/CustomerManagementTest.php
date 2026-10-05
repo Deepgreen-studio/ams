@@ -232,9 +232,19 @@ class CustomerManagementTest extends TestCase
         $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::UPDATE));
         $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::DELETE));
         $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::VIEW_TRASH));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::RESTORE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(CustomerPermission::FORCE_DELETE));
         $this->assertDatabaseHas('permissions', [
             'name' => CustomerPermission::VIEW_TRASH,
             'display_name' => 'Soft Deleted View',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => CustomerPermission::RESTORE,
+            'display_name' => 'Restore Customer',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => CustomerPermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Customer',
         ]);
 
         $manager = User::factory()->create();
@@ -249,5 +259,29 @@ class CustomerManagementTest extends TestCase
             'last_name' => 'Create',
             'email' => 'no.create@example.com',
         ])->assertForbidden();
+    }
+
+    public function test_only_force_delete_permission_can_permanently_delete_a_customer(): void
+    {
+        $customer = Customer::factory()->individual()->forCompany($this->company)->create([
+            'email' => 'gone.forever@example.com',
+        ]);
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/customers/'.$customer->uuid.'/force-delete')->assertStatus(422);
+
+        $customer->delete();
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+        $this->deleteJson('/api/v1/customers/'.$customer->uuid.'/force-delete')->assertForbidden();
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/customers/'.$customer->uuid.'/force-delete')
+            ->assertOk()
+            ->assertJsonPath('message', 'Customer permanently deleted.');
+
+        $this->assertDatabaseMissing('customers', ['id' => $customer->id]);
     }
 }

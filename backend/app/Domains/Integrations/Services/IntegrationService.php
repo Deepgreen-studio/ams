@@ -128,6 +128,20 @@ class IntegrationService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $integration = $this->integrationRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $integration->trashed()) {
+                throw new ApiException('Soft delete the integration before permanently deleting it.', 422);
+            }
+
+            $integration->forceDelete();
+            event(new IntegrationDeleted($integration, $actor));
+        });
+    }
+
     /**
      * @param  array<string, mixed>  $data
      * @return array<string, mixed>

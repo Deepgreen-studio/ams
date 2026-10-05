@@ -178,13 +178,13 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeIntegration"
-        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-48 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
       >
         <button
-          v-if="can('integrations.view')"
+          v-if="can('integrations.view') && !isTrashed(activeIntegration)"
           type="button"
           class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -203,6 +203,16 @@
           >
             <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
             Restore
+          </button>
+          <button
+            v-if="can('integrations.force-delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onForceDelete(activeIntegration)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Permanent Delete
           </button>
         </template>
         <template v-else>
@@ -254,11 +264,17 @@ const props = defineProps({
   sortDir: { type: String, default: 'desc' },
 });
 
-const emit = defineEmits(['sort', 'delete', 'restore']);
+const emit = defineEmits(['sort', 'delete', 'restore', 'force-delete']);
 const router = useRouter();
 const { can, canAny } = usePermissions();
 const hasAnyAction = computed(() =>
-  canAny('integrations.view', 'integrations.update', 'integrations.delete', 'integrations.restore'),
+  canAny(
+    'integrations.view',
+    'integrations.update',
+    'integrations.delete',
+    'integrations.restore',
+    'integrations.force-delete',
+  ),
 );
 
 const openMenuId = ref(null);
@@ -287,9 +303,9 @@ function toggleMenu(id, event) {
 
   const integration = props.integrations.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 176;
+  const menuWidth = 192;
   const itemCount = isTrashed(integration)
-    ? [can('integrations.view'), can('integrations.restore')].filter(Boolean).length
+    ? [can('integrations.restore'), can('integrations.force-delete')].filter(Boolean).length
     : [can('integrations.view'), can('integrations.update'), can('integrations.delete')].filter(Boolean).length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
   const gap = 8;
@@ -310,7 +326,7 @@ function closeMenu() {
 }
 
 function openDetails(integration) {
-  if (!integration?.uuid || !can('integrations.view')) {
+  if (!integration?.uuid || !can('integrations.view') || isTrashed(integration)) {
     return;
   }
 
@@ -325,6 +341,11 @@ function goTo(name, integration) {
 function onDelete(integration) {
   closeMenu();
   emit('delete', integration);
+}
+
+function onForceDelete(integration) {
+  closeMenu();
+  emit('force-delete', integration);
 }
 
 function onRestore(integration) {

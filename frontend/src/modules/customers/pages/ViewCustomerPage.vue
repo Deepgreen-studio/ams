@@ -10,13 +10,22 @@
           Edit
         </RouterLink>
         <button
-          v-if="customer.deleted_at"
+          v-if="customer.deleted_at && can('customers.restore')"
           type="button"
           class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
           :disabled="customersStore.saving"
           @click="restore"
         >
           Restore
+        </button>
+        <button
+          v-if="customer.deleted_at && can('customers.force-delete')"
+          type="button"
+          class="rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+          :disabled="customersStore.saving"
+          @click="showForceDelete = true"
+        >
+          Permanent Delete
         </button>
         <button
           v-else
@@ -123,6 +132,16 @@
       @cancel="showDelete = false"
       @confirm="confirmDelete"
     />
+
+    <DeleteConfirmation
+      :open="showForceDelete"
+      title="Permanently delete customer"
+      :message="`Permanently delete ${customer?.display_name || 'this customer'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="customersStore.saving"
+      @cancel="showForceDelete = false"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -156,6 +175,7 @@ const router = useRouter();
 const customersStore = useCustomersStore();
 const { can } = usePermissions();
 const showDelete = ref(false);
+const showForceDelete = ref(false);
 const showAnonymize = ref(false);
 const consoleRef = ref(null);
 
@@ -193,5 +213,11 @@ async function confirmAnonymize() {
 async function restore() {
   await customersStore.restoreCustomer(route.params.id);
   await customersStore.fetchCustomer(route.params.id);
+}
+
+async function confirmForceDelete() {
+  await customersStore.forceDeleteCustomer(route.params.id);
+  showForceDelete.value = false;
+  await router.push({ name: 'customers.trash' });
 }
 </script>

@@ -176,7 +176,7 @@
         @click.stop
       >
         <RouterLink
-          v-if="can('customers.view')"
+          v-if="can('customers.view') && !isTrashed(activeCustomer)"
           :to="{ name: 'customers.show', params: { id: activeCustomer.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -195,6 +195,16 @@
           >
             <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
             Restore
+          </button>
+          <button
+            v-if="can('customers.force-delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onForceDelete(activeCustomer)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Permanent Delete
           </button>
         </template>
         <template v-else>
@@ -259,20 +269,26 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['sort', 'delete', 'restore']);
+const emit = defineEmits(['sort', 'delete', 'restore', 'force-delete']);
 
 const { can, canAny } = usePermissions();
 const router = useRouter();
 
 function openDetails(customer) {
-  if (!customer?.uuid || !can('customers.view')) {
+  if (!customer?.uuid || !can('customers.view') || isTrashed(customer)) {
     return;
   }
 
   router.push({ name: 'customers.show', params: { id: customer.uuid } });
 }
 const hasAnyAction = computed(() =>
-  canAny('customers.view', 'customers.update', 'customers.delete', 'customers.restore'),
+  canAny(
+    'customers.view',
+    'customers.update',
+    'customers.delete',
+    'customers.restore',
+    'customers.force-delete',
+  ),
 );
 
 const openMenuId = ref(null);
@@ -303,7 +319,7 @@ function toggleMenu(id, event) {
   const rect = event.currentTarget.getBoundingClientRect();
   const menuWidth = 192;
   const itemCount = isTrashed(customer)
-    ? [can('customers.view'), can('customers.restore')].filter(Boolean).length
+    ? [can('customers.restore'), can('customers.force-delete')].filter(Boolean).length
     : [can('customers.view'), can('customers.update'), can('customers.delete')].filter(Boolean)
         .length;
   const menuHeight = 8 + Math.max(itemCount, 1) * 36;
@@ -332,6 +348,11 @@ function onDelete(customer) {
 function onRestore(customer) {
   closeMenu();
   emit('restore', customer);
+}
+
+function onForceDelete(customer) {
+  closeMenu();
+  emit('force-delete', customer);
 }
 
 function onDocumentClick() {

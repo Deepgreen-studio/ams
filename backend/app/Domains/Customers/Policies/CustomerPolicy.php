@@ -57,6 +57,11 @@ class CustomerPolicy
         return $user->can(CustomerPermission::RESTORE) && $this->inCompany($user, $customer);
     }
 
+    public function forceDelete(User $user, Customer $customer): bool
+    {
+        return $user->can(CustomerPermission::FORCE_DELETE) && $this->inCompany($user, $customer);
+    }
+
     public function viewTrash(User $user): bool
     {
         return $user->can(CustomerPermission::VIEW_TRASH);

@@ -19,6 +19,9 @@ export const integrationService = {
   restore(id) {
     return api.post(`/integrations/${id}/restore`);
   },
+  forceDelete(id) {
+    return api.delete(`/integrations/${id}/force-delete`);
+  },
   updateConfiguration(id, payload) {
     return api.put(`/integrations/${id}/configuration`, payload);
   },

@@ -14,6 +14,8 @@ final class ApplicationPermission
 
     public const RESTORE = 'applications.restore';
 
+    public const FORCE_DELETE = 'applications.force-delete';
+
     public const VIEW_TRASH = 'applications.view-trash';
 
     /**
@@ -27,6 +29,7 @@ final class ApplicationPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::FORCE_DELETE,
             self::VIEW_TRASH,
         ];
     }

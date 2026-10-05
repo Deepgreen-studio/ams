@@ -14,6 +14,8 @@ final class IntegrationPermission
 
     public const RESTORE = 'integrations.restore';
 
+    public const FORCE_DELETE = 'integrations.force-delete';
+
     public const VIEW_TRASH = 'integrations.view-trash';
 
     public const MANAGE = 'integrations.manage';
@@ -29,6 +31,7 @@ final class IntegrationPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::FORCE_DELETE,
             self::VIEW_TRASH,
             self::MANAGE,
         ];

@@ -38,6 +38,11 @@ class IntegrationPolicy
         return $user->can(IntegrationPermission::RESTORE);
     }
 
+    public function forceDelete(User $user, Integration $integration): bool
+    {
+        return $user->can(IntegrationPermission::FORCE_DELETE);
+    }
+
     public function viewTrash(User $user): bool
     {
         return $user->can(IntegrationPermission::VIEW_TRASH);

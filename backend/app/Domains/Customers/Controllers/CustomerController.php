@@ -107,6 +107,18 @@ class CustomerController
         ], 'Customer restored successfully.');
     }
 
+    public function forceDelete(Request $request, string $customer): JsonResponse
+    {
+        $existing = $this->customerService->find($customer, withTrashed: true);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->customerService->forceDelete($customer, $actor);
+
+        return ApiResponse::success(null, 'Customer permanently deleted.');
+    }
+
     public function industries(): JsonResponse
     {
         $this->authorize('viewAny', Customer::class);

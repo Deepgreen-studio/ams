@@ -14,6 +14,8 @@ final class CustomerPermission
 
     public const RESTORE = 'customers.restore';
 
+    public const FORCE_DELETE = 'customers.force-delete';
+
     public const VIEW_TRASH = 'customers.view-trash';
 
     public const EXPORT = 'customers.export';
@@ -31,6 +33,7 @@ final class CustomerPermission
             self::UPDATE,
             self::DELETE,
             self::RESTORE,
+            self::FORCE_DELETE,
             self::VIEW_TRASH,
             self::EXPORT,
             self::ANONYMIZE,

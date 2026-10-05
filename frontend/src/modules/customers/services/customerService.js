@@ -40,4 +40,8 @@ export const customerService = {
   restore(id) {
     return api.post(`/customers/${id}/restore`);
   },
+
+  forceDelete(id) {
+    return api.delete(`/customers/${id}/force-delete`);
+  },
 };

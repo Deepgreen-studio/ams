@@ -177,5 +177,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.ApplicationPermission::DELETE);
         Route::post('/{application}/restore', [ApplicationController::class, 'restore'])
             ->middleware('permission:'.ApplicationPermission::RESTORE);
+        Route::delete('/{application}/force-delete', [ApplicationController::class, 'forceDelete'])
+            ->middleware('permission:'.ApplicationPermission::FORCE_DELETE);
     });
 });

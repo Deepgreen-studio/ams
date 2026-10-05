@@ -20,6 +20,15 @@
           Restore
         </button>
         <button
+          v-if="integration.deleted_at && can('integrations.force-delete')"
+          type="button"
+          class="rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-60"
+          :disabled="integrationsStore.saving"
+          @click="showForceDelete = true"
+        >
+          Permanent Delete
+        </button>
+        <button
           v-else-if="!integration.deleted_at && can('integrations.delete')"
           type="button"
           class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
@@ -58,6 +67,16 @@
       @cancel="showDelete = false"
       @confirm="confirmDelete"
     />
+
+    <DeleteConfirmation
+      :open="showForceDelete"
+      title="Permanently delete integration"
+      :message="`Permanently delete ${integration?.name || 'this integration'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="integrationsStore.saving"
+      @cancel="showForceDelete = false"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -77,6 +96,7 @@ const router = useRouter();
 const integrationsStore = useIntegrationsStore();
 const { can } = usePermissions();
 const showDelete = ref(false);
+const showForceDelete = ref(false);
 
 const integration = computed(() => integrationsStore.currentIntegration);
 
@@ -93,5 +113,11 @@ async function confirmDelete() {
 async function restore() {
   await integrationsStore.restoreIntegration(route.params.id);
   await integrationsStore.fetchIntegration(route.params.id);
+}
+
+async function confirmForceDelete() {
+  await integrationsStore.forceDeleteIntegration(route.params.id);
+  showForceDelete.value = false;
+  await router.push({ name: 'integrations.trash' });
 }
 </script>

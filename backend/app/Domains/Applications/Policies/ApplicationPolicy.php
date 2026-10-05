@@ -41,6 +41,11 @@ class ApplicationPolicy
         return $user->can(ApplicationPermission::RESTORE) && $this->inCompany($user, $application);
     }
 
+    public function forceDelete(User $user, Application $application): bool
+    {
+        return $user->can(ApplicationPermission::FORCE_DELETE) && $this->inCompany($user, $application);
+    }
+
     public function viewTrash(User $user): bool
     {
         return $user->can(ApplicationPermission::VIEW_TRASH);

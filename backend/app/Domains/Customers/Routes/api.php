@@ -43,6 +43,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:' . CustomerPermission::DELETE);
         Route::post('/{customer}/restore', [CustomerController::class, 'restore'])
             ->middleware('permission:' . CustomerPermission::RESTORE);
+        Route::delete('/{customer}/force-delete', [CustomerController::class, 'forceDelete'])
+            ->middleware('permission:' . CustomerPermission::FORCE_DELETE);
     });
 
     Route::prefix('customer-contacts')->group(function (): void {

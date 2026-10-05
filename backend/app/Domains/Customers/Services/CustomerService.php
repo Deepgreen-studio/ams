@@ -324,6 +324,26 @@ class CustomerService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $customer = $this->customerRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $customer->trashed()) {
+                throw new ApiException('Soft delete the customer before permanently deleting it.', 422);
+            }
+
+            $customer->documents()->withTrashed()->each(function (CustomerDocument $document): void {
+                if (filled($document->path) && $document->path !== 'redacted') {
+                    Storage::disk($document->disk ?: 'public')->delete($document->path);
+                }
+            });
+
+            $customer->forceDelete();
+            event(new CustomerDeleted($customer, $actor));
+        });
+    }
+
     /**
      * @return array<string, int>
      */

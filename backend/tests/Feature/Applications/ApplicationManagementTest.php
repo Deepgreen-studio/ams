@@ -175,6 +175,7 @@ class ApplicationManagementTest extends TestCase
         $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::DELETE));
         $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::VIEW_TRASH));
         $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::RESTORE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(ApplicationPermission::FORCE_DELETE));
         $this->assertDatabaseHas('permissions', [
             'name' => ApplicationPermission::VIEW_TRASH,
             'display_name' => 'Soft Deleted View',
@@ -182,6 +183,14 @@ class ApplicationManagementTest extends TestCase
         $this->assertDatabaseHas('permissions', [
             'name' => ApplicationPermission::DELETE,
             'display_name' => 'Soft Delete Application',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => ApplicationPermission::RESTORE,
+            'display_name' => 'Restore Application',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => ApplicationPermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Application',
         ]);
 
         $manager = User::factory()->create();
@@ -289,5 +298,29 @@ class ApplicationManagementTest extends TestCase
         ])
             ->assertCreated()
             ->assertJsonPath('data.application.integration.uuid', $integration->uuid);
+    }
+
+    public function test_only_force_delete_permission_can_permanently_delete_an_application(): void
+    {
+        $application = Application::factory()->forCompany($this->company)->create([
+            'name' => 'Gone App',
+        ]);
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/applications/'.$application->uuid.'/force-delete')->assertStatus(422);
+
+        $application->delete();
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+        $this->deleteJson('/api/v1/applications/'.$application->uuid.'/force-delete')->assertForbidden();
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/applications/'.$application->uuid.'/force-delete')
+            ->assertOk()
+            ->assertJsonPath('message', 'Application permanently deleted.');
+
+        $this->assertDatabaseMissing('applications', ['id' => $application->id]);
     }
 }

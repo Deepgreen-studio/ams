@@ -115,4 +115,16 @@ class ApplicationController
             'application' => new ApplicationResource($restored),
         ], 'Application restored successfully.');
     }
+
+    public function forceDelete(Request $request, string $application): JsonResponse
+    {
+        $existing = $this->applicationService->find($application, withTrashed: true);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->applicationService->forceDelete($application, $actor);
+
+        return ApiResponse::success(null, 'Application permanently deleted.');
+    }
 }

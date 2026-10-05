@@ -50,6 +50,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:' . IntegrationPermission::DELETE);
         Route::post('/{integration}/restore', [IntegrationController::class, 'restore'])
             ->middleware('permission:'.IntegrationPermission::RESTORE);
+        Route::delete('/{integration}/force-delete', [IntegrationController::class, 'forceDelete'])
+            ->middleware('permission:'.IntegrationPermission::FORCE_DELETE);
     });
 
     Route::prefix('webhooks')->group(function (): void {

@@ -126,6 +126,21 @@ export const useApplicationsStore = defineStore('applications', () => {
     }
   }
 
+  async function forceDeleteApplication(id) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await applicationService.forceDelete(id);
+      state.successMessage.value = data.message || 'Application permanently deleted.';
+      return data;
+    } catch (err) {
+      state.applyError(err, 'Unable to permanently delete application');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function restoreApplication(id) {
     state.saving.value = true;
     state.clearMessages();
@@ -159,6 +174,7 @@ export const useApplicationsStore = defineStore('applications', () => {
     updateApplication,
     deleteApplication,
     restoreApplication,
+    forceDeleteApplication,
     resetFilters,
   };
 });

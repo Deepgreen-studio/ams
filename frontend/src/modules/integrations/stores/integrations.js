@@ -123,6 +123,21 @@ export const useIntegrationsStore = defineStore('integrations', () => {
     }
   }
 
+  async function forceDeleteIntegration(id) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await integrationService.forceDelete(id);
+      state.successMessage.value = data.message || 'Integration permanently deleted.';
+      return data;
+    } catch (err) {
+      state.applyError(err, 'Unable to permanently delete integration');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function restoreIntegration(id) {
     state.saving.value = true;
     state.clearMessages();
@@ -252,6 +267,7 @@ export const useIntegrationsStore = defineStore('integrations', () => {
     updateIntegration,
     deleteIntegration,
     restoreIntegration,
+    forceDeleteIntegration,
     updateConfiguration,
     testConnection,
     testAuthentication,

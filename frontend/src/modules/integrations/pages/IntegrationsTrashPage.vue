@@ -31,6 +31,7 @@
       :sort-dir="integrationsStore.filters.sort_dir"
       @sort="onSort"
       @restore="confirmRestore"
+      @force-delete="openForceDelete"
     >
       <template #toolbar>
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -75,6 +76,16 @@
         />
       </template>
     </IntegrationTable>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingForceDelete)"
+      title="Permanently delete integration"
+      :message="`Permanently delete ${pendingForceDelete?.name || 'this integration'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="integrationsStore.saving"
+      @cancel="pendingForceDelete = null"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -82,6 +93,7 @@
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import IntegrationsHubSubnav from '@/modules/integrations/components/IntegrationsHubSubnav.vue';
 import IntegrationTable from '@/modules/integrations/components/IntegrationTable.vue';
@@ -89,6 +101,7 @@ import { useIntegrationsStore } from '@/modules/integrations/stores/integrations
 
 const integrationsStore = useIntegrationsStore();
 const search = ref('');
+const pendingForceDelete = ref(null);
 const previousFilters = ref(null);
 let searchTimer = null;
 
@@ -159,6 +172,24 @@ function onSort(column) {
 
 async function confirmRestore(integration) {
   await integrationsStore.restoreIntegration(integration.uuid);
+  await loadTrash({
+    page: integrationsStore.filters.page,
+    sort_by: integrationsStore.filters.sort_by,
+    sort_dir: integrationsStore.filters.sort_dir,
+  });
+}
+
+function openForceDelete(integration) {
+  pendingForceDelete.value = integration;
+}
+
+async function confirmForceDelete() {
+  if (!pendingForceDelete.value) {
+    return;
+  }
+
+  await integrationsStore.forceDeleteIntegration(pendingForceDelete.value.uuid);
+  pendingForceDelete.value = null;
   await loadTrash({
     page: integrationsStore.filters.page,
     sort_by: integrationsStore.filters.sort_by,

@@ -19,4 +19,7 @@ export const applicationService = {
   restore(id) {
     return api.post(`/applications/${id}/restore`);
   },
+  forceDelete(id) {
+    return api.delete(`/applications/${id}/force-delete`);
+  },
 };

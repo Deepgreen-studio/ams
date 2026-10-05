@@ -129,6 +129,22 @@ export const useCustomersStore = defineStore('customers', () => {
     }
   }
 
+  async function forceDeleteCustomer(id) {
+    saving.value = true;
+    clearMessages();
+
+    try {
+      const { data } = await customerService.forceDelete(id);
+      successMessage.value = data.message || 'Customer permanently deleted.';
+      return data;
+    } catch (err) {
+      applyError(err, 'Unable to permanently delete customer');
+      throw err;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   async function restoreCustomer(id) {
     saving.value = true;
     clearMessages();
@@ -168,6 +184,7 @@ export const useCustomersStore = defineStore('customers', () => {
     updateCustomer,
     archiveCustomer,
     restoreCustomer,
+    forceDeleteCustomer,
     resetFilters,
     clearMessages,
   };

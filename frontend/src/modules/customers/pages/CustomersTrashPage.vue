@@ -29,6 +29,7 @@
       :sort-dir="customersStore.filters.sort_dir"
       @sort="onSort"
       @restore="confirmRestore"
+      @force-delete="openForceDelete"
     >
       <template #toolbar>
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -73,6 +74,16 @@
         />
       </template>
     </CustomerTable>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingForceDelete)"
+      title="Permanently delete customer"
+      :message="`Permanently delete ${pendingForceDelete?.display_name || 'this customer'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="customersStore.saving"
+      @cancel="pendingForceDelete = null"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -80,12 +91,14 @@
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const customersStore = useCustomersStore();
 const search = ref('');
+const pendingForceDelete = ref(null);
 const previousFilters = ref(null);
 let searchTimer = null;
 
@@ -154,6 +167,24 @@ function onSort(column) {
 
 async function confirmRestore(customer) {
   await customersStore.restoreCustomer(customer.uuid);
+  await loadTrash({
+    page: customersStore.filters.page,
+    sort_by: customersStore.filters.sort_by,
+    sort_dir: customersStore.filters.sort_dir,
+  });
+}
+
+function openForceDelete(customer) {
+  pendingForceDelete.value = customer;
+}
+
+async function confirmForceDelete() {
+  if (!pendingForceDelete.value) {
+    return;
+  }
+
+  await customersStore.forceDeleteCustomer(pendingForceDelete.value.uuid);
+  pendingForceDelete.value = null;
   await loadTrash({
     page: customersStore.filters.page,
     sort_by: customersStore.filters.sort_by,

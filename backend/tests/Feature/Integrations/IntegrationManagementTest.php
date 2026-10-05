@@ -147,6 +147,7 @@ class IntegrationManagementTest extends TestCase
         $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::DELETE));
         $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::VIEW_TRASH));
         $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::RESTORE));
+        $this->assertTrue($companyAdmin->hasPermissionTo(IntegrationPermission::FORCE_DELETE));
         $this->assertDatabaseHas('permissions', [
             'name' => IntegrationPermission::VIEW_TRASH,
             'display_name' => 'Soft Deleted View',
@@ -154,6 +155,14 @@ class IntegrationManagementTest extends TestCase
         $this->assertDatabaseHas('permissions', [
             'name' => IntegrationPermission::DELETE,
             'display_name' => 'Soft Delete Integration',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => IntegrationPermission::RESTORE,
+            'display_name' => 'Restore Integration',
+        ]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => IntegrationPermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Integration',
         ]);
 
         $manager = User::factory()->create();
@@ -193,5 +202,37 @@ class IntegrationManagementTest extends TestCase
         ])
             ->assertStatus(422)
             ->assertJsonPath('errors.slug.0', 'The slug has already been taken.');
+    }
+
+    public function test_only_force_delete_permission_can_permanently_delete_an_integration(): void
+    {
+        $integration = Integration::query()->create([
+            'company_id' => $this->company->id,
+            'name' => 'Gone API',
+            'slug' => 'gone-api',
+            'type' => 'rest_api',
+            'status' => 'active',
+            'authentication_type' => 'api_key',
+            'health_status' => 'unknown',
+            'timeout' => 30,
+            'retry_attempts' => 3,
+        ]);
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/integrations/'.$integration->uuid.'/force-delete')->assertStatus(422);
+
+        $integration->delete();
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+        $this->deleteJson('/api/v1/integrations/'.$integration->uuid.'/force-delete')->assertForbidden();
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/integrations/'.$integration->uuid.'/force-delete')
+            ->assertOk()
+            ->assertJsonPath('message', 'Integration permanently deleted.');
+
+        $this->assertDatabaseMissing('integrations', ['id' => $integration->id]);
     }
 }

@@ -36,21 +36,6 @@
         @change="emitSubmit"
       />
 
-      <SelectBox
-        v-model="local.visibility"
-        wrapper-class="min-w-[10rem]"
-        :options="visibilityOptions"
-        @change="emitSubmit"
-      />
-
-      <SelectBox
-        v-if="showDeletedFilter"
-        v-model="local.trashed"
-        wrapper-class="min-w-[10rem]"
-        :options="trashedOptions"
-        @change="emitSubmit"
-      />
-
       <button
         type="button"
         class="h-10 rounded-[12px] bg-brand-600 px-5 text-sm font-medium text-white hover:bg-brand-700"
@@ -70,9 +55,8 @@
 </template>
 
 <script setup>
-import { reactive, watch, onBeforeUnmount, computed } from 'vue';
+import { reactive, watch, onBeforeUnmount } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
-import { usePermissions } from '@/composables/usePermissions';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -83,8 +67,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'submit', 'reset']);
-const { can } = usePermissions();
-const showDeletedFilter = computed(() => can('applications.view-trash'));
 
 const statusOptions = [
   { value: '', label: 'Status: All' },
@@ -115,26 +97,11 @@ const categoryOptions = [
   { value: 'other', label: 'Other' },
 ];
 
-const visibilityOptions = [
-  { value: '', label: 'Visibility: All' },
-  { value: 'private', label: 'Private' },
-  { value: 'internal', label: 'Internal' },
-  { value: 'public', label: 'Public' },
-];
-
-const trashedOptions = [
-  { value: '', label: 'Deleted: Exclude' },
-  { value: 'with', label: 'Include deleted' },
-  { value: 'only', label: 'Only deleted' },
-];
-
 const local = reactive({
   search: props.modelValue.search || '',
   status: props.modelValue.status || '',
   platform: props.modelValue.platform || '',
   category: props.modelValue.category || '',
-  visibility: props.modelValue.visibility || '',
-  trashed: props.modelValue.trashed || '',
 });
 
 watch(
@@ -144,15 +111,14 @@ watch(
     local.status = value.status || '';
     local.platform = value.platform || '';
     local.category = value.category || '';
-    local.visibility = value.visibility || '';
-    local.trashed = value.trashed || '';
   },
   { deep: true },
 );
 
 function emitSubmit() {
-  emit('update:modelValue', { ...props.modelValue, ...local, page: 1 });
-  emit('submit', { ...local, page: 1 });
+  const filters = { ...local, visibility: '', trashed: '', page: 1 };
+  emit('update:modelValue', { ...props.modelValue, ...filters });
+  emit('submit', filters);
 }
 
 function emitReset() {
@@ -160,8 +126,6 @@ function emitReset() {
   local.status = '';
   local.platform = '';
   local.category = '';
-  local.visibility = '';
-  local.trashed = '';
   emit('reset');
 }
 

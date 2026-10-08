@@ -45,6 +45,7 @@ class ApplicationController
             'per_page',
             'page',
             'trashed',
+            'group_by',
         ]));
 
         return ApiResponse::success([

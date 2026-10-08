@@ -24,11 +24,55 @@
       {{ store.error }}
     </div>
 
-    <div v-if="store.loading && !hasStats" class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <div v-for="n in 4" :key="n" class="h-28 animate-pulse rounded-[12px] bg-zinc-100" />
+    <div v-if="showSkeleton" class="space-y-4">
+      <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div
+          v-for="n in 4"
+          :key="n"
+          class="flex items-center justify-between gap-4 rounded-[12px] bg-white px-6 py-5 ring-1 ring-zinc-100"
+        >
+          <div class="min-w-0 flex-1">
+            <div class="h-3 w-24 animate-pulse rounded bg-zinc-100" />
+            <div class="mt-3 h-7 w-10 animate-pulse rounded bg-zinc-100" />
+          </div>
+          <div class="h-11 w-11 shrink-0 animate-pulse rounded-[12px] bg-zinc-100" />
+        </div>
+      </div>
+
+      <section class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
+        <div class="mb-4 h-5 w-36 animate-pulse rounded bg-zinc-100" />
+        <div class="flex flex-wrap gap-2">
+          <div
+            v-for="n in 9"
+            :key="n"
+            class="h-7 animate-pulse rounded-full bg-zinc-100"
+            :class="n % 3 === 0 ? 'w-36' : 'w-28'"
+          />
+        </div>
+      </section>
+
+      <div class="grid gap-4 lg:grid-cols-2">
+        <section
+          v-for="panel in 2"
+          :key="panel"
+          class="rounded-[12px] bg-white p-6 ring-1 ring-zinc-100"
+        >
+          <div class="mb-5 flex items-center justify-between gap-3">
+            <div class="h-5 w-40 animate-pulse rounded bg-zinc-100" />
+            <div class="h-4 w-14 animate-pulse rounded bg-zinc-100" />
+          </div>
+          <div class="space-y-5">
+            <div v-for="row in 3" :key="row" class="space-y-2">
+              <div class="h-4 w-3/5 animate-pulse rounded bg-zinc-100" />
+              <div class="h-3 w-2/5 animate-pulse rounded bg-zinc-100" />
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
 
-    <div v-else class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <template v-else>
+    <div class="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <div
         v-for="card in cards"
         :key="card.label"
@@ -49,10 +93,7 @@
 
     <section class="mb-4 rounded-[12px] bg-white p-6 ring-1 ring-zinc-100">
       <h2 class="mb-4 text-base font-semibold text-slate-900">Enabled features</h2>
-      <div v-if="store.loading && !(store.catalog.features || []).length" class="flex flex-wrap gap-2">
-        <div v-for="n in 8" :key="n" class="h-7 w-28 animate-pulse rounded-full bg-zinc-100" />
-      </div>
-      <div v-else class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap gap-2">
         <span
           v-for="feature in store.catalog.features || []"
           :key="feature.value"
@@ -81,10 +122,7 @@
             View all
           </RouterLink>
         </div>
-        <div v-if="store.loading && !store.recentConversations.length" class="space-y-3">
-          <div v-for="n in 4" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
-        </div>
-        <p v-else-if="!store.recentConversations.length" class="py-10 text-center text-sm text-slate-500">
+        <p v-if="!store.recentConversations.length" class="py-10 text-center text-sm text-slate-500">
           No conversations yet.
         </p>
         <ul v-else class="divide-y divide-zinc-100">
@@ -113,10 +151,7 @@
             View logs
           </RouterLink>
         </div>
-        <div v-if="store.loading && !store.recentLogs.length" class="space-y-3">
-          <div v-for="n in 4" :key="n" class="h-14 animate-pulse rounded-[12px] bg-zinc-100" />
-        </div>
-        <p v-else-if="!store.recentLogs.length" class="py-10 text-center text-sm text-slate-500">
+        <p v-if="!store.recentLogs.length" class="py-10 text-center text-sm text-slate-500">
           No usage logs yet.
         </p>
         <ul v-else class="divide-y divide-zinc-100">
@@ -141,11 +176,12 @@
         </ul>
       </section>
     </div>
+    </template>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { RouterLink } from 'vue-router';
 import {
   ChatBubbleLeftRightIcon,
@@ -165,6 +201,8 @@ const hasStats = computed(
     || store.conversationStatistics != null
     || store.usageStatistics != null,
 );
+
+const showSkeleton = computed(() => store.loading && !hasStats.value);
 
 const cards = computed(() => [
   {
@@ -197,7 +235,5 @@ const cards = computed(() => [
   },
 ]);
 
-onMounted(() => {
-  store.fetchDashboard();
-});
+store.fetchDashboard();
 </script>

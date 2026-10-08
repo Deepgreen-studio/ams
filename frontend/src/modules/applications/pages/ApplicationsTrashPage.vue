@@ -130,6 +130,7 @@ function loadTrash(overrides = {}) {
     sort_dir: 'desc',
     page: 1,
     ...overrides,
+    group_by: '',
   });
 }
 

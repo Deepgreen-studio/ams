@@ -3,9 +3,11 @@
 namespace App\Domains\Applications\Repositories;
 
 use App\Domains\Applications\Models\Application;
+use App\Domains\Companies\Models\Company;
 use App\Shared\Repositories\BaseRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Pagination\LengthAwarePaginator as Paginator;
 
 class ApplicationRepository extends BaseRepository
 {
@@ -49,20 +51,105 @@ class ApplicationRepository extends BaseRepository
      */
     public function paginateFiltered(array $filters = []): LengthAwarePaginator
     {
-        $perPage = max(1, min((int) ($filters['per_page'] ?? 15), 100));
+        if (($filters['group_by'] ?? null) === 'company' && ($filters['trashed'] ?? null) !== 'only') {
+            return $this->paginateByCompany($filters);
+        }
+
+        $perPage = $this->perPage($filters);
 
         return $this->filteredQuery($filters)
-            ->with([
-                'company' => function ($query): void {
-                    $query->select('id', 'uuid', 'company_name', 'company_code', 'created_at')
-                        ->withCount('applications');
-                },
-                'integration:id,uuid,name,slug,status',
-                'creator:id,uuid,full_name,email',
-                'updater:id,uuid,full_name,email',
-            ])
+            ->with($this->listRelations($filters, false))
             ->paginate($perPage)
             ->withQueryString();
+    }
+
+    /**
+     * Page through companies that have matching applications, and return every
+     * matching application for the companies on the current page.
+     *
+     * @param  array<string, mixed>  $filters
+     */
+    public function paginateByCompany(array $filters = []): LengthAwarePaginator
+    {
+        $perPage = $this->perPage($filters);
+        $page = max(1, (int) ($filters['page'] ?? 1));
+
+        $companyIds = $this->applyFilters($this->model->newQuery(), $filters)
+            ->select('company_id')
+            ->whereNotNull('company_id')
+            ->distinct();
+
+        $companies = Company::query()
+            ->whereIn('companies.id', $companyIds)
+            ->orderByDesc('companies.created_at')
+            ->orderByDesc('companies.id')
+            ->paginate($perPage, ['companies.*'], 'page', $page)
+            ->withQueryString();
+
+        $ids = $companies->getCollection()->modelKeys();
+        $applications = $ids === []
+            ? $this->model->newCollection()
+            : $this->filteredQuery($filters)
+                ->whereIn('company_id', $ids)
+                ->with($this->listRelations($filters, true))
+                ->get();
+
+        $order = array_flip($ids);
+        $applications = $applications
+            ->sortBy(function (Application $application) use ($order): string {
+                $rank = $order[$application->company_id] ?? PHP_INT_MAX;
+                $created = $application->created_at?->getTimestamp() ?? 0;
+
+                return sprintf('%08d-%020d', $rank, PHP_INT_MAX - $created);
+            })
+            ->values();
+
+        return (new Paginator(
+            $applications,
+            $companies->total(),
+            $companies->perPage(),
+            $companies->currentPage(),
+            [
+                'path' => Paginator::resolveCurrentPath(),
+                'pageName' => 'page',
+            ],
+        ))->withQueryString();
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    private function perPage(array $filters): int
+    {
+        return max(1, min((int) ($filters['per_page'] ?? 15), 100));
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     * @return array<string, mixed>
+     */
+    private function listRelations(array $filters, bool $constrainCounts): array
+    {
+        return [
+            'company' => function ($query) use ($filters, $constrainCounts): void {
+                $query->select('id', 'uuid', 'company_name', 'company_code', 'created_at');
+
+                if ($constrainCounts) {
+                    $query->withCount([
+                        'applications' => function (Builder $apps) use ($filters): void {
+                            $this->applyFilters($apps, $filters);
+                        },
+                    ]);
+
+                    return;
+                }
+
+                $query->withCount('applications');
+            },
+            'integration:id,uuid,name,slug,status',
+            'creator:id,uuid,full_name,email',
+            'updater:id,uuid,full_name,email',
+        ];
     }
 
     /**
@@ -70,8 +157,36 @@ class ApplicationRepository extends BaseRepository
      */
     public function filteredQuery(array $filters = []): Builder
     {
-        $query = $this->model->newQuery();
+        $query = $this->applyFilters($this->model->newQuery(), $filters);
 
+        $sortBy = (string) ($filters['sort_by'] ?? 'created_at');
+        $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
+        $allowed = [
+            'id',
+            'name',
+            'slug',
+            'platform',
+            'category',
+            'status',
+            'visibility',
+            'current_version',
+            'created_at',
+            'updated_at',
+            'deleted_at',
+        ];
+
+        if (! in_array($sortBy, $allowed, true)) {
+            $sortBy = 'created_at';
+        }
+
+        return $query->orderBy($sortBy, $sortDir);
+    }
+
+    /**
+     * @param  array<string, mixed>  $filters
+     */
+    private function applyFilters(Builder $query, array $filters): Builder
+    {
         if (($filters['trashed'] ?? null) === 'only') {
             $query->onlyTrashed();
         } elseif (($filters['trashed'] ?? null) === 'with') {
@@ -116,27 +231,7 @@ class ApplicationRepository extends BaseRepository
             $query->where('visibility', $filters['visibility']);
         }
 
-        $sortBy = (string) ($filters['sort_by'] ?? 'created_at');
-        $sortDir = strtolower((string) ($filters['sort_dir'] ?? 'desc')) === 'asc' ? 'asc' : 'desc';
-        $allowed = [
-            'id',
-            'name',
-            'slug',
-            'platform',
-            'category',
-            'status',
-            'visibility',
-            'current_version',
-            'created_at',
-            'updated_at',
-            'deleted_at',
-        ];
-
-        if (! in_array($sortBy, $allowed, true)) {
-            $sortBy = 'created_at';
-        }
-
-        return $query->orderBy($sortBy, $sortDir);
+        return $query;
     }
 
     /**

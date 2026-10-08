@@ -44,8 +44,7 @@
         v-for="item in store.recent"
         :key="item.uuid"
         type="button"
-        class="flex w-full items-start justify-between gap-3 rounded-[12px] px-5 py-4 text-left ring-1 transition hover:ring-brand-200"
-        :class="item.is_read ? 'bg-white ring-zinc-100' : 'bg-brand-50/40 ring-brand-200'"
+        class="flex w-full items-start justify-between gap-3 rounded-[12px] bg-white px-5 py-4 text-left ring-1 ring-zinc-100 transition hover:ring-brand-200"
         @click="openItem(item)"
       >
         <div class="min-w-0">

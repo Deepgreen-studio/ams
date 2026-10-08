@@ -145,7 +145,7 @@
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ company.departments_count || 0 }} dept · {{ company.teams_count || 0 }} teams ·
-              {{ company.locations_count || 0 }} locs
+              {{ company.locations_count || 0 }} locs · {{ company.customers_count || 0 }} cust
             </td>
             <td class="px-5 py-4 text-slate-600">
               {{ formatDate(company.created_at) || '—' }}

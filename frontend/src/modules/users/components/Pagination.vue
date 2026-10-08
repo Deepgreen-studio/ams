@@ -3,6 +3,7 @@
     <p class="text-sm text-slate-500">
       Total
       <span class="font-medium text-slate-700">{{ meta?.total || 0 }}</span>
+      <span v-if="unit"> {{ unit }}</span>
     </p>
 
     <div class="flex items-center gap-2">
@@ -67,6 +68,10 @@ const props = defineProps({
   loading: {
     type: Boolean,
     default: false,
+  },
+  unit: {
+    type: String,
+    default: '',
   },
 });
 

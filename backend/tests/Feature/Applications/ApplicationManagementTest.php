@@ -323,4 +323,39 @@ class ApplicationManagementTest extends TestCase
 
         $this->assertDatabaseMissing('applications', ['id' => $application->id]);
     }
+
+    public function test_application_list_paginates_by_company(): void
+    {
+        $newer = Company::query()->create([
+            'company_name' => 'Newer Co',
+            'status' => 'active',
+            'timezone' => 'UTC',
+            'language' => 'en',
+            'currency' => 'USD',
+        ]);
+
+        Application::factory()->forCompany($this->company)->create(['name' => 'First App']);
+        Application::factory()->forCompany($this->company)->create(['name' => 'Second App']);
+        Application::factory()->forCompany($newer)->create(['name' => 'Newer App']);
+
+        Sanctum::actingAs($this->admin);
+
+        $page = $this->getJson('/api/v1/applications?group_by=company&per_page=1&page=1');
+
+        $page->assertOk()
+            ->assertJsonPath('data.applications.meta.total', 2)
+            ->assertJsonPath('data.applications.meta.per_page', 1)
+            ->assertJsonPath('data.applications.meta.last_page', 2)
+            ->assertJsonPath('data.applications.meta.current_page', 1)
+            ->assertJsonCount(1, 'data.applications.items')
+            ->assertJsonPath('data.applications.items.0.company.uuid', $newer->uuid)
+            ->assertJsonPath('data.applications.items.0.company.applications_count', 1);
+
+        $this->getJson('/api/v1/applications?group_by=company&per_page=1&page=2')
+            ->assertOk()
+            ->assertJsonCount(2, 'data.applications.items')
+            ->assertJsonPath('data.applications.items.0.company.uuid', $this->company->uuid)
+            ->assertJsonPath('data.applications.items.1.company.uuid', $this->company->uuid)
+            ->assertJsonPath('data.applications.items.0.company.applications_count', 2);
+    }
 }

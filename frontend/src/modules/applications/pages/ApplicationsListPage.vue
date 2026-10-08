@@ -82,6 +82,7 @@
         <Pagination
           :meta="applicationsStore.meta"
           :loading="applicationsStore.loading"
+          :unit="companyUnit"
           @change="onPageChange"
           @per-page="onPerPageChange"
         />
@@ -114,6 +115,11 @@ import { useApplicationsStore } from '@/modules/applications/stores/applications
 const applicationsStore = useApplicationsStore();
 const { can } = usePermissions();
 const pendingDelete = ref(null);
+const companyUnit = computed(() => (applicationsStore.meta?.total === 1 ? 'company' : 'companies'));
+
+function loadApplications(overrides = {}) {
+  return applicationsStore.fetchApplications({ group_by: 'company', ...overrides });
+}
 
 const statCards = computed(() => [
   {
@@ -154,24 +160,24 @@ const statCards = computed(() => [
 ]);
 
 onMounted(() => {
-  applicationsStore.fetchApplications();
+  loadApplications();
 });
 
 function onFilter(filters) {
-  applicationsStore.fetchApplications(filters);
+  loadApplications(filters);
 }
 
 function onReset() {
   applicationsStore.resetFilters();
-  applicationsStore.fetchApplications();
+  loadApplications();
 }
 
 function onPageChange(page) {
-  applicationsStore.fetchApplications({ page });
+  loadApplications({ page });
 }
 
 function onPerPageChange(perPage) {
-  applicationsStore.fetchApplications({ per_page: perPage, page: 1 });
+  loadApplications({ per_page: perPage, page: 1 });
 }
 
 function onSort(column) {
@@ -180,7 +186,7 @@ function onSort(column) {
       ? 'desc'
       : 'asc';
 
-  applicationsStore.fetchApplications({ sort_by: column, sort_dir: sortDir, page: 1 });
+  loadApplications({ sort_by: column, sort_dir: sortDir, page: 1 });
 }
 
 function openDelete(application) {
@@ -191,11 +197,11 @@ async function confirmDelete() {
   if (!pendingDelete.value) return;
   await applicationsStore.deleteApplication(pendingDelete.value.uuid);
   pendingDelete.value = null;
-  await applicationsStore.fetchApplications();
+  await loadApplications();
 }
 
 async function confirmRestore(application) {
   await applicationsStore.restoreApplication(application.uuid);
-  await applicationsStore.fetchApplications();
+  await loadApplications();
 }
 </script>

@@ -60,7 +60,7 @@ class CompanyService
             'departments',
             'teams.manager:id,uuid,full_name,email',
             'locations',
-        ])->loadCount(['departments', 'teams', 'locations']);
+        ])->loadCount(['departments', 'teams', 'locations', 'customers']);
 
         return $company;
     }

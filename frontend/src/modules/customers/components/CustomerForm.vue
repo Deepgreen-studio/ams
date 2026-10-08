@@ -8,11 +8,13 @@
           size="lg"
           placeholder="Select company"
           :options="companyOptions"
-          :disabled="Boolean(initial.uuid)"
+          :disabled="Boolean(initial.uuid) || lockCompany"
           :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
         />
-        <p class="mt-1 text-xs text-slate-500">The company owns the applications. This customer is entitled to use them.</p>
+        <p class="mt-1 text-xs text-slate-500">
+          {{ lockCompany ? 'This customer belongs to this company.' : 'The company owns the applications. This customer is entitled to use them.' }}
+        </p>
         <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
           {{ displayErrors.company_id[0] }}
         </p>
@@ -267,6 +269,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   submitLabel: { type: String, default: 'Save' },
   hideCompany: { type: Boolean, default: false },
+  lockCompany: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['submit', 'cancel']);
@@ -416,10 +419,19 @@ async function loadCompanies() {
     const items = data.data?.companies?.items ?? [];
     const currentId = props.initial?.company?.uuid || props.initial?.company_id;
     if (currentId && !items.some((company) => company.uuid === currentId)) {
+      let assignedName = props.initial?.company?.company_name || props.initial?.company_name || '';
+      if (!assignedName) {
+        try {
+          const single = await companyService.get(currentId);
+          assignedName = single.data?.data?.company?.company_name || '';
+        } catch {
+          assignedName = '';
+        }
+      }
       items.push({
         uuid: currentId,
-        company_name: props.initial?.company?.company_name || props.initial?.company_name || 'Assigned company',
-        status: 'inactive',
+        company_name: assignedName || 'Assigned company',
+        status: 'active',
       });
     }
     companies.value = items;
@@ -555,7 +567,7 @@ function isHttpUrl(value) {
 function validate() {
   const next = {};
 
-  if (!props.hideCompany && !String(form.company_id || '').trim()) {
+  if (!String(form.company_id || '').trim()) {
     next.company_id = ['Please select an owning company.'];
   }
 

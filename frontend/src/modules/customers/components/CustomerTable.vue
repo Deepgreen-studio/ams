@@ -32,7 +32,10 @@
                 </span>
               </button>
             </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
+            <th
+              v-if="!hideOwningCompany"
+              class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell"
+            >
               Owning company
             </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
@@ -132,7 +135,7 @@
             <td class="hidden px-5 py-4 md:table-cell">
               <TypeBadge :type="customer.customer_type" />
             </td>
-            <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+            <td v-if="!hideOwningCompany" class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ customer.company?.company_name || '—' }}
             </td>
             <td class="px-5 py-4">
@@ -262,6 +265,10 @@ const props = defineProps({
   sortBy: {
     type: String,
     default: 'created_at',
+  },
+  hideOwningCompany: {
+    type: Boolean,
+    default: false,
   },
   sortDir: {
     type: String,

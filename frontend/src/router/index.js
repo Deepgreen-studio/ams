@@ -205,6 +205,18 @@ const router = createRouter({
           meta: { title: 'Locations', requiresAuth: true },
         },
         {
+          path: 'companies/:id/customers/create',
+          name: 'companies.customers.create',
+          component: () => import('@/modules/customers/pages/CreateCustomerPage.vue'),
+          meta: { title: 'Create Customer', requiresAuth: true },
+        },
+        {
+          path: 'companies/:id/customers',
+          name: 'companies.customers',
+          component: () => import('@/modules/customers/pages/CustomersListPage.vue'),
+          meta: { title: 'Customers', requiresAuth: true },
+        },
+        {
           path: 'applications',
           name: 'applications.index',
           component: () => import('@/modules/applications/pages/ApplicationsListPage.vue'),

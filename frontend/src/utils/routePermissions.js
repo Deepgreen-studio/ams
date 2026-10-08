@@ -128,6 +128,7 @@ const PREFIX_MODULES = [
   ['companies.departments', 'departments'],
   ['companies.teams', 'teams'],
   ['companies.locations', 'locations'],
+  ['companies.customers', 'customers'],
   ['users.', 'users'],
   ['roles.', 'roles'],
   ['companies.', 'companies'],

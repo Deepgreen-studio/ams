@@ -81,7 +81,7 @@
             <RouterLink
               v-for="item in orgLinks"
               :key="item.to"
-              :to="{ name: item.to, params: { id: company.uuid } }"
+              :to="item.route"
               class="flex items-center justify-between gap-3 rounded-[12px] bg-zinc-50 px-4 py-3.5 transition hover:bg-zinc-100"
             >
               <div class="flex items-center gap-3">
@@ -199,6 +199,7 @@ import {
   PencilSquareIcon,
   TrashIcon,
   UserGroupIcon,
+  UsersIcon,
 } from '@heroicons/vue/24/outline';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
@@ -277,7 +278,24 @@ const orgLinks = computed(() =>
       manage: 'locations.update',
       count: company.value?.locations_count ?? company.value?.locations?.length ?? 0,
     },
-  ].filter((item) => can(item.permission)),
+    {
+      label: 'Customers',
+      to: 'companies.customers',
+      icon: UsersIcon,
+      permission: 'customers.view',
+      manage: 'customers.update',
+      count: company.value?.customers_count ?? 0,
+    },
+  ]
+    .map((item) => ({
+      ...item,
+      route: {
+        name: item.to,
+        params: item.query ? {} : { id: company.value?.uuid },
+        query: item.query || {},
+      },
+    }))
+    .filter((item) => can(item.permission)),
 );
 
 const visibleActivities = computed(() => {

@@ -46,6 +46,7 @@ class CompanyResource extends JsonResource
             'departments_count' => $this->whenCounted('departments'),
             'teams_count' => $this->whenCounted('teams'),
             'locations_count' => $this->whenCounted('locations'),
+            'customers_count' => $this->whenCounted('customers'),
             'departments' => DepartmentResource::collection($this->whenLoaded('departments')),
             'teams' => TeamResource::collection($this->whenLoaded('teams')),
             'locations' => LocationResource::collection($this->whenLoaded('locations')),

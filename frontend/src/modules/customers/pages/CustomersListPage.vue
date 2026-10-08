@@ -2,7 +2,14 @@
   <div>
     <Teleport defer to="#page-header-actions">
       <RouterLink
-        v-if="can('customers.view-trash')"
+        v-if="scopedCompanyId"
+        :to="{ name: 'companies.show', params: { id: scopedCompanyId } }"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+      >
+        Back to company
+      </RouterLink>
+      <RouterLink
+        v-if="!scopedCompanyId && can('customers.view-trash')"
         :to="{ name: 'customers.trash' }"
         class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
       >
@@ -10,7 +17,7 @@
       </RouterLink>
       <RouterLink
         v-if="can('customers.create')"
-        :to="{ name: 'customers.create' }"
+        :to="createRoute"
         class="inline-flex items-center gap-2 rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700"
       >
         <PlusIcon class="h-4 w-4" />
@@ -67,6 +74,7 @@
       <template #toolbar>
         <CustomerSearchFilter
           :model-value="customersStore.filters"
+          :hide-company="Boolean(scopedCompanyId)"
           @submit="onFilter"
           @reset="onReset"
         />
@@ -113,8 +121,8 @@ import {
   UserIcon,
   UsersIcon,
 } from '@heroicons/vue/24/outline';
-import { computed, onMounted, ref } from 'vue';
-import { RouterLink } from 'vue-router';
+import { computed, ref, watch } from 'vue';
+import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
@@ -122,9 +130,21 @@ import CustomerSearchFilter from '@/modules/customers/components/CustomerSearchF
 import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
+const route = useRoute();
+const router = useRouter();
 const customersStore = useCustomersStore();
 const { can } = usePermissions();
 const pendingDelete = ref(null);
+
+const scopedCompanyId = computed(() =>
+  route.name === 'companies.customers' ? String(route.params.id || '') : '',
+);
+
+const createRoute = computed(() =>
+  scopedCompanyId.value
+    ? { name: 'companies.customers.create', params: { id: scopedCompanyId.value } }
+    : { name: 'customers.create' },
+);
 
 const statCards = computed(() => [
   {
@@ -164,17 +184,35 @@ const statCards = computed(() => [
   },
 ]);
 
-onMounted(() => {
-  customersStore.fetchCustomers({ trashed: '' });
-});
+watch(
+  () => [route.name, route.params.id, route.query.company],
+  () => {
+    const company = scopedCompanyId.value
+      || (typeof route.query.company === 'string' ? route.query.company : '');
+    customersStore.fetchCustomers({
+      trashed: '',
+      page: 1,
+      company,
+    });
+  },
+  { immediate: true },
+);
 
 function onFilter(filters) {
-  customersStore.fetchCustomers(filters);
+  customersStore.fetchCustomers({
+    ...filters,
+    ...(scopedCompanyId.value ? { company: scopedCompanyId.value } : {}),
+  });
 }
 
 function onReset() {
+  const company = scopedCompanyId.value;
   customersStore.resetFilters();
-  customersStore.fetchCustomers();
+  if (!company && route.query.company) {
+    router.replace({ name: 'customers.index', query: {} });
+    return;
+  }
+  customersStore.fetchCustomers(company ? { company, page: 1 } : { page: 1 });
 }
 
 function onPageChange(page) {

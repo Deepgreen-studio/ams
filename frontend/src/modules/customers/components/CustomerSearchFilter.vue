@@ -30,6 +30,7 @@
       />
 
       <SelectBox
+        v-if="!hideCompany"
         v-model="local.company"
         wrapper-class="min-w-[11rem]"
         :options="companyOptions"
@@ -64,6 +65,10 @@ const props = defineProps({
   modelValue: {
     type: Object,
     required: true,
+  },
+  hideCompany: {
+    type: Boolean,
+    default: false,
   },
 });
 
@@ -113,6 +118,7 @@ watch(
 );
 
 onMounted(async () => {
+  if (props.hideCompany) return;
   try {
     const { data } = await companyService.list({
       per_page: 100,

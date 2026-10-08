@@ -53,7 +53,7 @@ class CompanyRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with(['creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email'])
-            ->withCount(['departments', 'teams', 'locations'])
+            ->withCount(['departments', 'teams', 'locations', 'customers'])
             ->paginate($perPage)
             ->withQueryString();
     }

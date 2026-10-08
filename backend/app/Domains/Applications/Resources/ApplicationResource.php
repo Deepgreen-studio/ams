@@ -19,6 +19,9 @@ class ApplicationResource extends JsonResource
                     'id' => $this->company->id,
                     'uuid' => $this->company->uuid,
                     'company_name' => $this->company->company_name,
+                    'company_code' => $this->company->company_code,
+                    'created_at' => $this->company->created_at,
+                    'applications_count' => $this->company->applications_count,
                     'status' => $this->company->status?->value ?? $this->company->status ?? null,
                 ];
             }),

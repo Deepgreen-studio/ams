@@ -51,6 +51,7 @@
     </div>
 
     <ApplicationTable
+      group-by-company
       :applications="applicationsStore.applications"
       :loading="applicationsStore.loading"
       :sort-by="applicationsStore.filters.sort_by"

@@ -6,7 +6,17 @@
 
     <div class="overflow-x-auto px-3">
       <table class="min-w-full text-sm">
-        <thead>
+        <thead v-if="groupByCompany">
+          <tr class="border-b border-zinc-100">
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Company</th>
+            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
+              Company Code
+            </th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Total Applications</th>
+            <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
+          </tr>
+        </thead>
+        <thead v-else>
           <tr class="border-b border-zinc-100">
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
@@ -112,6 +122,127 @@
 
           </tr>
 
+        </tbody>
+
+        <tbody v-else-if="groupByCompany">
+          <template v-for="group in companyGroups" :key="group.key">
+            <tr
+              class="cursor-pointer border-b border-zinc-100 bg-white transition hover:bg-zinc-50"
+              @click="toggleGroup(group.key)"
+            >
+              <td class="px-5 py-4">
+                <div class="flex items-center gap-3">
+                  <ChevronDownIcon
+                    class="h-4 w-4 shrink-0 text-slate-400 transition"
+                    :class="isExpanded(group.key) ? '' : '-rotate-90'"
+                  />
+                  <div class="min-w-0">
+                    <p class="truncate font-semibold text-slate-900">{{ group.name }}</p>
+                    <p class="truncate text-xs text-slate-500 md:hidden">{{ group.code }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="hidden px-5 py-4 font-medium text-slate-700 md:table-cell">
+                {{ group.code }}
+              </td>
+              <td class="px-5 py-4 text-lg font-semibold text-slate-900">
+                {{ group.total }}
+              </td>
+              <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+                {{ formatDate(group.createdAt) || '—' }}
+              </td>
+            </tr>
+            <tr v-if="isExpanded(group.key)" class="border-b border-zinc-100 last:border-b-0">
+              <td colspan="4" class="bg-white px-4 py-3 sm:px-6">
+                <div class="overflow-hidden rounded-[12px] ring-1 ring-zinc-100">
+                  <table class="min-w-full text-sm">
+                    <thead>
+                      <tr class="border-b border-zinc-100 bg-white">
+                        <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Application</th>
+                        <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 md:table-cell">
+                          Platform
+                        </th>
+                        <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 lg:table-cell">
+                          Category
+                        </th>
+                        <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Status</th>
+                        <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">Created At</th>
+                        <th
+                          v-if="hasAnyAction"
+                          class="px-5 py-3 text-right text-sm font-semibold text-zinc-500"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        v-for="item in group.applications"
+                        :key="item.uuid"
+                        class="border-b border-zinc-100 transition last:border-b-0 hover:bg-zinc-50/60"
+                        :class="can('applications.view') ? 'cursor-pointer' : ''"
+                        @click="openDetails(item)"
+                      >
+                        <td class="px-5 py-4">
+                          <div class="flex items-center gap-3">
+                            <div
+                              class="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-[12px] bg-brand-50 text-xs font-semibold text-brand-700"
+                            >
+                              <img
+                                v-if="iconSrc(item) && !failedIcons[item.uuid]"
+                                :src="iconSrc(item)"
+                                alt=""
+                                class="h-full w-full object-cover"
+                                @error="markIconFailed(item.uuid)"
+                              />
+                              <span v-else>{{ initials(item.name) }}</span>
+                            </div>
+                            <div class="min-w-0">
+                              <p class="truncate font-semibold text-slate-900">{{ item.name }}</p>
+                              <p class="truncate text-xs text-slate-500">{{ item.slug }}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="hidden px-5 py-4 md:table-cell">
+                          <div class="flex flex-wrap gap-1.5">
+                            <StatusBadge
+                              v-for="platform in applicationPlatforms(item)"
+                              :key="platform"
+                              :status="platform"
+                              kind="platform"
+                            />
+                          </div>
+                        </td>
+                        <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
+                          {{ item.category_label || item.category || '—' }}
+                        </td>
+                        <td class="px-5 py-4">
+                          <StatusBadge :status="item.status" />
+                        </td>
+                        <td class="whitespace-nowrap px-5 py-4 text-slate-600">
+                          {{ formatDate(item.created_at) || '—' }}
+                        </td>
+                        <td v-if="hasAnyAction" class="px-5 py-4">
+                          <div class="relative flex justify-end">
+                            <button
+                              type="button"
+                              class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
+                              :aria-expanded="openMenuId === item.uuid"
+                              aria-haspopup="menu"
+                              aria-label="Open actions"
+                              @click.stop="toggleMenu(item.uuid, $event)"
+                            >
+                              <EllipsisVerticalIcon class="h-5 w-5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </td>
+            </tr>
+          </template>
         </tbody>
 
         <tbody v-else>
@@ -257,10 +388,11 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import {
   ArrowUturnLeftIcon,
+  ChevronDownIcon,
   EllipsisVerticalIcon,
   EyeIcon,
   PencilSquareIcon,
@@ -278,6 +410,7 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   sortBy: { type: String, default: 'created_at' },
   sortDir: { type: String, default: 'desc' },
+  groupByCompany: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(['sort', 'delete', 'restore', 'force-delete']);
@@ -292,6 +425,55 @@ function openDetails(application) {
 
   router.push({ name: 'applications.show', params: { id: application.uuid } });
 }
+const companyGroups = computed(() => {
+  const groups = [];
+  const index = new Map();
+
+  props.applications.forEach((item) => {
+    const key = item.company?.uuid || 'unassigned';
+    if (!index.has(key)) {
+      const group = {
+        key,
+        name: item.company?.company_name || 'Unassigned',
+        code: item.company?.company_code || '—',
+        createdAt: item.company?.created_at || null,
+        total: Number(item.company?.applications_count ?? 0),
+        applications: [],
+      };
+      index.set(key, group);
+      groups.push(group);
+    }
+
+    const group = index.get(key);
+    group.applications.push(item);
+    if (!group.total) {
+      group.total = group.applications.length;
+    }
+  });
+
+  return groups;
+});
+
+const expandedIds = ref([]);
+
+watch(companyGroups, (groups) => {
+  const keys = groups.map((group) => group.key);
+  expandedIds.value = expandedIds.value.filter((id) => keys.includes(id));
+});
+
+function isExpanded(key) {
+  return expandedIds.value.includes(key);
+}
+
+function toggleGroup(key) {
+  if (isExpanded(key)) {
+    expandedIds.value = expandedIds.value.filter((id) => id !== key);
+    return;
+  }
+
+  expandedIds.value = [...expandedIds.value, key];
+}
+
 const hasAnyAction = computed(() =>
   canAny(
     'applications.view',

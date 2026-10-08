@@ -53,7 +53,10 @@ class ApplicationRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'company:id,uuid,company_name',
+                'company' => function ($query): void {
+                    $query->select('id', 'uuid', 'company_name', 'company_code', 'created_at')
+                        ->withCount('applications');
+                },
                 'integration:id,uuid,name,slug,status',
                 'creator:id,uuid,full_name,email',
                 'updater:id,uuid,full_name,email',

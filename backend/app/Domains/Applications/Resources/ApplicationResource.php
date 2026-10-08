@@ -2,6 +2,7 @@
 
 namespace App\Domains\Applications\Resources;
 
+use App\Domains\Applications\Enums\ApplicationPlatform;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -41,6 +42,11 @@ class ApplicationResource extends JsonResource
             'description' => $this->description,
             'platform' => $this->platform?->value ?? $this->platform,
             'platform_label' => $this->platform?->label(),
+            'platforms' => $this->platformList(),
+            'platform_labels' => array_map(
+                static fn (string $value): string => ApplicationPlatform::tryFrom($value)?->label() ?? $value,
+                $this->platformList(),
+            ),
             'category' => $this->category?->value ?? $this->category,
             'category_custom' => $this->category_custom,
             'category_label' => $this->category?->value === 'other' && filled($this->category_custom)

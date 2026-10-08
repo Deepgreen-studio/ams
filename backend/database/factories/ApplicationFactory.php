@@ -24,6 +24,7 @@ class ApplicationFactory extends Factory
     public function definition(): array
     {
         $name = fake()->unique()->words(3, true);
+        $platform = fake()->randomElement(ApplicationPlatform::values());
 
         return [
             'uuid' => (string) Str::uuid(),
@@ -31,7 +32,8 @@ class ApplicationFactory extends Factory
             'name' => Str::title($name),
             'slug' => Str::slug($name),
             'description' => fake()->optional()->sentence(12),
-            'platform' => fake()->randomElement(ApplicationPlatform::values()),
+            'platform' => $platform,
+            'platforms' => [$platform],
             'category' => fake()->randomElement(ApplicationCategory::values()),
             'icon' => null,
             'banner' => null,

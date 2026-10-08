@@ -31,7 +31,12 @@
             </h2>
             <p class="mt-1 truncate text-sm text-slate-500">{{ application.slug }}</p>
             <div class="mt-3 flex flex-wrap gap-1.5">
-              <StatusBadge :status="application.platform" kind="platform" />
+              <StatusBadge
+                v-for="platform in applicationPlatforms(application)"
+                :key="platform"
+                :status="platform"
+                kind="platform"
+              />
               <StatusBadge :status="application.status" />
               <StatusBadge :status="application.visibility" kind="visibility" />
             </div>
@@ -123,6 +128,7 @@ import { computed, ref, watch } from 'vue';
 import { formatDate } from '@/utils/formatters';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 import StatusBadge from '@/modules/applications/components/StatusBadge.vue';
+import { applicationPlatforms, platformLabels } from '@/modules/applications/utils/platforms';
 
 const props = defineProps({
   application: { type: Object, required: true },
@@ -159,11 +165,7 @@ const sidebarItems = computed(() => [
 const metricCards = computed(() => [
   {
     label: 'Platform',
-    value: props.application?.platform === 'ios'
-      ? 'iOS'
-      : String(props.application?.platform || '—')
-          .replaceAll('_', ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase()),
+    value: platformLabels(props.application),
   },
   { label: 'Version', value: props.application?.current_version || '—' },
   {

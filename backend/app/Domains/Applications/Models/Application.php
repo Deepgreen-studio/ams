@@ -38,6 +38,7 @@ class Application extends Model
         'slug',
         'description',
         'platform',
+        'platforms',
         'category',
         'category_custom',
         'icon',
@@ -71,6 +72,7 @@ class Application extends Model
     {
         return [
             'platform' => ApplicationPlatform::class,
+            'platforms' => 'array',
             'category' => ApplicationCategory::class,
             'status' => ApplicationStatus::class,
             'visibility' => ApplicationVisibility::class,
@@ -84,6 +86,7 @@ class Application extends Model
                 'name',
                 'slug',
                 'platform',
+                'platforms',
                 'category',
                 'category_custom',
                 'status',
@@ -99,6 +102,22 @@ class Application extends Model
     public function getRouteKeyName(): string
     {
         return 'uuid';
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function platformList(): array
+    {
+        $stored = $this->platforms;
+
+        if (is_array($stored) && $stored !== []) {
+            return array_values(array_map(static fn (mixed $value): string => (string) $value, $stored));
+        }
+
+        $primary = $this->platform?->value ?? $this->platform;
+
+        return filled($primary) ? [(string) $primary] : [];
     }
 
     public function company(): BelongsTo

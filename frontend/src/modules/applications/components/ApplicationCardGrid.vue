@@ -45,7 +45,12 @@
         </div>
 
         <div class="mt-4 flex flex-wrap gap-2">
-          <StatusBadge :status="item.platform" kind="platform" />
+          <StatusBadge
+            v-for="platform in applicationPlatforms(item)"
+            :key="platform"
+            :status="platform"
+            kind="platform"
+          />
           <StatusBadge :status="item.status" />
           <StatusBadge :status="item.visibility" kind="visibility" />
         </div>
@@ -92,6 +97,7 @@ import { reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import StatusBadge from '@/modules/applications/components/StatusBadge.vue';
+import { applicationPlatforms } from '@/modules/applications/utils/platforms';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 defineProps({

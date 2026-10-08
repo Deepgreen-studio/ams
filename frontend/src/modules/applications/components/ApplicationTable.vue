@@ -145,7 +145,14 @@
               </div>
             </td>
             <td class="hidden px-5 py-4 md:table-cell">
-              <StatusBadge :status="item.platform" kind="platform" />
+              <div class="flex flex-wrap gap-1.5">
+                <StatusBadge
+                  v-for="platform in applicationPlatforms(item)"
+                  :key="platform"
+                  :status="platform"
+                  kind="platform"
+                />
+              </div>
             </td>
             <td class="hidden px-5 py-4 text-slate-600 lg:table-cell">
               {{ item.category_label || item.category || '—' }}
@@ -263,6 +270,7 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import { formatDate } from '@/utils/formatters';
 import { usePermissions } from '@/composables/usePermissions';
 import StatusBadge from '@/modules/applications/components/StatusBadge.vue';
+import { applicationPlatforms } from '@/modules/applications/utils/platforms';
 import { resolveMediaUrl } from '@/utils/mediaUrl';
 
 const props = defineProps({

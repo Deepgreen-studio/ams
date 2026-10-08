@@ -98,7 +98,11 @@ class ApplicationRepository extends BaseRepository
         }
 
         if (! empty($filters['platform'])) {
-            $query->where('platform', $filters['platform']);
+            $platform = (string) $filters['platform'];
+            $query->where(function (Builder $builder) use ($platform): void {
+                $builder->where('platform', $platform)
+                    ->orWhereJsonContains('platforms', $platform);
+            });
         }
 
         if (! empty($filters['category'])) {

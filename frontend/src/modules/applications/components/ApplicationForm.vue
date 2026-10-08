@@ -48,13 +48,16 @@
       <div>
         <FormLabel required>Platform</FormLabel>
         <SelectBox
-          v-model="form.platform"
+          v-model="form.platforms"
           size="lg"
+          multiple
+          placeholder="Select platforms"
           :options="platformOptions"
-          :error="Boolean(displayErrors.platform)"
+          :error="Boolean(platformError)"
         />
-        <p v-if="displayErrors.platform" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.platform[0] }}
+        <p class="mt-1 text-xs text-slate-500">Select every platform this application supports.</p>
+        <p v-if="platformError" class="mt-1 text-xs text-rose-600">
+          {{ platformError }}
         </p>
       </div>
 
@@ -269,6 +272,14 @@ const displayErrors = computed(() => ({
   ...props.errors,
 }));
 
+const platformError = computed(
+  () =>
+    displayErrors.value.platforms?.[0]
+    || displayErrors.value['platforms.0']?.[0]
+    || displayErrors.value.platform?.[0]
+    || '',
+);
+
 watch(
   () => props.initial,
   (value) => {
@@ -334,6 +345,18 @@ async function loadIntegrations(companyUuid) {
   }
 }
 
+function normalizePlatforms(value = {}) {
+  if (Array.isArray(value.platforms) && value.platforms.length) {
+    return [...value.platforms];
+  }
+
+  if (value.platform) {
+    return [value.platform];
+  }
+
+  return ['android'];
+}
+
 function createForm(value = {}) {
   return {
     company_id: value.company?.uuid || value.company_id || '',
@@ -342,6 +365,7 @@ function createForm(value = {}) {
     slug: value.slug || '',
     description: value.description || '',
     platform: value.platform || 'android',
+    platforms: normalizePlatforms(value),
     category: value.category || '',
     category_custom: value.category_custom || '',
     icon: value.icon || '',
@@ -387,8 +411,8 @@ function validate() {
     next.category_custom = ['Enter the other category.'];
   }
 
-  if (!String(form.platform || '').trim()) {
-    next.platform = ['The platform field is required.'];
+  if (!Array.isArray(form.platforms) || !form.platforms.length) {
+    next.platforms = ['Select at least one platform.'];
   }
 
   if (form.icon && !isValidUrl(form.icon)) {
@@ -410,7 +434,8 @@ function onSubmit() {
   }
 
   localErrors.value = {};
-  const payload = { ...form };
+  const payload = { ...form, platforms: [...form.platforms] };
+  payload.platform = payload.platforms[0];
   if (payload.category !== 'other') {
     payload.category_custom = '';
   }

@@ -183,6 +183,7 @@ class ApplicationService
             'slug',
             'description',
             'platform',
+            'platforms',
             'category',
             'category_custom',
             'icon',
@@ -224,6 +225,34 @@ class ApplicationService
                 $payload['category_custom'] = null;
             }
         }
+
+        return $this->applyPlatforms($data, $payload);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    protected function applyPlatforms(array $data, array $payload): array
+    {
+        $platforms = [];
+
+        if (array_key_exists('platforms', $data) && is_array($data['platforms'])) {
+            $platforms = array_values(array_unique(array_map(
+                static fn (mixed $value): string => (string) $value,
+                $data['platforms']
+            )));
+        } elseif (array_key_exists('platform', $payload) && filled($payload['platform'])) {
+            $platforms = [(string) $payload['platform']];
+        }
+
+        if ($platforms === []) {
+            return $payload;
+        }
+
+        $payload['platforms'] = $platforms;
+        $payload['platform'] = $platforms[0];
 
         return $payload;
     }

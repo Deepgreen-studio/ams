@@ -54,7 +54,7 @@ class CustomerContactRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status',
+                'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status',
                 'creator:id,uuid,full_name,email',
                 'updater:id,uuid,full_name,email',
             ])

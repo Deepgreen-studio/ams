@@ -20,6 +20,8 @@ final class CustomerPermission
 
     public const EXPORT = 'customers.export';
 
+    public const IMPORT = 'customers.import';
+
     public const ANONYMIZE = 'customers.anonymize';
 
     /**
@@ -36,6 +38,7 @@ final class CustomerPermission
             self::FORCE_DELETE,
             self::VIEW_TRASH,
             self::EXPORT,
+            self::IMPORT,
             self::ANONYMIZE,
         ];
     }

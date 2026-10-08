@@ -104,7 +104,7 @@ class SupportTicketService
 
         $ticket->load([
             'company:id,uuid,company_name,email',
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type,phone',
+            'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,phone',
             'application:id,uuid,name,slug,platform,status',
             'department:id,uuid,name',
             'team:id,uuid,name,manager_id',

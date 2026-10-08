@@ -56,7 +56,7 @@ class SupportTicketRepository extends BaseRepository
     {
         return [
             'company:id,uuid,company_name',
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type',
+            'customer:id,uuid,first_name,last_name,legal_name,email,customer_type',
             'application:id,uuid,name,slug,platform',
             'department:id,uuid,name',
             'team:id,uuid,name,manager_id',

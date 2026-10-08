@@ -89,13 +89,9 @@
 
       <template v-else>
         <div class="md:col-span-2">
-          <FormLabel required>Organization Name</FormLabel>
-          <input v-model="form.company_name" type="text" class="field" :class="fieldClass('company_name')" />
-          <p v-if="displayErrors.company_name" class="mt-1 text-xs text-rose-600">{{ displayErrors.company_name[0] }}</p>
-        </div>
-        <div>
-          <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal Name</label>
-          <input v-model="form.legal_name" type="text" class="field" />
+          <FormLabel required>Legal Name</FormLabel>
+          <input v-model="form.legal_name" type="text" class="field" :class="fieldClass('legal_name')" />
+          <p v-if="displayErrors.legal_name" class="mt-1 text-xs text-rose-600">{{ displayErrors.legal_name[0] }}</p>
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration / Tax ID</label>
@@ -419,7 +415,7 @@ async function loadCompanies() {
     const items = data.data?.companies?.items ?? [];
     const currentId = props.initial?.company?.uuid || props.initial?.company_id;
     if (currentId && !items.some((company) => company.uuid === currentId)) {
-      let assignedName = props.initial?.company?.company_name || props.initial?.company_name || '';
+      let assignedName = props.initial?.company?.company_name || '';
       if (!assignedName) {
         try {
           const single = await companyService.get(currentId);
@@ -526,7 +522,6 @@ function createForm(value = {}) {
     reference: value.reference || '',
     first_name: value.first_name || '',
     last_name: value.last_name || '',
-    company_name: value.company_name || '',
     legal_name: value.legal_name || '',
     registration_number: value.registration_number || '',
     primary_contact_name: value.primary_contact_name || '',
@@ -539,7 +534,6 @@ function createForm(value = {}) {
     industry_id: value.industry_master?.uuid || '',
     sub_industry_id: value.sub_industry?.uuid || '',
     industry_other: value.industry_other || '',
-    language: value.language || 'en',
     legal_basis: value.legal_basis || '',
     processing_purpose: value.processing_purpose || '',
     retention_until: value.retention_until || '',
@@ -578,8 +572,8 @@ function validate() {
   if (isIndividual.value) {
     if (!String(form.first_name || '').trim()) next.first_name = ['First name is required for individual customers.'];
     if (!String(form.last_name || '').trim()) next.last_name = ['Last name is required for individual customers.'];
-  } else if (!String(form.company_name || '').trim()) {
-    next.company_name = ['Organization name is required for organization customers.'];
+  } else if (!String(form.legal_name || '').trim()) {
+    next.legal_name = ['Legal name is required for organization customers.'];
   }
 
   if (!String(form.legal_basis || '').trim()) {
@@ -635,7 +629,6 @@ function onSubmit() {
     industry_id: form.industry_id || null,
     sub_industry_id: form.sub_industry_id || null,
     industry_other: form.industry_other || null,
-    language: form.language || 'en',
     legal_basis: form.legal_basis || null,
     processing_purpose: form.processing_purpose || null,
     retention_until: form.retention_until || null,
@@ -646,10 +639,9 @@ function onSubmit() {
   if (isIndividual.value) {
     payload.first_name = form.first_name;
     payload.last_name = form.last_name;
-    payload.company_name = null;
+    payload.legal_name = null;
   } else {
-    payload.company_name = form.company_name;
-    payload.legal_name = form.legal_name || null;
+    payload.legal_name = form.legal_name;
     payload.registration_number = form.registration_number || null;
     payload.primary_contact_name = form.primary_contact_name || null;
     payload.primary_contact_title = form.primary_contact_title || null;

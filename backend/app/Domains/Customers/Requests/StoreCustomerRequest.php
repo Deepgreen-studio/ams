@@ -46,8 +46,8 @@ class StoreCustomerRequest extends FormRequest
             $merged[$field] = PhoneNumber::canonicalize($this->input($field));
         }
 
-        if ($this->filled('organization_name') && blank($this->input('company_name'))) {
-            $merged['company_name'] = $this->input('organization_name');
+        if ($this->filled('organization_name') && blank($this->input('legal_name'))) {
+            $merged['legal_name'] = $this->input('organization_name');
         }
 
         if ($merged !== []) {
@@ -76,8 +76,6 @@ class StoreCustomerRequest extends FormRequest
             ],
             'first_name' => ['nullable', 'string', 'max:120'],
             'last_name' => ['nullable', 'string', 'max:120'],
-            'company_name' => ['nullable', 'string', 'max:255'],
-            'organization_name' => ['nullable', 'string', 'max:255'],
             'legal_name' => ['nullable', 'string', 'max:255'],
             'registration_number' => ['nullable', 'string', 'max:64'],
             'email' => [
@@ -97,9 +95,6 @@ class StoreCustomerRequest extends FormRequest
             'industry_id' => ['nullable', 'string'],
             'sub_industry_id' => ['nullable', 'string'],
             'industry_other' => ['nullable', 'string', 'max:120'],
-            'country' => ['nullable', 'string', 'max:100'],
-            'timezone' => ['nullable', 'timezone:all'],
-            'language' => ['nullable', 'string', 'max:16'],
             'legal_basis' => ['required', Rule::in(CustomerLegalBasis::values())],
             'processing_purpose' => ['required', 'string', 'max:500'],
             'retention_until' => ['nullable', 'date'],
@@ -135,8 +130,8 @@ class StoreCustomerRequest extends FormRequest
                 }
             }
 
-            if ($type->requiresCompanyName() && blank($this->input('company_name'))) {
-                $validator->errors()->add('company_name', 'Organization name is required for business and enterprise customers.');
+            if ($type->requiresCompanyName() && blank($this->input('legal_name'))) {
+                $validator->errors()->add('legal_name', 'Legal name is required for business and enterprise customers.');
             }
 
             $this->validateIndustrySelection($validator);

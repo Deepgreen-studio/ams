@@ -37,10 +37,6 @@
         <p class="mt-1 text-sm font-semibold text-slate-900">{{ customer?.location?.branch_name || '—' }}</p>
       </div>
       <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
-        <p class="text-xs text-zinc-500">Country</p>
-        <p class="mt-1 text-sm font-semibold text-slate-900">{{ customer?.country || '—' }}</p>
-      </div>
-      <div class="rounded-[12px] bg-zinc-50 px-4 py-3">
         <p class="text-xs text-zinc-500">Industry</p>
         <p class="mt-1 text-sm font-semibold text-slate-900">{{ customer?.industry || '—' }}</p>
       </div>
@@ -100,10 +96,6 @@ const contactItems = computed(() => [
     label: 'Website',
     value: props.customer?.website || '—',
     href: props.customer?.website || null,
-  },
-  {
-    label: 'Timezone',
-    value: `${props.customer?.timezone || '—'} · ${props.customer?.language || '—'}`,
   },
 ]);
 </script>

@@ -43,7 +43,7 @@ class CustomerCommunicationCenterTest extends TestCase
 
         $this->customer = Customer::factory()->business()->forCompany($company)->create([
             'email' => 'comms-buyer@example.com',
-            'company_name' => 'Comms Buyer',
+            'legal_name' => 'Comms Buyer',
         ]);
     }
 

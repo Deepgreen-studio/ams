@@ -50,18 +50,6 @@
                 </span>
               </button>
             </th>
-            <th class="hidden px-5 py-3 text-left text-sm font-semibold text-zinc-500 xl:table-cell">
-              <button
-                type="button"
-                class="inline-flex items-center gap-1.5 hover:text-zinc-700"
-                @click="$emit('sort', 'country')"
-              >
-                Country
-                <span class="text-base leading-none text-zinc-400">
-                  {{ sortBy === 'country' ? (sortDir === 'asc' ? '↑' : '↓') : '↕' }}
-                </span>
-              </button>
-            </th>
             <th class="px-5 py-3 text-left text-sm font-semibold text-zinc-500">
               <button
                 type="button"
@@ -140,9 +128,6 @@
             </td>
             <td class="px-5 py-4">
               <StatusBadge :status="customer.status" />
-            </td>
-            <td class="hidden px-5 py-4 text-slate-600 xl:table-cell">
-              {{ customer.country || '—' }}
             </td>
             <td class="whitespace-nowrap px-5 py-4 text-slate-600">
               {{ formatDate(customer.created_at) || '—' }}

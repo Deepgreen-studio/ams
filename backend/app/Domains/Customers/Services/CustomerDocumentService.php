@@ -99,7 +99,7 @@ class CustomerDocumentService
     public function show(string $identifier): CustomerDocument
     {
         return $this->find($identifier)->load([
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status',
+            'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
         ]);
@@ -154,7 +154,7 @@ class CustomerDocumentService
             event(new CustomerDocumentUploaded($document, $actor));
 
             return $document->load([
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'creator:id,uuid,full_name,email',
             ]);
         });
@@ -223,7 +223,7 @@ class CustomerDocumentService
             event(new CustomerDocumentVersionUploaded($document, $actor));
 
             return $document->load([
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'creator:id,uuid,full_name,email',
             ]);
         });
@@ -257,7 +257,7 @@ class CustomerDocumentService
             event(new CustomerDocumentUpdated($updated, $actor));
 
             return $updated->load([
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'creator:id,uuid,full_name,email',
                 'updater:id,uuid,full_name,email',
             ]);

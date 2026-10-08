@@ -11,12 +11,14 @@ use App\Domains\Customers\Resources\CustomerCollection;
 use App\Domains\Customers\Resources\CustomerResource;
 use App\Domains\Customers\Resources\IndustryResource;
 use App\Domains\Customers\Services\CustomerConsoleService;
+use App\Domains\Customers\Services\CustomerImportService;
 use App\Domains\Customers\Services\CustomerService;
 use App\Models\User;
 use App\Shared\Responses\ApiResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CustomerController
 {
@@ -26,6 +28,7 @@ class CustomerController
         private readonly CustomerService $customerService,
         private readonly CustomerConsoleService $customerConsoleService,
         private readonly IndustryRepository $industryRepository,
+        private readonly CustomerImportService $customerImportService,
     ) {}
 
     public function index(IndexCustomerRequest $request): JsonResponse
@@ -42,6 +45,58 @@ class CustomerController
             'customers' => (new CustomerCollection($result['customers']))->resolve(),
             'statistics' => $result['statistics'],
         ]);
+    }
+
+    public function export(IndexCustomerRequest $request): StreamedResponse
+    {
+        $this->authorize('export', Customer::class);
+
+        $format = (string) $request->query('format', 'csv');
+
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            abort(422, 'Export format must be csv or xlsx.');
+        }
+
+        return $this->customerImportService->export($request->filters(), $format);
+    }
+
+    public function example(Request $request): StreamedResponse
+    {
+        $this->authorize('import', Customer::class);
+
+        $format = (string) $request->query('format', 'csv');
+
+        if (! in_array($format, ['csv', 'xlsx'], true)) {
+            abort(422, 'Example format must be csv or xlsx.');
+        }
+
+        $company = $request->query('company');
+
+        return $this->customerImportService->example(is_string($company) ? $company : null, $format);
+    }
+
+    public function import(Request $request): JsonResponse
+    {
+        $this->authorize('import', Customer::class);
+
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:csv,txt,xlsx,xls', 'max:5120'],
+            'company_id' => ['nullable', 'string'],
+            'update_existing' => ['nullable', 'boolean'],
+        ]);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $report = $this->customerImportService->import(
+            $request->file('file'),
+            $request->input('company_id'),
+            $request->boolean('update_existing'),
+            $actor
+        );
+
+        return ApiResponse::success([
+            'import' => $report,
+        ], 'Customer import completed.');
     }
 
     public function store(StoreCustomerRequest $request): JsonResponse

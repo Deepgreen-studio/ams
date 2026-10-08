@@ -32,8 +32,6 @@ class PortalCustomerUserSeeder extends Seeder
                 'first_name' => 'Portal',
                 'last_name' => 'Customer',
                 'status' => CustomerStatus::Active->value,
-                'timezone' => 'UTC',
-                'language' => 'en',
             ]
         );
 

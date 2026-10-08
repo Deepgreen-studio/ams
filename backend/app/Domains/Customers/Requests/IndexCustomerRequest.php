@@ -25,7 +25,6 @@ class IndexCustomerRequest extends FormRequest
             'customer_type' => ['nullable', Rule::in(CustomerType::values())],
             'company' => ['nullable', 'string'],
             'company_id' => ['nullable', 'string'],
-            'country' => ['nullable', 'string', 'max:100'],
             'industry' => ['nullable', 'string', 'max:120'],
             'sort_by' => ['nullable', 'string', 'max:50'],
             'sort_dir' => ['nullable', Rule::in(['asc', 'desc'])],

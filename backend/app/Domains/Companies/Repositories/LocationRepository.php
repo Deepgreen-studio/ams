@@ -42,6 +42,14 @@ class LocationRepository extends BaseRepository
         return $location;
     }
 
+    public function findByBranchName(int $companyId, string $name): ?CompanyLocation
+    {
+        return $this->model->newQuery()
+            ->where('company_id', $companyId)
+            ->whereRaw('LOWER(branch_name) = ?', [mb_strtolower(trim($name))])
+            ->first();
+    }
+
     /**
      * @param  array<string, mixed>  $filters
      */

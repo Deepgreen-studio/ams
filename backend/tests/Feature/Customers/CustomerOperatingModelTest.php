@@ -60,7 +60,6 @@ class CustomerOperatingModelTest extends TestCase
         $response = $this->postJson('/api/v1/customers', [
             'company_id' => $this->company->uuid,
             'customer_type' => 'business',
-            'company_name' => 'Northwind Traders',
             'legal_name' => 'Northwind Traders LLC',
             'registration_number' => 'TAX-100',
             'reference' => 'ACCT-100',
@@ -82,11 +81,10 @@ class CustomerOperatingModelTest extends TestCase
             ->assertJsonPath('data.customer.customer_type', 'business')
             ->assertJsonPath('data.customer.is_organization', true)
             ->assertJsonPath('data.customer.organization_category', 'business')
-            ->assertJsonPath('data.customer.company_name', 'Northwind Traders')
+            ->assertJsonPath('data.customer.legal_name', 'Northwind Traders LLC')
+            ->assertJsonPath('data.customer.display_name', 'Northwind Traders LLC')
             ->assertJsonPath('data.customer.registration_number', 'TAX-100')
             ->assertJsonPath('data.customer.reference', 'ACCT-100')
-            ->assertJsonPath('data.customer.country', 'US')
-            ->assertJsonPath('data.customer.timezone', 'America/Chicago')
             ->assertJsonPath('data.customer.industry', 'Technology / Software')
             ->assertJsonPath('data.customer.legal_basis', 'contract');
 
@@ -122,7 +120,7 @@ class CustomerOperatingModelTest extends TestCase
         $this->postJson('/api/v1/customers', [
             'company_id' => $this->company->uuid,
             'customer_type' => 'enterprise',
-            'company_name' => 'Custom Org',
+            'legal_name' => 'Custom Org',
             'email' => 'custom@example.test',
             'industry_id' => $other->uuid,
             'website' => 'not a url',

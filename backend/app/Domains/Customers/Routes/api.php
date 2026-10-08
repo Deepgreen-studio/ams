@@ -29,6 +29,12 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:' . CustomerPermission::VIEW);
         Route::get('/industries', [CustomerController::class, 'industries'])
             ->middleware('permission:' . CustomerPermission::VIEW);
+        Route::get('/export', [CustomerController::class, 'export'])
+            ->middleware('permission:' . CustomerPermission::EXPORT);
+        Route::get('/example', [CustomerController::class, 'example'])
+            ->middleware('permission:' . CustomerPermission::IMPORT);
+        Route::post('/import', [CustomerController::class, 'import'])
+            ->middleware('permission:' . CustomerPermission::IMPORT);
         Route::post('/', [CustomerController::class, 'store'])
             ->middleware('permission:' . CustomerPermission::CREATE);
         Route::get('/{customer}/console', [CustomerController::class, 'console'])

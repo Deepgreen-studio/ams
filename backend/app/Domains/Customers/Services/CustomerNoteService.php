@@ -48,7 +48,7 @@ class CustomerNoteService
     public function show(string $identifier): CustomerNote
     {
         return $this->find($identifier)->load([
-            'customer:id,uuid,first_name,last_name,company_name,email',
+            'customer:id,uuid,first_name,last_name,legal_name,email',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
         ]);
@@ -75,7 +75,7 @@ class CustomerNoteService
 
             event(new CustomerNoteCreated($note, $actor));
 
-            return $note->load(['customer:id,uuid,first_name,last_name,company_name,email', 'creator:id,uuid,full_name,email']);
+            return $note->load(['customer:id,uuid,first_name,last_name,legal_name,email', 'creator:id,uuid,full_name,email']);
         });
     }
 
@@ -102,7 +102,7 @@ class CustomerNoteService
             $updated = $this->noteRepository->updateNote($note, $payload);
             event(new CustomerNoteUpdated($updated, $actor));
 
-            return $updated->load(['customer:id,uuid,first_name,last_name,company_name,email', 'creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
+            return $updated->load(['customer:id,uuid,first_name,last_name,legal_name,email', 'creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
         });
     }
 

@@ -44,7 +44,7 @@ class SubscriptionLicenseManagementTest extends TestCase
 
         $this->customer = Customer::factory()->business()->forCompany($this->company)->create([
             'email' => 'subscriber@example.com',
-            'company_name' => 'Subscriber Org',
+            'legal_name' => 'Subscriber Org',
         ]);
     }
 

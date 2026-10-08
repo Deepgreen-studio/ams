@@ -27,6 +27,22 @@ class IndustryRepository extends BaseRepository
         return $industry;
     }
 
+    public function findByNameOrCode(string $value): ?Industry
+    {
+        $industry = $this->findByIdentifier($value);
+
+        if ($industry) {
+            return $industry;
+        }
+
+        return $this->model->newQuery()
+            ->where(function (Builder $builder) use ($value): void {
+                $builder->whereRaw('LOWER(name) = ?', [mb_strtolower(trim($value))])
+                    ->orWhereRaw('LOWER(code) = ?', [mb_strtolower(trim($value))]);
+            })
+            ->first();
+    }
+
     /**
      * @return Collection<int, Industry>
      */

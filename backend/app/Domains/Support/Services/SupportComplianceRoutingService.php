@@ -102,7 +102,7 @@ class SupportComplianceRoutingService
 
             $customer = $ticket->customer;
             $requesterName = $customer
-                ? (trim(($customer->first_name ?? '').' '.($customer->last_name ?? '')) ?: ($customer->company_name ?: 'Requester'))
+                ? (trim(($customer->first_name ?? '').' '.($customer->last_name ?? '')) ?: ($customer->legal_name ?: 'Requester'))
                 : 'Requester';
             $requesterEmail = $customer?->email ?? ($actor->email ?: 'privacy@example.com');
 

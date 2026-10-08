@@ -45,7 +45,7 @@ class CustomerContactService
         $contact = $this->find($identifier);
 
         return $contact->load([
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status,company_id',
+            'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status,company_id',
             'customer.company:id,uuid,company_name',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',

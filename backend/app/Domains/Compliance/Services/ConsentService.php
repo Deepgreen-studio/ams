@@ -128,7 +128,7 @@ class ConsentService
             'company:id,uuid,company_name,status',
             'consentType',
             'user:id,uuid,full_name,email',
-            'customer:id,uuid,first_name,last_name,company_name,email',
+            'customer:id,uuid,first_name,last_name,legal_name,email',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
         ]);

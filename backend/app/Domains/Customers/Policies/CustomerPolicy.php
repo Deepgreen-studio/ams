@@ -72,6 +72,16 @@ class CustomerPolicy
         return $user->can(CustomerPermission::ANONYMIZE) && $this->inCompany($user, $customer);
     }
 
+    public function export(User $user): bool
+    {
+        return $user->can(CustomerPermission::EXPORT);
+    }
+
+    public function import(User $user): bool
+    {
+        return $user->can(CustomerPermission::IMPORT);
+    }
+
     public function exportContacts(User $user): bool
     {
         return $user->can(CustomerContactPermission::EXPORT);

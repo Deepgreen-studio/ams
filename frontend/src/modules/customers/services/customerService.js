@@ -13,6 +13,20 @@ export const customerService = {
     return api.get('/customers/industries');
   },
 
+  exportCustomers(params = {}) {
+    return api.get('/customers/export', { params, responseType: 'blob' });
+  },
+
+  example(params = {}) {
+    return api.get('/customers/example', { params, responseType: 'blob' });
+  },
+
+  importCustomers(formData) {
+    return api.post('/customers/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+
   console(id) {
     return api.get(`/customers/${id}/console`);
   },

@@ -47,7 +47,7 @@ class CustomerDocumentManagementTest extends TestCase
 
         $this->customer = Customer::factory()->business()->forCompany($this->company)->create([
             'email' => 'docs-buyer@example.com',
-            'company_name' => 'Docs Buyer',
+            'legal_name' => 'Docs Buyer',
         ]);
     }
 

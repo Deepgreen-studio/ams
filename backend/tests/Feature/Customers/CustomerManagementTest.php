@@ -9,6 +9,7 @@ use App\Domains\Roles\Models\Role;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -57,7 +58,6 @@ class CustomerManagementTest extends TestCase
             'last_name' => 'Doe',
             'email' => 'jane.doe@example.com',
             'phone' => '+1 555 0100',
-            'country' => 'US',
             'status' => 'active',
             'legal_basis' => 'contract',
             'processing_purpose' => 'Provide the subscribed application and support.',
@@ -90,7 +90,7 @@ class CustomerManagementTest extends TestCase
         $this->postJson('/api/v1/customers', [
             'company_id' => $this->company->uuid,
             'customer_type' => 'business',
-            'company_name' => 'Acme Retail',
+            'legal_name' => 'Acme Retail',
             'email' => 'ops@acme-retail.test',
             'industry' => 'Retail',
             'legal_basis' => 'contract',
@@ -103,7 +103,7 @@ class CustomerManagementTest extends TestCase
         $this->postJson('/api/v1/customers', [
             'company_id' => $this->company->uuid,
             'customer_type' => 'enterprise',
-            'company_name' => 'Globex Holdings',
+            'legal_name' => 'Globex Holdings',
             'email' => 'contact@globex.test',
             'industry' => 'Technology',
             'legal_basis' => 'contract',
@@ -133,7 +133,7 @@ class CustomerManagementTest extends TestCase
             'email' => 'biz@example.com',
         ])
             ->assertStatus(422)
-            ->assertJsonStructure(['errors' => ['company_name']]);
+            ->assertJsonStructure(['errors' => ['legal_name']]);
     }
 
     public function test_admin_can_update_archive_and_restore_customer(): void
@@ -283,5 +283,56 @@ class CustomerManagementTest extends TestCase
             ->assertJsonPath('message', 'Customer permanently deleted.');
 
         $this->assertDatabaseMissing('customers', ['id' => $customer->id]);
+    }
+
+    public function test_admin_can_download_an_example_import_customers_and_export_them(): void
+    {
+        Sanctum::actingAs($this->admin);
+
+        $example = $this->get('/api/v1/customers/example?company='.$this->company->uuid);
+        $example->assertOk();
+        $example->assertHeader('content-type', 'text/csv; charset=UTF-8');
+        $this->assertStringContainsString('customer_type', $example->streamedContent());
+        $this->assertStringContainsString('Tenant Co', $example->streamedContent());
+        $this->assertStringContainsString('jane.doe@example.com', $example->streamedContent());
+
+        $csv = implode("\n", [
+            'company,customer_type,first_name,last_name,legal_name,email,phone,legal_basis,processing_purpose,status',
+            'Tenant Co,individual,Jane,Doe,,jane.doe@example.com,+447700900123,contract,Provide support.,active',
+            'Tenant Co,business,,,Northwind Clinic,billing@northwind.example,+447700900456,contract,Subscription billing.,active',
+        ]);
+        $path = storage_path('framework/testing/customers-import.csv');
+        if (! is_dir(dirname($path))) {
+            mkdir(dirname($path), 0777, true);
+        }
+        file_put_contents($path, $csv);
+
+        $this->post('/api/v1/customers/import', [
+            'file' => new UploadedFile($path, 'customers.csv', 'text/csv', null, true),
+            'update_existing' => '0',
+        ])->assertOk()
+            ->assertJsonPath('data.import.created', 2)
+            ->assertJsonPath('data.import.skipped', 0);
+
+        $this->assertDatabaseHas('customers', [
+            'email' => 'jane.doe@example.com',
+            'company_id' => $this->company->id,
+        ]);
+        $this->assertDatabaseHas('customers', [
+            'email' => 'billing@northwind.example',
+            'legal_name' => 'Northwind Clinic',
+        ]);
+
+        $export = $this->get('/api/v1/customers/export?search=Jane');
+        $export->assertOk();
+        $this->assertStringContainsString('jane.doe@example.com', $export->streamedContent());
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+        $this->get('/api/v1/customers/example')->assertForbidden();
+        $this->post('/api/v1/customers/import', [
+            'file' => new UploadedFile($path, 'customers.csv', 'text/csv', null, true),
+        ])->assertForbidden();
     }
 }

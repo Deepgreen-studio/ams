@@ -87,7 +87,7 @@ class UserConsentRepository extends BaseRepository
                 'company:id,uuid,company_name',
                 'consentType:id,uuid,code,name,channel,current_version',
                 'user:id,uuid,full_name,email',
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'creator:id,uuid,full_name,email',
             ])
             ->paginate($perPage)

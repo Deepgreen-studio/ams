@@ -49,7 +49,7 @@ class CustomerTaskService
     public function show(string $identifier): CustomerTask
     {
         return $this->find($identifier)->load([
-            'customer:id,uuid,first_name,last_name,company_name,email',
+            'customer:id,uuid,first_name,last_name,legal_name,email',
             'assignee:id,uuid,full_name,email',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
@@ -78,7 +78,7 @@ class CustomerTaskService
 
             event(new CustomerTaskCreated($task, $actor));
 
-            return $task->load(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,company_name,email']);
+            return $task->load(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,legal_name,email']);
         });
     }
 
@@ -121,7 +121,7 @@ class CustomerTaskService
                 event(new CustomerTaskUpdated($updated, $actor));
             }
 
-            return $updated->load(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,company_name,email']);
+            return $updated->load(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,legal_name,email']);
         });
     }
 

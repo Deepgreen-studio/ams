@@ -49,7 +49,7 @@ class PrivacyRequestResource extends JsonResource
                     'uuid' => $this->customer->uuid,
                     'first_name' => $this->customer->first_name,
                     'last_name' => $this->customer->last_name,
-                    'company_name' => $this->customer->company_name,
+                    'legal_name' => $this->customer->legal_name,
                     'email' => $this->customer->email,
                     'phone' => $this->customer->phone,
                     'display_name' => $this->customer->display_name,

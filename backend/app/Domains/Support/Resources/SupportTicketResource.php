@@ -61,7 +61,7 @@ class SupportTicketResource extends JsonResource
 
                 $displayName = trim(($this->customer->first_name ?? '').' '.($this->customer->last_name ?? ''));
                 if ($displayName === '') {
-                    $displayName = $this->customer->company_name;
+                    $displayName = $this->customer->legal_name;
                 }
 
                 return [

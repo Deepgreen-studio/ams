@@ -176,7 +176,7 @@ class DashboardRepository
         $tasks = CustomerTask::query()
             ->with([
                 'assignee:id,uuid,first_name,last_name,full_name,name',
-                'customer:id,uuid,company_name,first_name,last_name,email',
+                'customer:id,uuid,legal_name,first_name,last_name,email',
             ])
             ->whereIn('status', $this->openTaskStatuses())
             ->where(function ($query) use ($todayStart, $todayEnd, $actor): void {

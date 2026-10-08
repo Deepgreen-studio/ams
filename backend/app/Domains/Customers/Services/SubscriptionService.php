@@ -69,7 +69,7 @@ class SubscriptionService
     public function show(string $identifier): Subscription
     {
         return $this->find($identifier)->load([
-            'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status,company_id',
+            'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status,company_id',
             'customerApplication:id,uuid,application_id,status,ownership_type',
             'customerApplication.application:id,uuid,name,slug,platform,status',
             'licenses',

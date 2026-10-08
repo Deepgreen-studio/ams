@@ -94,7 +94,7 @@ class PortalSupportTicketService
 
         return $ticket->load([
             'company:id,uuid,company_name',
-            'customer:id,uuid,first_name,last_name,company_name,email',
+            'customer:id,uuid,first_name,last_name,legal_name,email',
             'assignee:id,uuid,full_name,email',
             'application:id,uuid,name',
         ]);

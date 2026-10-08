@@ -102,7 +102,7 @@ class PrivacyRequestService
     {
         return $this->find($identifier)->load([
             'company:id,uuid,company_name,status',
-            'customer:id,uuid,first_name,last_name,company_name,email,phone',
+            'customer:id,uuid,first_name,last_name,legal_name,email,phone',
             'assignee:id,uuid,full_name,email',
             'identityVerifier:id,uuid,full_name,email',
             'decisionMaker:id,uuid,full_name,email',
@@ -699,7 +699,7 @@ class PrivacyRequestService
                 'uuid' => $customer->uuid,
                 'first_name' => $customer->first_name,
                 'last_name' => $customer->last_name,
-                'company_name' => $customer->company_name,
+                'legal_name' => $customer->legal_name,
                 'email' => $customer->email,
                 'phone' => $customer->phone,
                 'customer_type' => $customer->customer_type?->value ?? $customer->customer_type,

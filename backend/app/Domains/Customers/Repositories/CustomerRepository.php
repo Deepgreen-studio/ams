@@ -87,11 +87,10 @@ class CustomerRepository extends BaseRepository
             $query->where(function (Builder $builder) use ($search): void {
                 $builder->where('first_name', 'like', "%{$search}%")
                     ->orWhere('last_name', 'like', "%{$search}%")
-                    ->orWhere('company_name', 'like', "%{$search}%")
+                    ->orWhere('legal_name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%")
                     ->orWhere('phone', 'like', "%{$search}%")
                     ->orWhere('industry', 'like', "%{$search}%")
-                    ->orWhere('country', 'like', "%{$search}%")
                     ->orWhere('customer_number', 'like', "%{$search}%")
                     ->orWhere('reference', 'like', "%{$search}%")
                     ->orWhere('registration_number', 'like', "%{$search}%");
@@ -106,10 +105,6 @@ class CustomerRepository extends BaseRepository
             $query->where('customer_type', $filters['customer_type']);
         }
 
-        if (! empty($filters['country'])) {
-            $query->where('country', $filters['country']);
-        }
-
         if (! empty($filters['industry'])) {
             $query->where('industry', $filters['industry']);
         }
@@ -120,11 +115,10 @@ class CustomerRepository extends BaseRepository
             'id',
             'first_name',
             'last_name',
-            'company_name',
+            'legal_name',
             'email',
             'customer_type',
             'status',
-            'country',
             'created_at',
             'updated_at',
             'deleted_at',
@@ -135,6 +129,21 @@ class CustomerRepository extends BaseRepository
         }
 
         return $query->orderBy($sortBy, $sortDir);
+    }
+
+    public function findActiveByNumber(string $customerNumber): ?Customer
+    {
+        return $this->model->newQuery()
+            ->where('customer_number', $customerNumber)
+            ->first();
+    }
+
+    public function findActiveByEmail(int $companyId, string $email): ?Customer
+    {
+        return $this->model->newQuery()
+            ->where('company_id', $companyId)
+            ->where('email', strtolower($email))
+            ->first();
     }
 
     /**

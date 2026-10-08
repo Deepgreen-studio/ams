@@ -53,7 +53,7 @@ class CustomerTaskRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'assignee:id,uuid,full_name,email',
                 'creator:id,uuid,full_name,email',
                 'updater:id,uuid,full_name,email',
@@ -111,7 +111,7 @@ class CustomerTaskRepository extends BaseRepository
         $to ??= now()->endOfMonth()->addMonth();
 
         $query = $this->model->newQuery()
-            ->with(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,company_name'])
+            ->with(['assignee:id,uuid,full_name,email', 'customer:id,uuid,first_name,last_name,legal_name'])
             ->where(function (Builder $builder) use ($from, $to): void {
                 $builder->whereBetween('remind_at', [$from, $to])
                     ->orWhereBetween('due_at', [$from, $to]);

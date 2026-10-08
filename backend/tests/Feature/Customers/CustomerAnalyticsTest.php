@@ -47,7 +47,7 @@ class CustomerAnalyticsTest extends TestCase
 
         $this->customer = Customer::factory()->business()->forCompany($this->company)->create([
             'email' => 'analytics-buyer@example.com',
-            'company_name' => 'Analytics Buyer',
+            'legal_name' => 'Analytics Buyer',
         ]);
     }
 

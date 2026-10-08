@@ -30,16 +30,13 @@ class CustomerFactory extends Factory
             'customer_type' => $type,
             'first_name' => $type === CustomerType::Individual->value ? $firstName : fake()->optional()->firstName(),
             'last_name' => $type === CustomerType::Individual->value ? $lastName : fake()->optional()->lastName(),
-            'company_name' => $type === CustomerType::Individual->value
-                ? fake()->optional()->company()
+            'legal_name' => $type === CustomerType::Individual->value
+                ? null
                 : fake()->company(),
             'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->optional()->e164PhoneNumber(),
             'website' => fake()->optional()->url(),
             'industry' => fake()->optional()->randomElement(['Technology', 'Finance', 'Healthcare', 'Retail', 'Education']),
-            'country' => fake()->optional()->countryCode(),
-            'timezone' => 'UTC',
-            'language' => 'en',
             'status' => CustomerStatus::Active->value,
             'notes' => fake()->optional()->sentence(),
             'created_by' => null,
@@ -53,7 +50,7 @@ class CustomerFactory extends Factory
             'customer_type' => CustomerType::Individual->value,
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
-            'company_name' => null,
+            'legal_name' => null,
         ]);
     }
 
@@ -61,7 +58,7 @@ class CustomerFactory extends Factory
     {
         return $this->state(fn (): array => [
             'customer_type' => CustomerType::Business->value,
-            'company_name' => fake()->company(),
+            'legal_name' => fake()->company(),
         ]);
     }
 
@@ -69,7 +66,7 @@ class CustomerFactory extends Factory
     {
         return $this->state(fn (): array => [
             'customer_type' => CustomerType::Enterprise->value,
-            'company_name' => fake()->company(),
+            'legal_name' => fake()->company(),
         ]);
     }
 

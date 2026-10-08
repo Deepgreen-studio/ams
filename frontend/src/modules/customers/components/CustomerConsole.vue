@@ -230,10 +230,9 @@ const overviewItems = computed(() => [
   { label: 'Customer ID', value: props.customer?.customer_number || '—' },
   { label: 'Business reference', value: props.customer?.reference || '—' },
   { label: 'Type', value: props.customer?.customer_type_label || props.customer?.customer_type || '—' },
-  { label: 'Organization', value: props.customer?.is_organization ? (props.customer?.company_name || '—') : 'Individual' },
+  { label: 'Organization', value: props.customer?.is_organization ? (props.customer?.legal_name || '—') : 'Individual' },
   { label: 'Registration / Tax ID', value: props.customer?.registration_number || '—' },
   { label: 'Primary contact', value: props.customer?.primary_contact_name || '—' },
-  { label: 'Timezone', value: props.customer?.timezone || '—' },
   { label: 'Notes', value: props.customer?.notes || '—' },
 ]);
 

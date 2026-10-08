@@ -71,7 +71,7 @@ class CustomerApplicationRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status,company_id',
+                'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status,company_id',
                 'application:id,uuid,name,slug,platform,status,company_id,integration_id',
                 'environment:id,uuid,name,slug,type,status,application_id',
                 'integration:id,uuid,name,slug,status,type',
@@ -111,7 +111,7 @@ class CustomerApplicationRepository extends BaseRepository
                     $applicationQuery->where('name', 'like', "%{$search}%")
                         ->orWhere('slug', 'like', "%{$search}%");
                 })->orWhereHas('customer', function (Builder $customerQuery) use ($search): void {
-                    $customerQuery->where('company_name', 'like', "%{$search}%")
+                    $customerQuery->where('legal_name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%")
                         ->orWhere('first_name', 'like', "%{$search}%")
                         ->orWhere('last_name', 'like', "%{$search}%");

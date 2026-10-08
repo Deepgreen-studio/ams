@@ -49,7 +49,7 @@ class CustomerCommunicationService
     public function show(string $identifier): CustomerCommunication
     {
         return $this->find($identifier)->load([
-            'customer:id,uuid,first_name,last_name,company_name,email',
+            'customer:id,uuid,first_name,last_name,legal_name,email',
             'creator:id,uuid,full_name,email',
             'updater:id,uuid,full_name,email',
         ]);
@@ -85,7 +85,7 @@ class CustomerCommunicationService
 
             event(new CustomerCommunicationCreated($communication, $actor));
 
-            return $communication->load(['customer:id,uuid,first_name,last_name,company_name,email', 'creator:id,uuid,full_name,email']);
+            return $communication->load(['customer:id,uuid,first_name,last_name,legal_name,email', 'creator:id,uuid,full_name,email']);
         });
     }
 
@@ -117,7 +117,7 @@ class CustomerCommunicationService
             $updated = $this->communicationRepository->updateCommunication($communication, $payload);
             event(new CustomerCommunicationUpdated($updated, $actor));
 
-            return $updated->load(['customer:id,uuid,first_name,last_name,company_name,email', 'creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
+            return $updated->load(['customer:id,uuid,first_name,last_name,legal_name,email', 'creator:id,uuid,full_name,email', 'updater:id,uuid,full_name,email']);
         });
     }
 

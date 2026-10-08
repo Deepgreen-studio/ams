@@ -41,7 +41,6 @@ class Customer extends Model
         'customer_type',
         'first_name',
         'last_name',
-        'company_name',
         'legal_name',
         'registration_number',
         'email',
@@ -55,9 +54,6 @@ class Customer extends Model
         'industry_id',
         'sub_industry_id',
         'industry_other',
-        'country',
-        'timezone',
-        'language',
         'legal_basis',
         'processing_purpose',
         'retention_until',
@@ -121,7 +117,6 @@ class Customer extends Model
                 'first_name',
                 'last_name',
                 'reference',
-                'company_name',
                 'legal_name',
                 'registration_number',
                 'email',
@@ -133,9 +128,6 @@ class Customer extends Model
                 'industry_id',
                 'sub_industry_id',
                 'industry_other',
-                'country',
-                'timezone',
-                'language',
                 'legal_basis',
                 'processing_purpose',
                 'retention_until',
@@ -155,12 +147,12 @@ class Customer extends Model
     {
         return Attribute::get(function (): string {
             if ($this->customer_type instanceof CustomerType && $this->customer_type->requiresCompanyName()) {
-                return (string) ($this->company_name ?: trim("{$this->first_name} {$this->last_name}") ?: $this->email);
+                return (string) ($this->legal_name ?: trim("{$this->first_name} {$this->last_name}") ?: $this->email);
             }
 
             $person = trim("{$this->first_name} {$this->last_name}");
 
-            return $person !== '' ? $person : (string) ($this->company_name ?: $this->email);
+            return $person !== '' ? $person : (string) $this->email;
         });
     }
 

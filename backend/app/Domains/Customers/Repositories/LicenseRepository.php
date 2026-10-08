@@ -56,7 +56,7 @@ class LicenseRepository extends BaseRepository
         return $this->filteredQuery($filters)
             ->with([
                 'subscription:id,uuid,plan_name,plan_type,status,payment_status,customer_id',
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'customerApplication:id,uuid,application_id,status',
                 'customerApplication.application:id,uuid,name,slug',
                 'creator:id,uuid,full_name,email',

@@ -8,6 +8,40 @@
       >
         Back to company
       </RouterLink>
+      <button
+        v-if="can('customers.import')"
+        type="button"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="transferring"
+        @click="downloadExample"
+      >
+        Example
+      </button>
+      <button
+        v-if="can('customers.import')"
+        type="button"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="transferring"
+        @click="importInput?.click()"
+      >
+        Import
+      </button>
+      <input
+        ref="importInput"
+        type="file"
+        accept=".csv,.txt,.xlsx,.xls"
+        class="hidden"
+        @change="onImport"
+      />
+      <button
+        v-if="can('customers.export')"
+        type="button"
+        class="rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50 disabled:opacity-60"
+        :disabled="transferring"
+        @click="exportCustomers"
+      >
+        Export
+      </button>
       <RouterLink
         v-if="!scopedCompanyId && can('customers.view-trash')"
         :to="{ name: 'customers.trash' }"
@@ -25,6 +59,17 @@
       </RouterLink>
     </Teleport>
 
+    <div
+      v-if="importReport"
+      class="mb-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"
+    >
+      Created {{ importReport.created }}, updated {{ importReport.updated }}, skipped {{ importReport.skipped }}.
+      <ul v-if="importReport.errors?.length" class="mt-2 list-disc pl-5 text-rose-700">
+        <li v-for="error in importReport.errors" :key="`${error.row}-${error.message}`">
+          Row {{ error.row }}: {{ error.message }}
+        </li>
+      </ul>
+    </div>
     <div
       v-if="customersStore.successMessage"
       class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"
@@ -124,17 +169,23 @@ import {
 import { computed, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { usePermissions } from '@/composables/usePermissions';
+import { useToast } from '@/composables/useToast';
 import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import CustomerSearchFilter from '@/modules/customers/components/CustomerSearchFilter.vue';
 import CustomerTable from '@/modules/customers/components/CustomerTable.vue';
+import { customerService } from '@/modules/customers/services/customerService';
 import { useCustomersStore } from '@/modules/customers/stores/customers';
 
 const route = useRoute();
 const router = useRouter();
 const customersStore = useCustomersStore();
+const toast = useToast();
 const { can } = usePermissions();
 const pendingDelete = ref(null);
+const importInput = ref(null);
+const importReport = ref(null);
+const transferring = ref(false);
 
 const scopedCompanyId = computed(() =>
   route.name === 'companies.customers' ? String(route.params.id || '') : '',
@@ -246,5 +297,83 @@ async function confirmDelete() {
 async function confirmRestore(customer) {
   await customersStore.restoreCustomer(customer.uuid);
   await customersStore.fetchCustomers();
+}
+
+function activeCompanyId() {
+  return scopedCompanyId.value || customersStore.filters.company || '';
+}
+
+function saveBlob(data, filename) {
+  const blob = new Blob([data]);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadExample() {
+  transferring.value = true;
+
+  try {
+    const company = activeCompanyId();
+    const response = await customerService.example(company ? { company } : {});
+    saveBlob(response.data, 'customers-example.csv');
+  } catch (err) {
+    toast.error(err?.message || 'Unable to download the example file.', 'Example failed');
+  } finally {
+    transferring.value = false;
+  }
+}
+
+async function exportCustomers() {
+  transferring.value = true;
+
+  try {
+    const filters = customersStore.filters;
+    const response = await customerService.exportCustomers({
+      search: filters.search || undefined,
+      status: filters.status || undefined,
+      customer_type: filters.customer_type || undefined,
+      company: activeCompanyId() || undefined,
+      industry: filters.industry || undefined,
+      sort_by: filters.sort_by,
+      sort_dir: filters.sort_dir,
+      format: 'csv',
+    });
+    saveBlob(response.data, 'customers.csv');
+  } catch (err) {
+    toast.error(err?.message || 'Unable to export customers.', 'Export failed');
+  } finally {
+    transferring.value = false;
+  }
+}
+
+async function onImport(event) {
+  const file = event.target.files?.[0];
+  event.target.value = '';
+  if (!file) return;
+
+  transferring.value = true;
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('update_existing', '1');
+
+  const company = activeCompanyId();
+  if (company) {
+    formData.append('company_id', company);
+  }
+
+  try {
+    const { data } = await customerService.importCustomers(formData);
+    importReport.value = data.data?.import ?? null;
+    toast.success(data.message || 'Customer import completed.', 'Import completed');
+    await customersStore.fetchCustomers();
+  } catch (err) {
+    toast.error(err?.message || 'Unable to import customers.', 'Import failed');
+  } finally {
+    transferring.value = false;
+  }
 }
 </script>

@@ -49,7 +49,7 @@ class CustomerApplicationManagementTest extends TestCase
 
         $this->customer = Customer::factory()->business()->forCompany($this->company)->create([
             'email' => 'buyer@example.com',
-            'company_name' => 'Buyer Org',
+            'legal_name' => 'Buyer Org',
         ]);
 
         $this->application = Application::factory()->active()->forCompany($this->company)->create([

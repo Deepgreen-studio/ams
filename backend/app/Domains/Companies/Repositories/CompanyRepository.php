@@ -44,6 +44,19 @@ class CompanyRepository extends BaseRepository
         return $company;
     }
 
+    public function findByNameOrIdentifier(string $value): ?Company
+    {
+        $company = $this->findByIdentifier($value);
+
+        if ($company) {
+            return $company;
+        }
+
+        return $this->model->newQuery()
+            ->whereRaw('LOWER(company_name) = ?', [mb_strtolower(trim($value))])
+            ->first();
+    }
+
     /**
      * @param  array<string, mixed>  $filters
      */

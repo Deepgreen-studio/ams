@@ -97,7 +97,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'companies.view', 'companies.create', 'companies.update', 'companies.delete', 'companies.restore',
             'companies.force-delete', 'companies.view-trash', 'companies.console', 'companies.profile', 'companies.manage',
             'applications.view', 'applications.create', 'applications.update', 'applications.delete', 'applications.restore', 'applications.force-delete', 'applications.view-trash',
-            'customers.view', 'customers.create', 'customers.update', 'customers.delete', 'customers.restore', 'customers.force-delete', 'customers.view-trash', 'customers.export', 'customers.anonymize',
+            'customers.view', 'customers.create', 'customers.update', 'customers.delete', 'customers.restore', 'customers.force-delete', 'customers.view-trash', 'customers.export', 'customers.import', 'customers.anonymize',
             'integrations.view', 'integrations.create', 'integrations.update', 'integrations.delete',
             'integrations.restore', 'integrations.force-delete', 'integrations.view-trash',
             'webhooks.view', 'webhooks.create', 'webhooks.update', 'webhooks.delete',

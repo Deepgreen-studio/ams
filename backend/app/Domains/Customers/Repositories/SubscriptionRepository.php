@@ -54,7 +54,7 @@ class SubscriptionRepository extends BaseRepository
 
         return $this->filteredQuery($filters)
             ->with([
-                'customer:id,uuid,first_name,last_name,company_name,email,customer_type,status',
+                'customer:id,uuid,first_name,last_name,legal_name,email,customer_type,status',
                 'customerApplication:id,uuid,application_id,status,ownership_type',
                 'customerApplication.application:id,uuid,name,slug,platform,status',
                 'creator:id,uuid,full_name,email',
@@ -156,7 +156,7 @@ class SubscriptionRepository extends BaseRepository
         $soon = now()->addDays((int) config('billing.renewal_reminder_days', 14));
         $query = $this->model->newQuery()
             ->with([
-                'customer:id,uuid,first_name,last_name,company_name,email',
+                'customer:id,uuid,first_name,last_name,legal_name,email',
                 'customerApplication.application:id,uuid,name,slug',
             ])
             ->whereIn('status', ['active', 'trialing', 'past_due'])

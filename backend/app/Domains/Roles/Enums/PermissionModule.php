@@ -103,7 +103,7 @@ final class PermissionModule
             ],
             'customers' => [
                 'label' => 'Customers',
-                'actions' => array_merge($crud, ['restore', 'force-delete', 'view-trash', 'export', 'anonymize']),
+                'actions' => array_merge($crud, ['restore', 'force-delete', 'view-trash', 'export', 'import', 'anonymize']),
                 'labels' => [
                     'view' => 'View Customer',
                     'create' => 'Create Customer',
@@ -112,6 +112,9 @@ final class PermissionModule
                     'restore' => 'Restore Customer',
                     'force-delete' => 'Permanent Delete Customer',
                     'view-trash' => 'Soft Deleted View',
+                    'export' => 'Export Customers',
+                    'import' => 'Import Customers',
+                    'anonymize' => 'Anonymize Customer',
                 ],
             ],
             'customer-contacts' => [

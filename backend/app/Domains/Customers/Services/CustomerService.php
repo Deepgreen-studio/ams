@@ -15,7 +15,6 @@ use App\Domains\Customers\Models\CustomerDocument;
 use App\Domains\Customers\Models\Industry;
 use App\Domains\Customers\Repositories\CustomerRepository;
 use App\Domains\Customers\Repositories\IndustryRepository;
-use App\Domains\Settings\Support\ApplicationTimezone;
 use App\Models\User;
 use App\Shared\Exceptions\ApiException;
 use App\Shared\Support\PhoneNumber;
@@ -80,9 +79,6 @@ class CustomerService
             $payload['company_id'] = $company->id;
             $payload['location_id'] = $this->resolveLocationId($data['location_id'] ?? null, $company->id);
             $payload['status'] = $payload['status'] ?? CustomerStatus::Active->value;
-            $payload['country'] = $payload['country'] ?? $company->country;
-            $payload['timezone'] = $payload['timezone'] ?? ($company->timezone ?: ApplicationTimezone::name());
-            $payload['language'] = $payload['language'] ?? 'en';
             $payload['created_by'] = $actor->id;
             $payload['updated_by'] = $actor->id;
 
@@ -278,8 +274,7 @@ class CustomerService
         $this->customerRepository->updateCustomer($customer, [
             'first_name' => null,
             'last_name' => null,
-            'company_name' => $customer->customer_type?->isOrganization() ? 'Anonymized organization' : null,
-            'legal_name' => null,
+            'legal_name' => $customer->customer_type?->isOrganization() ? 'Anonymized organization' : null,
             'registration_number' => null,
             'reference' => null,
             'email' => 'anonymized-'.$customer->id.'@invalid.example',
@@ -360,6 +355,15 @@ class CustomerService
     }
 
     /**
+     * @param  array<string, mixed>  $filters
+     * @return array<string, mixed>
+     */
+    public function listFilters(array $filters): array
+    {
+        return $this->resolveCompanyFilter($filters);
+    }
+
+    /**
      * @param array<string, mixed> $filters
      * @return array<string, mixed>
      */
@@ -401,7 +405,6 @@ class CustomerService
             'reference',
             'first_name',
             'last_name',
-            'company_name',
             'legal_name',
             'registration_number',
             'email',
@@ -413,9 +416,6 @@ class CustomerService
             'website',
             'industry',
             'industry_other',
-            'country',
-            'timezone',
-            'language',
             'legal_basis',
             'processing_purpose',
             'retention_until',
@@ -429,7 +429,6 @@ class CustomerService
             'reference',
             'first_name',
             'last_name',
-            'company_name',
             'legal_name',
             'registration_number',
             'phone',
@@ -440,7 +439,6 @@ class CustomerService
             'website',
             'industry',
             'industry_other',
-            'country',
             'notes',
             'legal_basis',
             'processing_purpose',
@@ -463,21 +461,12 @@ class CustomerService
             }
         }
 
-        if ($isUpdate && array_key_exists('timezone', $payload) && blank($payload['timezone'])) {
-            unset($payload['timezone']);
-        }
-
-        if (! $isUpdate && empty($payload['language'])) {
-            $payload['language'] = 'en';
-        }
-
         if (isset($payload['customer_type'])) {
             $type = $payload['customer_type'] instanceof CustomerType
                 ? $payload['customer_type']
                 : CustomerType::tryFrom((string) $payload['customer_type']);
 
             if ($type?->requiresPersonName()) {
-                $payload['company_name'] = null;
                 $payload['legal_name'] = null;
                 $payload['registration_number'] = null;
             }

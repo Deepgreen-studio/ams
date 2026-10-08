@@ -7,7 +7,6 @@ const defaultFilters = () => ({
   status: '',
   customer_type: '',
   company: '',
-  country: '',
   industry: '',
   trashed: '',
   sort_by: 'created_at',

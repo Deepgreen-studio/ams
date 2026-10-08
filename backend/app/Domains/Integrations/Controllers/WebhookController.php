@@ -108,6 +108,18 @@ class WebhookController
         ], 'Webhook restored successfully.');
     }
 
+    public function forceDelete(Request $request, string $webhook): JsonResponse
+    {
+        $existing = $this->webhookService->find($webhook, withTrashed: true);
+        $this->authorize('forceDelete', $existing);
+
+        /** @var User $actor */
+        $actor = $request->user();
+        $this->webhookService->forceDelete($webhook, $actor);
+
+        return ApiResponse::success(null, 'Webhook permanently deleted.');
+    }
+
     public function test(TestWebhookRequest $request, string $webhook): JsonResponse
     {
         $existing = $this->webhookService->find($webhook);

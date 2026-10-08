@@ -123,8 +123,12 @@ class LogIntegrationActivity
         activity('webhooks')
             ->causedBy($event->actor)
             ->performedOn($event->webhook)
-            ->withProperties(['event' => 'webhook_deleted', 'name' => $event->webhook->name])
-            ->log('Webhook soft deleted');
+            ->withProperties([
+                'event' => $event->forceDeleted ? 'webhook_force_deleted' : 'webhook_deleted',
+                'name' => $event->webhook->name,
+                'force_deleted' => $event->forceDeleted,
+            ])
+            ->log($event->forceDeleted ? 'Webhook permanently deleted' : 'Webhook soft deleted');
     }
 
     public function handleWebhookRestored(WebhookRestored $event): void

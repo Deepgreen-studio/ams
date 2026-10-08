@@ -48,7 +48,7 @@
             v-for="item in webhooks"
             :key="item.uuid"
             class="border-b border-zinc-100 last:border-b-0 transition hover:bg-zinc-50/60"
-            :class="can('webhooks.view') ? 'cursor-pointer' : ''"
+            :class="can('webhooks.view') && !isTrashed(item) ? 'cursor-pointer' : ''"
             @click="openDetails(item)"
           >
             <td class="px-5 py-4">
@@ -60,7 +60,7 @@
                 </div>
                 <div class="min-w-0">
                   <RouterLink
-                    v-if="can('webhooks.view')"
+                    v-if="can('webhooks.view') && !isTrashed(item)"
                     :to="{ name: 'webhooks.show', params: { id: item.uuid } }"
                     class="truncate font-semibold text-slate-900 hover:text-brand-700"
                   >
@@ -85,7 +85,7 @@
             <td class="px-5 py-4">
               <div class="relative flex justify-end">
                 <button
-                  v-if="hasAnyAction"
+                  v-if="rowHasActions(item)"
                   type="button"
                   class="inline-flex h-9 w-9 items-center justify-center rounded-[12px] text-slate-500 transition hover:bg-zinc-100 hover:text-slate-800"
                   :aria-expanded="openMenuId === item.uuid"
@@ -109,13 +109,13 @@
     <Teleport to="body">
       <div
         v-if="openMenuId && activeWebhook"
-        class="fixed z-[80] w-40 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
+        class="fixed z-[80] w-48 overflow-hidden rounded-[12px] bg-white py-1 shadow-lg ring-1 ring-zinc-100"
         role="menu"
         :style="menuStyle"
         @click.stop
       >
         <RouterLink
-          v-if="can('webhooks.view')"
+          v-if="can('webhooks.view') && !isTrashed(activeWebhook)"
           :to="{ name: 'webhooks.show', params: { id: activeWebhook.uuid } }"
           class="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 transition hover:bg-zinc-50"
           role="menuitem"
@@ -134,6 +134,16 @@
           >
             <ArrowUturnLeftIcon class="h-4 w-4 text-slate-400" />
             Restore
+          </button>
+          <button
+            v-if="can('webhooks.force-delete')"
+            type="button"
+            class="flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm text-red-600 transition hover:bg-red-50"
+            role="menuitem"
+            @click="onForceDelete(activeWebhook)"
+          >
+            <TrashIcon class="h-4 w-4 text-red-500" />
+            Permanent Delete
           </button>
         </template>
         <template v-else>
@@ -195,15 +205,20 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
 });
 
-const emit = defineEmits(['delete', 'restore']);
+const emit = defineEmits(['delete', 'restore', 'force-delete']);
 const router = useRouter();
-const { can, canAny } = usePermissions();
-const hasAnyAction = computed(() =>
-  canAny('webhooks.view', 'webhooks.test', 'webhooks.update', 'webhooks.delete', 'webhooks.restore'),
-);
+const { can } = usePermissions();
+
+function rowHasActions(webhook) {
+  if (isTrashed(webhook)) {
+    return can('webhooks.restore') || can('webhooks.force-delete');
+  }
+
+  return can('webhooks.view') || can('webhooks.test') || can('webhooks.update') || can('webhooks.delete');
+}
 
 function openDetails(webhook) {
-  if (!webhook?.uuid || !can('webhooks.view')) {
+  if (!webhook?.uuid || !can('webhooks.view') || isTrashed(webhook)) {
     return;
   }
 
@@ -236,9 +251,9 @@ function toggleMenu(id, event) {
 
   const webhook = props.webhooks.find((item) => item.uuid === id);
   const rect = event.currentTarget.getBoundingClientRect();
-  const menuWidth = 176;
+  const menuWidth = 192;
   const itemCount = isTrashed(webhook)
-    ? [can('webhooks.view'), can('webhooks.restore')].filter(Boolean).length
+    ? [can('webhooks.restore'), can('webhooks.force-delete')].filter(Boolean).length
     : [
         can('webhooks.view'),
         can('webhooks.test'),
@@ -271,6 +286,11 @@ function onDelete(webhook) {
 function onRestore(webhook) {
   closeMenu();
   emit('restore', webhook);
+}
+
+function onForceDelete(webhook) {
+  closeMenu();
+  emit('force-delete', webhook);
 }
 
 function onDocumentClick() {

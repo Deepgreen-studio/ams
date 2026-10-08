@@ -312,5 +312,44 @@ class WebhookEngineTest extends TestCase
         $this->assertTrue(
             Role::findByName('company-admin', 'web')->hasPermissionTo(WebhookPermission::RESTORE)
         );
+        $this->assertTrue(
+            Role::findByName('company-admin', 'web')->hasPermissionTo(WebhookPermission::FORCE_DELETE)
+        );
+    }
+
+    public function test_only_force_delete_permission_can_permanently_delete_a_webhook(): void
+    {
+        $webhook = Webhook::query()->create([
+            'company_id' => $this->company->id,
+            'name' => 'Gone Hook',
+            'slug' => 'gone-hook',
+            'direction' => 'outgoing',
+            'status' => 'active',
+            'url' => 'https://hooks.example.test/gone',
+            'secret' => 'secret',
+            'signature_algorithm' => 'hmac_sha256',
+            'subscribed_events' => ['webhook.test'],
+        ]);
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/webhooks/'.$webhook->uuid.'/force-delete')->assertStatus(422);
+
+        $webhook->delete();
+
+        $manager = User::factory()->create();
+        $manager->assignRole('manager');
+        Sanctum::actingAs($manager);
+        $this->deleteJson('/api/v1/webhooks/'.$webhook->uuid.'/force-delete')->assertForbidden();
+
+        Sanctum::actingAs($this->admin);
+        $this->deleteJson('/api/v1/webhooks/'.$webhook->uuid.'/force-delete')
+            ->assertOk()
+            ->assertJsonPath('message', 'Webhook permanently deleted.');
+
+        $this->assertDatabaseMissing('webhooks', ['id' => $webhook->id]);
+        $this->assertDatabaseHas('permissions', [
+            'name' => WebhookPermission::FORCE_DELETE,
+            'display_name' => 'Permanent Delete Webhook',
+        ]);
     }
 }

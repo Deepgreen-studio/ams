@@ -77,6 +77,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function (): void {
             ->middleware('permission:'.WebhookPermission::DELETE);
         Route::post('/{webhook}/restore', [WebhookController::class, 'restore'])
             ->middleware('permission:'.WebhookPermission::RESTORE);
+        Route::delete('/{webhook}/force-delete', [WebhookController::class, 'forceDelete'])
+            ->middleware('permission:'.WebhookPermission::FORCE_DELETE);
         Route::post('/{webhook}/test', [WebhookController::class, 'test'])
             ->middleware('permission:'.WebhookPermission::TEST);
     });

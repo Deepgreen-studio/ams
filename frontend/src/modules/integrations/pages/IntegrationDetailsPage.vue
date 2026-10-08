@@ -5,7 +5,7 @@
         <RouterLink
           v-if="can('integrations.update') && !integration.deleted_at"
           :to="{ name: 'integrations.edit', params: { id: integration.uuid } }"
-          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-zinc-50"
         >
           <PencilSquareIcon class="h-4 w-4 text-slate-500" />
           Edit
@@ -31,10 +31,10 @@
         <button
           v-else-if="!integration.deleted_at && can('integrations.delete')"
           type="button"
-          class="inline-flex items-center gap-2 rounded-[12px] bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
+          class="inline-flex items-center gap-2 rounded-[12px] border border-red-200 bg-white px-5 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50"
           @click="showDelete = true"
         >
-          <TrashIcon class="h-4 w-4 text-white" />
+          <TrashIcon class="h-4 w-4 text-red-600" />
           Soft Delete
         </button>
       </div>

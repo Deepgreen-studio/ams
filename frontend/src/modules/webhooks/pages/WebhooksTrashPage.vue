@@ -28,6 +28,7 @@
       :webhooks="store.webhooks"
       :loading="store.loading"
       @restore="confirmRestore"
+      @force-delete="openForceDelete"
     >
       <template #toolbar>
         <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -72,6 +73,16 @@
         />
       </template>
     </WebhookTable>
+
+    <DeleteConfirmation
+      :open="Boolean(pendingForceDelete)"
+      title="Permanently delete webhook"
+      :message="`Permanently delete ${pendingForceDelete?.name || 'this webhook'}? This cannot be undone.`"
+      confirm-label="Permanent Delete"
+      :loading="store.saving"
+      @cancel="pendingForceDelete = null"
+      @confirm="confirmForceDelete"
+    />
   </div>
 </template>
 
@@ -80,6 +91,7 @@ import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { RouterLink } from 'vue-router';
 import { useToast } from '@/composables/useToast';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import Pagination from '@/modules/users/components/Pagination.vue';
 import WebhookSubnav from '@/modules/webhooks/components/WebhookSubnav.vue';
 import WebhookTable from '@/modules/webhooks/components/WebhookTable.vue';
@@ -88,6 +100,7 @@ import { useWebhooksStore } from '@/modules/webhooks/stores/webhooks';
 const store = useWebhooksStore();
 const toast = useToast();
 const search = ref('');
+const pendingForceDelete = ref(null);
 const previousFilters = ref(null);
 let searchTimer = null;
 
@@ -146,6 +159,31 @@ function onPerPageChange(perPage) {
     sort_by: store.filters.sort_by,
     sort_dir: store.filters.sort_dir,
   });
+}
+
+function openForceDelete(webhook) {
+  pendingForceDelete.value = webhook;
+}
+
+async function confirmForceDelete() {
+  if (!pendingForceDelete.value) {
+    return;
+  }
+
+  const name = pendingForceDelete.value.name || 'Webhook';
+
+  try {
+    const data = await store.forceDeleteWebhook(pendingForceDelete.value.uuid);
+    pendingForceDelete.value = null;
+    toast.success(data?.message || `${name} permanently deleted.`, 'Webhook deleted');
+    await loadTrash({
+      page: store.filters.page,
+      sort_by: store.filters.sort_by,
+      sort_dir: store.filters.sort_dir,
+    });
+  } catch (err) {
+    toast.error(err?.message || store.error || 'Unable to permanently delete webhook.', 'Delete failed');
+  }
 }
 
 async function confirmRestore(webhook) {

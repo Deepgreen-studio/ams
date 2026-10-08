@@ -19,6 +19,9 @@ export const webhookService = {
   restore(id) {
     return api.post(`/webhooks/${id}/restore`);
   },
+  forceDelete(id) {
+    return api.delete(`/webhooks/${id}/force-delete`);
+  },
   test(id, payload = {}) {
     return api.post(`/webhooks/${id}/test`, payload);
   },

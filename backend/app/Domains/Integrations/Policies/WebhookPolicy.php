@@ -39,6 +39,11 @@ class WebhookPolicy
         return $user->can(WebhookPermission::RESTORE);
     }
 
+    public function forceDelete(User $user, Webhook $webhook): bool
+    {
+        return $user->can(WebhookPermission::FORCE_DELETE);
+    }
+
     public function viewTrash(User $user): bool
     {
         return $user->can(WebhookPermission::VIEW_TRASH);

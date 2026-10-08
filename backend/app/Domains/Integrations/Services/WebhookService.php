@@ -177,6 +177,20 @@ class WebhookService
         });
     }
 
+    public function forceDelete(string $identifier, User $actor): void
+    {
+        DB::transaction(function () use ($identifier, $actor): void {
+            $webhook = $this->webhookRepository->findByIdentifierOrFail($identifier, withTrashed: true);
+
+            if (! $webhook->trashed()) {
+                throw new ApiException('Soft delete the webhook before permanently deleting it.', 422);
+            }
+
+            $webhook->forceDelete();
+            event(new WebhookDeleted($webhook, $actor, forceDeleted: true));
+        });
+    }
+
     /**
      * @param  array<string, mixed>  $filters
      */

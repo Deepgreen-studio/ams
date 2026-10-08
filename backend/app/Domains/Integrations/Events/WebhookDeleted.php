@@ -11,5 +11,9 @@ class WebhookDeleted
 {
     use Dispatchable, SerializesModels;
 
-    public function __construct(public readonly Webhook $webhook, public readonly User $actor) {}
+    public function __construct(
+        public readonly Webhook $webhook,
+        public readonly User $actor,
+        public readonly bool $forceDeleted = false,
+    ) {}
 }

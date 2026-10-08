@@ -122,6 +122,21 @@ export const useWebhooksStore = defineStore('webhooks', () => {
     }
   }
 
+  async function forceDeleteWebhook(id) {
+    state.saving.value = true;
+    state.clearMessages();
+    try {
+      const { data } = await webhookService.forceDelete(id);
+      state.successMessage.value = data.message || 'Webhook permanently deleted.';
+      return data;
+    } catch (err) {
+      state.applyError(err, 'Unable to permanently delete webhook');
+      throw err;
+    } finally {
+      state.saving.value = false;
+    }
+  }
+
   async function deleteWebhook(id) {
     state.saving.value = true;
     state.clearMessages();
@@ -230,6 +245,7 @@ export const useWebhooksStore = defineStore('webhooks', () => {
     createWebhook,
     updateWebhook,
     deleteWebhook,
+    forceDeleteWebhook,
     restoreWebhook,
     testWebhook,
     fetchLogs,

@@ -43,52 +43,47 @@
       </div>
     </div>
 
-    <div v-if="environmentsStore.loading" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <div v-for="n in 3" :key="n" class="h-56 animate-pulse rounded-[12px] bg-slate-100" />
-    </div>
+    <EnvironmentTable
+      :application-id="String(route.params.id)"
+      :environments="environmentsStore.environments"
+      :loading="environmentsStore.loading"
+      :busy="environmentsStore.saving"
+      @switch="onSwitch"
+      @health-check="onHealthCheck"
+      @delete="openDelete"
+    />
 
-    <EmptyState
-      v-else-if="!environmentsStore.environments.length"
-      title="No environments"
-      description="Create Development, Testing, Staging, Production, or Sandbox environments."
-    >
-      <template #action>
-      </template>
-    </EmptyState>
-
-    <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      <EnvironmentCard
-        v-for="item in environmentsStore.environments"
-        :key="item.uuid"
-        :application-id="route.params.id"
-        :environment="item"
-        :switching="environmentsStore.saving"
-        :checking="environmentsStore.saving"
-        @switch="onSwitch"
-        @health-check="onHealthCheck"
-      />
-    </div>
+    <DeleteConfirmation
+      :open="Boolean(pendingDelete)"
+      title="Delete environment"
+      :message="`Soft delete ${pendingDelete?.name || 'this environment'}?`"
+      confirm-label="Delete"
+      :loading="environmentsStore.saving"
+      @cancel="pendingDelete = null"
+      @confirm="confirmDelete"
+    />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   ServerStackIcon,
 } from '@heroicons/vue/24/outline';
-import EmptyState from '@/components/ui/EmptyState.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
+import DeleteConfirmation from '@/modules/users/components/DeleteConfirmation.vue';
 import ApplicationSubnav from '@/modules/applications/components/ApplicationSubnav.vue';
-import EnvironmentCard from '@/modules/applications/components/EnvironmentCard.vue';
+import EnvironmentTable from '@/modules/applications/components/EnvironmentTable.vue';
 import { useEnvironmentsStore } from '@/modules/applications/stores/environments';
 import { useToast } from '@/composables/useToast';
 
 const route = useRoute();
 const environmentsStore = useEnvironmentsStore();
 const toast = useToast();
+const pendingDelete = ref(null);
 
 const switchOptions = computed(() =>
   environmentsStore.environments.map((item) => ({
@@ -166,6 +161,22 @@ async function onSwitchSelect(uuid) {
 async function onHealthCheck(environment) {
   try {
     await environmentsStore.runHealthCheck(route.params.id, environment.uuid);
+  } catch {
+    // Toast handled by store error watcher.
+  }
+}
+
+function openDelete(environment) {
+  pendingDelete.value = environment;
+}
+
+async function confirmDelete() {
+  if (!pendingDelete.value) return;
+  try {
+    await environmentsStore.deleteEnvironment(route.params.id, pendingDelete.value.uuid);
+    pendingDelete.value = null;
+    await nextTick();
+    await environmentsStore.fetchDashboard(route.params.id);
   } catch {
     // Toast handled by store error watcher.
   }

@@ -1,6 +1,6 @@
 <template>
   <form class="space-y-8" novalidate @submit.prevent="onSubmit">
-    <div class="grid gap-x-10 gap-y-5 md:grid-cols-2">
+    <div class="fields grid items-start gap-x-10 gap-y-5 md:grid-cols-2">
       <div v-if="!hideCompany">
         <FormLabel required>Owning Company</FormLabel>
         <SelectBox
@@ -15,9 +15,7 @@
         <p class="mt-1 text-xs text-slate-500">
           {{ lockCompany ? 'This customer belongs to this company.' : 'The company owns the applications. This customer is entitled to use them.' }}
         </p>
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -31,9 +29,7 @@
           :error="Boolean(displayErrors.location_id)"
         />
         <p class="mt-1 text-xs text-slate-500">Active locations for the selected company.</p>
-        <p v-if="displayErrors.location_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.location_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.location_id?.[0] || ''" />
       </div>
 
       <div>
@@ -44,9 +40,7 @@
           :options="typeOptions"
           :error="Boolean(displayErrors.customer_type)"
         />
-        <p v-if="displayErrors.customer_type" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.customer_type[0] }}
-        </p>
+        <FieldError :message="displayErrors.customer_type?.[0] || ''" />
       </div>
 
       <div v-if="initial.uuid">
@@ -69,21 +63,19 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('reference')"
         />
-        <p v-if="displayErrors.reference" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.reference[0] }}
-        </p>
+        <FieldError :message="displayErrors.reference?.[0] || ''" />
       </div>
 
       <template v-if="isIndividual">
         <div>
           <FormLabel required>First Name</FormLabel>
           <input v-model="form.first_name" type="text" class="field" :class="fieldClass('first_name')" />
-          <p v-if="displayErrors.first_name" class="mt-1 text-xs text-rose-600">{{ displayErrors.first_name[0] }}</p>
+          <FieldError :message="displayErrors.first_name?.[0] || ''" />
         </div>
         <div>
           <FormLabel required>Last Name</FormLabel>
           <input v-model="form.last_name" type="text" class="field" :class="fieldClass('last_name')" />
-          <p v-if="displayErrors.last_name" class="mt-1 text-xs text-rose-600">{{ displayErrors.last_name[0] }}</p>
+          <FieldError :message="displayErrors.last_name?.[0] || ''" />
         </div>
       </template>
 
@@ -91,7 +83,7 @@
         <div class="md:col-span-2">
           <FormLabel required>Legal Name</FormLabel>
           <input v-model="form.legal_name" type="text" class="field" :class="fieldClass('legal_name')" />
-          <p v-if="displayErrors.legal_name" class="mt-1 text-xs text-rose-600">{{ displayErrors.legal_name[0] }}</p>
+          <FieldError :message="displayErrors.legal_name?.[0] || ''" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration / Tax ID</label>
@@ -108,28 +100,24 @@
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Primary Contact Email</label>
           <input v-model="form.primary_contact_email" type="email" class="field" :class="fieldClass('primary_contact_email')" />
-          <p v-if="displayErrors.primary_contact_email" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.primary_contact_email[0] }}
-          </p>
+          <FieldError :message="displayErrors.primary_contact_email?.[0] || ''" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Primary Contact Phone</label>
           <PhoneInput v-model="form.primary_contact_phone" :error="Boolean(displayErrors.primary_contact_phone)" />
-          <p v-if="displayErrors.primary_contact_phone" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.primary_contact_phone[0] }}
-          </p>
+          <FieldError :message="displayErrors.primary_contact_phone?.[0] || ''" />
         </div>
       </template>
 
       <div>
         <FormLabel required>Email</FormLabel>
         <input v-model="form.email" type="email" class="field" :class="fieldClass('email')" />
-        <p v-if="displayErrors.email" class="mt-1 text-xs text-rose-600">{{ displayErrors.email[0] }}</p>
+        <FieldError :message="displayErrors.email?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
         <PhoneInput v-model="form.phone" :error="Boolean(displayErrors.phone)" />
-        <p v-if="displayErrors.phone" class="mt-1 text-xs text-rose-600">{{ displayErrors.phone[0] }}</p>
+        <FieldError :message="displayErrors.phone?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
@@ -141,7 +129,7 @@
           :class="fieldClass('website')"
         />
         <p class="mt-1 text-xs text-slate-500">Optional. Use a full http or https URL.</p>
-        <p v-if="displayErrors.website" class="mt-1 text-xs text-rose-600">{{ displayErrors.website[0] }}</p>
+        <FieldError :message="displayErrors.website?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Industry</label>
@@ -152,7 +140,7 @@
           :options="industryOptions"
           :error="Boolean(displayErrors.industry_id)"
         />
-        <p v-if="displayErrors.industry_id" class="mt-1 text-xs text-rose-600">{{ displayErrors.industry_id[0] }}</p>
+        <FieldError :message="displayErrors.industry_id?.[0] || ''" />
       </div>
       <div v-if="subIndustryOptions.length > 1">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Sub-industry</label>
@@ -161,7 +149,7 @@
       <div v-if="selectedIndustry?.is_other">
         <FormLabel required>Other industry</FormLabel>
         <input v-model="form.industry_other" type="text" class="field" :class="fieldClass('industry_other')" />
-        <p v-if="displayErrors.industry_other" class="mt-1 text-xs text-rose-600">{{ displayErrors.industry_other[0] }}</p>
+        <FieldError :message="displayErrors.industry_other?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
@@ -173,20 +161,20 @@
         <p class="mt-1 text-xs text-slate-500">
           Legal basis and purpose are required. After the retention date, identifying data is anonymized. A confirmed deletion request does the same, unless a legal obligation is still in force.
         </p>
-        <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <div class="fields mt-4 grid items-start gap-x-4 gap-y-5 md:grid-cols-2">
           <div>
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal basis</label>
+            <FormLabel required>Legal basis</FormLabel>
             <SelectBox v-model="form.legal_basis" size="lg" :options="legalBasisOptions" :class="fieldClass('legal_basis')" />
-            <p v-if="displayErrors.legal_basis" class="mt-1 text-xs text-rose-600">{{ displayErrors.legal_basis[0] }}</p>
+            <FieldError :message="displayErrors.legal_basis?.[0] || ''" />
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700">Retain until</label>
             <input v-model="form.retention_until" type="date" class="field" />
           </div>
           <div class="md:col-span-2">
-            <label class="mb-1.5 block text-sm font-medium text-slate-700">Processing purpose</label>
+            <FormLabel required>Processing purpose</FormLabel>
             <textarea v-model="form.processing_purpose" rows="2" class="area" :class="fieldClass('processing_purpose')" />
-            <p v-if="displayErrors.processing_purpose" class="mt-1 text-xs text-rose-600">{{ displayErrors.processing_purpose[0] }}</p>
+            <FieldError :message="displayErrors.processing_purpose?.[0] || ''" />
           </div>
         </div>
       </div>
@@ -247,6 +235,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import FieldError from '@/components/ui/FieldError.vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -276,6 +265,7 @@ const industries = ref([]);
 const applications = ref([]);
 const environments = ref([]);
 const localErrors = ref({});
+const dismissedServerErrors = ref({});
 const form = reactive(createForm(props.initial));
 
 const typeOptions = [
@@ -366,6 +356,7 @@ watch(
   () => props.errors,
   () => {
     localErrors.value = {};
+    dismissedServerErrors.value = {};
   },
   { deep: true },
 );
@@ -394,10 +385,13 @@ watch(
   (applicationId) => loadEnvironments(applicationId),
 );
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
+const displayErrors = computed(() => {
+  const server = {};
+  for (const [key, messages] of Object.entries(props.errors || {})) {
+    if (!dismissedServerErrors.value[key]) server[key] = messages;
+  }
+  return { ...server, ...localErrors.value };
+});
 
 onMounted(async () => {
   await Promise.all([loadCompanies(), loadIndustries(), loadApplications(), loadLocations()]);
@@ -558,7 +552,7 @@ function isHttpUrl(value) {
   }
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.company_id || '').trim()) {
@@ -607,6 +601,44 @@ function validate() {
     next.industry_other = ['Describe the industry when Other is selected.'];
   }
 
+  return next;
+}
+
+function sameErrors(left, right) {
+  const leftKeys = Object.keys(left);
+  const rightKeys = Object.keys(right);
+  if (leftKeys.length !== rightKeys.length) return false;
+  return leftKeys.every((key) => left[key]?.[0] === right[key]?.[0]);
+}
+
+watch(
+  () => ({ ...form }),
+  (current, previous) => {
+    if (!previous) return;
+
+    const dismissed = { ...dismissedServerErrors.value };
+    let serverChanged = false;
+    for (const key of Object.keys(props.errors || {})) {
+      if (!dismissed[key] && current[key] !== previous[key]) {
+        dismissed[key] = true;
+        serverChanged = true;
+      }
+    }
+    if (serverChanged) dismissedServerErrors.value = dismissed;
+
+    if (!Object.keys(localErrors.value).length) return;
+
+    const kept = {};
+    const fresh = collectErrors();
+    for (const key of Object.keys(localErrors.value)) {
+      if (fresh[key]) kept[key] = fresh[key];
+    }
+    if (!sameErrors(localErrors.value, kept)) localErrors.value = kept;
+  },
+);
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }
@@ -664,6 +696,11 @@ function onSubmit() {
 </script>
 
 <style scoped>
+.fields > div {
+  min-width: 0;
+  align-self: start;
+}
+
 .field {
   height: 3rem;
   width: 100%;

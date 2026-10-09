@@ -15,7 +15,7 @@
         :disabled="transferring"
         @click="downloadExample"
       >
-        Example
+        Download Sample
       </button>
       <button
         v-if="can('customers.import')"

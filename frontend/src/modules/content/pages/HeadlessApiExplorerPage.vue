@@ -163,7 +163,7 @@
             <p class="font-medium">Copy now — shown once</p>
             <p class="mt-1 break-all font-mono text-xs">{{ plainTextKey }}</p>
           </div>
-          <p v-if="keyError" class="text-sm text-rose-600">{{ keyError }}</p>
+          <FieldError :message="keyError" />
         </div>
       </section>
 
@@ -225,6 +225,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import ContentSubnav from '@/modules/content/components/ContentSubnav.vue';

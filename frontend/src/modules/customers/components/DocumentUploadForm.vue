@@ -32,7 +32,7 @@
           :options="categoryOptions"
           :disabled="loading"
         />
-        <p v-if="errors.category" class="mt-1 text-xs text-rose-600">{{ errors.category[0] }}</p>
+        <FieldError :message="displayErrors.category?.[0] || ''" />
       </div>
 
       <div>
@@ -60,7 +60,7 @@
           File
         </label>
         <input type="file" class="input file:mr-3" :disabled="loading" @change="onFileChange" />
-        <p v-if="errors.file" class="mt-1 text-xs text-rose-600">{{ errors.file[0] }}</p>
+        <FieldError :message="displayErrors.file?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -83,7 +83,7 @@
       <button
         type="submit"
         class="rounded-[12px] bg-brand-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-700 disabled:opacity-60"
-        :disabled="loading || !file"
+        :disabled="loading || !form.file"
       >
         {{ loading ? 'Uploading...' : submitLabel }}
       </button>
@@ -92,7 +92,9 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue';
+import FieldError from '@/components/ui/FieldError.vue';
+import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -126,9 +128,10 @@ const form = reactive({
   status: 'active',
   expires_at: '',
   notes: '',
+  file: null,
 });
 
-const file = ref(null);
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 watch(
   () => props.defaultCategory,
@@ -138,12 +141,12 @@ watch(
 );
 
 function onFileChange(event) {
-  file.value = event.target.files?.[0] || null;
+  form.file = event.target.files?.[0] || null;
 }
 
 function onSubmit() {
-  if (!file.value || props.loading) return;
-  emit('submit', { ...form, file: file.value });
+  if (!form.file || props.loading) return;
+  emit('submit', { ...form, file: form.file });
 }
 </script>
 

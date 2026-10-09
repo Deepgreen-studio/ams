@@ -11,9 +11,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('company_id'))"
         />
-        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('company_id') }}
-        </p>
+        <FieldError :message="fieldError('company_id')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
@@ -26,9 +24,7 @@
           placeholder="Short incident title"
           :disabled="loading"
         />
-        <p v-if="fieldError('title')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('title') }}
-        </p>
+        <FieldError :message="fieldError('title')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Breach Type</label>
@@ -39,9 +35,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('breach_type'))"
         />
-        <p v-if="fieldError('breach_type')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('breach_type') }}
-        </p>
+        <FieldError :message="fieldError('breach_type')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Severity</label>
@@ -52,9 +46,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('severity'))"
         />
-        <p v-if="fieldError('severity')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('severity') }}
-        </p>
+        <FieldError :message="fieldError('severity')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Discovered At</label>
@@ -64,9 +56,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('discovered_at')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('discovered_at') }}
-        </p>
+        <FieldError :message="fieldError('discovered_at')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Occurred At</label>
@@ -76,9 +66,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('occurred_at')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('occurred_at') }}
-        </p>
+        <FieldError :message="fieldError('occurred_at')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
@@ -90,9 +78,7 @@
           placeholder="What happened, who is affected, and what is known so far."
           :disabled="loading"
         />
-        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('description') }}
-        </p>
+        <FieldError :message="fieldError('description')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Affected Data Categories</label>
@@ -104,9 +90,7 @@
           :disabled="loading"
         />
         <p class="mt-1.5 text-xs text-slate-500">Comma-separated categories stored on the incident.</p>
-        <p v-if="fieldError('affected_data_categories')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('affected_data_categories') }}
-        </p>
+        <FieldError :message="fieldError('affected_data_categories')" />
       </div>
       <label class="flex items-center gap-2.5 text-sm text-slate-700">
         <input
@@ -149,7 +133,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { companyService } from '@/modules/companies/services/companyService';
 import { breachSeverityOptions, breachTypeOptions } from '@/modules/compliance/utils/breachOptions';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -175,6 +161,8 @@ const form = reactive({
   special_category_data: false,
 });
 
+const { fieldMessage: fieldError } = useFieldErrors(form, () => props.fieldErrors);
+
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
     value: company.uuid,
@@ -183,11 +171,6 @@ const companySelectOptions = computed(() =>
 );
 
 const canSubmit = computed(() => Boolean(form.company_id && form.title && form.breach_type));
-
-function fieldError(key) {
-  const value = props.fieldErrors?.[key];
-  return Array.isArray(value) ? value[0] : value || '';
-}
 
 onMounted(async () => {
   try {

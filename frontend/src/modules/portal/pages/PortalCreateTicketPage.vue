@@ -32,7 +32,7 @@
           placeholder="What happened? Steps to reproduce, expected result…"
         />
       </div>
-      <p v-if="error" class="text-sm text-rose-600">{{ error }}</p>
+      <FieldError :message="error" />
       <div class="flex justify-end gap-2">
         <RouterLink :to="{ name: 'portal.tickets.index' }" class="rounded-lg border px-4 py-2 text-sm">Cancel</RouterLink>
         <button
@@ -48,6 +48,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import { categoryOptions, priorityOptions } from '@/modules/support/utils/ticketOptions';

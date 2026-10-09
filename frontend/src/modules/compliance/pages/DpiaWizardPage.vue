@@ -80,9 +80,7 @@
                 :disabled="Boolean(assessmentId)"
                 :error="Boolean(fieldError('company_id'))"
               />
-              <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-                {{ fieldError('company_id') }}
-              </p>
+              <FieldError :message="fieldError('company_id')" />
             </div>
             <div>
               <label class="mb-1.5 block text-sm font-medium text-slate-700">Template</label>
@@ -107,7 +105,7 @@
                 placeholder="e.g. Customer analytics platform DPIA"
                 required
               />
-              <p v-if="fieldError('title')" class="mt-1 text-xs text-rose-600">{{ fieldError('title') }}</p>
+              <FieldError :message="fieldError('title')" />
             </div>
             <div class="md:col-span-2">
               <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
@@ -278,7 +276,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
   CheckIcon,
@@ -327,6 +327,8 @@ const form = reactive({
   mitigation_summary: '',
   review_due_at: '',
 });
+
+const { fieldMessage: fieldError } = useFieldErrors(form, () => store.fieldErrors);
 
 const currentStepDef = computed(() => steps.find((step) => step.id === currentStep.value) || steps[0]);
 
@@ -426,10 +428,6 @@ function hydrate(assessment) {
   categoriesInput.value = (assessment.data_categories || []).join(', ');
   subjectsInput.value = (assessment.data_subjects || []).join(', ');
   currentStep.value = assessment.wizard_step || 1;
-}
-
-function fieldError(key) {
-  return store.fieldErrors?.[key]?.[0] || '';
 }
 
 function canGoToStep(id) {

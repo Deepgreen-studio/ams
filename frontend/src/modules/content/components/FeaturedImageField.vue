@@ -85,12 +85,13 @@
       placeholder="https://… image URL"
       @input="$emit('update:modelValue', $event.target.value)"
     />
-    <p v-if="error" class="text-xs text-rose-600">{{ error }}</p>
+    <FieldError :message="error" />
     <MediaPickerModal :open="pickerOpen" @close="pickerOpen = false" @select="onPick" />
   </div>
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { ref } from 'vue';
 import MediaPickerModal from '@/modules/content/components/media/MediaPickerModal.vue';
 import { contentService } from '@/modules/content/services/contentService';

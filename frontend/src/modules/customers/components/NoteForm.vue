@@ -18,7 +18,7 @@
         :options="typeOptions"
         :disabled="loading"
       />
-      <p v-if="errors.note_type" class="mt-1 text-xs text-rose-600">{{ errors.note_type[0] }}</p>
+      <FieldError :message="displayErrors.note_type?.[0] || ''" />
     </div>
 
     <div>
@@ -32,7 +32,7 @@
         placeholder="Optional title"
         :disabled="loading"
       />
-      <p v-if="errors.title" class="mt-1 text-xs text-rose-600">{{ errors.title[0] }}</p>
+      <FieldError :message="displayErrors.title?.[0] || ''" />
     </div>
 
     <div>
@@ -47,7 +47,7 @@
         placeholder="Write a note..."
         :disabled="loading"
       />
-      <p v-if="errors.body" class="mt-1 text-xs text-rose-600">{{ errors.body[0] }}</p>
+      <FieldError :message="displayErrors.body?.[0] || ''" />
     </div>
 
     <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -81,7 +81,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -106,6 +108,8 @@ const form = reactive({
   body: '',
   is_pinned: false,
 });
+
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 watch(
   () => props.initial,

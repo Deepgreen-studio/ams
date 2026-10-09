@@ -237,7 +237,7 @@
             <input v-model="form.is_active" type="checkbox" class="rounded border-zinc-300 text-brand-600 focus:ring-brand-500" />
             Active
           </label>
-          <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
+          <FieldError :message="formError" />
           <div class="flex justify-end gap-2 border-t border-zinc-100 pt-4">
             <button
               type="button"
@@ -271,6 +271,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import {
   CheckCircleIcon,

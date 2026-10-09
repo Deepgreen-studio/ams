@@ -129,3 +129,12 @@ textarea.input {
 .scrollbar-dark::-webkit-scrollbar-thumb:hover {
   background-color: #52525b;
 }
+
+/* Paired form controls stay on the same line when one cell is taller. */
+form .grid {
+  align-items: start;
+}
+
+form .grid > * {
+  min-width: 0;
+}

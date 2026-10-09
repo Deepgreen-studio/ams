@@ -6,7 +6,7 @@
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Environment Name</label>
         <input v-model="form.name" type="text" class="input" required />
-        <p v-if="errors.name" class="mt-1 text-xs text-rose-600">{{ errors.name[0] }}</p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Type</label>
@@ -15,9 +15,9 @@
           size="lg"
           :options="typeOptions"
           :disabled="Boolean(initial.uuid)"
-          :error="Boolean(errors.type)"
+          :error="Boolean(displayErrors.type)"
         />
-        <p v-if="errors.type" class="mt-1 text-xs text-rose-600">{{ errors.type[0] }}</p>
+        <FieldError :message="displayErrors.type?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Slug</label>
@@ -30,12 +30,12 @@
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">API URL</label>
         <input v-model="form.api_url" type="url" class="input" placeholder="https://" />
-        <p v-if="errors.api_url" class="mt-1 text-xs text-rose-600">{{ errors.api_url[0] }}</p>
+        <FieldError :message="displayErrors.api_url?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Web URL</label>
         <input v-model="form.web_url" type="url" class="input" placeholder="https://" />
-        <p v-if="errors.web_url" class="mt-1 text-xs text-rose-600">{{ errors.web_url[0] }}</p>
+        <FieldError :message="displayErrors.web_url?.[0] || ''" />
       </div>
       <div class="md:col-span-2">
         <label class="inline-flex items-center gap-2 text-sm text-slate-700">
@@ -71,7 +71,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const typeOptions = [
@@ -98,6 +100,7 @@ const props = defineProps({
 
 const emit = defineEmits(['submit', 'cancel']);
 const form = reactive(createForm(props.initial));
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 watch(() => props.initial, (value) => Object.assign(form, createForm(value)), { deep: true });
 
 function createForm(value = {}) {

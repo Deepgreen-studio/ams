@@ -14,7 +14,7 @@
         required
         class="w-full h-12 rounded-[12px] border border-slate-300 px-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
       />
-      <p v-if="fieldErrors.email?.[0]" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.email[0] }}</p>
+      <FieldError :message="displayErrors.email?.[0] || ''" />
     </div>
 
     <div>
@@ -28,9 +28,7 @@
         :tone="passwordTone"
       />
       <PasswordRequirements :password="form.password" />
-      <p v-for="message in extraPasswordErrors" :key="message" class="mt-1.5 text-xs text-rose-600">
-        {{ message }}
-      </p>
+      <FieldError :message="extraPasswordErrors.join(' ')" />
     </div>
 
     <div>
@@ -43,8 +41,8 @@
         :disabled="loading"
         :tone="confirmationTone"
       />
-      <p v-if="confirmationError" class="mt-1.5 text-xs text-rose-600">{{ confirmationError }}</p>
-      <p v-else-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
+      <FieldError :message="confirmationError" />
+        <p v-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
     </div>
 
     <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
@@ -69,7 +67,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, reactive, ref } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { useRoute, useRouter } from 'vue-router';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';
 import PasswordRequirements from '@/modules/authentication/components/PasswordRequirements.vue';
@@ -82,7 +82,7 @@ const loading = ref(false);
 const submitted = ref(false);
 const errorMessage = ref('');
 const successMessage = ref('');
-const fieldErrors = ref({});
+const apiErrors = ref({});
 
 const form = reactive({
   email: typeof route.query.email === 'string' ? route.query.email : '',
@@ -91,14 +91,16 @@ const form = reactive({
   token: typeof route.query.token === 'string' ? route.query.token : '',
 });
 
+const { displayErrors } = useFieldErrors(form, () => apiErrors.value);
+
 const passwordValid = computed(() => passwordIsValid(form.password));
 const showRuleErrors = computed(() => submitted.value || form.password.length > 0);
 const passwordsMatch = computed(
   () => form.password.length > 0 && form.password === form.password_confirmation,
 );
 const confirmationError = computed(() => {
-  if (fieldErrors.value.password_confirmation?.[0]) {
-    return fieldErrors.value.password_confirmation[0];
+  if (displayErrors.value.password_confirmation?.[0]) {
+    return displayErrors.value.password_confirmation[0];
   }
 
   if ((submitted.value || form.password_confirmation.length > 0) && !passwordsMatch.value) {
@@ -108,7 +110,7 @@ const confirmationError = computed(() => {
   return '';
 });
 const extraPasswordErrors = computed(() =>
-  (fieldErrors.value.password || []).filter(
+  (displayErrors.value.password || []).filter(
     (message) => !/uppercase|lowercase|letter|number|symbol|8 characters/i.test(message),
   ),
 );
@@ -139,7 +141,7 @@ async function onSubmit() {
   submitted.value = true;
   errorMessage.value = '';
   successMessage.value = '';
-  fieldErrors.value = {};
+  apiErrors.value = {};
 
   if (!passwordValid.value || form.password !== form.password_confirmation) {
     return;
@@ -152,8 +154,8 @@ async function onSubmit() {
     successMessage.value = data.message || 'Password updated successfully.';
     setTimeout(() => router.push({ name: 'login' }), 1200);
   } catch (err) {
-    fieldErrors.value = err.errors || {};
-    const hasFieldErrors = Object.keys(fieldErrors.value).length > 0;
+    apiErrors.value = err.errors || {};
+    const hasFieldErrors = Object.keys(apiErrors.value).length > 0;
     errorMessage.value = hasFieldErrors ? '' : err.message || 'Unable to reset password';
   } finally {
     loading.value = false;

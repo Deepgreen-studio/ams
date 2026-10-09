@@ -19,9 +19,7 @@
           :options="typeOptions"
           :disabled="loading"
         />
-        <p v-if="errors.contact_type" class="mt-1 text-xs text-rose-600">
-          {{ errors.contact_type[0] }}
-        </p>
+        <FieldError :message="displayErrors.contact_type?.[0] || ''" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -64,14 +62,14 @@
           :disabled="loading"
           @keydown.esc.prevent="$emit('cancel')"
         />
-        <p v-if="errors.name" class="mt-1 text-xs text-rose-600">{{ errors.name[0] }}</p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
           Email
         </label>
         <input v-model="form.email" type="email" class="input" :disabled="loading" />
-        <p v-if="errors.email" class="mt-1 text-xs text-rose-600">{{ errors.email[0] }}</p>
+        <FieldError :message="displayErrors.email?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -80,11 +78,9 @@
         <PhoneInput
           v-model="form.phone"
           :disabled="loading"
-          :error="Boolean(phoneError || errors.phone)"
+          :error="Boolean(phoneError || displayErrors.phone)"
         />
-        <p v-if="phoneError || errors.phone" class="mt-1 text-xs text-rose-600">
-          {{ phoneError || errors.phone[0] }}
-        </p>
+        <FieldError :message="phoneError || displayErrors.phone?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
@@ -127,7 +123,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { isValidE164, PHONE_INVALID_MESSAGE } from '@/utils/phone';
@@ -146,6 +144,7 @@ const emit = defineEmits(['submit', 'cancel']);
 const nameInput = ref(null);
 const phoneError = ref('');
 const form = reactive(createForm(props.initial));
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 const typeOptions = CONTACT_TYPE_OPTIONS;
 
@@ -184,6 +183,14 @@ function createForm(value = {}) {
     notes: value.notes || '',
   };
 }
+
+watch(
+  () => form.phone,
+  (value) => {
+    if (!phoneError.value) return;
+    if (!value || isValidE164(value)) phoneError.value = '';
+  },
+);
 
 function onSubmit() {
   phoneError.value = '';

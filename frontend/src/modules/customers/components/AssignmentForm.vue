@@ -21,9 +21,7 @@
           :disabled="loading || Boolean(initial.uuid)"
           @change="onApplicationChange"
         />
-        <p v-if="errors.application_id" class="mt-1 text-xs text-rose-600">
-          {{ errors.application_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.application_id?.[0] || ''" />
       </div>
 
       <div>
@@ -146,9 +144,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="errors.expires_at" class="mt-1 text-xs text-rose-600">
-          {{ errors.expires_at[0] }}
-        </p>
+        <FieldError :message="displayErrors.expires_at?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -180,7 +176,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { applicationService } from '@/modules/applications/services/applicationService';
 import { environmentService } from '@/modules/applications/services/environmentService';
@@ -217,6 +215,7 @@ const subscriptions = ref([]);
 const licenses = ref([]);
 const slaPolicies = ref([]);
 const form = reactive(createForm(props.initial));
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 const ownershipOptions = OWNERSHIP_OPTIONS.map((option) => ({ value: option.value, label: option.label }));
 const ownershipDescription = computed(

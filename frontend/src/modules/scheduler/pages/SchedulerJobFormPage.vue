@@ -21,7 +21,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
-            <p v-if="fieldErrors.name" class="mt-1 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
+            <FieldError :message="fieldErrors.name?.[0] || ''" />
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Job Type</span>
@@ -32,7 +32,7 @@
             >
               <option v-for="item in store.catalog.job_types" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
-            <p v-if="fieldErrors.job_type" class="mt-1 text-xs text-rose-600">{{ fieldErrors.job_type[0] }}</p>
+            <FieldError :message="fieldErrors.job_type?.[0] || ''" />
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Handler</span>
@@ -44,7 +44,7 @@
             >
               <option v-for="item in store.catalog.handlers" :key="item.value" :value="item.value">{{ item.label }}</option>
             </select>
-            <p v-if="fieldErrors.handler_key" class="mt-1 text-xs text-rose-600">{{ fieldErrors.handler_key[0] }}</p>
+            <FieldError :message="fieldErrors.handler_key?.[0] || ''" />
           </label>
           <label v-if="needsCron" class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Cron Expression</span>
@@ -54,9 +54,7 @@
               :class="fieldClass('schedule_cron')"
               placeholder="0 6 * * *"
             />
-            <p v-if="fieldErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
-              {{ fieldErrors.schedule_cron[0] }}
-            </p>
+            <FieldError :message="fieldErrors.schedule_cron?.[0] || ''" />
           </label>
           <label v-if="form.job_type === 'one_time'" class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Run At</span>
@@ -66,7 +64,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('run_at')"
             />
-            <p v-if="fieldErrors.run_at" class="mt-1 text-xs text-rose-600">{{ fieldErrors.run_at[0] }}</p>
+            <FieldError :message="fieldErrors.run_at?.[0] || ''" />
           </label>
           <label v-if="form.job_type === 'delayed'" class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Delay (Minutes)</span>
@@ -77,9 +75,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('delay_minutes')"
             />
-            <p v-if="fieldErrors.delay_minutes" class="mt-1 text-xs text-rose-600">
-              {{ fieldErrors.delay_minutes[0] }}
-            </p>
+            <FieldError :message="fieldErrors.delay_minutes?.[0] || ''" />
           </label>
           <label class="block text-sm">
             <span class="mb-1.5 block font-medium text-slate-700">Queue</span>
@@ -119,7 +115,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';
 import { useToast } from '@/composables/useToast';
@@ -131,7 +129,6 @@ const store = useSchedulerStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
-const fieldErrors = ref({});
 const isEdit = computed(() => Boolean(route.params.id));
 const needsCron = computed(() => ['cron', 'recurring', 'queue'].includes(form.job_type));
 
@@ -149,6 +146,8 @@ const form = reactive({
   without_overlapping: true,
   payload: {},
 });
+
+const { localErrors: fieldErrors } = useFieldErrors(form, () => ({}), () => collectErrors());
 
 watch(
   () => store.error,
@@ -186,7 +185,7 @@ function hydrate(job) {
   fieldErrors.value = {};
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.name || '').trim()) {
@@ -216,6 +215,11 @@ function validate() {
     }
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   fieldErrors.value = next;
   return Object.keys(next).length === 0;
 }

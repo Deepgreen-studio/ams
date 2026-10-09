@@ -10,9 +10,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('company_name')"
         />
-        <p v-if="displayErrors.company_name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_name[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_name?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Legal Name</label>
@@ -23,9 +21,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('legal_name')"
         />
-        <p v-if="displayErrors.legal_name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.legal_name[0] }}
-        </p>
+        <FieldError :message="displayErrors.legal_name?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Company Code</FormLabel>
@@ -40,9 +36,7 @@
         <p class="mt-1 text-xs text-slate-500">
           {{ codeLocked ? 'Company code cannot be changed.' : 'Used for internal references, integrations, and support. It stays the same after creation.' }}
         </p>
-        <p v-if="displayErrors.company_code" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_code[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_code?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Registration Number</label>
@@ -53,9 +47,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('registration_number')"
         />
-        <p v-if="displayErrors.registration_number" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.registration_number[0] }}
-        </p>
+        <FieldError :message="displayErrors.registration_number?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Tax Number</label>
@@ -75,9 +67,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('email')"
         />
-        <p v-if="displayErrors.email" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.email[0] }}
-        </p>
+        <FieldError :message="displayErrors.email?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Phone</FormLabel>
@@ -85,17 +75,13 @@
           v-model="form.phone"
           :error="Boolean(displayErrors.phone)"
         />
-        <p v-if="displayErrors.phone" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.phone[0] }}
-        </p>
+        <FieldError :message="displayErrors.phone?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Currency</FormLabel>
         <SelectBox v-model="form.currency" size="lg" :options="currencyOptions" />
         <p class="mt-1 text-xs text-slate-500">Set explicitly for this company.</p>
-        <p v-if="displayErrors.currency" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.currency[0] }}
-        </p>
+        <FieldError :message="displayErrors.currency?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
@@ -110,9 +96,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('state')"
         />
-        <p v-if="displayErrors.state" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.state[0] }}
-        </p>
+        <FieldError :message="displayErrors.state?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>City</FormLabel>
@@ -123,9 +107,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('city')"
         />
-        <p v-if="displayErrors.city" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.city[0] }}
-        </p>
+        <FieldError :message="displayErrors.city?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Address</FormLabel>
@@ -136,9 +118,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('address')"
         />
-        <p v-if="displayErrors.address" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.address[0] }}
-        </p>
+        <FieldError :message="displayErrors.address?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Postal Code</FormLabel>
@@ -149,9 +129,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('postal_code')"
         />
-        <p v-if="displayErrors.postal_code" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.postal_code[0] }}
-        </p>
+        <FieldError :message="displayErrors.postal_code?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Logo</label>
@@ -175,9 +153,7 @@
           </label>
           <span class="min-w-0 truncate text-xs text-slate-500">{{ logoName || 'JPG, PNG or WebP · Max 2MB' }}</span>
         </div>
-        <p v-if="displayErrors.logo" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.logo[0] }}
-        </p>
+        <FieldError :message="displayErrors.logo?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Website</label>
@@ -188,9 +164,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('website')"
         />
-        <p v-if="displayErrors.website" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.website[0] }}
-        </p>
+        <FieldError :message="displayErrors.website?.[0] || ''" />
       </div>
     </div>
 
@@ -215,7 +189,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -236,7 +212,6 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const auth = useAuthStore();
 const codeLocked = computed(() => Boolean(props.initial?.uuid || props.initial?.id) && !auth.isSuperAdmin);
-const localErrors = ref({});
 const logoFile = ref(null);
 const logoPreview = ref('');
 const logoName = computed(() => logoFile.value?.name || '');
@@ -263,6 +238,7 @@ const currencyOptionsBase = [
 ];
 
 const form = reactive(createForm(props.initial));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 watch(() => props.initial, (value) => Object.assign(form, createForm(value)), { deep: true });
 
@@ -274,19 +250,6 @@ watch(
     }
   },
 );
-
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
-);
-
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
 
 function withCurrentOption(options, current) {
   if (current && !options.some((option) => option.value === current)) {
@@ -322,7 +285,7 @@ function fieldClass(field) {
   return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.company_name || '').trim()) {
@@ -379,6 +342,11 @@ function validate() {
     next.logo = localErrors.value.logo;
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

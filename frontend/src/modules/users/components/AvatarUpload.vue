@@ -43,11 +43,12 @@
       </button>
     </div>
 
-    <p v-if="error" class="mt-3 text-xs text-rose-600">{{ error }}</p>
+    <FieldError :message="error" />
   </div>
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, ref, watch } from 'vue';
 import UserAvatar from '@/components/ui/UserAvatar.vue';
 import { getUserAvatarUrl } from '@/utils/avatar';

@@ -151,7 +151,7 @@
               :disabled="departmentsStore.saving"
             />
           </div>
-          <p v-if="formError" class="text-sm text-rose-600">{{ formError }}</p>
+          <FieldError :message="formError" />
           <div class="flex justify-end gap-2 pt-1">
             <button
               type="button"
@@ -185,6 +185,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/vue/24/outline';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
@@ -218,6 +219,15 @@ const form = reactive({
   note: '',
   status: 'active',
 });
+
+watch(
+  () => [form.department_name, form.company_id],
+  () => {
+    if (form.department_name.trim() && form.company_id && /required/i.test(formError.value)) {
+      formError.value = '';
+    }
+  },
+);
 
 const department = computed(() => departmentsStore.currentDepartment);
 const departmentName = computed(

@@ -12,7 +12,7 @@
         Title
       </label>
       <input v-model="form.title" type="text" required class="input" :disabled="loading" />
-      <p v-if="errors.title" class="mt-1 text-xs text-rose-600">{{ errors.title[0] }}</p>
+      <FieldError :message="displayErrors.title?.[0] || ''" />
     </div>
 
     <div>
@@ -77,7 +77,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -104,6 +106,8 @@ const form = reactive({
   due_at: '',
   remind_at: '',
 });
+
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 watch(
   () => props.initial,

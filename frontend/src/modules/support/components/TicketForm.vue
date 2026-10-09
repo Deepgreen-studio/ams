@@ -10,9 +10,7 @@
           :disabled="Boolean(initial.uuid)"
           :error="Boolean(displayErrors.company_id)"
         />
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -24,9 +22,7 @@
           :disabled="!form.company_id"
           :error="Boolean(displayErrors.customer_id)"
         />
-        <p v-if="displayErrors.customer_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.customer_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.customer_id?.[0] || ''" />
       </div>
 
       <div>
@@ -38,9 +34,7 @@
           :disabled="!form.company_id"
           :error="Boolean(displayErrors.application_id)"
         />
-        <p v-if="displayErrors.application_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.application_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.application_id?.[0] || ''" />
       </div>
 
       <div>
@@ -51,9 +45,7 @@
           :options="categoryOptions"
           :error="Boolean(displayErrors.category)"
         />
-        <p v-if="displayErrors.category" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.category[0] }}
-        </p>
+        <FieldError :message="displayErrors.category?.[0] || ''" />
       </div>
 
       <div>
@@ -64,9 +56,7 @@
           :options="priorityOptions"
           :error="Boolean(displayErrors.priority)"
         />
-        <p v-if="displayErrors.priority" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.priority[0] }}
-        </p>
+        <FieldError :message="displayErrors.priority?.[0] || ''" />
       </div>
 
       <div>
@@ -77,9 +67,7 @@
           :options="sourceOptions"
           :error="Boolean(displayErrors.source)"
         />
-        <p v-if="displayErrors.source" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.source[0] }}
-        </p>
+        <FieldError :message="displayErrors.source?.[0] || ''" />
       </div>
 
       <div v-if="initial.uuid">
@@ -90,9 +78,7 @@
           :options="statusOptions"
           :error="Boolean(displayErrors.status)"
         />
-        <p v-if="displayErrors.status" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.status[0] }}
-        </p>
+        <FieldError :message="displayErrors.status?.[0] || ''" />
       </div>
 
       <div>
@@ -113,9 +99,7 @@
           class="h-10 w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
           :class="fieldClass('subject')"
         />
-        <p v-if="displayErrors.subject" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.subject[0] }}
-        </p>
+        <FieldError :message="displayErrors.subject?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -126,9 +110,7 @@
           class="w-full rounded-[12px] border border-zinc-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-0"
           :class="fieldClass('description')"
         />
-        <p v-if="displayErrors.description" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.description[0] }}
-        </p>
+        <FieldError :message="displayErrors.description?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -142,9 +124,7 @@
             </span>
           </span>
         </label>
-        <p v-if="displayErrors.involves_personal_data" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.involves_personal_data[0] }}
-        </p>
+        <FieldError :message="displayErrors.involves_personal_data?.[0] || ''" />
       </div>
     </div>
 
@@ -169,7 +149,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { useToast } from '@/composables/useToast';
 import { applicationService } from '@/modules/applications/services/applicationService';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -198,8 +180,6 @@ const companies = ref([]);
 const customers = ref([]);
 const applications = ref([]);
 const users = ref([]);
-const localErrors = ref({});
-
 const form = reactive({
   company_id: '',
   customer_id: '',
@@ -214,10 +194,7 @@ const form = reactive({
   involves_personal_data: false,
 });
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 const filteredCustomers = computed(() => {
   if (!form.company_id) {
@@ -297,14 +274,6 @@ watch(
 );
 
 watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true }
-);
-
-watch(
   () => form.company_id,
   async (companyId, previous) => {
     if (previous && companyId !== previous) {
@@ -367,7 +336,7 @@ async function loadUsers() {
   }
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.company_id || '').trim()) {
@@ -398,6 +367,11 @@ function validate() {
     next.description = ['The description field is required.'];
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

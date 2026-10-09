@@ -204,6 +204,7 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { RouterLink, useRoute } from 'vue-router';
 import {
   CheckCircleIcon,
@@ -235,6 +236,8 @@ const lookup = reactive({
   subject_email: '',
   subject_name: '',
 });
+
+const { fieldMessage: fieldError } = useFieldErrors(lookup, () => store.fieldErrors);
 
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
@@ -355,10 +358,6 @@ onMounted(async () => {
     await onLoad();
   }
 });
-
-function fieldError(key) {
-  return store.fieldErrors?.[key]?.[0] || '';
-}
 
 function displayStatus(row) {
   if (row.granted !== row.originalGranted) {

@@ -19,7 +19,7 @@
           :options="planTypeOptions"
           :disabled="loading"
         />
-        <p v-if="errors.plan_type" class="mt-1 text-xs text-rose-600">{{ errors.plan_type[0] }}</p>
+        <FieldError :message="displayErrors.plan_type?.[0] || ''" />
       </div>
 
       <div>
@@ -178,7 +178,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { toDateTimeLocalInput } from '@/utils/appTimezone';
 
@@ -235,6 +237,8 @@ const form = reactive({
   notes: '',
   features: [],
 });
+
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 const featuresText = ref('');
 

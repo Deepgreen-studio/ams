@@ -11,9 +11,7 @@
           :error="Boolean(displayErrors.company_id)"
           @change="onCompanyChange"
         />
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -26,9 +24,7 @@
           :disabled="!form.company_id && !hideCompany"
           :error="Boolean(displayErrors.integration_id)"
         />
-        <p v-if="displayErrors.integration_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.integration_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.integration_id?.[0] || ''" />
       </div>
 
       <div>
@@ -40,9 +36,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
-        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.name[0] }}
-        </p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
 
       <div class="flex items-end">
@@ -86,10 +80,8 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 font-mono text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('schedule_cron')"
         />
-        <p v-if="displayErrors.schedule_cron" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.schedule_cron[0] }}
-        </p>
-        <p v-else class="mt-1 text-xs text-slate-400">Standard five-field cron, for example every 15 minutes.</p>
+        <FieldError :message="displayErrors.schedule_cron?.[0] || ''" />
+        <p class="mt-1 text-xs text-slate-400">Standard five-field cron, for example every 15 minutes.</p>
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Source Path</label>
@@ -128,10 +120,8 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('batch_size')"
         />
-        <p v-if="displayErrors.batch_size" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.batch_size[0] }}
-        </p>
-        <p v-else class="mt-1 text-xs text-slate-400">Records processed per batch (1–500).</p>
+        <FieldError :message="displayErrors.batch_size?.[0] || ''" />
+        <p class="mt-1 text-xs text-slate-400">Records processed per batch (1–500).</p>
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Cursor Field</label>
@@ -161,10 +151,8 @@
           class="w-full rounded-xl border border-slate-200 bg-zinc-50 px-3.5 py-3 font-mono text-xs text-slate-800 shadow-none outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-0"
           :class="fieldClass('options')"
         />
-        <p v-if="displayErrors.options" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.options[0] }}
-        </p>
-        <p v-else class="mt-1 text-xs text-slate-400">Must be a valid JSON array of records.</p>
+        <FieldError :message="displayErrors.options?.[0] || ''" />
+        <p class="mt-1 text-xs text-slate-400">Must be a valid JSON array of records.</p>
       </div>
     </div>
 
@@ -189,7 +177,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { useToast } from '@/composables/useToast';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { companyService } from '@/modules/companies/services/companyService';
@@ -209,8 +199,8 @@ const toast = useToast();
 const companies = ref([]);
 const integrations = ref([]);
 const sampleRecordsText = ref('');
-const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 const directionOptions = [
   { value: 'import', label: 'Import' },
@@ -250,11 +240,6 @@ const integrationOptions = computed(() =>
   })),
 );
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
-
 watch(
   () => props.initial,
   (value) => {
@@ -274,14 +259,6 @@ watch(
       toast.error(message, 'Validation Failed');
     }
   },
-);
-
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
 );
 
 onMounted(async () => {
@@ -338,7 +315,7 @@ function onCompanyChange() {
   loadIntegrations();
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!props.hideCompany && !String(form.company_id || '').trim()) {
@@ -373,6 +350,11 @@ function validate() {
     }
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

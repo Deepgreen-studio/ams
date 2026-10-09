@@ -10,9 +10,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           @input="onDisplayNameInput"
         />
-        <p v-if="errors.display_name" class="mt-1 text-xs text-rose-600">
-          {{ errors.display_name[0] }}
-        </p>
+        <FieldError :message="displayErrors.display_name?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Machine Name</label>
@@ -24,7 +22,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0 disabled:bg-slate-50"
           @input="nameTouched = true"
         />
-        <p v-if="errors.name" class="mt-1 text-xs text-rose-600">{{ errors.name[0] }}</p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
@@ -58,7 +56,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
@@ -74,6 +74,7 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 
 const form = reactive(createForm(props.initial));
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 const nameTouched = ref(Boolean(props.initial?.name));
 
 watch(

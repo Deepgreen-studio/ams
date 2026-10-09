@@ -52,7 +52,7 @@
             class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
             placeholder="Write a reply…"
           />
-          <p v-if="replyError" class="mt-2 text-sm text-rose-600">{{ replyError }}</p>
+          <FieldError :message="replyError" />
           <div class="mt-3 flex justify-end">
             <button
               type="button"
@@ -70,6 +70,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import DOMPurify from 'dompurify';

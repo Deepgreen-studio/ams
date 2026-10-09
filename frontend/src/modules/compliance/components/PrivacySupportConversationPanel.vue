@@ -80,7 +80,7 @@
           :disabled="saving"
         />
 
-        <p v-if="localError" class="mt-2 text-sm text-rose-600">{{ localError }}</p>
+        <FieldError :message="localError" />
 
         <div class="mt-3 flex justify-end">
           <button
@@ -98,6 +98,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import DOMPurify from 'dompurify';

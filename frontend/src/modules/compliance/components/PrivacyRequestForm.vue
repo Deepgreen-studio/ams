@@ -11,9 +11,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('company_id'))"
         />
-        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('company_id') }}
-        </p>
+        <FieldError :message="fieldError('company_id')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Customer</label>
@@ -25,10 +23,8 @@
           :disabled="loading || !form.company_id"
           :error="Boolean(fieldError('customer_id'))"
         />
-        <p v-if="fieldError('customer_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('customer_id') }}
-        </p>
-        <p v-else class="mt-1 text-xs text-slate-500">
+        <FieldError :message="fieldError('customer_id')" />
+        <p class="mt-1 text-xs text-slate-500">
           Optional. Choosing a customer fills the requester details and links this request.
         </p>
       </div>
@@ -41,9 +37,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('request_type'))"
         />
-        <p v-if="fieldError('request_type')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('request_type') }}
-        </p>
+        <FieldError :message="fieldError('request_type')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Name</label>
@@ -56,9 +50,7 @@
           placeholder="Full name"
           :disabled="loading"
         />
-        <p v-if="fieldError('requester_name')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('requester_name') }}
-        </p>
+        <FieldError :message="fieldError('requester_name')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Email</label>
@@ -71,9 +63,7 @@
           placeholder="name@example.com"
           :disabled="loading"
         />
-        <p v-if="fieldError('requester_email')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('requester_email') }}
-        </p>
+        <FieldError :message="fieldError('requester_email')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Requester Phone</label>
@@ -82,9 +72,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('requester_phone'))"
         />
-        <p v-if="fieldError('requester_phone')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('requester_phone') }}
-        </p>
+        <FieldError :message="fieldError('requester_phone')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Due Date</label>
@@ -94,9 +82,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('due_date')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('due_date') }}
-        </p>
+        <FieldError :message="fieldError('due_date')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign Officer</label>
@@ -117,9 +103,7 @@
           placeholder="Optional context for the DSAR intake."
           :disabled="loading"
         />
-        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('description') }}
-        </p>
+        <FieldError :message="fieldError('description')" />
       </div>
     </div>
 
@@ -144,7 +128,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import { companyService } from '@/modules/companies/services/companyService';
 import { customerService } from '@/modules/customers/services/customerService';
@@ -186,6 +172,8 @@ const form = reactive({
   description: '',
 });
 
+const { fieldMessage: fieldError } = useFieldErrors(form, () => props.fieldErrors);
+
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
     value: company.uuid,
@@ -214,11 +202,6 @@ const officerSelectOptions = computed(() => [
 const canSubmit = computed(() =>
   Boolean(form.company_id && form.request_type && form.requester_name && form.requester_email),
 );
-
-function fieldError(key) {
-  const value = props.fieldErrors?.[key];
-  return Array.isArray(value) ? value[0] : value || '';
-}
 
 watch(
   () => form.company_id,

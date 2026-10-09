@@ -27,7 +27,7 @@
           v-model="model[field.key]"
           size="lg"
           :options="booleanOptions"
-          :error="Boolean(errors[field.key])"
+          :error="Boolean(displayErrors[field.key])"
         />
         <SearchableSelect
           v-else-if="field.searchable"
@@ -44,12 +44,12 @@
           size="lg"
           :options="optionsFor(field)"
           :placeholder="field.placeholder || ''"
-          :error="Boolean(errors[field.key])"
+          :error="Boolean(displayErrors[field.key])"
         />
         <div
           v-else-if="field.type === 'image'"
           class="flex h-12 w-full items-center gap-2 rounded-xl border bg-white pl-2 pr-1.5"
-          :class="errors[field.key] ? 'border-rose-400' : 'border-slate-200'"
+          :class="displayErrors[field.key] ? 'border-rose-400' : 'border-slate-200'"
         >
           <span class="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
             <img
@@ -96,7 +96,7 @@
             autocomplete="new-password"
             class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 pr-11 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="{
-              'border-rose-400 focus:border-rose-500': Boolean(errors[field.key]),
+              'border-rose-400 focus:border-rose-500': Boolean(displayErrors[field.key]),
             }"
             :placeholder="field.placeholder || ''"
             :disabled="loading"
@@ -118,14 +118,12 @@
           :type="field.type || 'text'"
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="{
-            'border-rose-400 focus:border-rose-500': Boolean(errors[field.key]),
+            'border-rose-400 focus:border-rose-500': Boolean(displayErrors[field.key]),
           }"
           :placeholder="field.placeholder || ''"
         />
-        <p v-if="errors[field.key]" class="mt-1.5 text-xs text-rose-600">
-          {{ errors[field.key][0] }}
-        </p>
-        <p v-else-if="field.hint" class="mt-1.5 text-xs text-slate-500">
+        <FieldError :message="displayErrors[field.key]?.[0] || ''" />
+        <p v-if="field.hint" class="mt-1.5 text-xs text-slate-500">
           {{ field.hint }}
         </p>
       </div>
@@ -144,7 +142,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { EyeIcon, EyeSlashIcon, PhotoIcon } from '@heroicons/vue/24/outline';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -168,6 +168,7 @@ const props = defineProps({
 const emit = defineEmits(['submit']);
 
 const model = reactive({});
+const { displayErrors } = useFieldErrors(model, () => props.errors);
 const passwordVisible = reactive({});
 const imagePreview = reactive({});
 const imageNames = reactive({});
@@ -212,7 +213,7 @@ function searchableButtonClass(field) {
   const base =
     'h-12 w-full rounded-xl border bg-white px-3.5 text-sm shadow-none focus:outline-none focus:ring-0';
 
-  if (props.errors[field.key]) {
+  if (displayErrors.value[field.key]) {
     return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
   }
 

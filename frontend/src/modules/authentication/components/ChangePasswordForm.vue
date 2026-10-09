@@ -28,8 +28,8 @@
         :disabled="loading"
         :tone="confirmationTone"
       />
-      <p v-if="confirmationError" class="mt-1.5 text-xs text-rose-600">{{ confirmationError }}</p>
-      <p v-else-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
+      <FieldError :message="confirmationError" />
+        <p v-if="passwordsMatch" class="mt-1.5 text-xs text-emerald-600">Passwords match.</p>
     </div>
 
     <p v-if="successMessage" class="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
@@ -50,6 +50,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import PasswordInput from '@/modules/authentication/components/PasswordInput.vue';

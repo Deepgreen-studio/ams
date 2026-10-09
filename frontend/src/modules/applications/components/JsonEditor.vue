@@ -20,7 +20,7 @@
       @input="$emit('update:modelValue', $event.target.value)"
     />
     <p v-if="hint" class="text-xs text-slate-500">{{ hint }}</p>
-    <p v-if="error" class="text-xs text-rose-600">{{ error }}</p>
+    <FieldError :message="error" />
     <div
       v-if="validation"
       class="rounded-[12px] px-3.5 py-2.5 text-xs ring-1"
@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 defineProps({
   modelValue: { type: String, default: '' },
   label: { type: String, default: 'JSON payload' },

@@ -11,9 +11,7 @@
           :disabled="loading || Boolean(initial?.uuid)"
           :error="Boolean(fieldError('company_id'))"
         />
-        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('company_id') }}
-        </p>
+        <FieldError :message="fieldError('company_id')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Policy Type</label>
@@ -25,9 +23,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('policy_type'))"
         />
-        <p v-if="fieldError('policy_type')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('policy_type') }}
-        </p>
+        <FieldError :message="fieldError('policy_type')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
@@ -40,9 +36,7 @@
           placeholder="Policy title"
           :disabled="loading"
         />
-        <p v-if="fieldError('title')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('title') }}
-        </p>
+        <FieldError :message="fieldError('title')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
@@ -54,9 +48,7 @@
           placeholder="Optional summary for reviewers"
           :disabled="loading"
         />
-        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('description') }}
-        </p>
+        <FieldError :message="fieldError('description')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Body</label>
@@ -68,9 +60,7 @@
           placeholder="Policy content"
           :disabled="loading"
         />
-        <p v-if="fieldError('body')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('body') }}
-        </p>
+        <FieldError :message="fieldError('body')" />
       </div>
       <div v-if="initial?.uuid" class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Change Summary</label>
@@ -82,9 +72,7 @@
           placeholder="Why this revision exists (stored on the new version)"
           :disabled="loading"
         />
-        <p v-if="fieldError('change_summary')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('change_summary') }}
-        </p>
+        <FieldError :message="fieldError('change_summary')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Effective At</label>
@@ -94,9 +82,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('effective_at')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('effective_at') }}
-        </p>
+        <FieldError :message="fieldError('effective_at')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Review Due</label>
@@ -106,9 +92,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('review_due_at')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('review_due_at') }}
-        </p>
+        <FieldError :message="fieldError('review_due_at')" />
       </div>
     </div>
 
@@ -133,7 +117,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { companyService } from '@/modules/companies/services/companyService';
 import { policyTypeOptions } from '@/modules/compliance/utils/policyOptions';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -158,6 +144,8 @@ const form = reactive({
   review_due_at: '',
 });
 
+const { fieldMessage: fieldError } = useFieldErrors(form, () => props.fieldErrors);
+
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
     value: company.uuid,
@@ -168,11 +156,6 @@ const companySelectOptions = computed(() =>
 const canSubmit = computed(() =>
   Boolean(form.title && form.policy_type && form.body && (props.initial?.uuid || form.company_id)),
 );
-
-function fieldError(key) {
-  const value = props.fieldErrors?.[key];
-  return Array.isArray(value) ? value[0] : value || '';
-}
 
 function hydrate() {
   const item = props.initial || {};

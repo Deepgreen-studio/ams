@@ -11,9 +11,9 @@
           placeholder="Select type"
           wrapper-class="w-full"
           :options="contentTypeOptions"
-          :error="Boolean(errors.content_type_id)"
+          :error="Boolean(displayErrors.content_type_id)"
         />
-        <p v-if="errors.content_type_id" class="mt-1 text-xs text-rose-600">{{ errors.content_type_id[0] }}</p>
+        <FieldError :message="displayErrors.content_type_id?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
@@ -24,12 +24,12 @@
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Title</label>
         <input v-model="form.title" type="text" class="input" required />
-        <p v-if="errors.title" class="mt-1 text-xs text-rose-600">{{ errors.title[0] }}</p>
+        <FieldError :message="displayErrors.title?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1 block text-sm font-medium text-slate-700">Slug</label>
         <input v-model="form.slug" type="text" class="input" placeholder="auto-generated if empty" />
-        <p v-if="errors.slug" class="mt-1 text-xs text-rose-600">{{ errors.slug[0] }}</p>
+        <FieldError :message="displayErrors.slug?.[0] || ''" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1 block text-sm font-medium text-slate-700">Categories</label>
@@ -87,7 +87,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
 const props = defineProps({
@@ -125,6 +127,8 @@ const form = reactive({
   sort_order: 0,
   tagsInput: '',
 });
+
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 watch(
   () => props.initial,

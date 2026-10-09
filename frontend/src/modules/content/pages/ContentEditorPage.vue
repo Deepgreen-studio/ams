@@ -222,7 +222,7 @@
               @update:json="form.editor_json = $event"
               @upload-error="uploadError = $event"
             />
-            <p v-if="uploadError" class="mt-2 text-xs text-rose-600">{{ uploadError }}</p>
+            <FieldError :message="uploadError" />
           </div>
         </section>
 
@@ -434,6 +434,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 // import PageHeader from '@/components/ui/PageHeader.vue';

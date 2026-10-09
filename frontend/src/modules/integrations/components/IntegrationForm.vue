@@ -11,9 +11,7 @@
           :disabled="Boolean(initial.uuid)"
           :error="Boolean(displayErrors.company_id)"
         />
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -25,9 +23,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
-        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.name[0] }}
-        </p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
 
       <div>
@@ -39,9 +35,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
-        <p v-if="displayErrors.slug" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.slug[0] }}
-        </p>
+        <FieldError :message="displayErrors.slug?.[0] || ''" />
       </div>
 
       <div>
@@ -52,9 +46,7 @@
           :options="typeOptions"
           :error="Boolean(displayErrors.type)"
         />
-        <p v-if="displayErrors.type" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.type[0] }}
-        </p>
+        <FieldError :message="displayErrors.type?.[0] || ''" />
       </div>
 
       <div>
@@ -65,9 +57,7 @@
           :options="authOptions"
           :error="Boolean(displayErrors.authentication_type)"
         />
-        <p v-if="displayErrors.authentication_type" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.authentication_type[0] }}
-        </p>
+        <FieldError :message="displayErrors.authentication_type?.[0] || ''" />
       </div>
 
       <div>
@@ -84,9 +74,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('base_url')"
         />
-        <p v-if="displayErrors.base_url" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.base_url[0] }}
-        </p>
+        <FieldError :message="displayErrors.base_url?.[0] || ''" />
       </div>
 
       <div>
@@ -109,9 +97,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('timeout')"
         />
-        <p v-if="displayErrors.timeout" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.timeout[0] }}
-        </p>
+        <FieldError :message="displayErrors.timeout?.[0] || ''" />
       </div>
 
       <div>
@@ -124,9 +110,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('retry_attempts')"
         />
-        <p v-if="displayErrors.retry_attempts" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.retry_attempts[0] }}
-        </p>
+        <FieldError :message="displayErrors.retry_attempts?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -161,7 +145,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
@@ -179,8 +165,8 @@ const props = defineProps({
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const companies = ref([]);
-const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 const typeOptions = [
   { value: 'rest_api', label: 'REST API' },
@@ -228,19 +214,6 @@ watch(
   },
 );
 
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
-);
-
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
-
 onMounted(async () => {
   if (props.hideCompany || props.initial?.uuid) return;
   try {
@@ -282,7 +255,7 @@ function isValidUrl(value) {
   }
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!props.hideCompany && !String(form.company_id || '').trim()) {
@@ -330,6 +303,11 @@ function validate() {
     }
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

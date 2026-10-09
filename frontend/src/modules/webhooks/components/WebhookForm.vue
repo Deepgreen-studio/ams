@@ -11,9 +11,7 @@
           :disabled="Boolean(initial.uuid)"
           :error="Boolean(displayErrors.company_id)"
         />
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -25,9 +23,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
-        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.name[0] }}
-        </p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
 
       <div>
@@ -54,9 +50,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('url')"
         />
-        <p v-if="displayErrors.url" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.url[0] }}
-        </p>
+        <FieldError :message="displayErrors.url?.[0] || ''" />
       </div>
 
       <div>
@@ -84,9 +78,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('timeout')"
         />
-        <p v-if="displayErrors.timeout" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.timeout[0] }}
-        </p>
+        <FieldError :message="displayErrors.timeout?.[0] || ''" />
       </div>
 
       <div>
@@ -99,9 +91,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('retry_attempts')"
         />
-        <p v-if="displayErrors.retry_attempts" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.retry_attempts[0] }}
-        </p>
+        <FieldError :message="displayErrors.retry_attempts?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -161,7 +151,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { useToast } from '@/composables/useToast';
@@ -180,8 +172,8 @@ const toast = useToast();
 
 const companies = ref([]);
 const eventsText = ref('');
-const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 const directionOptions = [
   { value: 'outgoing', label: 'Outgoing' },
@@ -208,11 +200,6 @@ const companyOptions = computed(() =>
   })),
 );
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
-
 watch(
   () => props.initial,
   (value) => {
@@ -230,14 +217,6 @@ watch(
       toast.error(message, 'Validation Failed');
     }
   },
-);
-
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
 );
 
 onMounted(async () => {
@@ -279,7 +258,7 @@ function isValidUrl(value) {
   }
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!props.hideCompany && !String(form.company_id || '').trim()) {
@@ -316,6 +295,11 @@ function validate() {
     }
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

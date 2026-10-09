@@ -74,11 +74,12 @@
       Enable MFA
     </button>
 
-    <p v-if="error" class="mt-3 text-sm text-rose-600">{{ error }}</p>
+    <FieldError :message="error" />
   </section>
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, ref } from 'vue';
 import { userService } from '@/modules/users/services/userService';
 

@@ -25,9 +25,7 @@
         <p v-else-if="!subscriptionOptions.length" class="mt-1 text-xs text-amber-700">
           No subscriptions found for this customer. Create a subscription first.
         </p>
-        <p v-if="errors.subscription_id" class="mt-1 text-xs text-rose-600">
-          {{ errors.subscription_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.subscription_id?.[0] || ''" />
       </div>
 
       <div>
@@ -106,7 +104,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { toDateTimeLocalInput } from '@/utils/appTimezone';
 import { subscriptionService } from '@/modules/customers/services/subscriptionService';
@@ -143,6 +143,8 @@ const form = reactive({
   notes: '',
   features: [],
 });
+
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 const featuresText = ref('');
 

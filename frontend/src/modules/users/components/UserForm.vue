@@ -15,7 +15,7 @@
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('first_name')"
           />
-          <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
+          <FieldError :message="displayErrors.first_name?.[0] || ''" />
         </div>
         <div>
           <FormLabel required>Last Name</FormLabel>
@@ -26,7 +26,7 @@
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('last_name')"
           />
-          <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
+          <FieldError :message="displayErrors.last_name?.[0] || ''" />
         </div>
         <div>
           <FormLabel required>Email</FormLabel>
@@ -37,7 +37,7 @@
             class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('email')"
           />
-          <p v-if="errors.email" class="mt-1 text-xs text-rose-600">{{ errors.email[0] }}</p>
+          <FieldError :message="displayErrors.email?.[0] || ''" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
@@ -45,7 +45,7 @@
             v-model="form.phone"
             :error="Boolean(fieldError('phone'))"
           />
-          <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
+          <FieldError :message="fieldError('phone')" />
         </div>
       </div>
     </section>
@@ -60,7 +60,7 @@
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('first_name')"
         />
-        <p v-if="errors.first_name" class="mt-1 text-xs text-rose-600">{{ errors.first_name[0] }}</p>
+        <FieldError :message="displayErrors.first_name?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Last Name</FormLabel>
@@ -71,7 +71,7 @@
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('last_name')"
         />
-        <p v-if="errors.last_name" class="mt-1 text-xs text-rose-600">{{ errors.last_name[0] }}</p>
+        <FieldError :message="displayErrors.last_name?.[0] || ''" />
       </div>
       <div>
         <FormLabel required>Email</FormLabel>
@@ -82,7 +82,7 @@
           class="w-full h-12 rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('email')"
         />
-        <p v-if="errors.email" class="mt-1 text-xs text-rose-600">{{ errors.email[0] }}</p>
+        <FieldError :message="displayErrors.email?.[0] || ''" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Phone</label>
@@ -90,7 +90,7 @@
           v-model="form.phone"
           :error="Boolean(fieldError('phone'))"
         />
-        <p v-if="fieldError('phone')" class="mt-1 text-xs text-rose-600">{{ fieldError('phone') }}</p>
+        <FieldError :message="fieldError('phone')" />
       </div>
       <div v-if="layout !== 'profile'">
         <FormLabel required>Company</FormLabel>
@@ -101,7 +101,7 @@
           search-placeholder="Search company…"
           :button-class="companyButtonClass"
         />
-        <p v-if="errors.company_id" class="mt-1 text-xs text-rose-600">{{ errors.company_id[0] }}</p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
       <div v-if="showStatus">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
@@ -121,7 +121,7 @@
           search-placeholder="Search department…"
           :button-class="departmentButtonClass"
         />
-        <p v-if="errors.department_id" class="mt-1 text-xs text-rose-600">{{ errors.department_id[0] }}</p>
+        <FieldError :message="displayErrors.department_id?.[0] || ''" />
       </div>
       <div v-if="layout !== 'profile'">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Team</label>
@@ -153,7 +153,7 @@
           :error="Boolean(fieldError('roles'))"
         />
         <p class="mt-1 text-xs text-slate-500">Each user has one role. Permissions are enforced on the server.</p>
-        <p v-if="fieldError('roles')" class="mt-1 text-xs text-rose-600">{{ fieldError('roles') }}</p>
+        <FieldError :message="fieldError('roles')" />
       </div>
     </div>
 
@@ -189,7 +189,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import PhoneInput from '@/components/ui/PhoneInput.vue';
 import SearchableSelect from '@/components/ui/SearchableSelect.vue';
@@ -254,7 +256,11 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 
 const form = reactive(createForm(props.initial));
-const localErrors = ref({});
+const { localErrors, displayErrors, fieldMessage: fieldError } = useFieldErrors(
+  form,
+  () => props.errors,
+  () => collectErrors(),
+);
 
 const invitationNotice = computed(() => {
   if (props.initial?.invitation_status === 'pending') {
@@ -368,7 +374,7 @@ const departmentButtonClass = computed(() => {
     return `${base} border-slate-200 text-slate-400`;
   }
 
-  if (props.errors.department_id) {
+  if (displayErrors.value.department_id) {
     return `${base} border-rose-400 text-slate-900 focus:border-rose-500`;
   }
 
@@ -436,14 +442,6 @@ watch(
   }
 );
 
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true }
-);
-
 function keepCurrentAssignments(departments, locations) {
   const assigned = props.initial || {};
 
@@ -480,10 +478,6 @@ function keepCurrentAssignments(departments, locations) {
       status: 'inactive',
     });
   }
-}
-
-function fieldError(field) {
-  return localErrors.value?.[field]?.[0] || props.errors?.[field]?.[0] || '';
 }
 
 function resolveInitialRole(value = {}) {
@@ -523,21 +517,27 @@ function fieldClass(field) {
   return fieldError(field) ? 'border-rose-400 focus:border-rose-500 focus:ring-0' : '';
 }
 
-function onSubmit() {
-  const payload = { ...form };
+function collectErrors() {
   const nextErrors = {};
 
-  if (payload.phone && !isValidE164(payload.phone)) {
+  if (form.phone && !isValidE164(form.phone)) {
     nextErrors.phone = [PHONE_INVALID_MESSAGE];
   }
 
-  if (props.showRole && !payload.role) {
+  if (props.showRole && !form.role) {
     nextErrors.roles = ['The role field is required.'];
   }
 
-  if (props.layout !== 'profile' && !payload.company_id) {
+  if (props.layout !== 'profile' && !form.company_id) {
     nextErrors.company_id = ['The company field is required.'];
   }
+
+  return nextErrors;
+}
+
+function onSubmit() {
+  const payload = { ...form };
+  const nextErrors = collectErrors();
 
   if (Object.keys(nextErrors).length) {
     localErrors.value = nextErrors;

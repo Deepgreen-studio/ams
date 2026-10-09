@@ -11,9 +11,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('company_id'))"
         />
-        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('company_id') }}
-        </p>
+        <FieldError :message="fieldError('company_id')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Consent Type</label>
@@ -26,9 +24,7 @@
           :error="Boolean(fieldError('consent_type_id'))"
         />
         <p v-if="selectedTypeHint" class="mt-1.5 text-xs text-slate-500">{{ selectedTypeHint }}</p>
-        <p v-else-if="fieldError('consent_type_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('consent_type_id') }}
-        </p>
+        <FieldError :message="fieldError('consent_type_id')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Subject Name</label>
@@ -52,9 +48,7 @@
           required
           :disabled="loading"
         />
-        <p v-if="fieldError('subject_email')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('subject_email') }}
-        </p>
+        <FieldError :message="fieldError('subject_email')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Source</label>
@@ -111,7 +105,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { companyService } from '@/modules/companies/services/companyService';
 import { consentService } from '@/modules/compliance/services/consentService';
 import { consentSourceOptions } from '@/modules/compliance/utils/consentOptions';
@@ -136,6 +132,8 @@ const form = reactive({
   granted: true,
   notes: '',
 });
+
+const { fieldMessage: fieldError } = useFieldErrors(form, () => props.fieldErrors);
 
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
@@ -196,11 +194,6 @@ onMounted(async () => {
     types.value = [];
   }
 });
-
-function fieldError(key) {
-  const value = props.fieldErrors?.[key];
-  return Array.isArray(value) ? value[0] : value || '';
-}
 
 function onSubmit() {
   if (!canSubmit.value || props.loading) {

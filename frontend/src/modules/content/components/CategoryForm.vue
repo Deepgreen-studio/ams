@@ -17,9 +17,7 @@
             class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
             :class="fieldClass('name')"
           />
-          <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.name[0] }}
-          </p>
+          <FieldError :message="displayErrors.name?.[0] || ''" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-slug">
@@ -33,9 +31,7 @@
             :class="fieldClass('slug')"
             placeholder="auto-generated if empty"
           />
-          <p v-if="displayErrors.slug" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.slug[0] }}
-          </p>
+          <FieldError :message="displayErrors.slug?.[0] || ''" />
         </div>
         <div>
           <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-parent">
@@ -57,9 +53,7 @@
               {{ item.name }}
             </option>
           </select>
-          <p v-if="displayErrors.parent_id" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.parent_id[0] }}
-          </p>
+          <FieldError :message="displayErrors.parent_id?.[0] || ''" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
@@ -74,9 +68,7 @@
               class="w-full h-12 rounded-[12px] border border-slate-300 bg-white px-3 text-sm text-slate-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
               :class="fieldClass('sort_order')"
             />
-            <p v-if="displayErrors.sort_order" class="mt-1 text-xs text-rose-600">
-              {{ displayErrors.sort_order[0] }}
-            </p>
+            <FieldError :message="displayErrors.sort_order?.[0] || ''" />
           </div>
           <div>
             <label class="mb-1.5 block text-sm font-medium text-slate-700" for="category-status">
@@ -163,7 +155,9 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue';
+import FieldError from '@/components/ui/FieldError.vue';
+import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { useToast } from '@/composables/useToast';
 
 const props = defineProps({
@@ -176,8 +170,6 @@ const props = defineProps({
 });
 const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
-const localErrors = ref({});
-
 const form = reactive({
   name: '',
   slug: '',
@@ -189,10 +181,7 @@ const form = reactive({
   sort_order: 0,
 });
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 watch(
   () => props.initial,
@@ -219,21 +208,13 @@ watch(
   }
 );
 
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true }
-);
-
 function fieldClass(field) {
   return displayErrors.value?.[field]
     ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-100'
     : '';
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.name || '').trim()) {
@@ -253,6 +234,11 @@ function validate() {
     next.sort_order = ['Sort order must be 0 or greater.'];
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

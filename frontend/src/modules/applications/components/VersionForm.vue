@@ -16,9 +16,7 @@
         <p class="mt-1.5 text-xs text-slate-500">
           Semantic versioning (MAJOR.MINOR.PATCH). Optional leading “v” is accepted.
         </p>
-        <p v-if="errors.version_number" class="mt-1 text-xs text-rose-600">
-          {{ errors.version_number[0] }}
-        </p>
+        <FieldError :message="displayErrors.version_number?.[0] || ''" />
       </div>
 
       <div>
@@ -30,9 +28,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('build_number')"
         />
-        <p v-if="errors.build_number" class="mt-1 text-xs text-rose-600">
-          {{ errors.build_number[0] }}
-        </p>
+        <FieldError :message="displayErrors.build_number?.[0] || ''" />
       </div>
 
       <div>
@@ -41,9 +37,9 @@
           v-model="form.status"
           size="lg"
           :options="statusOptions"
-          :error="Boolean(errors.status)"
+          :error="Boolean(displayErrors.status)"
         />
-        <p v-if="errors.status" class="mt-1 text-xs text-rose-600">{{ errors.status[0] }}</p>
+        <FieldError :message="displayErrors.status?.[0] || ''" />
       </div>
 
       <div>
@@ -54,9 +50,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('release_date')"
         />
-        <p v-if="errors.release_date" class="mt-1 text-xs text-rose-600">
-          {{ errors.release_date[0] }}
-        </p>
+        <FieldError :message="displayErrors.release_date?.[0] || ''" />
       </div>
 
       <div>
@@ -70,9 +64,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('minimum_supported_version')"
         />
-        <p v-if="errors.minimum_supported_version" class="mt-1 text-xs text-rose-600">
-          {{ errors.minimum_supported_version[0] }}
-        </p>
+        <FieldError :message="displayErrors.minimum_supported_version?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -84,9 +76,7 @@
           class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('release_notes')"
         />
-        <p v-if="errors.release_notes" class="mt-1 text-xs text-rose-600">
-          {{ errors.release_notes[0] }}
-        </p>
+        <FieldError :message="displayErrors.release_notes?.[0] || ''" />
       </div>
     </div>
 
@@ -111,7 +101,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import { toDateTimeLocalInput } from '@/utils/appTimezone';
 import { useToast } from '@/composables/useToast';
@@ -137,6 +129,7 @@ const statusOptions = [
 ];
 
 const form = reactive(createForm(props.initial));
+const { displayErrors } = useFieldErrors(form, () => props.errors);
 
 watch(
   () => props.initial,
@@ -173,7 +166,7 @@ function toLocalInput(value) {
 }
 
 function fieldClass(field) {
-  return props.errors?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
+  return displayErrors.value?.[field] ? 'border-rose-400 focus:border-rose-500' : '';
 }
 
 function onSubmit() {

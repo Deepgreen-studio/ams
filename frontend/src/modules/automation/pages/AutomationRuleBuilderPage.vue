@@ -29,7 +29,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
-            <p v-if="fieldErrors.name" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
+            <FieldError :message="fieldErrors.name?.[0] || ''" />
           </label>
 
           <label class="block text-sm">
@@ -40,9 +40,7 @@
               :options="triggerTypeOptions"
               :error="Boolean(fieldErrors.trigger_type)"
             />
-            <p v-if="fieldErrors.trigger_type" class="mt-1.5 text-xs text-rose-600">
-              {{ fieldErrors.trigger_type[0] }}
-            </p>
+            <FieldError :message="fieldErrors.trigger_type?.[0] || ''" />
           </label>
 
           <label v-if="form.trigger_type !== 'schedule'" class="block text-sm md:col-span-2">
@@ -54,9 +52,7 @@
               :options="eventOptions"
               :error="Boolean(fieldErrors.event_key)"
             />
-            <p v-if="fieldErrors.event_key" class="mt-1.5 text-xs text-rose-600">
-              {{ fieldErrors.event_key[0] }}
-            </p>
+            <FieldError :message="fieldErrors.event_key?.[0] || ''" />
           </label>
 
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
@@ -67,9 +63,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 font-mono text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('schedule_cron')"
             />
-            <p v-if="fieldErrors.schedule_cron" class="mt-1.5 text-xs text-rose-600">
-              {{ fieldErrors.schedule_cron[0] }}
-            </p>
+            <FieldError :message="fieldErrors.schedule_cron?.[0] || ''" />
           </label>
 
           <label v-if="form.trigger_type === 'schedule'" class="block text-sm">
@@ -89,9 +83,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('delay_minutes')"
             />
-            <p v-if="fieldErrors.delay_minutes" class="mt-1.5 text-xs text-rose-600">
-              {{ fieldErrors.delay_minutes[0] }}
-            </p>
+            <FieldError :message="fieldErrors.delay_minutes?.[0] || ''" />
           </label>
 
           <label class="block text-sm md:col-span-2">
@@ -208,7 +200,7 @@
           </button>
         </div>
 
-        <p v-if="fieldErrors.actions" class="mb-3 text-xs text-rose-600">{{ fieldErrors.actions[0] }}</p>
+        <FieldError :message="fieldErrors.actions?.[0] || ''" />
 
         <div
           v-if="!form.actions.length"
@@ -310,7 +302,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import { useToast } from '@/composables/useToast';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -322,7 +316,6 @@ const store = useAutomationStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
-const fieldErrors = ref({});
 
 const isEdit = computed(() => Boolean(route.params.id));
 
@@ -346,6 +339,8 @@ const form = reactive({
     },
   ],
 });
+
+const { localErrors: fieldErrors } = useFieldErrors(form, () => ({}), () => collectErrors());
 
 const logicOptions = [
   { value: 'and', label: 'Match ALL (AND)' },
@@ -467,7 +462,7 @@ function hydrate(rule) {
   fieldErrors.value = {};
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.name || '').trim()) {
@@ -497,6 +492,11 @@ function validate() {
     next.actions = ['Add at least one action.'];
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   fieldErrors.value = next;
   return Object.keys(next).length === 0;
 }

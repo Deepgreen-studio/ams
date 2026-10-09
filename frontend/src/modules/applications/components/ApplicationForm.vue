@@ -13,9 +13,7 @@
           @change="onCompanyChange"
         />
         <p class="mt-1 text-xs text-slate-500">This company owns the application.</p>
-        <p v-if="displayErrors.company_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.company_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.company_id?.[0] || ''" />
       </div>
 
       <div>
@@ -26,9 +24,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('name')"
         />
-        <p v-if="displayErrors.name" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.name[0] }}
-        </p>
+        <FieldError :message="displayErrors.name?.[0] || ''" />
       </div>
 
       <div>
@@ -40,9 +36,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('slug')"
         />
-        <p v-if="displayErrors.slug" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.slug[0] }}
-        </p>
+        <FieldError :message="displayErrors.slug?.[0] || ''" />
       </div>
 
       <div>
@@ -56,9 +50,7 @@
           :error="Boolean(platformError)"
         />
         <p class="mt-1 text-xs text-slate-500">Select every platform this application supports.</p>
-        <p v-if="platformError" class="mt-1 text-xs text-rose-600">
-          {{ platformError }}
-        </p>
+        <FieldError :message="platformError" />
       </div>
 
       <div>
@@ -70,9 +62,7 @@
           :options="categoryOptions"
           :error="Boolean(displayErrors.category)"
         />
-        <p v-if="displayErrors.category" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.category[0] }}
-        </p>
+        <FieldError :message="displayErrors.category?.[0] || ''" />
         <div v-if="form.category === 'other'" class="mt-3">
           <FormLabel required>Other category</FormLabel>
           <input
@@ -82,9 +72,7 @@
             class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
             :class="fieldClass('category_custom')"
           />
-          <p v-if="displayErrors.category_custom" class="mt-1 text-xs text-rose-600">
-            {{ displayErrors.category_custom[0] }}
-          </p>
+          <FieldError :message="displayErrors.category_custom?.[0] || ''" />
         </div>
       </div>
 
@@ -108,9 +96,7 @@
           :disabled="!form.company_id && !initial.uuid"
           :error="Boolean(displayErrors.integration_id)"
         />
-        <p v-if="displayErrors.integration_id" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.integration_id[0] }}
-        </p>
+        <FieldError :message="displayErrors.integration_id?.[0] || ''" />
       </div>
 
       <div>
@@ -144,9 +130,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('icon')"
         />
-        <p v-if="displayErrors.icon" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.icon[0] }}
-        </p>
+        <FieldError :message="displayErrors.icon?.[0] || ''" />
       </div>
 
       <div>
@@ -158,9 +142,7 @@
           class="h-12 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           :class="fieldClass('banner')"
         />
-        <p v-if="displayErrors.banner" class="mt-1 text-xs text-rose-600">
-          {{ displayErrors.banner[0] }}
-        </p>
+        <FieldError :message="displayErrors.banner?.[0] || ''" />
       </div>
 
       <div class="md:col-span-2">
@@ -194,7 +176,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 import FormLabel from '@/components/ui/FormLabel.vue';
 import { useToast } from '@/composables/useToast';
@@ -214,8 +198,8 @@ const emit = defineEmits(['submit', 'cancel']);
 const toast = useToast();
 const companies = ref([]);
 const integrations = ref([]);
-const localErrors = ref({});
 const form = reactive(createForm(props.initial));
+const { localErrors, displayErrors } = useFieldErrors(form, () => props.errors, () => collectErrors());
 
 const platformOptions = [
   { value: 'android', label: 'Android' },
@@ -267,11 +251,6 @@ const integrationOptions = computed(() => [
   })),
 ]);
 
-const displayErrors = computed(() => ({
-  ...localErrors.value,
-  ...props.errors,
-}));
-
 const platformError = computed(
   () =>
     displayErrors.value.platforms?.[0]
@@ -296,14 +275,6 @@ watch(
       toast.error(message, 'Validation Failed');
     }
   },
-);
-
-watch(
-  () => props.errors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
 );
 
 onMounted(async () => {
@@ -390,7 +361,7 @@ function isValidUrl(value) {
   }
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!props.hideCompany && !String(form.company_id || '').trim()) {
@@ -423,6 +394,11 @@ function validate() {
     next.banner = ['The banner must be a valid URL.'];
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   localErrors.value = next;
   return Object.keys(next).length === 0;
 }

@@ -92,7 +92,7 @@
             placeholder='{"Accept":"application/json"}'
             class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 font-mono text-xs text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           />
-          <p v-if="headersError" class="mt-1 text-xs text-rose-600">{{ headersError }}</p>
+          <FieldError :message="headersError" />
         </div>
 
         <div>
@@ -105,7 +105,7 @@
             placeholder='{"lang":"en"}'
             class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 font-mono text-xs text-slate-900 outline-none transition placeholder:text-slate-400 shadow-none focus:border-brand-500 focus:outline-none focus:ring-0"
           />
-          <p v-if="queryError" class="mt-1 text-xs text-rose-600">{{ queryError }}</p>
+          <FieldError :message="queryError" />
         </div>
       </div>
     </div>
@@ -250,6 +250,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { reactive, ref, watch } from 'vue';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
 
@@ -278,6 +279,30 @@ const headersText = ref('{}');
 const queryText = ref('{}');
 const headersError = ref('');
 const queryError = ref('');
+
+function jsonObjectError(value, label) {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  try {
+    const parsed = JSON.parse(text);
+    if (Array.isArray(parsed) || typeof parsed !== 'object' || parsed === null) {
+      return `${label} must be a JSON object`;
+    }
+  } catch {
+    return `Invalid JSON for ${label.toLowerCase()}`;
+  }
+  return '';
+}
+
+watch(headersText, (value) => {
+  if (!headersError.value) return;
+  headersError.value = jsonObjectError(value, 'Headers');
+});
+
+watch(queryText, (value) => {
+  if (!queryError.value) return;
+  queryError.value = jsonObjectError(value, 'Query');
+});
 const form = reactive(createForm(props.initial));
 
 watch(

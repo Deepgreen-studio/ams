@@ -11,9 +11,7 @@
           :disabled="loading || Boolean(initial.uuid)"
           :error="Boolean(fieldError('company_id'))"
         />
-        <p v-if="fieldError('company_id')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('company_id') }}
-        </p>
+        <FieldError :message="fieldError('company_id')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Case Type</label>
@@ -24,9 +22,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('case_type'))"
         />
-        <p v-if="fieldError('case_type')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('case_type') }}
-        </p>
+        <FieldError :message="fieldError('case_type')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Title</label>
@@ -38,9 +34,7 @@
           placeholder="Case title"
           :disabled="loading"
         />
-        <p v-if="fieldError('title')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('title') }}
-        </p>
+        <FieldError :message="fieldError('title')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Priority</label>
@@ -51,9 +45,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('priority'))"
         />
-        <p v-if="fieldError('priority')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('priority') }}
-        </p>
+        <FieldError :message="fieldError('priority')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Status</label>
@@ -64,9 +56,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('status'))"
         />
-        <p v-if="fieldError('status')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('status') }}
-        </p>
+        <FieldError :message="fieldError('status')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Assign To</label>
@@ -78,9 +68,7 @@
           :disabled="loading"
           :error="Boolean(fieldError('assigned_to'))"
         />
-        <p v-if="fieldError('assigned_to')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('assigned_to') }}
-        </p>
+        <FieldError :message="fieldError('assigned_to')" />
       </div>
       <div>
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Due Date</label>
@@ -90,9 +78,7 @@
           class="input"
           :disabled="loading"
         />
-        <p v-if="fieldError('due_date')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('due_date') }}
-        </p>
+        <FieldError :message="fieldError('due_date')" />
       </div>
       <div class="md:col-span-2">
         <label class="mb-1.5 block text-sm font-medium text-slate-700">Description</label>
@@ -103,9 +89,7 @@
           placeholder="Optional context for investigators."
           :disabled="loading"
         />
-        <p v-if="fieldError('description')" class="mt-1 text-xs text-rose-600">
-          {{ fieldError('description') }}
-        </p>
+        <FieldError :message="fieldError('description')" />
       </div>
     </div>
 
@@ -130,7 +114,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { companyService } from '@/modules/companies/services/companyService';
 import { priorityOptions, statusOptions, typeOptions } from '@/modules/compliance/utils/caseOptions';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
@@ -148,7 +134,6 @@ const emit = defineEmits(['submit', 'cancel']);
 
 const companies = ref([]);
 const users = ref([]);
-const localErrors = ref({});
 
 const form = reactive({
   company_id: '',
@@ -160,6 +145,8 @@ const form = reactive({
   assigned_to: '',
   due_date: '',
 });
+
+const { localErrors, fieldMessage: fieldError } = useFieldErrors(form, () => props.fieldErrors);
 
 const companySelectOptions = computed(() =>
   companies.value.map((company) => ({
@@ -181,13 +168,6 @@ const canSubmit = computed(() => {
   return Boolean(hasCompany && form.case_type && form.title && form.priority && form.status);
 });
 
-function fieldError(key) {
-  const local = localErrors.value?.[key];
-  const remote = props.fieldErrors?.[key];
-  const value = local || remote;
-  return Array.isArray(value) ? value[0] : value || '';
-}
-
 function syncFromInitial() {
   form.company_id = props.initial.company?.uuid || props.initial.company_id || '';
   form.title = props.initial.title || '';
@@ -201,14 +181,6 @@ function syncFromInitial() {
 }
 
 watch(() => props.initial, syncFromInitial, { immediate: true, deep: true });
-
-watch(
-  () => props.fieldErrors,
-  () => {
-    localErrors.value = {};
-  },
-  { deep: true },
-);
 
 onMounted(async () => {
   try {

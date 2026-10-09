@@ -30,7 +30,7 @@
               class="h-10 w-full rounded-[12px] border border-zinc-200 px-3.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-0"
               :class="fieldClass('name')"
             />
-            <p v-if="fieldErrors.name" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.name[0] }}</p>
+            <FieldError :message="fieldErrors.name?.[0] || ''" />
           </label>
 
           <label class="block text-sm">
@@ -41,7 +41,7 @@
               :options="typeOptions"
               :error="Boolean(fieldErrors.type)"
             />
-            <p v-if="fieldErrors.type" class="mt-1.5 text-xs text-rose-600">{{ fieldErrors.type[0] }}</p>
+            <FieldError :message="fieldErrors.type?.[0] || ''" />
           </label>
 
           <label class="block text-sm md:col-span-2">
@@ -167,7 +167,7 @@
             <p class="mt-1 truncate text-xs text-slate-500">{{ step.step_key }}</p>
           </div>
         </div>
-        <p v-if="fieldErrors.steps" class="mt-2 text-xs text-rose-600">{{ fieldErrors.steps[0] }}</p>
+        <FieldError :message="fieldErrors.steps?.[0] || ''" />
       </section>
 
       <section
@@ -304,7 +304,9 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useFieldErrors } from '@/composables/useFieldErrors';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
 import {
   EllipsisVerticalIcon,
@@ -326,7 +328,6 @@ const canvasRef = ref(null);
 const selectedIndex = ref(0);
 const dragIndex = ref(null);
 const openMenuId = ref(null);
-const fieldErrors = ref({});
 let uid = 0;
 
 const isEdit = computed(() => Boolean(route.params.id));
@@ -338,6 +339,8 @@ const form = reactive({
   is_enabled: true,
   steps: [],
 });
+
+const { localErrors: fieldErrors } = useFieldErrors(form, () => ({}), () => collectErrors());
 
 const typeOptions = computed(() =>
   store.catalog.types.map((item) => ({ value: item.value, label: item.label })),
@@ -558,7 +561,7 @@ function hydrate(workflow) {
   fieldErrors.value = {};
 }
 
-function validate() {
+function collectErrors() {
   const next = {};
 
   if (!String(form.name || '').trim()) {
@@ -579,6 +582,11 @@ function validate() {
     }
   }
 
+  return next;
+}
+
+function validate() {
+  const next = collectErrors();
   fieldErrors.value = next;
   return Object.keys(next).length === 0;
 }

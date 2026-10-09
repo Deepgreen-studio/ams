@@ -38,7 +38,7 @@
             :disabled="loading"
             @keydown.esc.prevent="onCancel"
           />
-          <p v-if="error" class="mt-1.5 text-sm text-rose-600">{{ error }}</p>
+          <FieldError :message="error" />
         </div>
 
         <div class="flex justify-end gap-2 pt-1">
@@ -64,6 +64,7 @@
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { nextTick, ref, watch } from 'vue';
 
 const props = defineProps({

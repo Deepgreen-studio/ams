@@ -63,11 +63,12 @@
         Reset Filter
       </button>
     </div>
-    <p v-if="dateError" class="text-xs text-rose-600">{{ dateError }}</p>
+    <FieldError :message="dateError" />
   </div>
 </template>
 
 <script setup>
+import FieldError from '@/components/ui/FieldError.vue';
 import { onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
 import SelectBox from '@/modules/users/components/SelectBox.vue';
